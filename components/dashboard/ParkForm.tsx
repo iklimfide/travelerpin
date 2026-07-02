@@ -5,7 +5,12 @@ import { useRouter } from "next/navigation";
 import { LIMITS } from "@/lib/constants";
 import { translateCommon, translatePark } from "@/lib/i18n/client-messages";
 import { addPark } from "@/lib/client/park-actions";
+import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEditor";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
+import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
+import { buildPinMediaPayload, PinMediaFields } from "@/components/dashboard/PinMediaFields";
+import { readInstagramUrls, readPhotoUrl } from "@/lib/utils/pin-media";
+import { isValidInstagramUrl } from "@/lib/utils/instagram";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
 import type { ParkType, VisitedCountry, VisitedPark } from "@/types/database";
@@ -59,7 +64,9 @@ export function ParkForm({
     park?.country_code ?? visitedCountries[0]?.country_code ?? ""
   );
   const [parkType, setParkType] = useState<ParkType>(park?.park_type ?? "national_park");
-  const [parkName, setParkName] = useState(park?.park_name ?? "");
+  const [parkName, setParkName] = useState(
+    park?.park_name ? formatCityDisplayName(park.park_name) : ""
+  );
   const [searchCountryFilter, setSearchCountryFilter] = useState(ALL_COUNTRIES);
   const [customCountryCode] = useState(
     park?.country_code ?? visitedCountries[0]?.country_code ?? ""
@@ -68,9 +75,24 @@ export function ParkForm({
   const [searchResults, setSearchResults] = useState<SearchPark[]>([]);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [note, setNote] = useState(park?.note ?? "");
+  const [visitDates, setVisitDates] = useState<string[]>(park?.visit_dates ?? []);
+  const [savedPhotoUrl, setSavedPhotoUrl] = useState(() => readPhotoUrl(park));
+  const [removePhoto, setRemovePhoto] = useState(false);
+  const [instagramUrls, setInstagramUrls] = useState<string[]>(() => readInstagramUrls(park));
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const selectedCountry = visitedCountries.find((c) => c.country_code === countryCode);
+  const selectedCountry =
+    visitedCountries.find((c) => c.country_code === countryCode) ??
+    (park && park.country_code.toUpperCase() === countryCode.toUpperCase()
+      ? {
+          id: park.country_code,
+          user_id: park.user_id,
+          country_code: park.country_code,
+          country_name: park.country_name,
+          created_at: park.created_at,
+        }
+      : undefined);
 
   const customTargetCountryCode =
     searchCountryFilter !== ALL_COUNTRIES ? searchCountryFilter : customCountryCode;
@@ -350,21 +372,37 @@ export function ParkForm({
 
   async function handleSave() {
     if (!selectedCountry || !parkName.trim()) {
-      await modal.alert(t("pickParkFirst"), { variant: "info" });
+      toast.show(t("pickParkFirst"));
       return;
     }
 
     setLoading(true);
 
     try {
+      const mediaResult = await buildPinMediaPayload({
+        photoFile,
+        savedPhotoUrl,
+        removePhoto,
+        instagramUrls,
+        isValidInstagramUrl,
+        formatPhotoUploadError,
+      });
+
+      if (!mediaResult.ok) {
+        toast.show(mediaResult.error);
+        await modal.alert(mediaResult.error, { variant: "error" });
+        return;
+      }
+
       const payload = {
         park_name: parkName,
         park_type: parkType,
         country_code: selectedCountry.country_code,
         country_name: selectedCountry.country_name,
         note: note || null,
-        media_type: null,
-        media_url: null,
+        photo_url: mediaResult.photo_url,
+        instagram_urls: mediaResult.instagram_urls,
+        visit_dates: visitDates,
       };
 
       const res = await fetch(isEdit ? `/api/parks/${park!.id}` : "/api/parks", {
@@ -375,15 +413,50 @@ export function ParkForm({
 
       if (!res.ok) {
         const data = await res.json();
-        await modal.alert(data.error ?? "Failed to save park", { variant: "error" });
+        const message = (data.error as string) ?? "Failed to save park";
+        toast.show(message);
+        await modal.alert(message, { variant: "error" });
         return;
       }
 
-      router.refresh();
+      toast.show(isEdit ? t("saveSuccess") : t("parkAdded"));
       onSuccess?.();
+      router.refresh();
     } finally {
       setLoading(false);
     }
+  }
+
+  function handlePhotoFileChange(file: File | null) {
+    setPhotoFile(file);
+    if (file) {
+      setRemovePhoto(false);
+      toast.show(t("photoSelected"));
+    }
+  }
+
+  function renderMediaFields() {
+    return (
+      <PinMediaFields
+        labels={{
+          mediaHint: t("mediaHint"),
+          photo: t("photo"),
+          photoSaved: t("photoSaved"),
+          instagram: t("instagram"),
+          instagramHint: t("instagramHint"),
+          addInstagram: t("addInstagram"),
+          removeInstagram: t("removeInstagram"),
+          removePhoto: t("removePhoto"),
+        }}
+        savedPhotoUrl={savedPhotoUrl}
+        photoFile={photoFile}
+        onPhotoFileChange={handlePhotoFileChange}
+        removePhoto={removePhoto}
+        onRemovePhotoChange={setRemovePhoto}
+        instagramUrls={instagramUrls}
+        onInstagramUrlsChange={setInstagramUrls}
+      />
+    );
   }
 
   if (isEdit) {
@@ -437,9 +510,14 @@ export function ParkForm({
               onChange={(e) => setNote(e.target.value)}
               maxLength={LIMITS.noteMaxLength}
               rows={3}
+              placeholder={t("notePlaceholder")}
               className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white"
             />
           </div>
+
+          <CityVisitDatesEditor key={park?.id} value={visitDates} onChange={setVisitDates} />
+
+          {renderMediaFields()}
         </div>
 
         <div className="dashboard-form-park__footer">
@@ -449,7 +527,7 @@ export function ParkForm({
             disabled={loading}
             className="dashboard-form-park__btn-primary"
           >
-            {tCommon("save")}
+            {loading ? tCommon("loading") : tCommon("save")}
           </button>
           <button
             type="button"
@@ -556,17 +634,27 @@ export function ParkForm({
         ) : null}
 
         {parkName ? (
-          <div>
-            <label className="dashboard-form-park__label">{t("note")}</label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              maxLength={LIMITS.noteMaxLength}
-              rows={3}
-              placeholder={t("notePlaceholder")}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white"
+          <>
+            <CityVisitDatesEditor
+              key={parkName}
+              value={visitDates}
+              onChange={setVisitDates}
             />
-          </div>
+
+            {renderMediaFields()}
+
+            <div>
+              <label className="dashboard-form-park__label">{t("note")}</label>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                maxLength={LIMITS.noteMaxLength}
+                rows={3}
+                placeholder={t("notePlaceholder")}
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white"
+              />
+            </div>
+          </>
         ) : null}
       </div>
 

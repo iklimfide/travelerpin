@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import Image from "next/image";
 import { InstagramEmbed } from "@/components/media/InstagramEmbed";
 import { popupMessages } from "@/lib/i18n/client-messages";
+import { resolvePublicMediaImageUrl } from "@/lib/storage/hub-photo-url";
+import { readPhotoUrl } from "@/lib/utils/pin-media";
 import { formatVisitDatesList } from "@/lib/utils/visit-date";
 import { getIntlLocale } from "@/lib/i18n/config";
 import type { VisitedCity } from "@/types/database";
@@ -62,7 +64,7 @@ export function CityPopup({ city, onClose }: CityPopupProps) {
         {city.media_type === "photo" && city.media_url && (
           <div className="relative aspect-[4/3] w-full bg-slate-800">
             <Image
-              src={city.media_url}
+              src={resolvePublicMediaImageUrl(readPhotoUrl(city) ?? city.media_url) ?? city.media_url}
               alt={`${city.city_name}, ${city.country_name}`}
               fill
               className="object-cover"

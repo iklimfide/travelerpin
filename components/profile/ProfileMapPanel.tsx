@@ -16,8 +16,9 @@ type ProfileMapPanelProps = {
   canEditMap: boolean;
   countryCount: number;
   title: string;
-  detailLabel: string;
   exploredBadgeLabel: string;
+  detailLabel?: string;
+  detailHref?: string;
 };
 
 export function ProfileMapPanel({
@@ -31,8 +32,9 @@ export function ProfileMapPanel({
   canEditMap,
   countryCount,
   title,
-  detailLabel,
   exploredBadgeLabel,
+  detailLabel,
+  detailHref = "#travel-map",
 }: ProfileMapPanelProps) {
   const coverage = worldCoveragePercent(countryCount);
 
@@ -40,9 +42,11 @@ export function ProfileMapPanel({
     <section id="profile-map" className="profile-section">
       <div className="profile-section-head">
         <h2 className="profile-section-title">{title}</h2>
-        <a href="#travel-map" className="profile-see-all">
-          {detailLabel}
-        </a>
+        {detailLabel ? (
+          <a href={detailHref} className="profile-see-all">
+            {detailLabel}
+          </a>
+        ) : null}
       </div>
 
       <div className="profile-map-panel">

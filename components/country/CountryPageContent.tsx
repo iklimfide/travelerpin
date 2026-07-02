@@ -1,24 +1,31 @@
 import Link from "next/link";
-import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import type { HubPinStatItem } from "@/components/hub/HubPagePinCount";
 import { CountryPageActions } from "@/components/country/CountryPageActions";
 import { CountryPageNav } from "@/components/country/CountryPageNav";
+import { CountryPagePinStatsBlock } from "@/components/country/CountryPagePinStatsBlock";
+import { HubPageListingSections } from "@/components/hub/HubPageListingSections";
 import { HubPageTopBar } from "@/components/hub/HubPageTopBar";
-import { HubPagePinCount } from "@/components/hub/HubPagePinCount";
-import { HubRecentTravelers } from "@/components/hub/HubRecentTravelers";
+import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { findCityHubSlug } from "@/lib/data/city-hubs";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { cityPath } from "@/lib/seo/site";
+import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
 import type { CountryHub } from "@/lib/data/country-hubs";
 import type { CountryVisitorState } from "@/lib/data/country-visitor-state";
 import type { CountryTraveler } from "@/lib/supabase/country-travelers";
+import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
 
 type CountryPageContentProps = {
   hub: CountryHub;
   travelers: CountryTraveler[];
+  memoryPins: HubTravelerPin[];
   visitorState: CountryVisitorState;
+  editOwnerCity: VisitedCity | null;
+  editOwnerPark: VisitedPark | null;
+  visitedCountries: VisitedCountry[];
   loginHref: string;
   registerHref: string;
-  pinCountLabel: string;
+  pinCountItems?: HubPinStatItem[];
   labels: {
     home: string;
     visited: string;
@@ -34,9 +41,21 @@ type CountryPageContentProps = {
     plugType: string;
     visa: string;
     language: string;
+    viewTravelMap: string;
+    viewPin: string;
+    close: string;
+    instagramPost: string;
+    editYourPin: string;
+    editYourPinSaved: string;
     recentTravelers: string;
     noTravelersYet: string;
     pinCountry: string;
+    photosHeading: string;
+    instagramHeading: string;
+    noInstagramPostsYet: string;
+    addYourPhotoCta: string;
+    addYourInstagramCta: string;
+    pinItTooCta: string;
     login: string;
     register: string;
   };
@@ -45,14 +64,20 @@ type CountryPageContentProps = {
 export function CountryPageContent({
   hub,
   travelers,
+  memoryPins,
   visitorState,
+  editOwnerCity,
+  editOwnerPark,
+  visitedCountries,
   loginHref,
   registerHref,
-  pinCountLabel,
+  pinCountItems = [],
   labels,
 }: CountryPageContentProps) {
   const flagUrl = countryCodeToFlagUrl(hub.code);
   const capitalCitySlug = findCityHubSlug(hub.code, hub.capital);
+  const featuredPin = memoryPins[0] ?? null;
+  const hasOwnerPin = Boolean(editOwnerCity || editOwnerPark);
 
   const rows = [
     {
@@ -84,13 +109,11 @@ export function CountryPageContent({
       </HubPageTopBar>
 
       <div className="city-page__container">
-        <section className="city-page__hero">
-          {flagUrl ? (
-            <div className="city-page__image-wrap">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={flagUrl} alt="" width={200} height={200} />
-            </div>
-          ) : null}
+        <section className="city-page__hero city-page__hero--park-card">
+          <div className="city-page__park-card-image">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={flagUrl} alt="" width={220} />
+          </div>
 
           <div>
             <h1 className="city-page__title">{hub.name}</h1>
@@ -100,7 +123,7 @@ export function CountryPageContent({
               loginHref={loginHref}
               labels={labels}
             />
-            <HubPagePinCount label={pinCountLabel} />
+            <CountryPagePinStatsBlock pinCountItems={pinCountItems} />
           </div>
         </section>
 
@@ -113,13 +136,54 @@ export function CountryPageContent({
           ))}
         </section>
 
-        <HubRecentTravelers
+        {featuredPin?.note ? (
+          <section className="city-page__featured-pin" aria-label={labels.viewPin}>
+            <Link href={featuredPin.profilePath} className="city-page__featured-pin-author">
+              <ProfileAvatar
+                avatarUrl={featuredPin.avatarUrl}
+                displayName={featuredPin.displayName}
+                username={featuredPin.username}
+                size="sm"
+              />
+              <div className="min-w-0">
+                <p className="city-page__traveler-name">{featuredPin.displayName}</p>
+                <p className="city-page__traveler-handle">@{featuredPin.username}</p>
+              </div>
+            </Link>
+            <p className="city-page__featured-pin-note">{featuredPin.note}</p>
+          </section>
+        ) : null}
+
+        <HubPageListingSections
+          hubName={hub.name}
           travelers={travelers}
-          headingId="country-travelers-heading"
+          memoryPins={memoryPins}
+          loginHref={loginHref}
+          isLoggedIn={visitorState.isLoggedIn}
+          hasOwnerPin={visitorState.isOnMap}
+          canEditMedia={hasOwnerPin}
+          visitedCountries={visitedCountries}
+          ownerCity={editOwnerCity}
+          ownerPark={editOwnerPark}
+          headingIds={{
+            travelers: "country-travelers-heading",
+            photos: "country-photos-heading",
+            instagram: "country-instagram-heading",
+          }}
           labels={{
             recentTravelers: labels.recentTravelers,
             noTravelersYet: labels.noTravelersYet,
             pinCta: labels.pinCountry,
+            pinItTooCta: labels.pinItTooCta,
+            photosHeading: labels.photosHeading,
+            instagramHeading: labels.instagramHeading,
+            noInstagramPostsYet: labels.noInstagramPostsYet,
+            addYourPhotoCta: labels.addYourPhotoCta,
+            addYourInstagramCta: labels.addYourInstagramCta,
+            viewPin: labels.viewPin,
+            viewMap: labels.viewTravelMap,
+            close: labels.close,
+            instagramPost: labels.instagramPost,
           }}
         />
       </div>

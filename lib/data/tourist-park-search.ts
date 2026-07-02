@@ -1,6 +1,7 @@
 import type { TouristPark } from "./tourist-parks";
 import { TOURIST_PARKS } from "./tourist-parks";
 import { matchesParkTypeFilter } from "@/lib/utils/park-type";
+import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
 
 export type { ParkType, TouristPark } from "./tourist-parks";
 
@@ -33,10 +34,7 @@ export function searchTouristParks(
   );
 
   if (q.length >= 2) {
-    results = results.filter((park) => {
-      const name = park.name.toLocaleLowerCase("tr");
-      return name.includes(q) || name.split(/\s+/).some((word) => word.startsWith(q));
-    });
+    results = results.filter((park) => matchesPlaceNameSearch(park.name, q));
   }
 
   return results.sort((a, b) => compareNames(a.name, b.name)).slice(0, limit);
@@ -53,11 +51,9 @@ export function searchTouristParksInCountries(
     return [];
   }
 
-  const results = TOURIST_PARKS.filter((park) => {
-    if (!allowed.has(park.countryCode)) return false;
-    const name = park.name.toLocaleLowerCase("tr");
-    return name.includes(q) || name.split(/\s+/).some((word) => word.startsWith(q));
-  });
+  const results = TOURIST_PARKS.filter(
+    (park) => allowed.has(park.countryCode) && matchesPlaceNameSearch(park.name, q)
+  );
 
   return results.sort((a, b) => compareNames(a.name, b.name)).slice(0, limit);
 }

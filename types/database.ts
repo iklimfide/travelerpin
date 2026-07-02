@@ -42,6 +42,8 @@ export interface VisitedCity {
   latitude: number | null;
   longitude: number | null;
   note: string | null;
+  photo_url: string | null;
+  instagram_urls: string[];
   media_type: MediaType | null;
   media_url: string | null;
   media_preview_url: string | null;
@@ -60,8 +62,11 @@ export interface VisitedPark {
   latitude: number | null;
   longitude: number | null;
   note: string | null;
+  photo_url: string | null;
+  instagram_urls: string[];
   media_type: MediaType | null;
   media_url: string | null;
+  visit_dates: string[];
   created_at: string;
   updated_at: string;
 }

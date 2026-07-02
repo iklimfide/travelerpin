@@ -22,7 +22,7 @@ Minimalist travel map platform at [travelerpin.com](https://travelerpin.com). Ma
 3. Run the SQL migration in Supabase SQL Editor:
    `supabase/migrations/001_initial_schema.sql`
 
-4. Create a public storage bucket named `city-media` in Supabase Storage.
+4. Create a **Cloudflare R2** bucket for city/park photos and add credentials to `.env.local` (see `.env.local.example`). Enable public access on the bucket (R2 dev subdomain or custom domain) and set `R2_PUBLIC_BASE_URL`.
 
 5. Install and run:
    ```bash

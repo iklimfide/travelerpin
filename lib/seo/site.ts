@@ -23,6 +23,22 @@ export function profileAllPath(username: string): string {
   return `${profilePath(username)}/all`;
 }
 
+export function profileMediaPath(
+  username: string,
+  tab: "photos" | "instagram" = "photos",
+  page = 1
+): string {
+  const path = `${profilePath(username)}/media`;
+  if (tab === "photos" && page <= 1) return path;
+
+  const params = new URLSearchParams();
+  if (tab !== "photos") params.set("tab", tab);
+  if (page > 1) params.set("page", String(page));
+
+  const query = params.toString();
+  return query ? `${path}?${query}` : path;
+}
+
 export function profileUrl(username: string): string {
   return `${getSiteUrl()}${profilePath(username)}`;
 }

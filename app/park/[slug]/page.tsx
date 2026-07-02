@@ -6,8 +6,10 @@ import { getCountryHubByCode } from "@/lib/data/country-hubs";
 import { getParkHubBySlug, listParkHubSlugs } from "@/lib/data/park-hubs";
 import { buildParkPageTitle, DEFAULT_DESCRIPTION, getSiteUrl, parkPath, parkUrl } from "@/lib/seo/site";
 import { getDefaultParkHeroAlt, getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
-import { getCachedRecentParkTravelers } from "@/lib/supabase/park-travelers-cache";
-import { countParkPinners, loadParkVisitorState } from "@/lib/supabase/park-visitor-state";
+import { getCachedRecentParkPins, getCachedRecentParkTravelers } from "@/lib/supabase/park-travelers-cache";
+import { fetchRecentParkPins } from "@/lib/supabase/park-travelers";
+import { mergeOwnerHubPin, pinsWithContent, countHubMediaItems, pinHasGalleryMedia } from "@/lib/supabase/hub-traveler-pin";
+import { countParkPinners, loadParkPageUserState } from "@/lib/supabase/park-visitor-state";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizeParkSlug } from "@/lib/utils/park-slug";
@@ -60,21 +62,51 @@ export default async function ParkHubPage({ params }: PageProps) {
   const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;
   const registerHref = `/register?next=${encodeURIComponent(returnPath)}`;
 
-  const [t, tCountry, tCommon, travelers, user, supabase] = await Promise.all([
+  const [t, tCountry, tCommon, cachedParkPins, travelers, user, supabase] = await Promise.all([
     getTranslations("parkHub"),
     getTranslations("countryHub"),
     getTranslations("common"),
+    getCachedRecentParkPins(hub),
     getCachedRecentParkTravelers(hub),
     getAuthUser(),
     createClient(),
   ]);
 
-  const visitorState = await loadParkVisitorState(supabase, user?.id, hub);
+  const { visitorState, ownerPark, ownerHubPin, visitedCountries } = await loadParkPageUserState(
+    supabase,
+    user?.id,
+    hub
+  );
+
+  let parkPins = cachedParkPins;
+  if (supabase) {
+    const freshPins = await fetchRecentParkPins(supabase, hub, 200);
+    if (freshPins.length > 0 || (ownerHubPin && pinHasGalleryMedia(ownerHubPin))) {
+      parkPins = freshPins;
+    }
+  }
+
+  const hubPins = mergeOwnerHubPin(parkPins, ownerHubPin);
+  const memoryPins = pinsWithContent(hubPins);
+  const mediaCounts = countHubMediaItems(hubPins);
   const pinCount = await countParkPinners(supabase, hub);
-  const pinCountLabel =
+  const pinCountItems: { label: string; href?: string }[] =
     pinCount > 0
-      ? t("travelersPinned", { count: pinCount })
-      : t("noTravelersPinned");
+      ? [
+          {
+            label: t("travelersPinned", { count: pinCount }),
+            href: "#park-travelers-heading",
+          },
+          {
+            label: t("photosAdded", { count: mediaCounts.photos }),
+            href: "#park-photos-heading",
+          },
+          {
+            label: t("instagramPostsAdded", { count: mediaCounts.instagramPosts }),
+            href: "#park-instagram-heading",
+          },
+        ]
+      : [{ label: t("noTravelersPinned") }];
 
   const labels = {
     home: t("home"),
@@ -89,9 +121,22 @@ export default async function ParkHubPage({ params }: PageProps) {
     parkRemoved: t("parkRemoved"),
     wishlistAdded: t("wishlistAdded"),
     wishlistRemoved: t("wishlistRemoved"),
+    travelerMemories: t("travelerMemories", { park: hub.name }),
+    viewTravelMap: t("viewTravelMap"),
+    viewPin: t("viewPin"),
+    close: t("closePin"),
+    instagramPost: t("instagramPost"),
+    editYourPin: t("editYourPin"),
+    editYourPinSaved: t("editYourPinSaved"),
     recentTravelers: t("recentTravelers", { park: hub.name }),
     noTravelersYet: t("noTravelersYet", { park: hub.name }),
     pinPark: t("pinPark", { park: hub.name }),
+    photosHeading: t("photosHeading"),
+    instagramHeading: t("instagramHeading"),
+    noInstagramPostsYet: t("noInstagramPostsYet"),
+    addYourPhotoCta: t("addYourPhotoCta"),
+    addYourInstagramCta: t("addYourInstagramCta"),
+    pinItTooCta: t("pinItTooCta"),
     login: tCommon("login"),
     register: tCommon("register"),
   };
@@ -102,10 +147,13 @@ export default async function ParkHubPage({ params }: PageProps) {
         hub={hub}
         countryHub={countryHub}
         travelers={travelers}
+        memoryPins={memoryPins}
         visitorState={visitorState}
+        ownerPark={ownerPark}
+        visitedCountries={visitedCountries}
         loginHref={loginHref}
         registerHref={registerHref}
-        pinCountLabel={pinCountLabel}
+        pinCountItems={pinCountItems}
         labels={labels}
       />
     </main>

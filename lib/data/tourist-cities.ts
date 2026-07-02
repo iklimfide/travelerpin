@@ -3,6 +3,8 @@
 // Exclusions: lib/data/sources/city-exclusions.csv
 // https://bestroadtrip.com/data · https://ourairports.com/data/
 
+import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
+
 export type TouristCity = {
   countryCode: string;
   name: string;
@@ -23581,10 +23583,7 @@ export function searchTouristCities(
   let results = TOURIST_CITIES.filter((city) => city.countryCode === code);
 
   if (q.length >= 2) {
-    results = results.filter((city) => {
-      const name = city.name.toLocaleLowerCase("tr");
-      return name.includes(q) || name.split(/\s+/).some((word) => word.startsWith(q));
-    });
+    results = results.filter((city) => matchesPlaceNameSearch(city.name, q));
   }
 
   return results.sort((a, b) => compareCityNames(a.name, b.name)).slice(0, limit);
@@ -23601,11 +23600,9 @@ export function searchTouristCitiesInCountries(
     return [];
   }
 
-  const results = TOURIST_CITIES.filter((city) => {
-    if (!allowed.has(city.countryCode)) return false;
-    const name = city.name.toLocaleLowerCase("tr");
-    return name.includes(q) || name.split(/\s+/).some((word) => word.startsWith(q));
-  });
+  const results = TOURIST_CITIES.filter(
+    (city) => allowed.has(city.countryCode) && matchesPlaceNameSearch(city.name, q)
+  );
 
   return results.sort((a, b) => compareCityNames(a.name, b.name)).slice(0, limit);
 }

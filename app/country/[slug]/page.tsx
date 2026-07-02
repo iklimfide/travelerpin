@@ -4,8 +4,16 @@ import { getTranslations } from "next-intl/server";
 import { CountryPageContent } from "@/components/country/CountryPageContent";
 import { getCountryHubBySlug, listCountryHubSlugs } from "@/lib/data/country-hubs";
 import { getCachedRecentCountryTravelers } from "@/lib/supabase/country-travelers-cache";
+import { getCachedRecentCountryPins } from "@/lib/supabase/country-memory-pins-cache";
+import { fetchRecentCountryPins } from "@/lib/supabase/country-memory-pins";
+import {
+  countHubMediaItems,
+  mergeOwnerHubPin,
+  pinHasGalleryMedia,
+  pinsWithContent,
+} from "@/lib/supabase/hub-traveler-pin";
 import { countCountryPinners } from "@/lib/supabase/country-pin-count";
-import { loadCountryVisitorState } from "@/lib/supabase/country-visitor-state";
+import { loadCountryPageUserState } from "@/lib/supabase/country-visitor-state";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { countryPath, countryUrl, buildCountryPageTitle, DEFAULT_DESCRIPTION } from "@/lib/seo/site";
@@ -56,20 +64,47 @@ export default async function CountryHubPage({ params }: PageProps) {
   const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;
   const registerHref = `/register?next=${encodeURIComponent(returnPath)}`;
 
-  const [t, tCommon, travelers, user, supabase] = await Promise.all([
+  const [t, tCommon, travelers, cachedCountryPins, user, supabase] = await Promise.all([
     getTranslations("countryHub"),
     getTranslations("common"),
     getCachedRecentCountryTravelers(hub.code),
+    getCachedRecentCountryPins(hub.code),
     getAuthUser(),
     createClient(),
   ]);
 
-  const visitorState = await loadCountryVisitorState(supabase, user?.id, hub);
+  const { visitorState, editOwnerCity, editOwnerPark, ownerHubPin, visitedCountries } =
+    await loadCountryPageUserState(supabase, user?.id, hub);
+
+  let countryPins = cachedCountryPins;
+  if (supabase) {
+    const freshPins = await fetchRecentCountryPins(supabase, hub.code, 200);
+    if (freshPins.length > 0 || (ownerHubPin && pinHasGalleryMedia(ownerHubPin))) {
+      countryPins = freshPins;
+    }
+  }
+
+  const hubPins = mergeOwnerHubPin(countryPins, ownerHubPin);
+  const memoryPins = pinsWithContent(hubPins);
+  const mediaCounts = countHubMediaItems(hubPins);
   const pinCount = await countCountryPinners(supabase, hub.code);
-  const pinCountLabel =
+  const pinCountItems: { label: string; href?: string }[] =
     pinCount > 0
-      ? t("travelersPinned", { count: pinCount })
-      : t("noTravelersPinned");
+      ? [
+          {
+            label: t("travelersPinned", { count: pinCount }),
+            href: "#country-travelers-heading",
+          },
+          {
+            label: t("photosAdded", { count: mediaCounts.photos }),
+            href: "#country-photos-heading",
+          },
+          {
+            label: t("instagramPostsAdded", { count: mediaCounts.instagramPosts }),
+            href: "#country-instagram-heading",
+          },
+        ]
+      : [{ label: t("noTravelersPinned") }];
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -94,9 +129,21 @@ export default async function CountryHubPage({ params }: PageProps) {
     plugType: t("plugType"),
     visa: t("visa"),
     language: t("language"),
-    recentTravelers: t("recentTravelers"),
-    noTravelersYet: t("noTravelersYet"),
+    viewTravelMap: t("viewTravelMap"),
+    viewPin: t("viewPin"),
+    close: t("closePin"),
+    instagramPost: t("instagramPost"),
+    editYourPin: t("editYourPin"),
+    editYourPinSaved: t("editYourPinSaved"),
+    recentTravelers: t("recentTravelers", { country: hub.name }),
+    noTravelersYet: t("noTravelersYet", { country: hub.name }),
     pinCountry: t("pinCountry"),
+    photosHeading: t("photosHeading"),
+    instagramHeading: t("instagramHeading"),
+    noInstagramPostsYet: t("noInstagramPostsYet"),
+    addYourPhotoCta: t("addYourPhotoCta"),
+    addYourInstagramCta: t("addYourInstagramCta"),
+    pinItTooCta: t("pinItTooCta"),
     login: tCommon("login"),
     register: tCommon("register"),
   };
@@ -111,10 +158,14 @@ export default async function CountryHubPage({ params }: PageProps) {
         <CountryPageContent
           hub={hub}
           travelers={travelers}
+          memoryPins={memoryPins}
           visitorState={visitorState}
+          editOwnerCity={editOwnerCity}
+          editOwnerPark={editOwnerPark}
+          visitedCountries={visitedCountries}
           loginHref={loginHref}
           registerHref={registerHref}
-          pinCountLabel={pinCountLabel}
+          pinCountItems={pinCountItems}
           labels={labels}
         />
       </main>

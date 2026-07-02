@@ -6,6 +6,7 @@ import { HomeFeatures } from "@/components/home/HomeFeatures";
 import { ProfileHeroCover } from "@/components/profile/ProfileHeroCover";
 import { ProfileIdentityCard } from "@/components/profile/ProfileIdentityCard";
 import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
+import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections";
 import { ProfileSummaryGrid } from "@/components/profile/ProfileSummaryGrid";
 import { isDemoProfileUsername } from "@/lib/data/jennifer-demo-page";
 import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
@@ -19,6 +20,7 @@ import {
   buildProfileTrips,
   resolveProfileCoverUrl,
 } from "@/lib/utils/profile-page";
+import { buildProfileMediaPins } from "@/lib/utils/profile-media";
 import { resolveResidenceCityHref } from "@/lib/utils/residence-city";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { profileAllPath, profilePath } from "@/lib/seo/site";
@@ -77,6 +79,7 @@ export async function PublicProfileView({
 
   const coverUrl = resolveProfileCoverUrl(visitedCities, visitedParks);
   const trips = buildProfileTrips(visitedCities, visitedParks);
+  const mediaPins = buildProfileMediaPins(visitedCities, visitedParks, profile);
   const summary = buildProfileSummary(
     visitedCountries,
     visitedCities,
@@ -193,6 +196,7 @@ export async function PublicProfileView({
               title={t("worldMapTitle")}
               detailLabel={t("mapDetail")}
               exploredBadgeLabel={t("mapExploredBadge")}
+              detailHref={profileAllPath(profile.username)}
             />
           ) : (
             <section className="profile-section">
@@ -218,6 +222,38 @@ export async function PublicProfileView({
 
               {ownerTools ? (
                 <div className="profile-dashboard-tools">{ownerTools}</div>
+              ) : null}
+
+              {mediaPins.length > 0 ? (
+                <ProfileMediaSections
+                  username={profile.username}
+                  displayName={displayName}
+                  memoryPins={mediaPins}
+                  isOwnProfile={isOwnProfile}
+                  visitedCountries={visitedCountries}
+                  visitedCities={visitedCities}
+                  visitedParks={visitedParks}
+                  labels={{
+                    photosHeading: isOwnProfile
+                      ? t("myPhotos")
+                      : t("visitorPhotos", { name: displayName }),
+                    instagramHeading: isOwnProfile
+                      ? t("myInstagramLinks")
+                      : t("visitorInstagramLinks", { name: displayName }),
+                    noInstagramYet: t("noInstagramYet"),
+                    viewPin: t("viewPin"),
+                    viewMap: t("viewMap"),
+                    close: t("closePin"),
+                    instagramPost: t("instagramPost"),
+                    viewAll: t("viewAll"),
+                    editMedia: tCommon("edit"),
+                    removeMedia: tCommon("delete"),
+                    removePhotoTitle: t("removePhotoTitle"),
+                    removePhotoMessage: t("removePhotoMessage"),
+                    removeInstagramTitle: t("removeInstagramTitle"),
+                    removeInstagramMessage: t("removeInstagramMessage"),
+                  }}
+                />
               ) : null}
 
               {!isOwnProfile && hasMapContent ? (

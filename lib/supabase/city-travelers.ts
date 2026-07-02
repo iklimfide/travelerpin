@@ -2,25 +2,23 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CityHub } from "@/lib/data/city-hubs";
 import { profilePath } from "@/lib/seo/site";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
-import type { MediaType } from "@/types/database";
+import type { MediaType, VisitedCity } from "@/types/database";
+import {
+  type CityTravelerPin,
+  type HubTravelerPin,
+  buildHubTravelerPinMedia,
+  pinsWithContent,
+  sortHubTravelerPins,
+  uniqueHubTravelers,
+} from "@/lib/supabase/hub-traveler-pin";
 
-export type CityTravelerPin = {
-  id: string;
-  note: string | null;
-  mediaType: MediaType | null;
-  mediaUrl: string | null;
-  mediaPreviewUrl: string | null;
-  visitDates: string[];
-  pinnedAt: string;
-  username: string;
-  displayName: string;
-  avatarUrl: string | null;
-  profilePath: string;
-};
+export type { CityTravelerPin, HubTravelerPin };
 
 type CityPinRow = {
   id: string;
   note: string | null;
+  photo_url?: string | null;
+  instagram_urls?: string[] | null;
   media_type: MediaType | null;
   media_url: string | null;
   media_preview_url: string | null;
@@ -33,20 +31,25 @@ type CityPinRow = {
   } | null;
 };
 
-function rowToPin(row: CityPinRow): CityTravelerPin | null {
+function rowToPin(row: CityPinRow): HubTravelerPin | null {
   const profile = row.profiles;
   if (!profile?.username) return null;
 
   const username = profile.username.toLowerCase();
+  const media = buildHubTravelerPinMedia(row);
 
   return {
     id: row.id,
+    placeLabel: null,
     note: row.note,
-    mediaType: row.media_type,
-    mediaUrl: row.media_url,
+    photoUrl: media.photoUrl,
+    instagramUrls: media.instagramUrls,
+    mediaType: media.mediaType,
+    mediaUrl: media.mediaUrl,
+    mediaDisplayUrl: media.mediaDisplayUrl,
     mediaPreviewUrl:
       row.media_preview_url ??
-      (row.media_type === "photo" ? row.media_url : null),
+      media.mediaPreviewUrl,
     visitDates: row.visit_dates ?? [],
     pinnedAt: row.updated_at,
     username,
@@ -56,39 +59,65 @@ function rowToPin(row: CityPinRow): CityTravelerPin | null {
   };
 }
 
-function pinPriority(pin: CityTravelerPin): number {
-  if (pin.mediaUrl) return 2;
-  if (pin.note) return 1;
-  return 0;
+type OwnerProfile = {
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+};
+
+export function visitedCityToHubPin(
+  city: VisitedCity,
+  hub: CityHub,
+  profile: OwnerProfile
+): HubTravelerPin | null {
+  if (city.country_code.toUpperCase() !== hub.countryCode.toUpperCase()) return null;
+  if (city.city_name.trim().toLowerCase() !== hub.name.trim().toLowerCase()) return null;
+  if (!profile.username) return null;
+
+  const username = profile.username.toLowerCase();
+  const media = buildHubTravelerPinMedia(city);
+
+  return {
+    id: city.id,
+    placeLabel: null,
+    note: city.note,
+    photoUrl: media.photoUrl,
+    instagramUrls: media.instagramUrls,
+    mediaType: media.mediaType,
+    mediaUrl: media.mediaUrl,
+    mediaDisplayUrl: media.mediaDisplayUrl,
+    mediaPreviewUrl: city.media_preview_url ?? media.mediaPreviewUrl,
+    visitDates: city.visit_dates ?? [],
+    pinnedAt: city.updated_at,
+    username,
+    displayName: resolveProfileDisplayName(profile.display_name, profile.username),
+    avatarUrl: profile.avatar_url,
+    profilePath: profilePath(username),
+  };
 }
 
 export async function fetchRecentCityPins(
   supabase: SupabaseClient,
   hub: CityHub,
   limit = 12
-): Promise<CityTravelerPin[]> {
+): Promise<HubTravelerPin[]> {
   const code = hub.countryCode.toUpperCase();
 
   const { data } = await supabase
     .from("visited_cities")
     .select(
-      "id, note, media_type, media_url, media_preview_url, visit_dates, updated_at, profiles!inner(username, display_name, avatar_url)"
+      "id, note, media_type, media_url, media_preview_url, photo_url, instagram_urls, visit_dates, updated_at, profiles!inner(username, display_name, avatar_url)"
     )
     .eq("country_code", code)
     .ilike("city_name", hub.name.trim())
     .order("updated_at", { ascending: false })
     .limit(40);
 
-  const pins = (data as CityPinRow[] | null ?? [])
+  const pins = ((data as CityPinRow[] | null) ?? [])
     .map(rowToPin)
-    .filter((pin): pin is CityTravelerPin => pin !== null)
-    .sort((a, b) => {
-      const priorityDiff = pinPriority(b) - pinPriority(a);
-      if (priorityDiff !== 0) return priorityDiff;
-      return b.pinnedAt.localeCompare(a.pinnedAt);
-    });
+    .filter((pin): pin is HubTravelerPin => pin !== null);
 
-  return pins.slice(0, limit);
+  return sortHubTravelerPins(pins).slice(0, limit);
 }
 
 export async function countCityPinners(
@@ -106,32 +135,4 @@ export async function countCityPinners(
   return count ?? 0;
 }
 
-export function cityPinsWithContent(pins: CityTravelerPin[]): CityTravelerPin[] {
-  return pins.filter((pin) => Boolean(pin.mediaUrl) || Boolean(pin.note?.trim()));
-}
-
-export function uniqueCityTravelers(pins: CityTravelerPin[], limit = 5) {
-  const seen = new Set<string>();
-  const travelers: {
-    username: string;
-    displayName: string;
-    avatarUrl: string | null;
-    profilePath: string;
-    lastPinnedAt: string;
-  }[] = [];
-
-  for (const pin of pins) {
-    if (seen.has(pin.username)) continue;
-    seen.add(pin.username);
-    travelers.push({
-      username: pin.username,
-      displayName: pin.displayName,
-      avatarUrl: pin.avatarUrl,
-      profilePath: pin.profilePath,
-      lastPinnedAt: pin.pinnedAt,
-    });
-    if (travelers.length >= limit) break;
-  }
-
-  return travelers;
-}
+export { pinsWithContent as cityPinsWithContent, uniqueHubTravelers as uniqueCityTravelers };

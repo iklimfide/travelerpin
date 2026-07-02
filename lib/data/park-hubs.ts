@@ -2,10 +2,12 @@ import { POPULAR_PARKS } from "@/lib/data/popular-parks";
 import type { ParkType } from "@/lib/data/tourist-park-search";
 import { getCountryHubByCode } from "@/lib/data/country-hubs";
 import { buildParkSlug } from "@/lib/utils/park-slug";
+import { parkPinMatchesHub, uniqueParkSearchNames } from "@/lib/utils/park-hub-match";
 
 export type ParkHub = {
   slug: string;
   name: string;
+  searchNames: string[];
   parkType: ParkType;
   countryCode: string;
   countrySlug: string;
@@ -18,6 +20,7 @@ const bySlug = new Map<string, ParkHub>();
 
 function registerPark(input: {
   name: string;
+  searchNames?: string[];
   parkType: ParkType;
   countryCode: string;
   countryName: string;
@@ -32,6 +35,7 @@ function registerPark(input: {
   bySlug.set(slug, {
     slug,
     name: input.name,
+    searchNames: uniqueParkSearchNames(input.name, ...(input.searchNames ?? [])),
     parkType: input.parkType,
     countryCode: input.countryCode.toUpperCase(),
     countrySlug: countryHub?.slug ?? input.countryCode.toLowerCase(),
@@ -44,6 +48,7 @@ function registerPark(input: {
 for (const park of POPULAR_PARKS) {
   registerPark({
     name: park.parkName,
+    searchNames: park.label !== park.parkName ? [park.label] : [],
     parkType: park.parkType,
     countryCode: park.countryCode,
     countryName: park.countryName,
@@ -54,6 +59,18 @@ for (const park of POPULAR_PARKS) {
 
 export function getParkHubBySlug(slug: string): ParkHub | null {
   return bySlug.get(slug.toLowerCase()) ?? null;
+}
+
+export function findParkHubSlug(parkName: string, countryCode: string): string | null {
+  const code = countryCode.toUpperCase();
+
+  for (const hub of bySlug.values()) {
+    if (parkPinMatchesHub(parkName, code, hub)) {
+      return hub.slug;
+    }
+  }
+
+  return null;
 }
 
 export function listParkHubSlugs(): string[] {

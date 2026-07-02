@@ -1,16 +1,18 @@
 const SLUG_PATTERN = /^[a-z0-9-]{1,80}$/;
 
-export function buildParkSlug(parkName: string, countryCode: string): string {
-  const namePart = parkName
+function slugifyParkName(parkName: string): string {
+  return parkName
     .trim()
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
 
-  const codePart = countryCode.trim().toLowerCase();
-  return `${namePart}-${codePart}`;
+/** Park URL slug from name only (e.g. Efteling → efteling). */
+export function buildParkSlug(parkName: string, _countryCode?: string): string {
+  return slugifyParkName(parkName);
 }
 
 export function sanitizeParkSlug(raw: string | null | undefined): string | null {

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { ProfileCountryLink } from "@/components/profile/ProfilePlaceLink";
+import { ProfileCountryLink, ProfileParkLink } from "@/components/profile/ProfilePlaceLink";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import type { ProfileParkDestination } from "@/lib/utils/profile-all-destinations";
@@ -25,7 +25,13 @@ export function ProfileParkDestinationCard({
         <span className="profile-trip-badge">{parkTypeLabel(park.parkType)}</span>
       </div>
       <div className="profile-trip-body">
-        <h3>{park.parkName}</h3>
+        <h3>
+          <ProfileParkLink
+            slug={park.parkSlug}
+            name={park.parkName}
+            className="profile-trip-title-link"
+          />
+        </h3>
         <p>{park.note?.trim() || emptyNote}</p>
         <div className="profile-trip-meta">
           <span className="profile-chip">

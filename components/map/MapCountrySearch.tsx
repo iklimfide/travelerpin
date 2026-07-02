@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { COUNTRY_LIST, type CountryOption } from "@/lib/data/countries";
+import { searchCountries, type CountryOption } from "@/lib/data/countries";
 import { mapMessages } from "@/lib/i18n/client-messages";
 
 type MapCountrySearchProps = {
@@ -19,10 +19,7 @@ export function MapCountrySearch({ onSelect }: MapCountrySearchProps) {
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (q.length < MIN_QUERY_LENGTH) return [];
-    return COUNTRY_LIST.filter((country) => country.searchText.includes(q)).slice(
-      0,
-      MAX_RESULTS
-    );
+    return searchCountries(query, MAX_RESULTS);
   }, [query]);
 
   useEffect(() => {

@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { LIMITS } from "@/lib/constants";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
-import { isValidInstagramUrl } from "@/lib/utils/instagram";
 import { isValidVisitYearMonth, normalizeVisitDates } from "@/lib/utils/visit-date";
+import { pinMediaFields, pinMediaRefineMessage, refinePinMediaInput } from "@/lib/validations/pin-media";
 
 const visitDatesField = z
   .array(z.string())
@@ -26,28 +26,9 @@ const cityFields = {
     .max(LIMITS.noteMaxLength, `Note must be at most ${LIMITS.noteMaxLength} characters`)
     .optional()
     .nullable(),
-  media_type: z.enum(["photo", "instagram"]).optional().nullable(),
-  media_url: z.string().optional().nullable(),
+  ...pinMediaFields,
   visit_dates: visitDatesField,
 };
-
-const mediaRefine = {
-  check: (data: {
-    media_type?: "photo" | "instagram" | null;
-    media_url?: string | null;
-  }) => {
-    if (!data.media_type) return true;
-    if (!data.media_url) return false;
-    if (data.media_type === "instagram") return isValidInstagramUrl(data.media_url);
-    try {
-      new URL(data.media_url);
-      return true;
-    } catch {
-      return false;
-    }
-  },
-  message: "Valid media URL required for selected media type",
-} as const;
 
 /** Client payload — coordinates optional when picked from search. */
 export const cityInputSchema = z
@@ -56,7 +37,7 @@ export const cityInputSchema = z
     (data) => (data.visit_dates ?? []).every(isValidVisitYearMonth),
     { message: "Invalid visit date format" }
   )
-  .refine(mediaRefine.check, { message: mediaRefine.message })
+  .refine(refinePinMediaInput, { message: pinMediaRefineMessage })
   .refine(
     (data) => {
       const hasLat = data.latitude !== undefined;

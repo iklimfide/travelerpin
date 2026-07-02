@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ParkForm } from "@/components/dashboard/ParkForm";
 import { useModal } from "@/components/ui/ModalProvider";
 import { commonMessages, modalMessages, parkMessages } from "@/lib/i18n/client-messages";
+import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import type { ParkType, VisitedCountry, VisitedPark } from "@/types/database";
 
@@ -173,7 +174,7 @@ export function ParkList({ parks, countries, embedded = false }: ParkListProps) 
                 >
                   <div className="min-w-0">
                     <p className={`truncate font-medium ${embedded ? "profile-owner-show-primary" : "text-white"}`}>
-                      {park.park_name}
+                      {formatCityDisplayName(park.park_name)}
                       {countryFilter === ALL_COUNTRIES ? (
                         <span className="font-normal text-slate-400">, {park.country_name}</span>
                       ) : null}

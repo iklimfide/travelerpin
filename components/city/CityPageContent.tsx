@@ -1,22 +1,24 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import type { HubPinStatItem } from "@/components/hub/HubPagePinCount";
 import { CityPageNav } from "@/components/city/CityPageNav";
 import { CityPageActions } from "@/components/city/CityPageActions";
+import { CityPagePinStatsBlock } from "@/components/city/CityPagePinStatsBlock";
+import { HubPageListingSections } from "@/components/hub/HubPageListingSections";
 import { HubPageTopBar } from "@/components/hub/HubPageTopBar";
-import { CityHubMemories } from "@/components/city/CityHubMemories";
-import { HubPagePinCount } from "@/components/hub/HubPagePinCount";
-import { HubRecentTravelers } from "@/components/hub/HubRecentTravelers";
+import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ensureParkHubFromTouristPark } from "@/lib/data/park-hubs";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { countryPath, parkPath } from "@/lib/seo/site";
 import { parkTypeLabel } from "@/lib/utils/park-type";
+import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
 import type { CityHub } from "@/lib/data/city-hubs";
 import type { CountryHub } from "@/lib/data/country-hubs";
 import type { TouristCity } from "@/lib/data/tourist-cities";
 import type { TouristPark } from "@/lib/data/tourist-park-search";
 import type { CityVisitorState } from "@/lib/data/city-visitor-state";
-import type { CityTravelerPin } from "@/lib/supabase/city-travelers";
 import type { CountryTraveler } from "@/lib/supabase/country-travelers";
+import type { VisitedCity, VisitedCountry } from "@/types/database";
 
 type CityPageContentProps = {
   hub: CityHub;
@@ -24,11 +26,13 @@ type CityPageContentProps = {
   countryHub: CountryHub | null;
   parks: TouristPark[];
   travelers: CountryTraveler[];
-  memoryPins: CityTravelerPin[];
+  memoryPins: HubTravelerPin[];
   visitorState: CityVisitorState;
+  ownerCity: VisitedCity | null;
+  visitedCountries: VisitedCountry[];
   loginHref: string;
   registerHref: string;
-  pinCountLabel: string;
+  pinCountItems?: HubPinStatItem[];
   labels: {
     home: string;
     visited: string;
@@ -45,14 +49,21 @@ type CityPageContentProps = {
     visa: string;
     language: string;
     parksInCity: string;
-    travelerMemories: string;
     viewTravelMap: string;
     viewPin: string;
     close: string;
     instagramPost: string;
+    editYourPin: string;
+    editYourPinSaved: string;
     recentTravelers: string;
     noTravelersYet: string;
     pinCity: string;
+    photosHeading: string;
+    instagramHeading: string;
+    noInstagramPostsYet: string;
+    addYourPhotoCta: string;
+    addYourInstagramCta: string;
+    pinItTooCta: string;
     login: string;
     register: string;
   };
@@ -66,11 +77,16 @@ export function CityPageContent({
   travelers,
   memoryPins,
   visitorState,
+  ownerCity,
+  visitedCountries,
   loginHref,
   registerHref,
-  pinCountLabel,
+  pinCountItems = [],
   labels,
 }: CityPageContentProps) {
+  const heroUrl = DEFAULT_CITY_HERO_IMAGE;
+  const featuredPin = memoryPins[0] ?? null;
+
   const rows: { label: string; value: ReactNode }[] = [];
 
   rows.push({
@@ -112,10 +128,6 @@ export function CityPageContent({
     });
   }
 
-  const pinWithPhoto = memoryPins.find((pin) => pin.mediaPreviewUrl || pin.mediaUrl);
-  const heroUrl =
-    pinWithPhoto?.mediaPreviewUrl ?? pinWithPhoto?.mediaUrl ?? DEFAULT_CITY_HERO_IMAGE;
-
   return (
     <div className="city-page">
       <HubPageTopBar
@@ -129,10 +141,10 @@ export function CityPageContent({
       </HubPageTopBar>
 
       <div className="city-page__container">
-        <section className="city-page__hero">
-          <div className="city-page__image-wrap">
+        <section className="city-page__hero city-page__hero--park-card">
+          <div className="city-page__park-card-image">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={heroUrl} alt="" width={200} height={200} />
+            <img src={heroUrl} alt="" width={220} />
           </div>
 
           <div>
@@ -147,7 +159,7 @@ export function CityPageContent({
               loginHref={loginHref}
               labels={labels}
             />
-            <HubPagePinCount label={pinCountLabel} />
+            <CityPagePinStatsBlock pinCountItems={pinCountItems} />
           </div>
         </section>
 
@@ -162,25 +174,53 @@ export function CityPageContent({
           </section>
         ) : null}
 
-        <CityHubMemories
-          cityName={hub.name}
-          pins={memoryPins}
-          labels={{
-            heading: labels.travelerMemories,
-            viewMap: labels.viewTravelMap,
-            viewPin: labels.viewPin,
-            close: labels.close,
-            instagramPost: labels.instagramPost,
-          }}
-        />
+        {featuredPin?.note ? (
+          <section className="city-page__featured-pin" aria-label={labels.viewPin}>
+            <Link href={featuredPin.profilePath} className="city-page__featured-pin-author">
+              <ProfileAvatar
+                avatarUrl={featuredPin.avatarUrl}
+                displayName={featuredPin.displayName}
+                username={featuredPin.username}
+                size="sm"
+              />
+              <div className="min-w-0">
+                <p className="city-page__traveler-name">{featuredPin.displayName}</p>
+                <p className="city-page__traveler-handle">@{featuredPin.username}</p>
+              </div>
+            </Link>
+            <p className="city-page__featured-pin-note">{featuredPin.note}</p>
+          </section>
+        ) : null}
 
-        <HubRecentTravelers
+        <HubPageListingSections
+          hubName={hub.name}
           travelers={travelers}
-          headingId="city-travelers-heading"
+          memoryPins={memoryPins}
+          loginHref={loginHref}
+          isLoggedIn={visitorState.isLoggedIn}
+          hasOwnerPin={Boolean(ownerCity)}
+          canEditMedia={Boolean(ownerCity)}
+          visitedCountries={visitedCountries}
+          ownerCity={ownerCity}
+          headingIds={{
+            travelers: "city-travelers-heading",
+            photos: "city-photos-heading",
+            instagram: "city-instagram-heading",
+          }}
           labels={{
             recentTravelers: labels.recentTravelers,
             noTravelersYet: labels.noTravelersYet,
             pinCta: labels.pinCity,
+            pinItTooCta: labels.pinItTooCta,
+            photosHeading: labels.photosHeading,
+            instagramHeading: labels.instagramHeading,
+            noInstagramPostsYet: labels.noInstagramPostsYet,
+            addYourPhotoCta: labels.addYourPhotoCta,
+            addYourInstagramCta: labels.addYourInstagramCta,
+            viewPin: labels.viewPin,
+            viewMap: labels.viewTravelMap,
+            close: labels.close,
+            instagramPost: labels.instagramPost,
           }}
         />
       </div>

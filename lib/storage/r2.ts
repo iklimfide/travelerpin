@@ -1,0 +1,171 @@
+import { PutObjectCommand, GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+
+function readEnv(name: string): string | undefined {
+  const raw = process.env[name];
+  if (!raw) return undefined;
+
+  const trimmed = raw.trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1);
+  }
+
+  return trimmed;
+}
+
+export function isR2Configured(): boolean {
+  return Boolean(
+    readEnv("R2_ACCOUNT_ID") &&
+      readEnv("R2_ACCESS_KEY_ID") &&
+      readEnv("R2_SECRET_ACCESS_KEY") &&
+      readEnv("R2_BUCKET_NAME") &&
+      readEnv("R2_PUBLIC_BASE_URL")
+  );
+}
+
+function getR2Endpoint(): string {
+  const endpoint = readEnv("R2_ENDPOINT");
+  if (endpoint) return endpoint.replace(/\/$/, "");
+
+  const accountId = readEnv("R2_ACCOUNT_ID");
+  if (!accountId) {
+    throw new Error("Cloudflare R2 is not configured");
+  }
+
+  return `https://${accountId}.r2.cloudflarestorage.com`;
+}
+
+function getR2Client(): S3Client {
+  const accessKeyId = readEnv("R2_ACCESS_KEY_ID");
+  const secretAccessKey = readEnv("R2_SECRET_ACCESS_KEY");
+
+  if (!accessKeyId || !secretAccessKey) {
+    throw new Error("Cloudflare R2 is not configured");
+  }
+
+  return new S3Client({
+    region: "auto",
+    endpoint: getR2Endpoint(),
+    credentials: {
+      accessKeyId,
+      secretAccessKey,
+    },
+  });
+}
+
+export function validateR2PublicBaseUrl(): string | null {
+  const publicBaseUrl = readEnv("R2_PUBLIC_BASE_URL");
+  if (!publicBaseUrl) return "R2_PUBLIC_BASE_URL is missing";
+
+  try {
+    const hostname = new URL(publicBaseUrl).hostname;
+    if (hostname.endsWith(".r2.cloudflarestorage.com")) {
+      return "R2_PUBLIC_BASE_URL must be the public bucket URL (pub-….r2.dev or your custom domain), not the S3 API endpoint.";
+    }
+  } catch {
+    return "R2_PUBLIC_BASE_URL is not a valid URL";
+  }
+
+  return null;
+}
+
+export async function uploadPhotoToR2(
+  key: string,
+  body: Buffer,
+  contentType: string
+): Promise<string> {
+  const bucket = readEnv("R2_BUCKET_NAME");
+  const publicBaseUrl = readEnv("R2_PUBLIC_BASE_URL");
+
+  if (!bucket || !publicBaseUrl) {
+    throw new Error("Cloudflare R2 bucket or public URL is not configured");
+  }
+
+  const publicUrlError = validateR2PublicBaseUrl();
+  if (publicUrlError) {
+    throw new Error(publicUrlError);
+  }
+
+  await getR2Client().send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+      CacheControl: "public, max-age=31536000, immutable",
+    })
+  );
+
+  const base = publicBaseUrl.replace(/\/$/, "");
+  return `${base}/${key}`;
+}
+
+const R2_OBJECT_KEY_PATTERN = /^[\w-]+\/.+\.(webp|jpe?g|png|gif)$/i;
+
+/** Parse object key from a public R2 URL (works without server env — safe for client hydration). */
+export function parseR2ObjectKey(publicUrl: string): string | null {
+  try {
+    const parsed = new URL(publicUrl);
+    if (parsed.protocol !== "https:") return null;
+
+    const key = decodeURIComponent(parsed.pathname.replace(/^\//, ""));
+    if (!R2_OBJECT_KEY_PATTERN.test(key)) return null;
+
+    if (parsed.hostname.endsWith(".r2.dev")) {
+      return key;
+    }
+
+    const publicBaseUrl = readEnv("R2_PUBLIC_BASE_URL");
+    if (publicBaseUrl) {
+      const base = publicBaseUrl.replace(/\/$/, "");
+      if (publicUrl.startsWith(`${base}/`)) {
+        return key;
+      }
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+export async function getR2Object(
+  key: string
+): Promise<{ body: Uint8Array; contentType: string } | null> {
+  const bucket = readEnv("R2_BUCKET_NAME");
+  if (!bucket || !R2_OBJECT_KEY_PATTERN.test(key)) {
+    return null;
+  }
+
+  try {
+    const response = await getR2Client().send(
+      new GetObjectCommand({
+        Bucket: bucket,
+        Key: key,
+      })
+    );
+
+    if (!response.Body) return null;
+
+    const bytes = await response.Body.transformToByteArray();
+    return {
+      body: bytes,
+      contentType: response.ContentType ?? "image/webp",
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function getR2PublicHostname(): string | null {
+  const publicBaseUrl = readEnv("R2_PUBLIC_BASE_URL");
+  if (!publicBaseUrl) return null;
+
+  try {
+    return new URL(publicBaseUrl).hostname;
+  } catch {
+    return null;
+  }
+}

@@ -12,6 +12,7 @@ import {
 } from "@/components/profile/ProfileOwnerSection";
 import { profileMessages, translateCity } from "@/lib/i18n/client-messages";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
+import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import { formatVisitDatesSummary } from "@/lib/utils/visit-date";
 import { getIntlLocale } from "@/lib/i18n/config";
@@ -221,7 +222,7 @@ export function ProfileOwnerTools({
                   <li key={park.id} className="profile-owner-show-item profile-owner-show-item--stacked">
                     <div>
                       <p className="profile-owner-show-primary">
-                        {park.park_name}
+                        {formatCityDisplayName(park.park_name)}
                         <span className="profile-owner-show-secondary">, {park.country_name}</span>
                       </p>
                       <p className="profile-owner-show-meta">{parkTypeLabel(park.park_type)}</p>

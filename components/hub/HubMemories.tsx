@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { InstagramMemoryThumb } from "@/components/city/InstagramMemoryThumb";
-import { InstagramEmbed } from "@/components/media/InstagramEmbed";
+import { HubMemoryLightbox } from "@/components/hub/HubMemoryLightbox";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { formatVisitDatesList } from "@/lib/utils/visit-date";
 import { getIntlLocale } from "@/lib/i18n/config";
-import type { CityTravelerPin } from "@/lib/supabase/city-travelers";
+import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
 
-type CityHubMemoriesProps = {
-  cityName: string;
-  pins: CityTravelerPin[];
+type HubMemoriesProps = {
+  hubName: string;
+  pins: HubTravelerPin[];
   labels: {
     heading: string;
     viewMap: string;
@@ -22,110 +22,15 @@ type CityHubMemoriesProps = {
   };
 };
 
-function MemoryLightbox({
-  pin,
-  cityName,
-  labels,
-  onClose,
-}: {
-  pin: CityTravelerPin;
-  cityName: string;
-  labels: CityHubMemoriesProps["labels"];
-  onClose: () => void;
-}) {
-  const visitDatesLabel =
-    pin.visitDates.length > 0
-      ? formatVisitDatesList(pin.visitDates, getIntlLocale())
-      : null;
-
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
-    }
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
-
-  return (
-    <div
-      className="city-page__memory-lightbox"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="city-memory-lightbox-title"
-    >
-      <div className="city-page__memory-lightbox-panel" onClick={(e) => e.stopPropagation()}>
-        <div className="city-page__memory-lightbox-header">
-          <Link href={pin.profilePath} className="city-page__traveler-link">
-            <ProfileAvatar
-              avatarUrl={pin.avatarUrl}
-              displayName={pin.displayName}
-              username={pin.username}
-              size="sm"
-            />
-            <div className="min-w-0">
-              <p id="city-memory-lightbox-title" className="city-page__traveler-name">
-                {pin.displayName}
-              </p>
-              <p className="city-page__traveler-handle">@{pin.username}</p>
-            </div>
-          </Link>
-          <button
-            type="button"
-            onClick={onClose}
-            className="city-page__memory-lightbox-close"
-            aria-label={labels.close}
-          >
-            ✕
-          </button>
-        </div>
-
-        {pin.mediaType === "photo" && pin.mediaUrl ? (
-          <div className="city-page__memory-lightbox-media">
-            <Image
-              src={pin.mediaUrl}
-              alt={`${cityName} — ${pin.displayName}`}
-              width={900}
-              height={675}
-              className="city-page__memory-lightbox-photo"
-              sizes="(max-width: 448px) 100vw, 448px"
-            />
-          </div>
-        ) : null}
-
-        {pin.mediaType === "instagram" && pin.mediaUrl ? (
-          <div className="city-page__memory-lightbox-media city-page__memory-lightbox-media--instagram">
-            <InstagramEmbed
-              postUrl={pin.mediaUrl}
-              title={`${cityName} — ${pin.displayName} on Instagram`}
-            />
-          </div>
-        ) : null}
-
-        {pin.note ? <p className="city-page__memory-lightbox-note">{pin.note}</p> : null}
-        {visitDatesLabel ? (
-          <p className="city-page__memory-lightbox-dates">{visitDatesLabel}</p>
-        ) : null}
-
-        <div className="city-page__memory-lightbox-footer">
-          <Link href={pin.profilePath} className="city-page__memory-map-link">
-            {labels.viewMap}
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function CityHubMemories({ cityName, pins, labels }: CityHubMemoriesProps) {
-  const [expandedPin, setExpandedPin] = useState<CityTravelerPin | null>(null);
+export function HubMemories({ hubName, pins, labels }: HubMemoriesProps) {
+  const [expandedPin, setExpandedPin] = useState<HubTravelerPin | null>(null);
 
   if (pins.length === 0) return null;
 
   return (
     <>
-      <section className="city-page__section" aria-labelledby="city-memories-heading">
-        <h2 id="city-memories-heading" className="city-page__section-title">
+      <section className="city-page__section" aria-labelledby="hub-memories-heading">
+        <h2 id="hub-memories-heading" className="city-page__section-title">
           {labels.heading}
         </h2>
         <ul className="city-page__memories">
@@ -159,7 +64,7 @@ export function CityHubMemories({ cityName, pins, labels }: CityHubMemoriesProps
                     {pin.mediaType === "instagram" && pin.mediaUrl ? (
                       <InstagramMemoryThumb
                         postUrl={pin.mediaUrl}
-                        alt={`${cityName} — ${pin.displayName}`}
+                        alt={`${hubName} — ${pin.displayName}`}
                         instagramLabel={labels.instagramPost}
                       />
                     ) : null}
@@ -189,6 +94,9 @@ export function CityHubMemories({ cityName, pins, labels }: CityHubMemoriesProps
                     <div className="min-w-0">
                       <p className="city-page__traveler-name">{pin.displayName}</p>
                       <p className="city-page__traveler-handle">@{pin.username}</p>
+                      {pin.placeLabel ? (
+                        <p className="city-page__memory-place">{pin.placeLabel}</p>
+                      ) : null}
                     </div>
                   </Link>
 
@@ -207,10 +115,10 @@ export function CityHubMemories({ cityName, pins, labels }: CityHubMemoriesProps
       </section>
 
       {expandedPin ? (
-        <MemoryLightbox
+        <HubMemoryLightbox
           pin={expandedPin}
-          cityName={cityName}
-          labels={labels}
+          hubName={hubName}
+          labels={{ viewMap: labels.viewMap, close: labels.close }}
           onClose={() => setExpandedPin(null)}
         />
       ) : null}

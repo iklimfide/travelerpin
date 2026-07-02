@@ -82,6 +82,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       latitude,
       longitude,
       note: data.note ?? null,
+      photo_url: media.photo_url,
+      instagram_urls: media.instagram_urls,
       media_type: media.media_type,
       media_url: media.media_url,
       media_preview_url: media.media_preview_url,

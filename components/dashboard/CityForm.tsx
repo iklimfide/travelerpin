@@ -6,10 +6,13 @@ import { LIMITS } from "@/lib/constants";
 import { translateCity, translateCommon } from "@/lib/i18n/client-messages";
 import { addCity } from "@/lib/client/city-actions";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
+import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { isValidInstagramUrl } from "@/lib/utils/instagram";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
 import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEditor";
+import { buildPinMediaPayload, PinMediaFields } from "@/components/dashboard/PinMediaFields";
+import { readInstagramUrls, readPhotoUrl } from "@/lib/utils/pin-media";
 import type { VisitedCity, VisitedCountry } from "@/types/database";
 
 type SearchCity = {
@@ -77,12 +80,9 @@ export function CityForm({
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [note, setNote] = useState(city?.note ?? "");
   const [visitDates, setVisitDates] = useState<string[]>(city?.visit_dates ?? []);
-  const [mediaType, setMediaType] = useState<"photo" | "instagram" | "">(
-    city?.media_type ?? ""
-  );
-  const [instagramUrl, setInstagramUrl] = useState(
-    city?.media_type === "instagram" ? (city.media_url ?? "") : ""
-  );
+  const [savedPhotoUrl, setSavedPhotoUrl] = useState(() => readPhotoUrl(city));
+  const [removePhoto, setRemovePhoto] = useState(false);
+  const [instagramUrls, setInstagramUrls] = useState<string[]>(() => readInstagramUrls(city));
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -400,39 +400,18 @@ export function CityForm({
     setLoading(true);
 
     try {
-      let mediaUrl: string | null = null;
-      let finalMediaType: "photo" | "instagram" | null = null;
+      const mediaResult = await buildPinMediaPayload({
+        photoFile,
+        savedPhotoUrl,
+        removePhoto,
+        instagramUrls,
+        isValidInstagramUrl,
+        formatPhotoUploadError,
+      });
 
-      if (mediaType === "instagram") {
-        const trimmedUrl = instagramUrl.trim();
-        if (trimmedUrl) {
-          if (!isValidInstagramUrl(trimmedUrl)) {
-            await modal.alert("Invalid Instagram post URL", { variant: "error" });
-            return;
-          }
-          finalMediaType = "instagram";
-          mediaUrl = trimmedUrl;
-        }
-      } else if (mediaType === "photo") {
-        if (photoFile) {
-          const formData = new FormData();
-          formData.append("file", photoFile);
-          const uploadRes = await fetch("/api/upload", {
-            method: "POST",
-            body: formData,
-          });
-          if (!uploadRes.ok) {
-            const data = await uploadRes.json();
-            await modal.alert(data.error ?? "Upload failed", { variant: "error" });
-            return;
-          }
-          const { url } = await uploadRes.json();
-          finalMediaType = "photo";
-          mediaUrl = url;
-        } else if (city?.media_type === "photo" && city.media_url) {
-          finalMediaType = "photo";
-          mediaUrl = city.media_url;
-        }
+      if (!mediaResult.ok) {
+        await modal.alert(mediaResult.error, { variant: "error" });
+        return;
       }
 
       const payload = {
@@ -443,8 +422,8 @@ export function CityForm({
           ? { latitude: resolvedCoords.latitude, longitude: resolvedCoords.longitude }
           : {}),
         note: note || null,
-        media_type: finalMediaType,
-        media_url: mediaUrl,
+        photo_url: mediaResult.photo_url,
+        instagram_urls: mediaResult.instagram_urls,
         visit_dates: visitDates,
       };
 
@@ -631,59 +610,28 @@ export function CityForm({
         />
       )}
 
-      <p className="text-xs text-slate-500">{t("mediaHint")}</p>
-
-      <div className="flex flex-wrap gap-4">
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-300">
-          <input
-            type="radio"
-            name="mediaType"
-            checked={mediaType === "photo"}
-            onChange={() => setMediaType("photo")}
-          />
-          {t("photo")}
-        </label>
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-300">
-          <input
-            type="radio"
-            name="mediaType"
-            checked={mediaType === "instagram"}
-            onChange={() => setMediaType("instagram")}
-          />
-          {t("instagram")}
-        </label>
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-300">
-          <input
-            type="radio"
-            name="mediaType"
-            checked={mediaType === ""}
-            onChange={() => setMediaType("")}
-          />
-          {t("mediaNone")}
-        </label>
-      </div>
-
-      {mediaType === "photo" && (
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
-          className="text-sm text-slate-400 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:text-white"
-        />
-      )}
-
-      {mediaType === "instagram" && (
-        <div>
-          <input
-            type="url"
-            value={instagramUrl}
-            onChange={(e) => setInstagramUrl(e.target.value)}
-            placeholder="https://www.instagram.com/p/..."
-            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-blue-500"
-          />
-          <p className="mt-1 text-xs text-slate-500">{t("instagramHint")}</p>
-        </div>
-      )}
+      <PinMediaFields
+        labels={{
+          mediaHint: t("mediaHint"),
+          photo: t("photo"),
+          photoSaved: t("photoSaved"),
+          instagram: t("instagram"),
+          instagramHint: t("instagramHint"),
+          addInstagram: t("addInstagram"),
+          removeInstagram: t("removeInstagram"),
+          removePhoto: t("removePhoto"),
+        }}
+        savedPhotoUrl={savedPhotoUrl}
+        photoFile={photoFile}
+        onPhotoFileChange={(file) => {
+          setPhotoFile(file);
+          if (file) setRemovePhoto(false);
+        }}
+        removePhoto={removePhoto}
+        onRemovePhotoChange={setRemovePhoto}
+        instagramUrls={instagramUrls}
+        onInstagramUrlsChange={setInstagramUrls}
+      />
 
       <div>
         <label className="dashboard-form-city__label">{t("note")}</label>

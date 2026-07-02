@@ -7,24 +7,19 @@ import {
 import type { TravelStats } from "@/types/database";
 
 const T = {
-  pageBg: "#f4f7fb",
   card: "#ffffff",
-  text: "#152033",
-  muted: "#728094",
+  text: "#142033",
   caption: "#7a8798",
   primary: "#2563eb",
-  soft: "#f5f7fb",
   barTrack: "#dfe7f1",
   statDivider: "#dfe5ee",
+  panelBorder: "#dfe5ee",
   heroGradient: "linear-gradient(135deg, #729ac6 0%, #a9c4df 44%, #c7daf0 100%)",
-  heroOverlay:
-    "linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.35) 58%, rgba(15, 23, 42, 0.62) 100%)",
 } as const;
 
 const FONT = "system-ui, sans-serif";
-const SHELL_W = 560;
 const AVATAR = 112;
-const AVATAR_LEFT = (SHELL_W - AVATAR) / 2;
+const CARDS_MAX_W = 720;
 
 const BADGE_STYLES: Record<
   TravelerBadgeTier,
@@ -38,12 +33,8 @@ const BADGE_STYLES: Record<
 
 export type ProfileCardOgLayoutProps = {
   displayName: string;
-  username: string;
   avatarUrl: string | null;
-  coverUrl: string | null;
-  residence: string | null;
   heroTitle: string;
-  heroSubtitle: string;
   description: string;
   stats: TravelStats;
 };
@@ -123,6 +114,7 @@ function TravelerBadgePill({ countryCount }: { countryCount: number }) {
         fontFamily: FONT,
         fontSize: "13px",
         fontWeight: 600,
+        whiteSpace: "nowrap",
       }}
     >
       {label}
@@ -138,10 +130,11 @@ function WorldProgress({ countryCount }: { countryCount: number }) {
       style={{
         display: "flex",
         flexDirection: "column",
-        background: T.soft,
+        background: T.card,
         borderRadius: "24px",
         padding: "18px",
         width: "100%",
+        border: `1px solid ${T.panelBorder}`,
       }}
     >
       <div
@@ -158,7 +151,7 @@ function WorldProgress({ countryCount }: { countryCount: number }) {
             fontFamily: FONT,
             fontSize: "16px",
             fontWeight: 800,
-            color: "#142033",
+            color: T.text,
           }}
         >
           World explored
@@ -223,10 +216,11 @@ function StatCounters({ stats }: { stats: TravelStats }) {
     <div
       style={{
         display: "flex",
-        background: T.soft,
+        background: T.card,
         borderRadius: "24px",
         padding: "18px 10px",
         width: "100%",
+        border: `1px solid ${T.panelBorder}`,
       }}
     >
       {items.map((item, index) => (
@@ -248,7 +242,7 @@ function StatCounters({ stats }: { stats: TravelStats }) {
               fontFamily: FONT,
               fontSize: "25px",
               fontWeight: 800,
-              color: "#142033",
+              color: T.text,
               lineHeight: 1,
               marginBottom: "4px",
             }}
@@ -276,10 +270,7 @@ function StatCounters({ stats }: { stats: TravelStats }) {
 export function ProfileCardOgLayout({
   displayName,
   avatarUrl,
-  coverUrl,
-  residence,
   heroTitle,
-  heroSubtitle,
   description,
   stats,
 }: ProfileCardOgLayoutProps) {
@@ -289,177 +280,71 @@ export function ProfileCardOgLayout({
         width: "100%",
         height: "100%",
         display: "flex",
-        alignItems: "center",
+        flexDirection: "column",
         justifyContent: "center",
-        background: T.pageBg,
+        background: T.heroGradient,
         fontFamily: FONT,
+        padding: "28px 32px 28px 24px",
       }}
     >
       <div
         style={{
           display: "flex",
-          width: `${SHELL_W}px`,
-          flexDirection: "column",
+          fontSize: "40px",
+          fontWeight: 800,
+          color: "#fff",
+          lineHeight: 1.08,
+          marginBottom: "10px",
+        }}
+      >
+        {heroTitle}
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          fontSize: "17px",
+          lineHeight: 1.45,
+          color: "rgba(255, 255, 255, 0.88)",
+          marginBottom: "22px",
+          maxWidth: "900px",
+        }}
+      >
+        {description}
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "22px",
         }}
       >
         <div
           style={{
             display: "flex",
-            position: "relative",
-            height: "210px",
-            padding: "24px 22px 78px",
-            borderRadius: "0 0 30px 30px",
-            overflow: "hidden",
-            background: T.heroGradient,
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "10px",
+            flexShrink: 0,
           }}
         >
-          {coverUrl ? (
-            <img
-              src={coverUrl}
-              alt=""
-              width={SHELL_W}
-              height={210}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
-          ) : null}
-          {coverUrl ? (
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                background: T.heroOverlay,
-              }}
-            />
-          ) : null}
-
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              position: "relative",
-              width: "100%",
-              gap: "14px",
-            }}
-          >
-            {residence ? (
-              <div
-                style={{
-                  display: "flex",
-                  alignSelf: "flex-start",
-                  alignItems: "center",
-                  padding: "10px 16px",
-                  borderRadius: "24px",
-                  background: "rgba(255, 255, 255, 0.86)",
-                  color: "#17233a",
-                  fontSize: "15px",
-                  fontWeight: 800,
-                }}
-              >
-                {residence}
-              </div>
-            ) : null}
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", color: T.card }}>
-              <div
-                style={{
-                  display: "flex",
-                  fontSize: "34px",
-                  fontWeight: 800,
-                  lineHeight: 1.05,
-                  maxWidth: "360px",
-                }}
-              >
-                {heroTitle}
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  fontSize: "16px",
-                  lineHeight: 1.45,
-                  color: "rgba(255, 255, 255, 0.88)",
-                  maxWidth: "360px",
-                }}
-              >
-                {heroSubtitle}
-              </div>
-            </div>
-          </div>
+          <ProfileAvatar displayName={displayName} avatarUrl={avatarUrl} />
+          <TravelerBadgePill countryCount={stats.countries} />
         </div>
 
         <div
           style={{
             display: "flex",
+            flex: 1,
             flexDirection: "column",
-            alignItems: "center",
-            marginTop: "-64px",
-            background: T.card,
-            borderRadius: "30px",
-            padding: "72px 22px 24px",
-            position: "relative",
-            textAlign: "center",
+            gap: "16px",
+            maxWidth: `${CARDS_MAX_W}px`,
+            minWidth: 0,
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              position: "absolute",
-              top: "-52px",
-              left: `${AVATAR_LEFT}px`,
-            }}
-          >
-            <ProfileAvatar displayName={displayName} avatarUrl={avatarUrl} />
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              fontSize: "32px",
-              fontWeight: 800,
-              color: T.text,
-              lineHeight: 1.1,
-              marginBottom: "8px",
-            }}
-          >
-            {displayName}
-          </div>
-
-          <TravelerBadgePill countryCount={stats.countries} />
-
-          <div
-            style={{
-              display: "flex",
-              marginTop: "16px",
-              marginBottom: "18px",
-              maxWidth: "460px",
-              fontSize: "17px",
-              lineHeight: 1.45,
-              color: T.muted,
-              textAlign: "center",
-            }}
-          >
-            {description}
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              width: "100%",
-              gap: "18px",
-            }}
-          >
-            <WorldProgress countryCount={stats.countries} />
-            <StatCounters stats={stats} />
-          </div>
+          <WorldProgress countryCount={stats.countries} />
+          <StatCounters stats={stats} />
         </div>
       </div>
     </div>

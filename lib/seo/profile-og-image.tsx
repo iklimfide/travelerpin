@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { notFound } from "next/navigation";
+import { BRAND } from "@/lib/constants";
 import { ProfileCardOgLayout } from "@/lib/seo/profile-card-og-layout";
 import { getOgAssetOrigin } from "@/lib/seo/og-asset-origin";
 import { loadProxiedOgImageDataUrl } from "@/lib/seo/og-image-proxy-load";
@@ -9,14 +10,18 @@ import { getSiteUrl } from "@/lib/seo/site";
 import { createClient } from "@/lib/supabase/server";
 import { fetchPublicProfile } from "@/lib/supabase/public-profile";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
-import { resolveProfileCoverUrl } from "@/lib/utils/profile-page";
 import { computeTravelStats } from "@/lib/utils/stats";
-import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
+import type { TravelStats, VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
 
 function absoluteAssetUrl(url: string | null, siteUrl: string): string | null {
   if (!url) return null;
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   return `${siteUrl}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
+function ogCardDescription(displayName: string, stats: TravelStats, bio: string | null): string {
+  const base = bio?.trim() || buildProfileDescription(displayName, stats);
+  return base.replace(new RegExp(`${BRAND.name}\\.$`), `${BRAND.name}.com`);
 }
 
 export async function buildProfileOgImage(
@@ -43,33 +48,22 @@ export async function buildProfileOgImage(
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
   const siteUrl = getSiteUrl();
   const imageOrigin = assetOrigin ?? (await getOgAssetOrigin());
-  const coverSource = absoluteAssetUrl(
-    resolveProfileCoverUrl(visitedCities, visitedParks),
-    siteUrl
-  );
   const avatarSource = absoluteAssetUrl(profile.avatar_url, siteUrl);
 
-  const [coverUrl, avatarUrl] = await Promise.all([
-    loadProxiedOgImageDataUrl(coverSource, imageOrigin, { width: 1120, height: 420 }),
-    loadProxiedOgImageDataUrl(avatarSource, imageOrigin, { width: 224, height: 224 }),
-  ]);
+  const avatarUrl = await loadProxiedOgImageDataUrl(avatarSource, imageOrigin, {
+    width: 224,
+    height: 224,
+  });
 
-  const description =
-    profile.bio?.trim() || buildProfileDescription(displayName, stats);
+  const description = ogCardDescription(displayName, stats, profile.bio);
   const heroTitle = `${displayName}'s Travel Map`;
-  const heroSubtitle =
-    "Collect the places you've been and share how your map grows over time.";
 
   return new ImageResponse(
     (
       <ProfileCardOgLayout
         displayName={displayName}
-        username={profile.username}
         avatarUrl={avatarUrl}
-        coverUrl={coverUrl}
-        residence={profile.residence}
         heroTitle={heroTitle}
-        heroSubtitle={heroSubtitle}
         description={description}
         stats={stats}
       />

@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { revalidateParkHubForPin } from "@/lib/cache/revalidate-park-hub";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
+import { resolveCityMediaFields } from "@/lib/utils/city-media";
 import { parkInputSchema } from "@/lib/validations/park";
+import {
+  formatVisitedParkSaveError,
+  updateVisitedParkRow,
+} from "@/lib/supabase/visited-park-update";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -72,26 +77,28 @@ export async function PATCH(request: Request, context: RouteContext) {
     longitude = null;
   }
 
-  const { data: park, error } = await supabase
-    .from("visited_parks")
-    .update({
-      park_name: data.park_name,
-      park_type: data.park_type,
-      country_code: code,
-      country_name: data.country_name,
-      latitude,
-      longitude,
-      note: data.note ?? null,
-      media_type: data.media_type ?? null,
-      media_url: data.media_url ?? null,
-    })
-    .eq("id", id)
-    .eq("user_id", user.id)
-    .select()
-    .single();
+  const media = await resolveCityMediaFields(data);
+
+  const { data: park, error } = await updateVisitedParkRow(supabase, id, user.id, {
+    park_name: data.park_name,
+    park_type: data.park_type,
+    country_code: code,
+    country_name: data.country_name,
+    latitude,
+    longitude,
+    note: data.note ?? null,
+    photo_url: media.photo_url,
+    instagram_urls: media.instagram_urls,
+    media_type: media.media_type,
+    media_url: media.media_url,
+    visit_dates: data.visit_dates ?? [],
+  });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: formatVisitedParkSaveError(error.message) },
+      { status: 500 }
+    );
   }
 
   revalidateParkHubForPin(park.country_code, park.park_name);

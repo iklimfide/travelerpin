@@ -6,7 +6,7 @@ import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
 import { countryMessages, wishlistMessages } from "@/lib/i18n/client-messages";
 import { CountryCityPickerSheet } from "@/components/map/CountryCityPickerSheet";
-import { COUNTRY_LIST, getCountryName } from "@/lib/data/countries";
+import { COUNTRY_LIST, searchCountries, getCountryName } from "@/lib/data/countries";
 import {
   countryHasMappedPlaces,
   isCountryRemoveBlockedByPlacesError,
@@ -83,7 +83,7 @@ export function CountryManager({
     const q = query.trim().toLowerCase();
 
     const source = q
-      ? COUNTRY_LIST.filter((c) => c.searchText.includes(q))
+      ? searchCountries(query)
       : COUNTRY_LIST.filter(
           (c) =>
             visitedCodeSet.has(c.code) || wishlistByCode.has(c.code)

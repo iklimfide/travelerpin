@@ -49,6 +49,8 @@ export default async function ProfileAllDestinationsPage({ params }: PageProps) 
   const wishlistPublic = profile.wishlist_public;
   const visibleWishlistCountries =
     isOwnProfile || wishlistPublic ? data.wishlistCountries : [];
+  const visibleWishlistCodes =
+    isOwnProfile || wishlistPublic ? data.wishlistCodes : [];
 
   const destinations = buildProfileAllDestinations(
     data.visitedCountries,
@@ -67,6 +69,11 @@ export default async function ProfileAllDestinationsPage({ params }: PageProps) 
       visitedCountries={data.visitedCountries}
       visitedCities={data.visitedCities}
       visitedParks={data.visitedParks}
+      visitedCodes={data.visitedCodes}
+      wishlistCodes={visibleWishlistCodes}
+      wishlistCountries={visibleWishlistCountries}
+      isLoggedIn={data.isLoggedIn}
+      stats={data.stats}
     />
   );
 

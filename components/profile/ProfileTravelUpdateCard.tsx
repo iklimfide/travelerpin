@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState, type ReactNode } from "react";
 import { ShareSheetModal } from "@/components/share/ShareSheetModal";
@@ -7,6 +8,7 @@ import { ShareTravelUpdateModal } from "@/components/share/ShareTravelUpdateModa
 import { useShareProfile } from "@/components/share/ShareProfileButton";
 import { finalizeTravelShare } from "@/lib/client/travel-share-snapshot";
 import { profileMessages } from "@/lib/i18n/client-messages";
+import { profileAllPath } from "@/lib/seo/site";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import type { TravelUpdateDelta } from "@/lib/utils/travel-update";
 import type { TravelStats } from "@/types/database";
@@ -71,19 +73,21 @@ function ProfileUpdateStat({
   icon,
   value,
   label,
+  href,
 }: {
   icon: StatKind;
   value: ReactNode;
   label: string;
+  href: string;
 }) {
   return (
-    <div className="profile-update-card__stat">
+    <Link href={href} className="profile-update-card__stat profile-update-card__stat-link">
       <span className="profile-update-card__stat-icon">
         <StatIcon kind={icon} />
       </span>
       <strong>{value}</strong>
       <span>{label}</span>
-    </div>
+    </Link>
   );
 }
 
@@ -99,6 +103,7 @@ export function ProfileTravelUpdateCard({
   const router = useRouter();
   const [updateOpen, setUpdateOpen] = useState(false);
   const hasUpdate = delta.hasChanges;
+  const allHref = profileAllPath(username);
 
   const handleShareComplete = useCallback(async () => {
     if (!persistShareSnapshot) return;
@@ -136,6 +141,7 @@ export function ProfileTravelUpdateCard({
                     icon="countries"
                     value={`+${delta.countriesDelta}`}
                     label={profileMessages.travelUpdateCountries}
+                    href={allHref}
                   />
                 ) : null}
                 {delta.citiesDelta > 0 ? (
@@ -143,6 +149,7 @@ export function ProfileTravelUpdateCard({
                     icon="cities"
                     value={`+${delta.citiesDelta}`}
                     label={profileMessages.travelUpdateCities}
+                    href={allHref}
                   />
                 ) : null}
                 {showParksDelta ? (
@@ -150,6 +157,7 @@ export function ProfileTravelUpdateCard({
                     icon="nationalParks"
                     value={`+${delta.parksDelta}`}
                     label={profileMessages.travelUpdateParks}
+                    href={allHref}
                   />
                 ) : null}
               </div>
@@ -181,21 +189,25 @@ export function ProfileTravelUpdateCard({
                 icon="countries"
                 value={stats.countries}
                 label={profileMessages.travelUpdateCountries}
+                href={allHref}
               />
               <ProfileUpdateStat
                 icon="cities"
                 value={stats.cities}
                 label={profileMessages.travelUpdateCities}
+                href={allHref}
               />
               <ProfileUpdateStat
                 icon="nationalParks"
                 value={stats.nationalParks}
                 label={profileMessages.travelUpdateNationalParks}
+                href={allHref}
               />
               <ProfileUpdateStat
                 icon="themeParks"
                 value={stats.themeParks}
                 label={profileMessages.travelUpdateThemeParks}
+                href={allHref}
               />
             </div>
           )}

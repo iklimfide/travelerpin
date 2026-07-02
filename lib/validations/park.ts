@@ -1,10 +1,18 @@
 import { z } from "zod";
 import { LIMITS } from "@/lib/constants";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
-import { isValidInstagramUrl } from "@/lib/utils/instagram";
+import { isValidVisitYearMonth, normalizeVisitDates } from "@/lib/utils/visit-date";
 import { PARK_TYPES } from "@/types/database";
+import { pinMediaFields, pinMediaRefineMessage, refinePinMediaInput } from "@/lib/validations/pin-media";
 
 const parkTypeSchema = z.enum(PARK_TYPES);
+
+const visitDatesField = z
+  .array(z.string())
+  .max(LIMITS.maxCityVisitDates)
+  .optional()
+  .nullable()
+  .transform((value) => normalizeVisitDates(value ?? []));
 
 const parkFields = {
   park_name: z
@@ -22,31 +30,17 @@ const parkFields = {
     .max(LIMITS.noteMaxLength, `Note must be at most ${LIMITS.noteMaxLength} characters`)
     .optional()
     .nullable(),
-  media_type: z.enum(["photo", "instagram"]).optional().nullable(),
-  media_url: z.string().optional().nullable(),
+  ...pinMediaFields,
+  visit_dates: visitDatesField,
 };
-
-const mediaRefine = {
-  check: (data: {
-    media_type?: "photo" | "instagram" | null;
-    media_url?: string | null;
-  }) => {
-    if (!data.media_type) return true;
-    if (!data.media_url) return false;
-    if (data.media_type === "instagram") return isValidInstagramUrl(data.media_url);
-    try {
-      new URL(data.media_url);
-      return true;
-    } catch {
-      return false;
-    }
-  },
-  message: "Valid media URL required for selected media type",
-} as const;
 
 export const parkInputSchema = z
   .object(parkFields)
-  .refine(mediaRefine.check, { message: mediaRefine.message })
+  .refine(
+    (data) => (data.visit_dates ?? []).every(isValidVisitYearMonth),
+    { message: "Invalid visit date format" }
+  )
+  .refine(refinePinMediaInput, { message: pinMediaRefineMessage })
   .refine(
     (data) => {
       const hasLat = data.latitude !== undefined;

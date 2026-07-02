@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { HubSectionHeading } from "@/components/hub/HubSectionHeading";
 import type { CountryTraveler } from "@/lib/supabase/country-travelers";
+import type { ReactNode } from "react";
 
 type HubRecentTravelersProps = {
   travelers: CountryTraveler[];
   headingId: string;
+  layout?: "list" | "row";
+  headingCta?: ReactNode;
   labels: {
     recentTravelers: string;
     noTravelersYet: string;
@@ -16,16 +20,19 @@ type HubRecentTravelersProps = {
 export function HubRecentTravelers({
   travelers,
   headingId,
+  layout = "list",
+  headingCta,
   labels,
   registerHref = "/register",
 }: HubRecentTravelersProps) {
+  const travelersClassName =
+    layout === "row" ? "city-page__travelers city-page__travelers--row" : "city-page__travelers";
+
   return (
     <section className="city-page__section" aria-labelledby={headingId}>
-      <h2 id={headingId} className="city-page__section-title">
-        {labels.recentTravelers}
-      </h2>
+      <HubSectionHeading id={headingId} title={labels.recentTravelers} cta={headingCta} />
       {travelers.length > 0 ? (
-        <ul className="city-page__travelers">
+        <ul className={travelersClassName}>
           {travelers.map((traveler) => (
             <li key={traveler.username}>
               <Link href={traveler.profilePath} className="city-page__traveler-link">

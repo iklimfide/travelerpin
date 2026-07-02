@@ -1,7 +1,10 @@
 import { buildVisitedCountryList } from "@/lib/map/travel-lists";
 import { getCountryHubByCode } from "@/lib/data/country-hubs";
+import { findParkHubSlug } from "@/lib/data/park-hubs";
 import type { ParkType, VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
+import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
+import { profilePinImageUrl } from "@/lib/storage/hub-photo-url";
 import { buildProfileTrips, type ProfileTrip } from "@/lib/utils/profile-page";
 
 function countryHubSlug(code: string): string | null {
@@ -12,10 +15,10 @@ function mediaImageUrl(item: {
   media_type: string | null;
   media_url: string | null;
   media_preview_url?: string | null;
+  photo_url?: string | null;
+  instagram_urls?: string[] | null;
 }): string | null {
-  if (item.media_type === "photo" && item.media_url) return item.media_url;
-  if (item.media_preview_url) return item.media_preview_url;
-  return null;
+  return profilePinImageUrl(item);
 }
 
 export type ProfileCountryDestination = {
@@ -32,6 +35,7 @@ export type ProfileCountryDestination = {
 export type ProfileParkDestination = {
   id: string;
   parkName: string;
+  parkSlug: string | null;
   countryCode: string;
   countryName: string;
   countrySlug: string | null;
@@ -124,7 +128,8 @@ export function buildProfileAllDestinations(
     .sort((a, b) => a.park_name.localeCompare(b.park_name, undefined, { sensitivity: "base" }))
     .map((park) => ({
       id: park.id,
-      parkName: park.park_name,
+      parkName: formatCityDisplayName(park.park_name),
+      parkSlug: findParkHubSlug(park.park_name, park.country_code),
       countryCode: park.country_code,
       countryName: park.country_name,
       countrySlug: countryHubSlug(park.country_code),

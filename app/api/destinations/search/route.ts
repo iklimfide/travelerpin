@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { COUNTRY_LIST, getCountryName } from "@/lib/data/countries";
+import { COUNTRY_LIST, searchCountries, getCountryName } from "@/lib/data/countries";
 import { searchTouristCitiesInCountries } from "@/lib/data/tourist-cities";
 import { searchTouristParksInCountries } from "@/lib/data/tourist-park-search";
 import { createClient } from "@/lib/supabase/server";
@@ -27,14 +27,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ countries: [], cities: [], parks: [] });
   }
 
-  const needle = q.toLowerCase();
-
-  const countries = COUNTRY_LIST.filter((country) => country.searchText.includes(needle))
-    .slice(0, 12)
-    .map((country) => ({
-      code: country.code,
-      name: country.name,
-    }));
+  const countries = searchCountries(q, 12).map((country) => ({
+    code: country.code,
+    name: country.name,
+  }));
 
   const cities = searchTouristCitiesInCountries(COUNTRY_CODES, q, 24).map((city) => ({
     cityName: city.name,

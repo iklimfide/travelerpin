@@ -8,7 +8,7 @@ import {
   type PopularDestination,
 } from "@/lib/data/popular-destinations";
 import { POPULAR_PARKS, type PopularPark } from "@/lib/data/popular-parks";
-import { COUNTRY_LIST } from "@/lib/data/countries";
+import { COUNTRY_LIST, searchCountries } from "@/lib/data/countries";
 import { getPopularCountries } from "@/lib/data/popular-countries";
 import {
   quickAddDestination,
@@ -16,11 +16,14 @@ import {
 } from "@/lib/client/destination-actions";
 import { quickAddPark, quickRemovePark } from "@/lib/client/park-destination-actions";
 import { addCity } from "@/lib/client/city-actions";
+import { addWishlistCountry, removeWishlistCountry } from "@/lib/client/country-actions";
 import { addPark } from "@/lib/client/park-actions";
 import { CityForm } from "@/components/dashboard/CityForm";
+import { ParkForm } from "@/components/dashboard/ParkForm";
 import {
   commonMessages,
   cityMessages,
+  countryHubMessages,
   parkMessages,
   saveDestinationMessages,
   destinationMessages,
@@ -29,13 +32,19 @@ import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import { useToast } from "@/components/ui/ToastProvider";
-import type { ParkType, VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
+import type {
+  ParkType,
+  VisitedCity,
+  VisitedCountry,
+  VisitedPark,
+  WishlistCountry,
+} from "@/types/database";
 import { PARK_TYPES } from "@/types/database";
 
 const WORLD_COUNTRY_TOTAL = 195;
 const SEARCH_DEBOUNCE_MS = 280;
 
-type SaveDestinationTab = "popular" | "countries" | "cities" | "parks";
+type SaveDestinationTab = "popular" | "countries" | "cities" | "parks" | "want";
 
 type SearchCityResult = {
   cityName: string;
@@ -87,7 +96,7 @@ type DestinationRow =
       longitude: number;
     };
 
-export type SaveDestinationInitialTab = "popular" | "countries" | "cities" | "parks";
+export type SaveDestinationInitialTab = "popular" | "countries" | "cities" | "parks" | "want";
 
 type SaveDestinationModalProps = {
   open: boolean;
@@ -227,6 +236,21 @@ function findVisitedCityForRow(
   );
 }
 
+function findVisitedParkForRow(
+  row: Extract<DestinationRow, { kind: "park" }>,
+  parks: VisitedPark[]
+): VisitedPark | undefined {
+  const countryCode = row.countryCode.toUpperCase();
+  const parkName = row.parkName.toLowerCase();
+
+  return parks.find(
+    (park) =>
+      park.country_code.toUpperCase() === countryCode &&
+      park.park_type === row.parkType &&
+      park.park_name.toLowerCase() === parkName
+  );
+}
+
 function queryMatchesCityName(
   query: string,
   rows: DestinationRow[],
@@ -260,6 +284,16 @@ function queryMatchesParkName(
   return POPULAR_PARKS.some((park) => park.parkName.toLowerCase() === normalized);
 }
 
+function excludeVisitedCountries(
+  rows: DestinationRow[],
+  visitedCountryCodes: Set<string>
+): DestinationRow[] {
+  return rows.filter(
+    (row) =>
+      row.kind !== "country" || !visitedCountryCodes.has(row.countryCode.toUpperCase())
+  );
+}
+
 export function SaveDestinationModal({
   open,
   initialTab = "popular",
@@ -275,11 +309,15 @@ export function SaveDestinationModal({
   const [visitedCountries, setVisitedCountries] = useState<VisitedCountry[]>([]);
   const [visitedCities, setVisitedCities] = useState<VisitedCity[]>([]);
   const [visitedParks, setVisitedParks] = useState<VisitedPark[]>([]);
+  const [wishlistCountries, setWishlistCountries] = useState<WishlistCountry[]>([]);
   const [searchCities, setSearchCities] = useState<SearchCityResult[]>([]);
   const [searchParks, setSearchParks] = useState<SearchParkResult[]>([]);
   const [recentlyAdded, setRecentlyAdded] = useState<Set<string>>(new Set());
   const [recentlyRemoved, setRecentlyRemoved] = useState<Set<string>>(new Set());
+  const [recentlyWishlistAdded, setRecentlyWishlistAdded] = useState<Set<string>>(new Set());
+  const [recentlyWishlistRemoved, setRecentlyWishlistRemoved] = useState<Set<string>>(new Set());
   const [editingCityId, setEditingCityId] = useState<string | null>(null);
+  const [editingParkId, setEditingParkId] = useState<string | null>(null);
 
   const loadTravelState = useCallback(async () => {
     try {
@@ -289,6 +327,7 @@ export function SaveDestinationModal({
       setVisitedCountries(data.visitedCountries ?? []);
       setVisitedCities(data.visitedCities ?? []);
       setVisitedParks(data.visitedParks ?? []);
+      setWishlistCountries(data.wishlistCountries ?? []);
     } catch {
       // keep previous state
     }
@@ -302,7 +341,10 @@ export function SaveDestinationModal({
     setSearchParks([]);
     setRecentlyAdded(new Set());
     setRecentlyRemoved(new Set());
+    setRecentlyWishlistAdded(new Set());
+    setRecentlyWishlistRemoved(new Set());
     setEditingCityId(null);
+    setEditingParkId(null);
     void loadTravelState();
   }, [open, initialTab, loadTravelState]);
 
@@ -361,6 +403,48 @@ export function SaveDestinationModal({
     };
   }, [open, trimmedQuery]);
 
+  const isWantMode = tab === "want";
+
+  const wishlistByCode = useMemo(() => {
+    const map = new Map<string, WishlistCountry>();
+    for (const country of wishlistCountries) {
+      map.set(country.country_code.toUpperCase(), country);
+    }
+    return map;
+  }, [wishlistCountries]);
+
+  const visitedCountryCodes = useMemo(() => {
+    const codes = new Set<string>();
+    for (const country of visitedCountries) {
+      codes.add(country.country_code.toUpperCase());
+    }
+    for (const city of visitedCities) {
+      codes.add(city.country_code.toUpperCase());
+    }
+    for (const park of visitedParks) {
+      codes.add(park.country_code.toUpperCase());
+    }
+    return codes;
+  }, [visitedCountries, visitedCities, visitedParks]);
+
+  const wantedIds = useMemo(() => {
+    const ids = new Set<string>();
+
+    for (const country of wishlistCountries) {
+      ids.add(countryRowId(country.country_code));
+    }
+
+    for (const code of recentlyWishlistAdded) {
+      ids.add(countryRowId(code));
+    }
+
+    for (const code of recentlyWishlistRemoved) {
+      ids.delete(countryRowId(code));
+    }
+
+    return ids;
+  }, [wishlistCountries, recentlyWishlistAdded, recentlyWishlistRemoved]);
+
   const addedIds = useMemo(() => {
     const ids = new Set<string>();
 
@@ -399,9 +483,7 @@ export function SaveDestinationModal({
 
   const rows = useMemo((): DestinationRow[] => {
     if (trimmedQuery.length >= 2) {
-      const countryRows = COUNTRY_LIST.filter((country) => country.searchText.includes(needle))
-        .slice(0, 8)
-        .map(countryToRow);
+      const countryRows = searchCountries(trimmedQuery, 8).map(countryToRow);
       const cityRows = searchCities.map(cityToRow);
       const parkRows = searchParks.map(parkToRow);
       const popularRows = POPULAR_DESTINATIONS.filter((destination) =>
@@ -417,10 +499,24 @@ export function SaveDestinationModal({
       ).map(parkToRow);
 
       const merged = new Map<string, DestinationRow>();
-      for (const row of [...popularRows, ...popularParkRows, ...cityRows, ...parkRows, ...countryRows]) {
+      for (const row of [...countryRows, ...popularRows, ...popularParkRows, ...cityRows, ...parkRows]) {
         merged.set(row.id, row);
       }
-      return [...merged.values()];
+      let results = [...merged.values()];
+      if (isWantMode) {
+        results = excludeVisitedCountries(
+          results.filter((row) => row.kind === "country"),
+          visitedCountryCodes
+        );
+      }
+      return results;
+    }
+
+    if (tab === "want") {
+      return excludeVisitedCountries(
+        getPopularCountries(40).map(countryToRow),
+        visitedCountryCodes
+      );
     }
 
     if (tab === "countries") {
@@ -438,11 +534,16 @@ export function SaveDestinationModal({
     }
 
     return POPULAR_DESTINATIONS.slice(0, 40).map(popularToRow);
-  }, [needle, searchCities, searchParks, tab, trimmedQuery.length]);
+  }, [isWantMode, needle, searchCities, searchParks, tab, trimmedQuery.length, visitedCountryCodes]);
 
   const editingCity = useMemo(
     () => visitedCities.find((city) => city.id === editingCityId) ?? null,
     [editingCityId, visitedCities]
+  );
+
+  const editingPark = useMemo(
+    () => visitedParks.find((park) => park.id === editingParkId) ?? null,
+    [editingParkId, visitedParks]
   );
 
   const formattedQueryName = formatCityDisplayName(trimmedQuery);
@@ -468,10 +569,7 @@ export function SaveDestinationModal({
       map.set(park.countryCode.toUpperCase(), park.countryName);
     }
 
-    for (const country of COUNTRY_LIST.filter((entry) => entry.searchText.includes(needle)).slice(
-      0,
-      12
-    )) {
+    for (const country of searchCountries(trimmedQuery, 12)) {
       map.set(country.code, country.name);
     }
 
@@ -481,11 +579,13 @@ export function SaveDestinationModal({
   }, [needle, rows, searchCities, searchParks, visitedCountries]);
 
   const showCustomCity =
+    !isWantMode &&
     trimmedQuery.length >= 2 &&
     !loadingSearch &&
     !queryMatchesCityName(trimmedQuery, rows, searchCities);
 
   const showCustomPark =
+    !isWantMode &&
     trimmedQuery.length >= 2 &&
     !loadingSearch &&
     !queryMatchesParkName(trimmedQuery, rows, searchParks);
@@ -672,7 +772,65 @@ export function SaveDestinationModal({
     });
   }
 
+  async function handleWishlistToggle(row: DestinationRow) {
+    if (row.kind !== "country") return;
+
+    const code = row.countryCode.toUpperCase();
+    if (visitedCountryCodes.has(code)) return;
+
+    const id = row.id;
+    if (busyId) return;
+    setBusyId(id);
+
+    try {
+      const wanted = wantedIds.has(id);
+
+      if (wanted) {
+        const wishlist = wishlistByCode.get(code);
+        if (!wishlist) return;
+
+        const result = await removeWishlistCountry(wishlist.id);
+        if (!result.ok) {
+          toast.show(result.error, 2500);
+          return;
+        }
+
+        setRecentlyWishlistAdded((prev) => {
+          const next = new Set(prev);
+          next.delete(code);
+          return next;
+        });
+        setRecentlyWishlistRemoved((prev) => new Set(prev).add(code));
+        toast.show(countryHubMessages.wishlistRemoved, 1500);
+      } else {
+        const result = await addWishlistCountry(code);
+        if (!result.ok) {
+          toast.show(result.error, 2500);
+          return;
+        }
+
+        setRecentlyWishlistRemoved((prev) => {
+          const next = new Set(prev);
+          next.delete(code);
+          return next;
+        });
+        setRecentlyWishlistAdded((prev) => new Set(prev).add(code));
+        toast.show(countryHubMessages.wishlistAdded, 1500);
+      }
+
+      router.refresh();
+      void loadTravelState();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   async function handleToggle(row: DestinationRow) {
+    if (isWantMode) {
+      await handleWishlistToggle(row);
+      return;
+    }
+
     const id = row.id;
     if (busyId) return;
 
@@ -803,6 +961,7 @@ export function SaveDestinationModal({
     { id: "countries", label: saveDestinationMessages.tabCountries, icon: "🌍" },
     { id: "cities", label: saveDestinationMessages.tabCities, icon: "📍" },
     { id: "parks", label: saveDestinationMessages.tabParks, icon: "🏞️" },
+    { id: "want", label: saveDestinationMessages.tabWant, icon: "⭐" },
   ];
 
   return (
@@ -878,25 +1037,42 @@ export function SaveDestinationModal({
             .replace("{total}", String(WORLD_COUNTRY_TOTAL))}
         </div>
 
-        {editingCity ? (
+        {editingCity || editingPark ? (
           <div className="save-destination-modal__edit-panel scrollbar-thin">
             <button
               type="button"
               className="save-destination-modal__back"
-              onClick={() => setEditingCityId(null)}
+              onClick={() => {
+                setEditingCityId(null);
+                setEditingParkId(null);
+              }}
             >
               {saveDestinationMessages.backToSearch}
             </button>
-            <CityForm
-              city={editingCity}
-              visitedCountries={visitedCountries}
-              onSuccess={() => {
-                setEditingCityId(null);
-                router.refresh();
-                void loadTravelState();
-              }}
-              onCancel={() => setEditingCityId(null)}
-            />
+            {editingCity ? (
+              <CityForm
+                city={editingCity}
+                visitedCountries={visitedCountries}
+                onSuccess={() => {
+                  setEditingCityId(null);
+                  router.refresh();
+                  void loadTravelState();
+                }}
+                onCancel={() => setEditingCityId(null)}
+              />
+            ) : editingPark ? (
+              <ParkForm
+                park={editingPark}
+                visitedCountries={visitedCountries}
+                existingParks={visitedParks}
+                onSuccess={() => {
+                  setEditingParkId(null);
+                  router.refresh();
+                  void loadTravelState();
+                }}
+                onCancel={() => setEditingParkId(null)}
+              />
+            ) : null}
           </div>
         ) : (
         <ul className="save-destination-modal__list scrollbar-thin">
@@ -905,11 +1081,15 @@ export function SaveDestinationModal({
           ) : (
             <>
               {rows.map((row) => {
-              const added = addedIds.has(row.id);
+              const marked = isWantMode ? wantedIds.has(row.id) : addedIds.has(row.id);
               const busy = busyId === row.id;
               const visitedCity =
-                row.kind === "city" && added
+                !isWantMode && row.kind === "city" && marked
                   ? findVisitedCityForRow(row, visitedCities)
+                  : undefined;
+              const visitedPark =
+                !isWantMode && row.kind === "park" && marked
+                  ? findVisitedParkForRow(row, visitedParks)
                   : undefined;
 
               return (
@@ -934,19 +1114,26 @@ export function SaveDestinationModal({
                       <span className="save-destination-modal__meta">{row.subtitle}</span>
                     </span>
                     <span
-                      className={`save-destination-modal__check${added ? " save-destination-modal__check--on" : ""}`}
+                      className={`save-destination-modal__check${marked ? " save-destination-modal__check--on" : ""}`}
                       aria-hidden
                     >
-                      {added ? "✓" : "+"}
+                      {marked ? "✓" : "+"}
                     </span>
                   </button>
-                  {visitedCity ? (
+                  {visitedCity || visitedPark ? (
                     <button
                       type="button"
                       className="save-destination-modal__edit"
                       disabled={busy}
-                      onClick={() => setEditingCityId(visitedCity.id)}
-                      aria-label={saveDestinationMessages.editCity}
+                      onClick={() => {
+                        setEditingCityId(visitedCity?.id ?? null);
+                        setEditingParkId(visitedPark?.id ?? null);
+                      }}
+                      aria-label={
+                        visitedCity
+                          ? saveDestinationMessages.editCity
+                          : saveDestinationMessages.editPark
+                      }
                     >
                       {commonMessages.edit}
                     </button>

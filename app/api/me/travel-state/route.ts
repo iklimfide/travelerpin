@@ -4,7 +4,7 @@ import {
   computeTravelStats,
   getVisitedCountryCodes,
 } from "@/lib/utils/stats";
-import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
+import type { VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 
 export async function GET() {
   const supabase = await createClient();
@@ -20,7 +20,8 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [{ data: countries }, { data: cities }, { data: parks }] = await Promise.all([
+  const [{ data: countries }, { data: cities }, { data: parks }, { data: wishlist }] =
+    await Promise.all([
     supabase
       .from("visited_countries")
       .select("id, country_code, country_name")
@@ -33,11 +34,16 @@ export async function GET() {
       .from("visited_parks")
       .select("id, park_name, park_type, country_code, country_name")
       .eq("user_id", user.id),
+    supabase
+      .from("wishlist_countries")
+      .select("id, country_code, country_name")
+      .eq("user_id", user.id),
   ]);
 
   const visitedCountries = (countries ?? []) as VisitedCountry[];
   const visitedCities = (cities ?? []) as VisitedCity[];
   const visitedParks = (parks ?? []) as VisitedPark[];
+  const wishlistCountries = (wishlist ?? []) as WishlistCountry[];
   const stats = computeTravelStats(visitedCountries, visitedCities, visitedParks);
   const visitedCodes = getVisitedCountryCodes(visitedCountries, visitedCities, visitedParks);
 
@@ -45,6 +51,7 @@ export async function GET() {
     visitedCountries,
     visitedCities,
     visitedParks,
+    wishlistCountries,
     stats,
     visitedCodes,
   });

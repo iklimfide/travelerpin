@@ -1,11 +1,25 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ParkHub } from "@/lib/data/park-hubs";
-import type { CountryTraveler } from "@/lib/supabase/country-travelers";
 import { profilePath } from "@/lib/seo/site";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
+import { parkPinMatchesHub } from "@/lib/utils/park-hub-match";
+import type { VisitedPark } from "@/types/database";
+import type { CountryTraveler } from "@/lib/supabase/country-travelers";
+import {
+  type HubTravelerPin,
+  buildHubTravelerPinMedia,
+  hubPhotoDisplayUrl,
+  sortHubTravelerPins,
+  uniqueHubTravelers,
+} from "@/lib/supabase/hub-traveler-pin";
+import { fetchParkPinRows, type ParkPinQueryRow } from "@/lib/supabase/park-pin-select";
 
-type ParkPinRow = {
+type ParkPinRow = ParkPinQueryRow;
+
+type ParkTravelerRow = {
   user_id: string;
+  park_name: string;
+  country_code: string;
   created_at: string;
   profiles: {
     username: string;
@@ -14,25 +28,103 @@ type ParkPinRow = {
   } | null;
 };
 
+function rowToPin(row: ParkPinRow, hub: ParkHub): HubTravelerPin | null {
+  if (!parkPinMatchesHub(row.park_name, row.country_code, hub)) return null;
+
+  const profile = row.profiles;
+  if (!profile?.username) return null;
+
+  const username = profile.username.toLowerCase();
+  const media = buildHubTravelerPinMedia(row);
+
+  return {
+    id: row.id,
+    placeLabel: null,
+    note: row.note,
+    photoUrl: media.photoUrl,
+    instagramUrls: media.instagramUrls,
+    mediaType: media.mediaType,
+    mediaUrl: media.mediaUrl,
+    mediaDisplayUrl: media.mediaDisplayUrl,
+    mediaPreviewUrl: media.mediaPreviewUrl,
+    visitDates: row.visit_dates ?? [],
+    pinnedAt: row.updated_at,
+    username,
+    displayName: resolveProfileDisplayName(profile.display_name, profile.username),
+    avatarUrl: profile.avatar_url,
+    profilePath: profilePath(username),
+  };
+}
+
+type OwnerProfile = {
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+};
+
+export function visitedParkToHubPin(
+  park: VisitedPark,
+  hub: ParkHub,
+  profile: OwnerProfile
+): HubTravelerPin | null {
+  if (!parkPinMatchesHub(park.park_name, park.country_code, hub)) return null;
+  if (!profile.username) return null;
+
+  const username = profile.username.toLowerCase();
+  const media = buildHubTravelerPinMedia(park);
+
+  return {
+    id: park.id,
+    placeLabel: null,
+    note: park.note,
+    photoUrl: media.photoUrl,
+    instagramUrls: media.instagramUrls,
+    mediaType: media.mediaType,
+    mediaUrl: media.mediaUrl,
+    mediaDisplayUrl: media.mediaDisplayUrl,
+    mediaPreviewUrl: media.mediaPreviewUrl,
+    visitDates: park.visit_dates ?? [],
+    pinnedAt: park.updated_at,
+    username,
+    displayName: resolveProfileDisplayName(profile.display_name, profile.username),
+    avatarUrl: profile.avatar_url,
+    profilePath: profilePath(username),
+  };
+}
+
+export async function fetchRecentParkPins(
+  supabase: SupabaseClient,
+  hub: ParkHub,
+  limit = 12
+): Promise<HubTravelerPin[]> {
+  const rows = await fetchParkPinRows(supabase, hub.countryCode);
+
+  const pins = rows
+    .map((row) => rowToPin(row, hub))
+    .filter((pin): pin is HubTravelerPin => pin !== null);
+
+  return sortHubTravelerPins(pins).slice(0, limit);
+}
+
 export async function fetchRecentParkTravelers(
   supabase: SupabaseClient,
   hub: ParkHub,
   limit = 5
 ): Promise<CountryTraveler[]> {
   const code = hub.countryCode.toUpperCase();
-  const parkName = hub.name.trim();
 
   const { data } = await supabase
     .from("visited_parks")
-    .select("user_id, created_at, profiles!inner(username, display_name, avatar_url)")
+    .select("user_id, park_name, country_code, created_at, profiles!inner(username, display_name, avatar_url)")
     .eq("country_code", code)
-    .ilike("park_name", parkName)
     .order("created_at", { ascending: false })
-    .limit(30);
+    .limit(200);
 
   const latestByUser = new Map<string, CountryTraveler>();
 
-  for (const row of (data as ParkPinRow[] | null) ?? []) {
+  for (const row of (data as ParkTravelerRow[] | null) ?? []) {
+    if (!parkPinMatchesHub(row.park_name, row.country_code, hub)) continue;
+
     const profile = row.profiles;
     if (!profile?.username) continue;
 
@@ -52,4 +144,8 @@ export async function fetchRecentParkTravelers(
   return [...latestByUser.values()]
     .sort((a, b) => b.lastPinnedAt.localeCompare(a.lastPinnedAt))
     .slice(0, limit);
+}
+
+export function uniqueParkTravelers(pins: HubTravelerPin[], limit = 5): CountryTraveler[] {
+  return uniqueHubTravelers(pins, limit);
 }

@@ -1,0 +1,23 @@
+import { NextResponse } from "next/server";
+import { getR2Object } from "@/lib/storage/r2";
+
+export const runtime = "nodejs";
+
+export async function GET(request: Request) {
+  const key = new URL(request.url).searchParams.get("key");
+  if (!key) {
+    return NextResponse.json({ error: "Missing key" }, { status: 400 });
+  }
+
+  const object = await getR2Object(key);
+  if (!object) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  return new NextResponse(Buffer.from(object.body), {
+    headers: {
+      "Content-Type": object.contentType,
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
+  });
+}
