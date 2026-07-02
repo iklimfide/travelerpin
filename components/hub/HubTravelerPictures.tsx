@@ -6,6 +6,7 @@ import { HubExternalPhoto } from "@/components/hub/HubExternalPhoto";
 import { HubMemoryLightbox } from "@/components/hub/HubMemoryLightbox";
 import { HubSectionHeading } from "@/components/hub/HubSectionHeading";
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
+import { hubGalleryPhotoSrc } from "@/lib/storage/hub-photo-url";
 import type { HubGalleryItem, HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
 import { expandHubPinGalleryItems } from "@/lib/supabase/hub-traveler-pin";
 
@@ -57,20 +58,25 @@ function GalleryGrid({
               />
             </a>
           ) : (
-            <button
-              type="button"
-              className="city-page__traveler-picture-btn"
-              onClick={() => onSelect(item)}
-              aria-label={`${labels.viewPin} — ${item.pin.displayName}`}
-            >
-              <HubExternalPhoto
-                src={item.mediaDisplayUrl ?? item.mediaUrl}
-                alt={`${hubName} — ${item.pin.displayName}`}
-                width={160}
-                height={160}
-                className="city-page__traveler-picture-image"
-              />
-            </button>
+            (() => {
+              const photoSrc = hubGalleryPhotoSrc(item);
+              return photoSrc ? (
+                <button
+                  type="button"
+                  className="city-page__traveler-picture-btn"
+                  onClick={() => onSelect(item)}
+                  aria-label={`${labels.viewPin} — ${item.pin.displayName}`}
+                >
+                  <HubExternalPhoto
+                    src={photoSrc}
+                    alt={`${hubName} — ${item.pin.displayName}`}
+                    width={160}
+                    height={160}
+                    className="city-page__traveler-picture-image"
+                  />
+                </button>
+              ) : null;
+            })()
           )}
         </li>
       ))}

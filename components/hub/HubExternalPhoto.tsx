@@ -6,7 +6,7 @@ type HubExternalPhotoProps = {
   height?: number;
 };
 
-/** Plain img — src must be resolved on the server (see hubPhotoDisplayUrl). */
+/** Plain img — src should come from hubGalleryPhotoSrc / resolvePublicMediaImageUrl. */
 export function HubExternalPhoto({
   src,
   alt,
@@ -37,10 +37,4 @@ export function isHubPhotoPin(pin: {
   return Boolean(pin.mediaUrl) && pin.mediaType !== "instagram";
 }
 
-export function hubPinPhotoSrc(pin: {
-  mediaDisplayUrl: string | null;
-  photoUrl?: string | null;
-  mediaUrl: string | null;
-}): string | null {
-  return pin.mediaDisplayUrl ?? pin.photoUrl ?? pin.mediaUrl;
-}
+export { hubPinPhotoSrc } from "@/lib/storage/hub-photo-url";

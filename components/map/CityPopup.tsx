@@ -61,17 +61,21 @@ export function CityPopup({ city, onClose }: CityPopupProps) {
           </button>
         </div>
 
-        {city.media_type === "photo" && city.media_url && (
-          <div className="relative aspect-[4/3] w-full bg-slate-800">
-            <Image
-              src={resolvePublicMediaImageUrl(readPhotoUrl(city) ?? city.media_url) ?? city.media_url}
-              alt={`${city.city_name}, ${city.country_name}`}
-              fill
-              className="object-cover"
-              sizes="(max-width: 448px) 100vw, 448px"
-            />
-          </div>
-        )}
+        {(() => {
+          const photoSrc = resolvePublicMediaImageUrl(readPhotoUrl(city) ?? city.media_url);
+          if (!photoSrc) return null;
+          return (
+            <div className="relative aspect-[4/3] w-full bg-slate-800">
+              <Image
+                src={photoSrc}
+                alt={`${city.city_name}, ${city.country_name}`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 448px) 100vw, 448px"
+              />
+            </div>
+          );
+        })()}
 
         {city.media_type === "instagram" && city.media_url && (
           <div className="bg-slate-800">

@@ -7,6 +7,7 @@ import { HubExternalPhoto } from "@/components/hub/HubExternalPhoto";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { formatVisitDatesList } from "@/lib/utils/visit-date";
 import { getIntlLocale } from "@/lib/i18n/config";
+import { hubPinPhotoSrc } from "@/lib/storage/hub-photo-url";
 import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
 import type { MediaType } from "@/types/database";
 
@@ -40,7 +41,13 @@ export function HubMemoryLightbox({
     pin.mediaUrl;
   const photoSrc =
     activeMediaDisplayUrl ??
-    (mediaType === "photo" ? pin.mediaDisplayUrl ?? mediaUrl : null);
+    (mediaType === "photo"
+      ? hubPinPhotoSrc({
+          mediaDisplayUrl: pin.mediaDisplayUrl,
+          photoUrl: pin.photoUrl,
+          mediaUrl: pin.mediaUrl,
+        })
+      : null);
 
   const visitDatesLabel =
     pin.visitDates.length > 0

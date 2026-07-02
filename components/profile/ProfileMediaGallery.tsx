@@ -18,6 +18,7 @@ import {
 } from "@/lib/client/profile-media-update";
 import type { HubGalleryItem } from "@/lib/supabase/hub-traveler-pin";
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
+import { hubGalleryPhotoSrc } from "@/lib/storage/hub-photo-url";
 import { parseProfilePinId } from "@/lib/utils/profile-media";
 import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
 
@@ -161,6 +162,7 @@ function GalleryTile({
   }
 
   if (isOwnProfile) {
+    const photoSrc = hubGalleryPhotoSrc(item);
     return (
       <div className="profile-media-item">
         <button
@@ -169,19 +171,22 @@ function GalleryTile({
           onClick={() => onSelect(item)}
           aria-label={`${labels.viewPin} — ${item.pin.placeLabel}`}
         >
-          <HubExternalPhoto
-            src={item.mediaDisplayUrl ?? item.mediaUrl}
-            alt={`${hubName} — ${item.pin.placeLabel}`}
-            width={160}
-            height={160}
-            className="city-page__traveler-picture-image"
-          />
+          {photoSrc ? (
+            <HubExternalPhoto
+              src={photoSrc}
+              alt={`${hubName} — ${item.pin.placeLabel}`}
+              width={160}
+              height={160}
+              className="city-page__traveler-picture-image"
+            />
+          ) : null}
         </button>
         {ownerActions}
       </div>
     );
   }
 
+  const photoSrc = hubGalleryPhotoSrc(item);
   return (
     <button
       type="button"
@@ -189,13 +194,15 @@ function GalleryTile({
       onClick={() => onSelect(item)}
       aria-label={`${labels.viewPin} — ${item.pin.placeLabel}`}
     >
-      <HubExternalPhoto
-        src={item.mediaDisplayUrl ?? item.mediaUrl}
-        alt={`${hubName} — ${item.pin.placeLabel}`}
-        width={160}
-        height={160}
-        className="city-page__traveler-picture-image"
-      />
+      {photoSrc ? (
+        <HubExternalPhoto
+          src={photoSrc}
+          alt={`${hubName} — ${item.pin.placeLabel}`}
+          width={160}
+          height={160}
+          className="city-page__traveler-picture-image"
+        />
+      ) : null}
     </button>
   );
 }

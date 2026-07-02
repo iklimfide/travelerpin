@@ -15,13 +15,18 @@ function readEnv(name: string): string | undefined {
   return trimmed;
 }
 
+/** Server + client (via NEXT_PUBLIC_) base URL for stored R2 media links. */
+export function getR2PublicBaseUrl(): string | undefined {
+  return readEnv("R2_PUBLIC_BASE_URL") ?? readEnv("NEXT_PUBLIC_R2_PUBLIC_BASE_URL");
+}
+
 export function isR2Configured(): boolean {
   return Boolean(
     readEnv("R2_ACCOUNT_ID") &&
       readEnv("R2_ACCESS_KEY_ID") &&
       readEnv("R2_SECRET_ACCESS_KEY") &&
       readEnv("R2_BUCKET_NAME") &&
-      readEnv("R2_PUBLIC_BASE_URL")
+      getR2PublicBaseUrl()
   );
 }
 
@@ -56,7 +61,7 @@ function getR2Client(): S3Client {
 }
 
 export function validateR2PublicBaseUrl(): string | null {
-  const publicBaseUrl = readEnv("R2_PUBLIC_BASE_URL");
+  const publicBaseUrl = getR2PublicBaseUrl();
   if (!publicBaseUrl) return "R2_PUBLIC_BASE_URL is missing";
 
   try {
@@ -71,13 +76,40 @@ export function validateR2PublicBaseUrl(): string | null {
   return null;
 }
 
+export function isSafeR2ObjectKey(key: string): boolean {
+  if (!key || key.length > 512) return false;
+  if (key.includes("..") || key.startsWith("/")) return false;
+  return key.includes("/");
+}
+
+export function isR2PublicMediaUrl(publicUrl: string): boolean {
+  try {
+    const parsed = new URL(publicUrl);
+    if (parsed.protocol !== "https:") return false;
+
+    if (parsed.hostname.endsWith(".r2.dev")) {
+      return true;
+    }
+
+    const publicBaseUrl = getR2PublicBaseUrl();
+    if (publicBaseUrl) {
+      const base = publicBaseUrl.replace(/\/$/, "");
+      return publicUrl.startsWith(`${base}/`);
+    }
+  } catch {
+    return false;
+  }
+
+  return false;
+}
+
 export async function uploadPhotoToR2(
   key: string,
   body: Buffer,
   contentType: string
 ): Promise<string> {
   const bucket = readEnv("R2_BUCKET_NAME");
-  const publicBaseUrl = readEnv("R2_PUBLIC_BASE_URL");
+  const publicBaseUrl = getR2PublicBaseUrl();
 
   if (!bucket || !publicBaseUrl) {
     throw new Error("Cloudflare R2 bucket or public URL is not configured");
@@ -102,40 +134,23 @@ export async function uploadPhotoToR2(
   return `${base}/${key}`;
 }
 
-const R2_OBJECT_KEY_PATTERN = /^[\w-]+\/.+\.(webp|jpe?g|png|gif)$/i;
-
-/** Parse object key from a public R2 URL (works without server env — safe for client hydration). */
+/** Parse object key from a public R2 URL (works on client for pub-*.r2.dev links). */
 export function parseR2ObjectKey(publicUrl: string): string | null {
+  if (!isR2PublicMediaUrl(publicUrl)) return null;
+
   try {
-    const parsed = new URL(publicUrl);
-    if (parsed.protocol !== "https:") return null;
-
-    const key = decodeURIComponent(parsed.pathname.replace(/^\//, ""));
-    if (!R2_OBJECT_KEY_PATTERN.test(key)) return null;
-
-    if (parsed.hostname.endsWith(".r2.dev")) {
-      return key;
-    }
-
-    const publicBaseUrl = readEnv("R2_PUBLIC_BASE_URL");
-    if (publicBaseUrl) {
-      const base = publicBaseUrl.replace(/\/$/, "");
-      if (publicUrl.startsWith(`${base}/`)) {
-        return key;
-      }
-    }
+    const key = decodeURIComponent(new URL(publicUrl).pathname.replace(/^\//, ""));
+    return isSafeR2ObjectKey(key) ? key : null;
   } catch {
     return null;
   }
-
-  return null;
 }
 
 export async function getR2Object(
   key: string
 ): Promise<{ body: Uint8Array; contentType: string } | null> {
   const bucket = readEnv("R2_BUCKET_NAME");
-  if (!bucket || !R2_OBJECT_KEY_PATTERN.test(key)) {
+  if (!bucket || !isSafeR2ObjectKey(key)) {
     return null;
   }
 
@@ -160,7 +175,7 @@ export async function getR2Object(
 }
 
 export function getR2PublicHostname(): string | null {
-  const publicBaseUrl = readEnv("R2_PUBLIC_BASE_URL");
+  const publicBaseUrl = getR2PublicBaseUrl();
   if (!publicBaseUrl) return null;
 
   try {
@@ -168,4 +183,8 @@ export function getR2PublicHostname(): string | null {
   } catch {
     return null;
   }
+}
+
+export function hubPhotoProxyPath(key: string): string {
+  return `/api/hub-photo?key=${encodeURIComponent(key)}`;
 }

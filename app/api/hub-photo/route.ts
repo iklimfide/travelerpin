@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getR2Object } from "@/lib/storage/r2";
+import { getR2Object, isR2Configured } from "@/lib/storage/r2";
 
 export const runtime = "nodejs";
 
@@ -7,6 +7,10 @@ export async function GET(request: Request) {
   const key = new URL(request.url).searchParams.get("key");
   if (!key) {
     return NextResponse.json({ error: "Missing key" }, { status: 400 });
+  }
+
+  if (!isR2Configured()) {
+    return NextResponse.json({ error: "Photo storage is not configured" }, { status: 503 });
   }
 
   const object = await getR2Object(key);
