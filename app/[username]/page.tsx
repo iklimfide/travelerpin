@@ -9,12 +9,10 @@ import { buildProfileDescription, buildProfileOgTitle } from "@/lib/seo/profile"
 import {
   OG_IMAGE_SIZE,
   profileOgImageAlt,
-  profileOgImagePath,
   profileOgImageUrl,
   profileOgImageVersion,
 } from "@/lib/seo/og";
 import {
-  DEFAULT_DESCRIPTION,
   MY_MAP_TITLE,
   profilePath,
   profileUrl as buildProfileUrl,
@@ -48,28 +46,27 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       ? `@${profile.username}`
       : `${displayName} (@${profile.username})`;
   const ogTitle = buildProfileOgTitle(displayName);
+  const ogDescription = buildProfileDescription(displayName, stats);
   const url = buildProfileUrl(profile.username);
   const ogVersion = profileOgImageVersion(stats, visitedCount, wishlistCount);
-  const ogImagePath = profileOgImagePath(profile.username, ogVersion);
   const ogImageUrl = profileOgImageUrl(profile.username, ogVersion);
 
   return {
     metadataBase: new URL(getSiteUrl()),
     title,
-    description: DEFAULT_DESCRIPTION,
+    description: ogDescription,
     alternates: {
       canonical: profilePath(profile.username),
     },
     openGraph: {
       type: "website",
       title: ogTitle,
-      description: DEFAULT_DESCRIPTION,
+      description: ogDescription,
       url,
       siteName: BRAND.name,
       images: [
         {
-          url: ogImagePath,
-          secureUrl: ogImageUrl,
+          url: ogImageUrl,
           width: OG_IMAGE_SIZE.width,
           height: OG_IMAGE_SIZE.height,
           alt: profileOgImageAlt(displayName),
@@ -80,7 +77,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     twitter: {
       card: "summary_large_image",
       title: ogTitle,
-      description: DEFAULT_DESCRIPTION,
+      description: ogDescription,
       images: [ogImageUrl],
     },
   };
