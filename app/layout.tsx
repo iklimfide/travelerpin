@@ -3,7 +3,7 @@ import { Geist } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { BRAND } from "@/lib/constants";
-import { DEFAULT_DESCRIPTION, DEFAULT_KEYWORDS, HOME_TITLE, getSiteUrl } from "@/lib/seo/site";
+import { DEFAULT_DESCRIPTION, DEFAULT_KEYWORDS, getSiteUrl } from "@/lib/seo/site";
 import { defaultLocale, type Locale } from "@/lib/i18n/config";
 import enMessages from "@/messages/en.json";
 import { ModalProvider } from "@/components/ui/ModalProvider";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useAuthModal } from "@/components/auth/AuthModalProvider";
 
@@ -8,7 +8,7 @@ type Props = {
   mode: "login" | "register";
 };
 
-export function AuthModalRoute({ mode }: Props) {
+function AuthModalRouteInner({ mode }: Props) {
   const authModal = useAuthModal();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -23,3 +23,10 @@ export function AuthModalRoute({ mode }: Props) {
   return null;
 }
 
+export function AuthModalRoute({ mode }: Props) {
+  return (
+    <Suspense fallback={null}>
+      <AuthModalRouteInner mode={mode} />
+    </Suspense>
+  );
+}

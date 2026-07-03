@@ -1,6 +1,15 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  Suspense,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AuthForm } from "@/components/auth/AuthForm";
@@ -37,7 +46,16 @@ function sanitizeNext(next: string | null | undefined): string | null {
   return null;
 }
 
+/** Renders children immediately; search-param logic suspends separately for static prerender. */
 export function AuthModalProvider({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={children}>
+      <AuthModalProviderInner>{children}</AuthModalProviderInner>
+    </Suspense>
+  );
+}
+
+function AuthModalProviderInner({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
