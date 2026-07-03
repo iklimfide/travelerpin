@@ -12,8 +12,7 @@ import { AuthModalProvider } from "@/components/auth/AuthModalProvider";
 import { SharePinPromptProvider } from "@/components/share/SharePinPromptProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { ClearPwaArtifacts } from "@/components/dev/ClearPwaArtifacts";
-import { OwnProfileShell } from "@/components/dashboard/OwnProfileShell";
-import { getLoggedInUsername } from "@/lib/supabase/auth";
+import { OwnProfileShellGate } from "@/components/dashboard/OwnProfileShellGate";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -78,23 +77,6 @@ export default async function RootLayout({
     // Fallback when request config is unavailable (e.g. during error recovery)
   }
 
-  const username = await getLoggedInUsername();
-
-  const appBody = (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      <ThemeProvider>
-        <ClearPwaArtifacts />
-        <ModalProvider>
-          <ToastProvider>
-            <SharePinPromptProvider>
-              <AuthModalProvider>{children}</AuthModalProvider>
-            </SharePinPromptProvider>
-          </ToastProvider>
-        </ModalProvider>
-      </ThemeProvider>
-    </NextIntlClientProvider>
-  );
-
   return (
     <html
       lang={locale}
@@ -102,11 +84,20 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full min-w-0 flex-col overflow-x-hidden bg-background text-foreground">
-        {username ? (
-          <OwnProfileShell username={username}>{appBody}</OwnProfileShell>
-        ) : (
-          appBody
-        )}
+        <OwnProfileShellGate>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <ThemeProvider>
+              <ClearPwaArtifacts />
+              <ModalProvider>
+                <ToastProvider>
+                  <SharePinPromptProvider>
+                    <AuthModalProvider>{children}</AuthModalProvider>
+                  </SharePinPromptProvider>
+                </ToastProvider>
+              </ModalProvider>
+            </ThemeProvider>
+          </NextIntlClientProvider>
+        </OwnProfileShellGate>
       </body>
     </html>
   );

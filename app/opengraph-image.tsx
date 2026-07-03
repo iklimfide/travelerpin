@@ -8,6 +8,7 @@ import { ogMapDataUrl } from "@/lib/seo/og-map-svg";
 import { DEFAULT_DESCRIPTION } from "@/lib/seo/site";
 
 export const runtime = "edge";
+export const revalidate = 86400;
 export const alt = `${BRAND.name} travel map`;
 export const size = OG_IMAGE_SIZE;
 export const contentType = "image/png";

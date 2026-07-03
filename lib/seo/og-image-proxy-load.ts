@@ -22,7 +22,8 @@ export async function loadProxiedOgImageDataUrl(
     if (size?.height) params.set("h", String(size.height));
 
     const response = await fetch(`${assetOrigin}/api/og-asset?${params}`, {
-      cache: "no-store",
+      // /api/og-asset already sends long Cache-Control; reuse across OG renders.
+      next: { revalidate: 86400 },
     });
     if (!response.ok) return null;
 

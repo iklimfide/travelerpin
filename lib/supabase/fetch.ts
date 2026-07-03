@@ -1,5 +1,5 @@
-/** Prevent hung Supabase requests from blocking SSR for minutes. */
-export const SUPABASE_FETCH_TIMEOUT_MS = 8_000;
+/** Prevent hung Supabase requests from burning Vercel execution time. */
+export const SUPABASE_FETCH_TIMEOUT_MS = 4_000;
 
 export function fetchWithTimeout(
   input: RequestInfo | URL,

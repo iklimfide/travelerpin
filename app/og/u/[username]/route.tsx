@@ -2,7 +2,8 @@ import { buildProfileOgImage } from "@/lib/seo/profile-og-image";
 import { fetchProfileOgSnapshot } from "@/lib/seo/profile-og-snapshot";
 import { getOgAssetOriginFromRequest } from "@/lib/seo/og-asset-origin";
 
-export const runtime = "edge";
+// Node runtime so profile data can use unstable_cache (unsupported on Edge).
+export const runtime = "nodejs";
 
 type RouteContext = { params: Promise<{ username: string }> };
 

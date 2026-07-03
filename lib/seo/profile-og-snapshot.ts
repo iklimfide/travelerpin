@@ -18,7 +18,8 @@ export async function fetchProfileOgSnapshot(
   if (!url) return null;
 
   try {
-    const response = await fetch(url, { cache: "no-store" });
+    // Layout-versioned R2 key; short TTL so a fresh share upload appears soon.
+    const response = await fetch(url, { next: { revalidate: 300 } });
     if (!response.ok) return null;
 
     const body = await response.arrayBuffer();

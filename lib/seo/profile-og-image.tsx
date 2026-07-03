@@ -7,11 +7,10 @@ import { loadProxiedOgImageDataUrl } from "@/lib/seo/og-image-proxy-load";
 import { buildProfileDescription } from "@/lib/seo/profile";
 import { OG_IMAGE_SIZE } from "@/lib/seo/og";
 import { getSiteUrl } from "@/lib/seo/site";
-import { createClient } from "@/lib/supabase/server";
-import { fetchPublicProfile } from "@/lib/supabase/public-profile";
+import { getCachedPublicProfileBundle } from "@/lib/supabase/profile-page-data";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { computeTravelStats } from "@/lib/utils/stats";
-import type { TravelStats, VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
+import type { TravelStats } from "@/types/database";
 
 function absoluteAssetUrl(url: string | null, siteUrl: string): string | null {
   if (!url) return null;
@@ -28,21 +27,10 @@ export async function buildProfileOgImage(
   username: string,
   assetOrigin?: string
 ): Promise<ImageResponse> {
-  const supabase = await createClient();
-  if (!supabase) notFound();
+  const bundle = await getCachedPublicProfileBundle(username);
+  if (!bundle) notFound();
 
-  const profile = await fetchPublicProfile(supabase, username);
-  if (!profile) notFound();
-
-  const [{ data: countries }, { data: cities }, { data: parks }] = await Promise.all([
-    supabase.from("visited_countries").select("*").eq("user_id", profile.id),
-    supabase.from("visited_cities").select("*").eq("user_id", profile.id),
-    supabase.from("visited_parks").select("*").eq("user_id", profile.id),
-  ]);
-
-  const visitedCountries = (countries ?? []) as VisitedCountry[];
-  const visitedCities = (cities ?? []) as VisitedCity[];
-  const visitedParks = (parks ?? []) as VisitedPark[];
+  const { profile, visitedCountries, visitedCities, visitedParks } = bundle;
   const stats = computeTravelStats(visitedCountries, visitedCities, visitedParks);
 
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);

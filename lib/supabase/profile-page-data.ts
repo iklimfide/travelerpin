@@ -1,6 +1,8 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import {
   fetchPublicProfile,
   type PublicProfile,
@@ -35,6 +37,14 @@ export type PublicProfilePageData = {
   currentUsername: string | null;
   followState: ProfileFollowState | null;
   canFollow: boolean;
+};
+
+type PublicProfileBundle = {
+  profile: PublicProfile;
+  visitedCountries: VisitedCountry[];
+  visitedCities: VisitedCity[];
+  visitedParks: VisitedPark[];
+  publicWishlistCountries: WishlistCountry[];
 };
 
 async function loadWishlistCountries(
@@ -85,35 +95,83 @@ async function loadProfileRows(
   };
 }
 
+/** Shared across viewers / OG generation — profile pins are public. */
+export function getCachedPublicProfileBundle(
+  username: string
+): Promise<PublicProfileBundle | null> {
+  const key = username.trim().toLowerCase();
+
+  return unstable_cache(
+    async () => {
+      const supabase = createPublicSupabaseClient();
+      if (!supabase) return null;
+
+      const profile = await fetchPublicProfile(supabase, key);
+      if (!profile) return null;
+
+      const rows = await loadProfileRows(supabase, profile);
+      const publicWishlistCountries = await loadWishlistCountries(
+        supabase,
+        profile,
+        false
+      );
+
+      return {
+        profile,
+        ...rows,
+        publicWishlistCountries,
+      };
+    },
+    ["public-profile-bundle", key],
+    { revalidate: 60, tags: [`profile:${key}`] }
+  )();
+}
+
 /** Single cached loader for profile metadata + page (avoids duplicate Supabase round-trips). */
 export const loadPublicProfilePage = cache(
   async (username: string): Promise<PublicProfilePageData | null> => {
-    const supabase = await createClient();
-    if (!supabase) return null;
+    const [bundle, authUser] = await Promise.all([
+      getCachedPublicProfileBundle(username),
+      getAuthUser(),
+    ]);
+    if (!bundle) return null;
 
-    const profile = await fetchPublicProfile(supabase, username);
-    if (!profile) return null;
-
-    const authUser = await getAuthUser();
+    const { profile } = bundle;
+    let { visitedCountries, visitedCities, visitedParks } = bundle;
+    let wishlistCountries = bundle.publicWishlistCountries;
     let currentUsername: string | null = null;
+    let followState: ProfileFollowState | null = null;
+    let isOwnProfile = false;
+
     if (authUser) {
+      const supabase = await createClient();
+      if (!supabase) return null;
+
       const { data: currentProfile } = await supabase
         .from("profiles")
         .select("username")
         .eq("id", authUser.id)
         .maybeSingle();
       currentUsername = currentProfile?.username ?? null;
+      isOwnProfile =
+        currentUsername != null &&
+        currentUsername.toLowerCase() === profile.username.toLowerCase();
+
+      if (isOwnProfile) {
+        // Owners always see live pins (cache is for public/crawler traffic).
+        const rows = await loadProfileRows(supabase, profile);
+        visitedCountries = rows.visitedCountries;
+        visitedCities = rows.visitedCities;
+        visitedParks = rows.visitedParks;
+        wishlistCountries = await loadWishlistCountries(supabase, profile, true);
+      }
+
+      followState = await loadProfileFollowState(
+        supabase,
+        profile.id,
+        authUser.id
+      );
     }
-
-    const isOwnProfile =
-      currentUsername != null &&
-      currentUsername.toLowerCase() === profile.username.toLowerCase();
-
-    const [{ visitedCountries, visitedCities, visitedParks }, wishlistCountries] =
-      await Promise.all([
-        loadProfileRows(supabase, profile),
-        loadWishlistCountries(supabase, profile, isOwnProfile),
-      ]);
 
     const stats = computeTravelStats(visitedCountries, visitedCities, visitedParks);
     const visitedCodes = getVisitedCountryCodes(
@@ -126,11 +184,6 @@ export const loadPublicProfilePage = cache(
         ? getWishlistCountryCodes(wishlistCountries)
         : [];
 
-    const followState = await loadProfileFollowState(
-      supabase,
-      profile.id,
-      authUser?.id ?? null
-    );
     const canFollow =
       Boolean(authUser) &&
       !isOwnProfile &&

@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { fetchWithTimeout } from "@/lib/supabase/fetch";
+import { hasSupabaseAuthCookie } from "@/lib/supabase/session-cookie";
 
 function getSupabaseEnv() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -22,6 +23,11 @@ function isRecoverableAuthError(message: string): boolean {
 export async function updateSession(request: NextRequest) {
   const env = getSupabaseEnv();
   if (!env) {
+    return NextResponse.next({ request });
+  }
+
+  // Anonymous / bot traffic has nothing to refresh — skip the Supabase round-trip.
+  if (!hasSupabaseAuthCookie(request.cookies)) {
     return NextResponse.next({ request });
   }
 

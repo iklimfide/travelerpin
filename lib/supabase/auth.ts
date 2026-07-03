@@ -1,8 +1,13 @@
 import { cache } from "react";
+import { cookies } from "next/headers";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { hasSupabaseAuthCookie } from "@/lib/supabase/session-cookie";
 
 export const getAuthUser = cache(async (): Promise<User | null> => {
+  const cookieStore = await cookies();
+  if (!hasSupabaseAuthCookie(cookieStore)) return null;
+
   const supabase = await createClient();
   if (!supabase) return null;
 
