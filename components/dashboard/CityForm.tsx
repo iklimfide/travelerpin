@@ -12,7 +12,7 @@ import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
 import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEditor";
 import { buildPinMediaPayload, PinMediaFields } from "@/components/dashboard/PinMediaFields";
-import { readInstagramUrls, readPhotoUrl } from "@/lib/utils/pin-media";
+import { readInstagramUrls, readPhotoUrl, withInstagramDraftField } from "@/lib/utils/pin-media";
 import type { VisitedCity, VisitedCountry } from "@/types/database";
 
 type SearchCity = {
@@ -37,6 +37,7 @@ type CityFormProps = {
   onSuccess?: () => void;
   onCancel?: () => void;
   onEditExisting?: (cityId: string) => void;
+  mediaFocus?: "photo" | "instagram";
 };
 
 function encodeCountries(countries: VisitedCountry[]): string {
@@ -52,6 +53,7 @@ export function CityForm({
   onSuccess,
   onCancel,
   onEditExisting,
+  mediaFocus,
 }: CityFormProps) {
   const isEdit = Boolean(city);
   const t = translateCity;
@@ -82,7 +84,10 @@ export function CityForm({
   const [visitDates, setVisitDates] = useState<string[]>(city?.visit_dates ?? []);
   const [savedPhotoUrl, setSavedPhotoUrl] = useState(() => readPhotoUrl(city));
   const [removePhoto, setRemovePhoto] = useState(false);
-  const [instagramUrls, setInstagramUrls] = useState<string[]>(() => readInstagramUrls(city));
+  const [instagramUrls, setInstagramUrls] = useState(() => {
+    const urls = readInstagramUrls(city);
+    return mediaFocus === "instagram" ? withInstagramDraftField(urls) : urls;
+  });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -631,6 +636,7 @@ export function CityForm({
         onRemovePhotoChange={setRemovePhoto}
         instagramUrls={instagramUrls}
         onInstagramUrlsChange={setInstagramUrls}
+        autoFocusInstagram={mediaFocus === "instagram"}
       />
 
       <div>

@@ -17,6 +17,7 @@ const DEMO_PROFILE: PublicProfile = {
   username: DEMO_PERSONA.username,
   display_name: DEMO_PERSONA.name,
   avatar_url: DEMO_PERSONA.avatarUrl,
+  cover_url: null,
   bio: DEMO_PERSONA.bio,
   residence: DEMO_PERSONA.residence,
   profession: null,

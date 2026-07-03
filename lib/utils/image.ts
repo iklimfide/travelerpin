@@ -1,7 +1,13 @@
-import sharp from "sharp";
 import { LIMITS } from "@/lib/constants";
 
+type SharpModule = typeof import("sharp").default;
+
+async function loadSharp(): Promise<SharpModule> {
+  return (await import("sharp")).default;
+}
+
 export async function optimizeImage(buffer: Buffer): Promise<Buffer> {
+  const sharp = await loadSharp();
   return sharp(buffer)
     .rotate()
     .resize({
@@ -13,6 +19,7 @@ export async function optimizeImage(buffer: Buffer): Promise<Buffer> {
 }
 
 export async function optimizeAvatar(buffer: Buffer): Promise<Buffer> {
+  const sharp = await loadSharp();
   return sharp(buffer)
     .rotate()
     .resize(LIMITS.avatarSize, LIMITS.avatarSize, {
@@ -20,6 +27,18 @@ export async function optimizeAvatar(buffer: Buffer): Promise<Buffer> {
       position: "centre",
     })
     .webp({ quality: 85 })
+    .toBuffer();
+}
+
+export async function optimizeCover(buffer: Buffer): Promise<Buffer> {
+  const sharp = await loadSharp();
+  return sharp(buffer)
+    .rotate()
+    .resize(LIMITS.coverWidth, LIMITS.coverHeight, {
+      fit: "cover",
+      position: "centre",
+    })
+    .webp({ quality: 82 })
     .toBuffer();
 }
 

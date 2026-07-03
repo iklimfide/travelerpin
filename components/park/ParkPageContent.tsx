@@ -10,7 +10,6 @@ import { countryPath } from "@/lib/seo/site";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import type { ParkHub } from "@/lib/data/park-hubs";
-import type { CountryHub } from "@/lib/data/country-hubs";
 import type { ParkVisitorState } from "@/lib/data/park-visitor-state";
 import type { CountryTraveler } from "@/lib/supabase/country-travelers";
 import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
@@ -18,7 +17,6 @@ import type { VisitedCountry, VisitedPark } from "@/types/database";
 
 type ParkPageContentProps = {
   hub: ParkHub;
-  countryHub: CountryHub | null;
   travelers: CountryTraveler[];
   memoryPins: HubTravelerPin[];
   visitorState: ParkVisitorState;
@@ -34,8 +32,6 @@ type ParkPageContentProps = {
     like: string;
     country: string;
     parkType: string;
-    currency: string;
-    plugType: string;
     parkAdded: string;
     parkRemoved: string;
     wishlistAdded: string;
@@ -53,6 +49,7 @@ type ParkPageContentProps = {
     photosHeading: string;
     instagramHeading: string;
     noInstagramPostsYet: string;
+    noPhotosYet: string;
     addYourPhotoCta: string;
     addYourInstagramCta: string;
     pinItTooCta: string;
@@ -63,7 +60,6 @@ type ParkPageContentProps = {
 
 export function ParkPageContent({
   hub,
-  countryHub,
   travelers,
   memoryPins,
   visitorState,
@@ -91,13 +87,6 @@ export function ParkPageContent({
       value: parkTypeLabel(hub.parkType),
     },
   ];
-
-  if (countryHub) {
-    rows.push(
-      { label: labels.currency, value: countryHub.currency },
-      { label: labels.plugType, value: countryHub.plugType }
-    );
-  }
 
   return (
     <div className="city-page">
@@ -185,6 +174,7 @@ export function ParkPageContent({
             photosHeading: labels.photosHeading,
             instagramHeading: labels.instagramHeading,
             noInstagramPostsYet: labels.noInstagramPostsYet,
+            noPhotosYet: labels.noPhotosYet,
             addYourPhotoCta: labels.addYourPhotoCta,
             addYourInstagramCta: labels.addYourInstagramCta,
             viewPin: labels.viewPin,

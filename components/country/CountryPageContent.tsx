@@ -53,6 +53,7 @@ type CountryPageContentProps = {
     photosHeading: string;
     instagramHeading: string;
     noInstagramPostsYet: string;
+    noPhotosYet: string;
     addYourPhotoCta: string;
     addYourInstagramCta: string;
     pinItTooCta: string;
@@ -178,6 +179,7 @@ export function CountryPageContent({
             photosHeading: labels.photosHeading,
             instagramHeading: labels.instagramHeading,
             noInstagramPostsYet: labels.noInstagramPostsYet,
+            noPhotosYet: labels.noPhotosYet,
             addYourPhotoCta: labels.addYourPhotoCta,
             addYourInstagramCta: labels.addYourInstagramCta,
             viewPin: labels.viewPin,

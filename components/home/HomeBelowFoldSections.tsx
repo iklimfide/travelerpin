@@ -2,6 +2,7 @@ import { HomeBestDestinations } from "@/components/home/HomeBestDestinations";
 import { HomeExplainer } from "@/components/home/HomeExplainer";
 import { HomeFeatures } from "@/components/home/HomeFeatures";
 import { HomeFinalCta } from "@/components/home/HomeFinalCta";
+import { HomeRelatedSearches } from "@/components/home/HomeRelatedSearches";
 
 type HomeBelowFoldSectionsProps = {
   name: string;
@@ -29,7 +30,12 @@ export async function HomeBelowFoldSections({
       />
       <HomeFeatures compact={compact} />
       <HomeFinalCta compact={compact} />
-      {!compact ? <HomeBestDestinations /> : null}
+      {!compact ? (
+        <>
+          <HomeBestDestinations />
+          <HomeRelatedSearches />
+        </>
+      ) : null}
     </>
   );
 }

@@ -94,6 +94,8 @@ export default async function ProfileMediaPage({ params, searchParams }: PagePro
       photoCount={photos.length}
       instagramCount={instagram.length}
       items={pageItems}
+      allPhotoItems={photos}
+      allInstagramItems={instagram}
       visitedCountries={data.visitedCountries}
       visitedCities={data.visitedCities}
       visitedParks={data.visitedParks}

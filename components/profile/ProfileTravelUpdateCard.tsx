@@ -19,7 +19,6 @@ type ProfileTravelUpdateCardProps = {
   stats: TravelStats;
   delta: TravelUpdateDelta;
   isOwnProfile?: boolean;
-  travelUpdateImagePath?: string;
   persistShareSnapshot?: boolean;
 };
 
@@ -97,7 +96,6 @@ export function ProfileTravelUpdateCard({
   stats,
   delta,
   isOwnProfile = true,
-  travelUpdateImagePath = "/api/me/travel-update-image",
   persistShareSnapshot = true,
 }: ProfileTravelUpdateCardProps) {
   const router = useRouter();
@@ -239,7 +237,6 @@ export function ProfileTravelUpdateCard({
         username={username}
         displayName={displayName}
         delta={delta}
-        imageApiPath={travelUpdateImagePath}
         persistShareSnapshot={persistShareSnapshot}
       />
 

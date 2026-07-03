@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
 
 type PinMediaFieldsProps = {
@@ -18,6 +19,8 @@ type PinMediaFieldsProps = {
   onRemovePhotoChange: (remove: boolean) => void;
   instagramUrls: string[];
   onInstagramUrlsChange: (urls: string[]) => void;
+  /** Opens with an empty Instagram field focused (e.g. from “Add your Instagram link”). */
+  autoFocusInstagram?: boolean;
 };
 
 export function PinMediaFields({
@@ -29,8 +32,21 @@ export function PinMediaFields({
   onRemovePhotoChange,
   instagramUrls,
   onInstagramUrlsChange,
+  autoFocusInstagram = false,
 }: PinMediaFieldsProps) {
   const showSavedPhoto = Boolean(savedPhotoUrl) && !removePhoto && !photoFile;
+  const instagramDraftRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!autoFocusInstagram) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      instagramDraftRef.current?.focus();
+      instagramDraftRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [autoFocusInstagram]);
 
   function updateInstagramUrl(index: number, value: string) {
     const next = [...instagramUrls];
@@ -93,6 +109,11 @@ export function PinMediaFields({
             {instagramUrls.map((url, index) => (
               <li key={index} className="flex gap-2">
                 <input
+                  ref={
+                    autoFocusInstagram && index === instagramUrls.length - 1
+                      ? instagramDraftRef
+                      : undefined
+                  }
                   type="url"
                   value={url}
                   onChange={(e) => updateInstagramUrl(index, e.target.value)}

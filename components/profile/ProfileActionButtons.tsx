@@ -42,7 +42,7 @@ export function ProfileActionButtons({
 
   return (
     <>
-      <div className="profile-actions">
+      <div className="profile-actions" data-story-exclude="">
         <button
           type="button"
           className="profile-small-action"

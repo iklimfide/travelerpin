@@ -57,7 +57,8 @@ export default async function ProfileAllDestinationsPage({ params }: PageProps) 
     data.visitedCities,
     data.visitedParks,
     visibleWishlistCountries,
-    data.visitedCodes
+    data.visitedCodes,
+    profile.residence
   );
 
   const view = (

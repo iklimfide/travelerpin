@@ -4,6 +4,7 @@ import { revalidateCityHubForPin } from "@/lib/cache/revalidate-city-hub";
 import { cityInputSchema } from "@/lib/validations/city";
 import { resolveCityMediaFields } from "@/lib/utils/city-media";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
+import { formatVisitedCitySaveError, insertVisitedCityRow } from "@/lib/supabase/visited-city-update";
 import { geocodeCity } from "@/lib/utils/geocode";
 
 export async function POST(request: Request) {
@@ -51,28 +52,24 @@ export async function POST(request: Request) {
 
   const media = await resolveCityMediaFields(data);
 
-  const { data: city, error } = await supabase
-    .from("visited_cities")
-    .insert({
-      user_id: user.id,
-      city_name: data.city_name,
-      country_code: code,
-      country_name: data.country_name,
-      latitude: coords?.latitude ?? null,
-      longitude: coords?.longitude ?? null,
-      note: data.note ?? null,
-      photo_url: media.photo_url,
-      instagram_urls: media.instagram_urls,
-      media_type: media.media_type,
-      media_url: media.media_url,
-      media_preview_url: media.media_preview_url,
-      visit_dates: data.visit_dates ?? [],
-    })
-    .select()
-    .single();
+  const { data: city, error } = await insertVisitedCityRow(supabase, {
+    user_id: user.id,
+    city_name: data.city_name,
+    country_code: code,
+    country_name: data.country_name,
+    latitude: coords?.latitude ?? null,
+    longitude: coords?.longitude ?? null,
+    note: data.note ?? null,
+    photo_url: media.photo_url,
+    instagram_urls: media.instagram_urls,
+    media_type: media.media_type,
+    media_url: media.media_url,
+    media_preview_url: media.media_preview_url,
+    visit_dates: data.visit_dates ?? [],
+  });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: formatVisitedCitySaveError(error.message) }, { status: 500 });
   }
 
   revalidateCityHubForPin(city.country_code, city.city_name);

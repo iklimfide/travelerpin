@@ -1,26 +1,15 @@
 import type { TravelStats } from "@/types/database";
 import { BRAND } from "@/lib/constants";
 import { profileShareUrl } from "@/lib/seo/site";
-import { getTravelerBadgeTier, type TravelerBadgeTier } from "@/lib/utils/traveler-badge";
-
-const BADGE_OG_LABELS: Record<TravelerBadgeTier, string> = {
-  explorer: "Explorer",
-  globetrotter: "Globetrotter",
-  super_voyager: "Super Voyager",
-  world_citizen: "World Citizen",
-};
 
 /** Open Graph / Twitter card title for public profile links. */
-export function buildProfileOgTitle(displayName: string): string {
-  return `${displayName} traveled and pinned the places they've visited`;
+export function buildProfileOgTitle(_displayName: string): string {
+  return `I can answer "How many countries have you visited?" with a single link.`;
 }
 
 /** Open Graph / Twitter card description for public profile links. */
-export function buildProfileOgDescription(countryCount: number): string {
-  const tier = getTravelerBadgeTier(countryCount);
-  const title = tier ? BADGE_OG_LABELS[tier] : "Rising Traveler";
-
-  return `Officially achieved ${title} status with ${countryCount} ${countryCount === 1 ? "country" : "countries"} visited. Tap to explore their travel secrets, photos, and next wishlist destinations!`;
+export function buildProfileOgDescription(): string {
+  return `Create your own travel map on ${BRAND.name} and share your journey with just one link.`;
 }
 
 export function buildProfileTitle(

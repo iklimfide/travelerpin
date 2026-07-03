@@ -284,7 +284,7 @@ export function ProfileCardOgLayout({
         justifyContent: "center",
         background: T.heroGradient,
         fontFamily: FONT,
-        padding: "28px 32px 28px 24px",
+        padding: "32px 36px",
       }}
     >
       <div

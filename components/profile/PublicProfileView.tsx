@@ -8,7 +8,13 @@ import { ProfileIdentityCard } from "@/components/profile/ProfileIdentityCard";
 import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
 import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections";
 import { ProfileSummaryGrid } from "@/components/profile/ProfileSummaryGrid";
+import { ProfileOgCaptureHost } from "@/components/profile/ProfileOgCaptureHost";
+import { BRAND } from "@/lib/constants";
 import { isDemoProfileUsername } from "@/lib/data/jennifer-demo-page";
+import {
+  BADGE_TIER_THEMES,
+  getTravelerBadgeTier,
+} from "@/lib/utils/traveler-badge";
 import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
 import { ProfileTravelUpdateCard } from "@/components/profile/ProfileTravelUpdateCard";
 import { ProfileTravelUpdateSection } from "@/components/profile/ProfileTravelUpdateSection";
@@ -18,7 +24,7 @@ import { LogOutButton } from "@/components/auth/LogOutButton";
 import {
   buildProfileSummary,
   buildProfileTrips,
-  resolveProfileCoverUrl,
+  WORLD_COUNTRY_TOTAL,
 } from "@/lib/utils/profile-page";
 import { buildProfileMediaPins } from "@/lib/utils/profile-media";
 import { resolveResidenceCityHref } from "@/lib/utils/residence-city";
@@ -47,10 +53,11 @@ export async function PublicProfileView({
   embedded = false,
   profilePageHref,
 }: PublicProfileViewProps) {
-  const [t, tHome, tCommon] = await Promise.all([
+  const [t, tHome, tCommon, tBadge] = await Promise.all([
     getTranslations("profile"),
     getTranslations("home"),
     getTranslations("common"),
+    getTranslations("badge"),
   ]);
 
   const {
@@ -77,8 +84,8 @@ export async function PublicProfileView({
     visitedParks.length > 0 ||
     visibleWishlistCodes.length > 0;
 
-  const coverUrl = resolveProfileCoverUrl(visitedCities, visitedParks);
-  const trips = buildProfileTrips(visitedCities, visitedParks);
+  const coverUrl = profile.cover_url;
+  const trips = buildProfileTrips(visitedCities, visitedParks, profile.residence);
   const mediaPins = buildProfileMediaPins(visitedCities, visitedParks, profile);
   const summary = buildProfileSummary(
     visitedCountries,
@@ -112,6 +119,15 @@ export async function PublicProfileView({
         )
       : t("travelDiaryTitleVisitor", { name: displayName });
 
+  const ogCaptureHeroTitle = `${displayName}'s Travel Map`;
+  const ogCaptureDescription = (
+    profile.bio?.trim() ||
+    profileDescription
+  ).replace(new RegExp(`${BRAND.name}\\.$`), `${BRAND.name}.com`);
+  const badgeTier = getTravelerBadgeTier(stats.countries);
+  const badgeLabel = badgeTier ? tBadge(badgeTier) : null;
+  const badgeShellClassName = badgeTier ? BADGE_TIER_THEMES[badgeTier].shell : "";
+
   const profileBody = (
     <div className={`profile-page${embedded ? " profile-page--embedded" : ""}`}>
       {isGuest && !embedded ? (
@@ -128,35 +144,67 @@ export async function PublicProfileView({
         </div>
       ) : null}
       <div className="profile-shell">
-        <ProfileHeroCover
-          coverUrl={coverUrl}
-          residence={profile.residence}
-          residenceHref={residenceHref}
-          heroTitle={heroTitle}
-          heroSubtitle={t("travelDiarySubtitle")}
-        />
-
-        <main className="profile-main">
-          <ProfileIdentityCard
-            avatarUrl={profile.avatar_url}
-            displayName={displayName}
-            username={profile.username}
-            bio={profile.bio}
-            fallbackBio={profileDescription}
-            stats={stats}
-            isOwnProfile={isOwnProfile}
-            countryCount={stats.countries}
-            profileHref={demoProfileHref}
-            labels={{
-              countries: t("statCountriesShort"),
-              cities: t("statCitiesShort"),
-              nationalParks: t("statNationalParksShort"),
-              themeParks: t("statThemeParksShort"),
-              share: t("shareProfile"),
-              edit: t("editProfile"),
-            }}
+        <div id="profile-story-capture" className="profile-story-capture">
+          <ProfileHeroCover
+            coverUrl={coverUrl}
+            residence={profile.residence}
+            residenceHref={residenceHref}
+            heroTitle={heroTitle}
+            heroSubtitle={t("travelDiarySubtitle")}
           />
 
+          <div className="profile-main">
+            <ProfileIdentityCard
+              avatarUrl={profile.avatar_url}
+              displayName={displayName}
+              username={profile.username}
+              bio={profile.bio}
+              fallbackBio={profileDescription}
+              stats={stats}
+              isOwnProfile={isOwnProfile}
+              countryCount={stats.countries}
+              profileHref={demoProfileHref}
+              labels={{
+                countries: t("statCountriesShort"),
+                cities: t("statCitiesShort"),
+                nationalParks: t("statNationalParksShort"),
+                themeParks: t("statThemeParksShort"),
+                share: t("shareProfile"),
+                edit: t("editProfile"),
+              }}
+            />
+
+            {hasMapContent ? (
+              <div id="profile-square-capture" className="profile-square-capture">
+                <ProfileMapPanel
+                  visitedCountryCodes={visitedCodes}
+                  wishlistCountryCodes={visibleWishlistCodes}
+                  visitedCountries={visitedCountries}
+                  wishlistCountries={visibleWishlistCountries}
+                  visitedCities={visitedCities}
+                  visitedParks={visitedParks}
+                  isLoggedIn={isLoggedIn}
+                  canEditMap={isOwnProfile}
+                  countryCount={stats.countries}
+                  title={
+                    isOwnProfile
+                      ? t("worldMapTitle")
+                      : t("worldMapTitleVisitor", { name: displayName })
+                  }
+                  detailLabel={t("mapDetail")}
+                  exploredBadgeLabel={t("mapExploredBadge")}
+                  detailHref={profileAllPath(profile.username)}
+                />
+              </div>
+            ) : (
+              <section className="profile-section">
+                <p className="profile-empty">{t("noCountries")}</p>
+              </section>
+            )}
+          </div>
+        </div>
+
+        <main className="profile-main">
           {showTravelUpdateCard ? (
             isOwnProfile && !embedded ? (
               <ProfileTravelUpdateSection
@@ -176,33 +224,10 @@ export async function PublicProfileView({
                 stats={stats}
                 delta={demoTravelDelta}
                 isOwnProfile={false}
-                travelUpdateImagePath={`/api/demo/travel-update-image?username=${encodeURIComponent(profile.username)}`}
                 persistShareSnapshot={false}
               />
             )
           ) : null}
-
-          {hasMapContent ? (
-            <ProfileMapPanel
-              visitedCountryCodes={visitedCodes}
-              wishlistCountryCodes={visibleWishlistCodes}
-              visitedCountries={visitedCountries}
-              wishlistCountries={visibleWishlistCountries}
-              visitedCities={visitedCities}
-              visitedParks={visitedParks}
-              isLoggedIn={isLoggedIn}
-              canEditMap={isOwnProfile}
-              countryCount={stats.countries}
-              title={t("worldMapTitle")}
-              detailLabel={t("mapDetail")}
-              exploredBadgeLabel={t("mapExploredBadge")}
-              detailHref={profileAllPath(profile.username)}
-            />
-          ) : (
-            <section className="profile-section">
-              <p className="profile-empty">{t("noCountries")}</p>
-            </section>
-          )}
 
           {!embedded ? (
             <>
@@ -309,5 +334,32 @@ export async function PublicProfileView({
     return profileBody;
   }
 
-  return <TravelMapFocusShell>{profileBody}</TravelMapFocusShell>;
+  return (
+    <TravelMapFocusShell>
+      {profileBody}
+      {isOwnProfile ? (
+        <ProfileOgCaptureHost
+          heroTitle={ogCaptureHeroTitle}
+          description={ogCaptureDescription}
+          avatarUrl={profile.avatar_url}
+          displayName={displayName}
+          username={profile.username}
+          stats={stats}
+          badgeLabel={badgeLabel}
+          badgeShellClassName={badgeShellClassName}
+          worldExploredLabel={t("worldExplored")}
+          worldExploredCaption={t("worldExploredCaption", {
+            pinned: stats.countries,
+            total: WORLD_COUNTRY_TOTAL,
+          })}
+          statLabels={{
+            countries: t("statCountriesShort"),
+            cities: t("statCitiesShort"),
+            nationalParks: t("statNationalParksShort"),
+            themeParks: t("statThemeParksShort"),
+          }}
+        />
+      ) : null}
+    </TravelMapFocusShell>
+  );
 }

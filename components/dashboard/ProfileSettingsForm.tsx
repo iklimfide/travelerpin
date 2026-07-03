@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProfileAvatarUpload } from "@/components/profile/ProfileAvatar";
+import { ProfileCoverUpload } from "@/components/profile/ProfileCoverUpload";
 import { ShareProfile } from "@/components/share/ShareProfile";
 import { useModal } from "@/components/ui/ModalProvider";
 import { LIMITS } from "@/lib/constants";
@@ -24,6 +25,7 @@ type ProfileSettingsFormProps = {
     | "username"
     | "display_name"
     | "avatar_url"
+    | "cover_url"
     | "bio"
     | "residence"
     | "profession"
@@ -46,6 +48,7 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
   const username = profile.username;
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url);
+  const [coverUrl, setCoverUrl] = useState(profile.cover_url);
   const [bio, setBio] = useState(profile.bio ?? "");
   const [residence, setResidence] = useState(profile.residence ?? "");
   const [profession, setProfession] = useState(profile.profession ?? "");
@@ -88,39 +91,69 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-      <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-5">
-        <h2 className="text-sm font-semibold text-white">{t("photoTitle")}</h2>
-        <div className="mt-4">
-          <ProfileAvatarUpload
-            avatarUrl={avatarUrl}
-            displayName={previewName}
-            username={username}
-            disabled={loading}
-            onError={(message) => modal.alert(message, { variant: "error" })}
-            labels={{
-              changePhoto: t("changePhoto"),
-              removePhoto: t("removePhoto"),
-              hint: t("photoHint"),
-            }}
-            onChange={(url) => {
-              setAvatarUrl(url);
-              router.refresh();
-            }}
-          />
+      <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="min-w-0">
+            <h2 className="truncate text-xs font-semibold uppercase tracking-wide text-slate-400">
+              {t("photoTitle")}
+            </h2>
+            <div className="mt-3">
+              <ProfileAvatarUpload
+                compact
+                avatarUrl={avatarUrl}
+                displayName={previewName}
+                username={username}
+                disabled={loading}
+                onError={(message) => modal.alert(message, { variant: "error" })}
+                labels={{
+                  changePhoto: t("changePhoto"),
+                  removePhoto: t("removePhoto"),
+                  hint: t("photoHint"),
+                }}
+                onChange={(url) => {
+                  setAvatarUrl(url);
+                  router.refresh();
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="min-w-0">
+            <h2 className="truncate text-xs font-semibold uppercase tracking-wide text-slate-400">
+              {t("coverTitle")}
+            </h2>
+            <div className="mt-3">
+              <ProfileCoverUpload
+                compact
+                coverUrl={coverUrl}
+                disabled={loading}
+                onError={(message) => modal.alert(message, { variant: "error" })}
+                labels={{
+                  changePhoto: t("changeCover"),
+                  removePhoto: t("removePhoto"),
+                }}
+                onChange={(url) => {
+                  setCoverUrl(url);
+                  router.refresh();
+                }}
+              />
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-5">
-        <h2 className="text-sm font-semibold text-white">{t("accountTitle")}</h2>
-
-        <div className="mt-4 flex flex-col gap-4">
-          <div>
-            <p className="mb-1.5 text-sm text-slate-500">{t("username")}</p>
-            <p className="select-none text-sm text-slate-500">@{username}</p>
+      <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="min-w-0">
+            <p className="mb-1 truncate text-xs text-slate-400 sm:text-sm">{t("username")}</p>
+            <p className="truncate py-2.5 text-sm text-slate-500">@{username}</p>
           </div>
 
-          <div>
-            <label htmlFor="displayName" className="mb-1 block text-sm text-slate-400">
+          <div className="min-w-0">
+            <label
+              htmlFor="displayName"
+              className="mb-1 block truncate text-xs text-slate-400 sm:text-sm"
+            >
               {t("displayName")}
             </label>
             <input
@@ -128,7 +161,7 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className={inputClass}
+              className={`${inputClass} min-w-0 px-2.5 text-sm sm:px-3`}
               maxLength={LIMITS.displayNameMaxLength}
               placeholder={username}
             />
@@ -141,9 +174,6 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
 
         <div className="mt-4 flex flex-col gap-4">
           <div>
-            <label htmlFor="bio" className="mb-1 block text-sm text-slate-400">
-              {t("bio")}
-            </label>
             <textarea
               id="bio"
               value={bio}
@@ -152,6 +182,7 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
               maxLength={LIMITS.bioMaxLength}
               className={`${inputClass} resize-y`}
               placeholder={t("bioPlaceholder")}
+              aria-label={t("bio")}
             />
             <p className="mt-1 text-xs text-slate-500">
               {t("charCount", { count: bio.length, max: LIMITS.bioMaxLength })}

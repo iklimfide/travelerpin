@@ -13,7 +13,6 @@ import { countryPath, parkPath } from "@/lib/seo/site";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
 import type { CityHub } from "@/lib/data/city-hubs";
-import type { CountryHub } from "@/lib/data/country-hubs";
 import type { TouristCity } from "@/lib/data/tourist-cities";
 import type { TouristPark } from "@/lib/data/tourist-park-search";
 import type { CityVisitorState } from "@/lib/data/city-visitor-state";
@@ -23,7 +22,6 @@ import type { VisitedCity, VisitedCountry } from "@/types/database";
 type CityPageContentProps = {
   hub: CityHub;
   touristCity: TouristCity | null;
-  countryHub: CountryHub | null;
   parks: TouristPark[];
   travelers: CountryTraveler[];
   memoryPins: HubTravelerPin[];
@@ -44,10 +42,6 @@ type CityPageContentProps = {
     wishlistRemoved: string;
     alreadyOnMap: string;
     country: string;
-    currency: string;
-    plugType: string;
-    visa: string;
-    language: string;
     parksInCity: string;
     viewTravelMap: string;
     viewPin: string;
@@ -61,6 +55,7 @@ type CityPageContentProps = {
     photosHeading: string;
     instagramHeading: string;
     noInstagramPostsYet: string;
+    noPhotosYet: string;
     addYourPhotoCta: string;
     addYourInstagramCta: string;
     pinItTooCta: string;
@@ -72,7 +67,6 @@ type CityPageContentProps = {
 export function CityPageContent({
   hub,
   touristCity,
-  countryHub,
   parks,
   travelers,
   memoryPins,
@@ -97,15 +91,6 @@ export function CityPageContent({
       </Link>
     ),
   });
-
-  if (countryHub) {
-    rows.push(
-      { label: labels.currency, value: countryHub.currency },
-      { label: labels.plugType, value: countryHub.plugType },
-      { label: labels.visa, value: countryHub.visaNote },
-      { label: labels.language, value: countryHub.language }
-    );
-  }
 
   if (parks.length > 0) {
     rows.push({
@@ -215,6 +200,7 @@ export function CityPageContent({
             photosHeading: labels.photosHeading,
             instagramHeading: labels.instagramHeading,
             noInstagramPostsYet: labels.noInstagramPostsYet,
+            noPhotosYet: labels.noPhotosYet,
             addYourPhotoCta: labels.addYourPhotoCta,
             addYourInstagramCta: labels.addYourInstagramCta,
             viewPin: labels.viewPin,

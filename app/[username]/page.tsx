@@ -5,7 +5,11 @@ import { ProfileOwnerTools } from "@/components/dashboard/ProfileOwnerTools";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { BRAND } from "@/lib/constants";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
-import { buildProfileDescription, buildProfileOgTitle } from "@/lib/seo/profile";
+import {
+  buildProfileDescription,
+  buildProfileOgDescription,
+  buildProfileOgTitle,
+} from "@/lib/seo/profile";
 import {
   OG_IMAGE_SIZE,
   profileOgImageAlt,
@@ -46,7 +50,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       ? `@${profile.username}`
       : `${displayName} (@${profile.username})`;
   const ogTitle = buildProfileOgTitle(displayName);
-  const ogDescription = buildProfileDescription(displayName, stats);
+  const ogDescription = buildProfileOgDescription();
   const url = buildProfileUrl(profile.username);
   const ogVersion = profileOgImageVersion(stats, visitedCount, wishlistCount);
   const ogImageUrl = profileOgImageUrl(profile.username, ogVersion);

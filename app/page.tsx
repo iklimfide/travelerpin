@@ -5,6 +5,7 @@ import { HomeGuestAuthBar } from "@/components/home/HomeGuestAuthBar";
 import { HomeBestDestinations } from "@/components/home/HomeBestDestinations";
 import { HomeBelowFoldSections } from "@/components/home/HomeBelowFoldSections";
 import { HomeLandingSection } from "@/components/home/HomeLandingSection";
+import { HomeRelatedSearches } from "@/components/home/HomeRelatedSearches";
 import { DEMO_PERSONA } from "@/lib/data/demo-persona";
 import { loadDemoPublicProfilePage } from "@/lib/data/jennifer-demo-page";
 import { DEFAULT_DESCRIPTION, HOME_TITLE, getSiteUrl, profilePath } from "@/lib/seo/site";
@@ -53,6 +54,9 @@ export default async function HomePage() {
 
           <div className="hidden lg:block">
             <HomeBestDestinations desktop />
+            <div className="mt-7">
+              <HomeRelatedSearches />
+            </div>
           </div>
 
           {data ? (

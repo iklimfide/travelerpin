@@ -5,7 +5,7 @@ import { CityPageContent } from "@/components/city/CityPageContent";
 import { getCityHubContext } from "@/lib/data/city-hubs";
 import { listCityHubSlugs } from "@/lib/data/city-hubs";
 import { loadCityPageUserState } from "@/lib/supabase/city-visitor-state";
-import { fetchRecentCityPins } from "@/lib/supabase/city-travelers";
+import { countCityPinners, fetchRecentCityPins } from "@/lib/supabase/city-travelers";
 import {
   countHubMediaItems,
   mergeOwnerHubPin,
@@ -13,7 +13,7 @@ import {
   pinsWithContent,
   uniqueHubTravelers,
 } from "@/lib/supabase/hub-traveler-pin";
-import { countCityPinners } from "@/lib/supabase/city-travelers";
+import { countCountryWishlisters } from "@/lib/supabase/country-pin-count";
 import { getCachedRecentCityPinsWithPreviews } from "@/lib/supabase/city-travelers-cache";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -65,7 +65,7 @@ export default async function CityHubPage({ params }: PageProps) {
   const context = getCityHubContext(slug);
   if (!context) notFound();
 
-  const { hub, touristCity, countryHub, parks } = context;
+  const { hub, touristCity, parks } = context;
   const returnPath = cityPath(slug);
   const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;
   const registerHref = `/register?next=${encodeURIComponent(returnPath)}`;
@@ -97,12 +97,16 @@ export default async function CityHubPage({ params }: PageProps) {
   const travelers = uniqueHubTravelers(hubPins);
   const mediaCounts = countHubMediaItems(hubPins);
   const pinCount = await countCityPinners(supabase, hub);
+  const wishlistCount = await countCountryWishlisters(supabase, hub.countryCode);
   const pinCountItems: { label: string; href?: string }[] =
     pinCount > 0
       ? [
           {
             label: t("travelersPinned", { count: pinCount }),
             href: "#city-travelers-heading",
+          },
+          {
+            label: t("travelersWantToVisit", { count: wishlistCount }),
           },
           {
             label: t("photosAdded", { count: mediaCounts.photos }),
@@ -113,7 +117,10 @@ export default async function CityHubPage({ params }: PageProps) {
             href: "#city-instagram-heading",
           },
         ]
-      : [{ label: t("noTravelersPinned") }];
+      : [
+          { label: t("noTravelersPinned") },
+          { label: t("travelersWantToVisit", { count: wishlistCount }) },
+        ];
 
   const labels = {
     home: t("home"),
@@ -126,10 +133,6 @@ export default async function CityHubPage({ params }: PageProps) {
     wishlistRemoved: t("wishlistRemoved"),
     alreadyOnMap: t("alreadyOnMap"),
     country: t("country"),
-    currency: t("currency"),
-    plugType: t("plugType"),
-    visa: t("visa"),
-    language: t("language"),
     parksInCity: t("parksInCity", { city: hub.name }),
     viewTravelMap: t("viewTravelMap"),
     viewPin: t("viewPin"),
@@ -143,6 +146,7 @@ export default async function CityHubPage({ params }: PageProps) {
     photosHeading: t("photosHeading"),
     instagramHeading: t("instagramHeading"),
     noInstagramPostsYet: t("noInstagramPostsYet"),
+    noPhotosYet: t("noPhotosYet"),
     addYourPhotoCta: t("addYourPhotoCta"),
     addYourInstagramCta: t("addYourInstagramCta"),
     pinItTooCta: t("pinItTooCta"),
@@ -155,7 +159,6 @@ export default async function CityHubPage({ params }: PageProps) {
       <CityPageContent
         hub={hub}
         touristCity={touristCity}
-        countryHub={countryHub}
         parks={parks}
         travelers={travelers}
         memoryPins={memoryPins}

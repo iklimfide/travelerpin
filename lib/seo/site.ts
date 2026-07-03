@@ -101,4 +101,10 @@ export const DEFAULT_KEYWORDS = [
   "world map",
   "travel memories",
   "share travel",
+  "visited countries checklist",
+  "countries visited counter",
+  "countries visited counter app",
+  "visited countries map percentage",
+  "countries visited map",
+  "count countries visited",
 ];

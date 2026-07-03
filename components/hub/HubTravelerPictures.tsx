@@ -101,7 +101,7 @@ export function HubTravelerPictures({
   const items = variant === "photos" ? photoItems : instagramItems;
   const heading = variant === "photos" ? labels.photosHeading : labels.instagramHeading;
 
-  if (items.length === 0 && !(alwaysShow && variant === "instagram")) {
+  if (items.length === 0 && !alwaysShow) {
     return null;
   }
 

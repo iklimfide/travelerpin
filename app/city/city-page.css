@@ -1034,23 +1034,43 @@ html.dark .city-page__memory-lightbox-note {
   }
 
   .city-page__actions {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: nowrap;
     align-items: stretch;
-    justify-content: stretch;
     width: 100%;
+    gap: 8px;
+  }
+
+  .city-page__actions > .city-page__btn--visited {
+    flex: 1;
+    min-width: 0;
   }
 
   .city-page__actions-secondary {
     display: flex;
-    flex-direction: column;
+    flex: 2;
+    flex-direction: row;
     align-items: stretch;
-    width: 100%;
-    gap: 12px;
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .city-page__actions-secondary .city-page__btn {
+    flex: 1;
+    min-width: 0;
   }
 
   .city-page__btn {
-    width: 100%;
+    width: auto;
     justify-content: center;
+    padding: 10px 8px;
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .city-page__btn span {
+    text-align: center;
+    line-height: 1.2;
   }
 
   .city-page__pin-count {

@@ -5,8 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useAuthModal } from "@/components/auth/AuthModalProvider";
 
-const REQUIRE_LOGIN_TOAST =
-  "Bu işlemi yapabilmek için giriş yapmanız gerekmektedir.";
+const REQUIRE_LOGIN_TOAST = "Please sign in to continue.";
 
 function currentPath(pathname: string | null, searchParams: ReturnType<typeof useSearchParams>) {
   const path = pathname ?? "/";

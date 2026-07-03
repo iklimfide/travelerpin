@@ -12,7 +12,7 @@ import {
   pinHasGalleryMedia,
   pinsWithContent,
 } from "@/lib/supabase/hub-traveler-pin";
-import { countCountryPinners } from "@/lib/supabase/country-pin-count";
+import { countCountryPinners, countCountryWishlisters } from "@/lib/supabase/country-pin-count";
 import { loadCountryPageUserState } from "@/lib/supabase/country-visitor-state";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -88,12 +88,16 @@ export default async function CountryHubPage({ params }: PageProps) {
   const memoryPins = pinsWithContent(hubPins);
   const mediaCounts = countHubMediaItems(hubPins);
   const pinCount = await countCountryPinners(supabase, hub.code);
+  const wishlistCount = await countCountryWishlisters(supabase, hub.code);
   const pinCountItems: { label: string; href?: string }[] =
     pinCount > 0
       ? [
           {
             label: t("travelersPinned", { count: pinCount }),
             href: "#country-travelers-heading",
+          },
+          {
+            label: t("travelersWantToVisit", { count: wishlistCount }),
           },
           {
             label: t("photosAdded", { count: mediaCounts.photos }),
@@ -104,7 +108,10 @@ export default async function CountryHubPage({ params }: PageProps) {
             href: "#country-instagram-heading",
           },
         ]
-      : [{ label: t("noTravelersPinned") }];
+      : [
+          { label: t("noTravelersPinned") },
+          { label: t("travelersWantToVisit", { count: wishlistCount }) },
+        ];
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -141,6 +148,7 @@ export default async function CountryHubPage({ params }: PageProps) {
     photosHeading: t("photosHeading"),
     instagramHeading: t("instagramHeading"),
     noInstagramPostsYet: t("noInstagramPostsYet"),
+    noPhotosYet: t("noPhotosYet"),
     addYourPhotoCta: t("addYourPhotoCta"),
     addYourInstagramCta: t("addYourInstagramCta"),
     pinItTooCta: t("pinItTooCta"),

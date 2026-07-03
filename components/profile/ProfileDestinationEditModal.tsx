@@ -12,6 +12,7 @@ type ProfileDestinationEditModalProps = {
   park: VisitedPark | null;
   visitedCountries: VisitedCountry[];
   onClose: () => void;
+  mediaFocus?: "photo" | "instagram";
 };
 
 export function ProfileDestinationEditModal({
@@ -19,6 +20,7 @@ export function ProfileDestinationEditModal({
   park,
   visitedCountries,
   onClose,
+  mediaFocus,
 }: ProfileDestinationEditModalProps) {
   const router = useRouter();
   const open = Boolean(city || park);
@@ -79,6 +81,7 @@ export function ProfileDestinationEditModal({
               visitedCountries={visitedCountries}
               onSuccess={handleSuccess}
               onCancel={onClose}
+              mediaFocus={mediaFocus}
             />
           ) : park ? (
             <ParkForm
@@ -86,6 +89,7 @@ export function ProfileDestinationEditModal({
               visitedCountries={visitedCountries}
               onSuccess={handleSuccess}
               onCancel={onClose}
+              mediaFocus={mediaFocus}
             />
           ) : null}
         </div>

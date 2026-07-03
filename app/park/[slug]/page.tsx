@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ParkPageContent } from "@/components/park/ParkPageContent";
-import { getCountryHubByCode } from "@/lib/data/country-hubs";
 import { getParkHubBySlug, listParkHubSlugs } from "@/lib/data/park-hubs";
 import { buildParkPageTitle, DEFAULT_DESCRIPTION, getSiteUrl, parkPath, parkUrl } from "@/lib/seo/site";
 import { getDefaultParkHeroAlt, getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
 import { getCachedRecentParkPins, getCachedRecentParkTravelers } from "@/lib/supabase/park-travelers-cache";
 import { fetchRecentParkPins } from "@/lib/supabase/park-travelers";
 import { mergeOwnerHubPin, pinsWithContent, countHubMediaItems, pinHasGalleryMedia } from "@/lib/supabase/hub-traveler-pin";
+import { countCountryWishlisters } from "@/lib/supabase/country-pin-count";
 import { countParkPinners, loadParkPageUserState } from "@/lib/supabase/park-visitor-state";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -57,14 +57,12 @@ export default async function ParkHubPage({ params }: PageProps) {
   const hub = getParkHubBySlug(slug);
   if (!hub) notFound();
 
-  const countryHub = getCountryHubByCode(hub.countryCode);
   const returnPath = parkPath(slug);
   const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;
   const registerHref = `/register?next=${encodeURIComponent(returnPath)}`;
 
-  const [t, tCountry, tCommon, cachedParkPins, travelers, user, supabase] = await Promise.all([
+  const [t, tCommon, cachedParkPins, travelers, user, supabase] = await Promise.all([
     getTranslations("parkHub"),
-    getTranslations("countryHub"),
     getTranslations("common"),
     getCachedRecentParkPins(hub),
     getCachedRecentParkTravelers(hub),
@@ -90,12 +88,16 @@ export default async function ParkHubPage({ params }: PageProps) {
   const memoryPins = pinsWithContent(hubPins);
   const mediaCounts = countHubMediaItems(hubPins);
   const pinCount = await countParkPinners(supabase, hub);
+  const wishlistCount = await countCountryWishlisters(supabase, hub.countryCode);
   const pinCountItems: { label: string; href?: string }[] =
     pinCount > 0
       ? [
           {
             label: t("travelersPinned", { count: pinCount }),
             href: "#park-travelers-heading",
+          },
+          {
+            label: t("travelersWantToVisit", { count: wishlistCount }),
           },
           {
             label: t("photosAdded", { count: mediaCounts.photos }),
@@ -106,7 +108,10 @@ export default async function ParkHubPage({ params }: PageProps) {
             href: "#park-instagram-heading",
           },
         ]
-      : [{ label: t("noTravelersPinned") }];
+      : [
+          { label: t("noTravelersPinned") },
+          { label: t("travelersWantToVisit", { count: wishlistCount }) },
+        ];
 
   const labels = {
     home: t("home"),
@@ -115,8 +120,6 @@ export default async function ParkHubPage({ params }: PageProps) {
     like: t("like"),
     country: t("country"),
     parkType: t("parkType"),
-    currency: tCountry("currency"),
-    plugType: tCountry("plugType"),
     parkAdded: t("parkAdded"),
     parkRemoved: t("parkRemoved"),
     wishlistAdded: t("wishlistAdded"),
@@ -134,6 +137,7 @@ export default async function ParkHubPage({ params }: PageProps) {
     photosHeading: t("photosHeading"),
     instagramHeading: t("instagramHeading"),
     noInstagramPostsYet: t("noInstagramPostsYet"),
+    noPhotosYet: t("noPhotosYet"),
     addYourPhotoCta: t("addYourPhotoCta"),
     addYourInstagramCta: t("addYourInstagramCta"),
     pinItTooCta: t("pinItTooCta"),
@@ -145,7 +149,6 @@ export default async function ParkHubPage({ params }: PageProps) {
     <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden">
       <ParkPageContent
         hub={hub}
-        countryHub={countryHub}
         travelers={travelers}
         memoryPins={memoryPins}
         visitorState={visitorState}

@@ -1,4 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { fetchCityPinRowsByCountry } from "@/lib/supabase/city-pin-select";
+import { fetchParkPinRows } from "@/lib/supabase/park-pin-select";
 import { profilePath } from "@/lib/seo/site";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import type { MediaType } from "@/types/database";
@@ -46,7 +48,7 @@ type ParkPinRow = {
 
 function cityRowToPin(row: CityPinRow): HubTravelerPin | null {
   const profile = row.profiles;
-  if (!profile?.username) return null;
+  if (!profile?.username || !row.city_name) return null;
 
   const username = profile.username.toLowerCase();
   const media = buildHubTravelerPinMedia(row);
@@ -105,31 +107,30 @@ export async function fetchRecentCountryPins(
 ): Promise<HubTravelerPin[]> {
   const code = countryCode.toUpperCase();
 
-  const [citiesResult, parksResult] = await Promise.all([
-    supabase
-      .from("visited_cities")
-      .select(
-        "id, city_name, note, media_type, media_url, media_preview_url, photo_url, instagram_urls, visit_dates, updated_at, profiles!inner(username, display_name, avatar_url)"
-      )
-      .eq("country_code", code)
-      .order("updated_at", { ascending: false })
-      .limit(30),
-    supabase
-      .from("visited_parks")
-      .select(
-        "id, park_name, note, media_type, media_url, photo_url, instagram_urls, visit_dates, updated_at, profiles!inner(username, display_name, avatar_url)"
-      )
-      .eq("country_code", code)
-      .order("updated_at", { ascending: false })
-      .limit(30),
+  const [cityRows, parkRows] = await Promise.all([
+    fetchCityPinRowsByCountry(supabase, code, 30),
+    fetchParkPinRows(supabase, code, 30),
   ]);
 
-  const cityPins = ((citiesResult.data as CityPinRow[] | null) ?? [])
-    .map(cityRowToPin)
+  const cityPins = cityRows
+    .map((row) => cityRowToPin({ ...row, city_name: row.city_name ?? "", visit_dates: row.visit_dates ?? [] }))
     .filter((pin): pin is HubTravelerPin => pin !== null);
 
-  const parkPins = ((parksResult.data as ParkPinRow[] | null) ?? [])
-    .map(parkRowToPin)
+  const parkPins = parkRows
+    .map((row) =>
+      parkRowToPin({
+        id: row.id,
+        park_name: row.park_name,
+        note: row.note,
+        photo_url: row.photo_url,
+        instagram_urls: row.instagram_urls,
+        media_type: row.media_type,
+        media_url: row.media_url,
+        visit_dates: row.visit_dates ?? [],
+        updated_at: row.updated_at,
+        profiles: row.profiles,
+      })
+    )
     .filter((pin): pin is HubTravelerPin => pin !== null);
 
   return pinsWithContent(sortHubTravelerPins([...cityPins, ...parkPins])).slice(0, limit);

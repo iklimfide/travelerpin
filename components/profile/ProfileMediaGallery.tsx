@@ -53,6 +53,10 @@ type ProfileMediaGalleryProps = {
   visitedCities: VisitedCity[];
   visitedParks: VisitedPark[];
   labels: ProfileMediaGalleryLabels;
+  /** When set, photo tiles get a DOM id for in-page scroll targets. */
+  photoAnchorPrefix?: string;
+  /** Instagram cards with an uploaded photo can jump to the related photo tile. */
+  onScrollToRelatedPhoto?: (photoItemId: string) => void;
 };
 
 function MediaItemActions({
@@ -102,6 +106,8 @@ function GalleryTile({
   onSelect,
   onEdit,
   onRemove,
+  photoAnchorPrefix,
+  onScrollToRelatedPhoto,
 }: {
   item: HubGalleryItem;
   hubName: string;
@@ -110,6 +116,8 @@ function GalleryTile({
   onSelect: (item: HubGalleryItem) => void;
   onEdit: () => void;
   onRemove: () => void;
+  photoAnchorPrefix?: string;
+  onScrollToRelatedPhoto?: (photoItemId: string) => void;
 }) {
   const ownerActions = isOwnProfile ? (
     <MediaItemActions
@@ -122,34 +130,17 @@ function GalleryTile({
 
   if (item.mediaType === "instagram") {
     const instagramHref = normalizeInstagramPostUrl(item.mediaUrl);
+    const relatedPhotoId =
+      item.pin.photoUrl && onScrollToRelatedPhoto
+        ? `${item.pin.id}:photo`
+        : null;
 
-    if (isOwnProfile) {
-      return (
-        <div className="profile-media-item">
-          <a
-            href={instagramHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="city-page__traveler-picture-btn profile-media-item__link"
-            aria-label={`${labels.instagramPost} — ${item.pin.placeLabel}`}
-          >
-            <InstagramMemoryThumb
-              postUrl={item.mediaUrl}
-              alt={`${hubName} — ${item.pin.placeLabel}`}
-              instagramLabel={labels.instagramPost}
-            />
-          </a>
-          {ownerActions}
-        </div>
-      );
-    }
-
-    return (
+    const instagramLink = (
       <a
         href={instagramHref}
         target="_blank"
         rel="noopener noreferrer"
-        className="city-page__traveler-picture-btn"
+        className="city-page__traveler-picture-btn profile-media-item__link"
         aria-label={`${labels.instagramPost} — ${item.pin.placeLabel}`}
       >
         <InstagramMemoryThumb
@@ -159,12 +150,53 @@ function GalleryTile({
         />
       </a>
     );
+
+    const relatedPhotoJump =
+      relatedPhotoId && item.pin.photoUrl ? (
+        <button
+          type="button"
+          className="profile-media-instagram-stack__photo"
+          onClick={() => onScrollToRelatedPhoto?.(relatedPhotoId)}
+          aria-label={`${labels.viewPin} — ${item.pin.placeLabel}`}
+        >
+          <HubExternalPhoto
+            src={item.pin.mediaDisplayUrl ?? item.pin.photoUrl}
+            alt={`${hubName} — ${item.pin.placeLabel}`}
+            width={160}
+            height={160}
+            className="city-page__traveler-picture-image"
+          />
+        </button>
+      ) : null;
+
+    if (isOwnProfile) {
+      return (
+        <div className="profile-media-item">
+          <div className="profile-media-instagram-stack">
+            {relatedPhotoJump}
+            {instagramLink}
+          </div>
+          {ownerActions}
+        </div>
+      );
+    }
+
+    return (
+      <div className="profile-media-instagram-stack">
+        {relatedPhotoJump}
+        {instagramLink}
+      </div>
+    );
   }
 
   if (isOwnProfile) {
     const photoSrc = hubGalleryPhotoSrc(item);
+    const anchorId =
+      photoAnchorPrefix && item.mediaType === "photo"
+        ? `${photoAnchorPrefix}${item.id}`
+        : undefined;
     return (
-      <div className="profile-media-item">
+      <div className="profile-media-item" id={anchorId}>
         <button
           type="button"
           className="city-page__traveler-picture-btn profile-media-item__link"
@@ -187,8 +219,13 @@ function GalleryTile({
   }
 
   const photoSrc = hubGalleryPhotoSrc(item);
+  const anchorId =
+    photoAnchorPrefix && item.mediaType === "photo"
+      ? `${photoAnchorPrefix}${item.id}`
+      : undefined;
   return (
     <button
+      id={anchorId}
       type="button"
       className="city-page__traveler-picture-btn"
       onClick={() => onSelect(item)}
@@ -221,6 +258,8 @@ export function ProfileMediaGallery({
   visitedCities,
   visitedParks,
   labels,
+  photoAnchorPrefix,
+  onScrollToRelatedPhoto,
 }: ProfileMediaGalleryProps) {
   const router = useRouter();
   const modal = useModal();
@@ -325,6 +364,8 @@ export function ProfileMediaGallery({
                     onSelect={setExpandedItem}
                     onEdit={() => openEditForItem(item)}
                     onRemove={() => handleRemoveItem(item)}
+                    photoAnchorPrefix={photoAnchorPrefix}
+                    onScrollToRelatedPhoto={onScrollToRelatedPhoto}
                   />
                 </li>
               ))}

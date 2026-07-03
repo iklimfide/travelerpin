@@ -30,6 +30,12 @@ export function readInstagramUrls(row: PinMediaRow | null | undefined): string[]
   return [];
 }
 
+/** Ensures at least one empty Instagram URL field for paste-ready editing. */
+export function withInstagramDraftField(urls: string[]): string[] {
+  if (urls.some((url) => !url.trim())) return urls;
+  return [...urls, ""];
+}
+
 export function pinHasMedia(row: PinMediaRow | null | undefined): boolean {
   return Boolean(readPhotoUrl(row)) || readInstagramUrls(row).length > 0;
 }

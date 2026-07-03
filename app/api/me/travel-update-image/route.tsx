@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { buildTravelUpdateImage } from "@/lib/seo/travel-update-image";
+import { loadTravelUpdateCardAssets } from "@/lib/seo/travel-update-card-assets";
+import { getOgAssetOriginFromRequest } from "@/lib/seo/og-asset-origin";
+import { buildProfileDescription } from "@/lib/seo/profile";
 import { createClient } from "@/lib/supabase/server";
 import { fetchTravelShareSnapshot } from "@/lib/supabase/travel-share-snapshot";
 import {
@@ -37,7 +40,7 @@ export async function GET(request: Request) {
       fetchTravelShareSnapshot(supabase, user.id),
       supabase
         .from("profiles")
-        .select("display_name, avatar_url, username")
+        .select("display_name, avatar_url, cover_url, username, bio, residence")
         .eq("id", user.id)
         .maybeSingle(),
     ]);
@@ -65,14 +68,26 @@ export async function GET(request: Request) {
     profile?.display_name ?? null,
     profile?.username ?? "traveler"
   );
+  const bio =
+    profile?.bio?.trim() ||
+    buildProfileDescription(displayName, stats);
+  const { avatarUrl, coverUrl } = await loadTravelUpdateCardAssets({
+    assetOrigin: getOgAssetOriginFromRequest(request),
+    avatarSource: profile?.avatar_url ?? null,
+    coverSource: profile?.cover_url ?? null,
+  });
 
   const response = await buildTravelUpdateImage({
     displayName,
-    avatarUrl: profile?.avatar_url ?? null,
+    avatarUrl,
     delta,
     visitedCountryCodes: visitedCodes,
     visitedCities,
     format,
+    bio,
+    residence: profile?.residence ?? null,
+    coverUrl,
+    isOwnProfile: true,
   });
 
   response.headers.set("Cache-Control", "private, no-store");

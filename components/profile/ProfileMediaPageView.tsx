@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useCallback } from "react";
 import { ProfileMediaGallery } from "@/components/profile/ProfileMediaGallery";
 import { formatMessage } from "@/lib/i18n/client-messages";
 import type { HubGalleryItem } from "@/lib/supabase/hub-traveler-pin";
@@ -8,6 +9,8 @@ import { profileMediaPath, profilePath } from "@/lib/seo/site";
 import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
 
 type ProfileMediaTab = "photos" | "instagram";
+
+const PHOTO_ANCHOR_PREFIX = "profile-media-photo-";
 
 type ProfileMediaPageViewProps = {
   username: string;
@@ -19,6 +22,8 @@ type ProfileMediaPageViewProps = {
   photoCount: number;
   instagramCount: number;
   items: HubGalleryItem[];
+  allPhotoItems: HubGalleryItem[];
+  allInstagramItems: HubGalleryItem[];
   visitedCountries: VisitedCountry[];
   visitedCities: VisitedCity[];
   visitedParks: VisitedPark[];
@@ -107,6 +112,8 @@ export function ProfileMediaPageView({
   photoCount,
   instagramCount,
   items,
+  allPhotoItems,
+  allInstagramItems,
   visitedCountries,
   visitedCities,
   visitedParks,
@@ -120,6 +127,100 @@ export function ProfileMediaPageView({
     { id: "photos", label: labels.mediaPageTabPhotos, count: photoCount },
     { id: "instagram", label: labels.mediaPageTabInstagram, count: instagramCount },
   ];
+
+  const scrollToRelatedPhoto = useCallback((photoItemId: string) => {
+    const element = document.getElementById(`${PHOTO_ANCHOR_PREFIX}${photoItemId}`);
+    if (!element) return;
+
+    element.scrollIntoView({ behavior: "smooth", block: "center" });
+    element.classList.add("profile-media-photo-target--pulse");
+    window.setTimeout(() => {
+      element.classList.remove("profile-media-photo-target--pulse");
+    }, 1600);
+  }, []);
+
+  const showPhotosPanel = tab === "photos" || allPhotoItems.length > 0;
+  const showInstagramPanel = tab === "instagram" || allInstagramItems.length > 0;
+
+  const photosPanelItems = tab === "instagram" ? allPhotoItems : items;
+  const instagramPanelItems = tab === "photos" ? allInstagramItems : items;
+
+  const photosPanelPaginated = tab === "photos";
+  const instagramPanelPaginated = tab === "instagram";
+
+  const instagramPanel = showInstagramPanel ? (
+    <div className="profile-media-page__panel" id="profile-media-instagram-panel">
+      <div className="profile-media-page__panel-title">{labels.instagramHeading}</div>
+      <div className="profile-media-sections profile-media-sections--page">
+        {instagramPanelItems.length > 0 ? (
+          <ProfileMediaGallery
+            hubName={displayName}
+            variant="instagram"
+            headingId="profile-media-page-instagram-panel"
+            items={instagramPanelItems}
+            hideHeading
+            isOwnProfile={isOwnProfile}
+            visitedCountries={visitedCountries}
+            visitedCities={visitedCities}
+            visitedParks={visitedParks}
+            labels={labels}
+            onScrollToRelatedPhoto={showPhotosPanel ? scrollToRelatedPhoto : undefined}
+          />
+        ) : (
+          <p className="profile-empty">{labels.mediaPageEmpty}</p>
+        )}
+      </div>
+
+      {instagramPanelPaginated ? (
+        <MediaPagination
+          username={username}
+          tab={tab}
+          page={page}
+          totalPages={totalPages}
+          prevLabel={labels.mediaPagePrev}
+          nextLabel={labels.mediaPageNext}
+          statusLabel={labels.mediaPageStatus}
+        />
+      ) : null}
+    </div>
+  ) : null;
+
+  const photosPanel = showPhotosPanel ? (
+    <div className="profile-media-page__panel" id="profile-media-photos-panel">
+      <div className="profile-media-page__panel-title">{labels.photosHeading}</div>
+      <div className="profile-media-sections profile-media-sections--page">
+        {photosPanelItems.length > 0 ? (
+          <ProfileMediaGallery
+            hubName={displayName}
+            variant="photos"
+            headingId="profile-media-page-photos-panel"
+            items={photosPanelItems}
+            hideHeading
+            isOwnProfile={isOwnProfile}
+            visitedCountries={visitedCountries}
+            visitedCities={visitedCities}
+            visitedParks={visitedParks}
+            labels={labels}
+            photoAnchorPrefix={PHOTO_ANCHOR_PREFIX}
+          />
+        ) : (
+          <p className="profile-empty">{labels.mediaPageEmpty}</p>
+        )}
+      </div>
+
+      {photosPanelPaginated ? (
+        <MediaPagination
+          username={username}
+          tab={tab}
+          page={page}
+          totalPages={totalPages}
+          prevLabel={labels.mediaPagePrev}
+          nextLabel={labels.mediaPageNext}
+          statusLabel={labels.mediaPageStatus}
+        />
+      ) : null}
+    </div>
+  ) : null;
 
   return (
     <div className="profile-page profile-media-page">
@@ -146,34 +247,19 @@ export function ProfileMediaPageView({
           ))}
         </div>
 
-        <div className="profile-media-sections profile-media-sections--page">
-          {items.length > 0 ? (
-            <ProfileMediaGallery
-              hubName={displayName}
-              variant={tab}
-              headingId={`profile-media-page-${tab}`}
-              items={items}
-              hideHeading
-              isOwnProfile={isOwnProfile}
-              visitedCountries={visitedCountries}
-              visitedCities={visitedCities}
-              visitedParks={visitedParks}
-              labels={labels}
-            />
+        <div className="profile-media-page__panels">
+          {tab === "photos" ? (
+            <>
+              {photosPanel}
+              {instagramPanel}
+            </>
           ) : (
-            <p className="profile-empty">{labels.mediaPageEmpty}</p>
+            <>
+              {instagramPanel}
+              {photosPanel}
+            </>
           )}
         </div>
-
-        <MediaPagination
-          username={username}
-          tab={tab}
-          page={page}
-          totalPages={totalPages}
-          prevLabel={labels.mediaPagePrev}
-          nextLabel={labels.mediaPageNext}
-          statusLabel={labels.mediaPageStatus}
-        />
       </div>
     </div>
   );

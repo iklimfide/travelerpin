@@ -29,3 +29,17 @@ export async function countCountryPinners(
 
   return userIds.size;
 }
+
+export async function countCountryWishlisters(
+  supabase: SupabaseClient | null,
+  countryCode: string
+): Promise<number> {
+  if (!supabase) return 0;
+
+  const { count } = await supabase
+    .from("wishlist_countries")
+    .select("user_id", { count: "exact", head: true })
+    .eq("country_code", countryCode.toUpperCase());
+
+  return count ?? 0;
+}

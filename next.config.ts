@@ -7,6 +7,7 @@ const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 const r2Hostname = getR2PublicHostname();
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["sharp"],
   images: {
     localPatterns: [
       {

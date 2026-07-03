@@ -9,6 +9,7 @@ export interface Profile {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
+  cover_url: string | null;
   bio: string | null;
   residence: string | null;
   profession: string | null;

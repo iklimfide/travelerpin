@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import Image from "next/image";
 import { LIMITS } from "@/lib/constants";
 
@@ -67,6 +68,7 @@ export function ProfileAvatarUpload({
   onError,
   disabled,
   labels,
+  compact = false,
 }: {
   avatarUrl: string | null;
   displayName: string;
@@ -74,12 +76,14 @@ export function ProfileAvatarUpload({
   onChange: (url: string | null) => void;
   onError?: (message: string) => void;
   disabled?: boolean;
+  compact?: boolean;
   labels: {
     changePhoto: string;
     removePhoto: string;
     hint: string;
   };
 }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   async function handleFile(file: File) {
     if (!file.type.startsWith("image/")) {
       onError?.("File must be an image");
@@ -117,46 +121,61 @@ export function ProfileAvatarUpload({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-4">
+    <div className={compact ? "flex items-start gap-2.5" : "flex flex-wrap items-center gap-4"}>
       <ProfileAvatar
         avatarUrl={avatarUrl}
         displayName={displayName}
         username={username}
-        size="lg"
+        size={compact ? "md" : "lg"}
+        className={compact ? "shrink-0" : ""}
       />
-      <div className="flex flex-col gap-2">
-        <label className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium text-white hover:border-slate-500">
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="sr-only"
-            disabled={disabled}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              e.target.value = "";
-              if (!file) return;
-              handleFile(file).catch((err) => {
-                onError?.(err instanceof Error ? err.message : "Could not upload photo");
-              });
-            }}
-          />
-          {labels.changePhoto}
-        </label>
-        {avatarUrl && (
+      <div className={compact ? "min-w-0 flex flex-1 flex-col gap-1.5" : "flex flex-col gap-2"}>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          disabled={disabled}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = "";
+            if (!file) return;
+            handleFile(file).catch((err) => {
+              onError?.(err instanceof Error ? err.message : "Could not upload photo");
+            });
+          }}
+        />
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             disabled={disabled}
-            onClick={() => {
-              handleRemove().catch((err) => {
-                onError?.(err instanceof Error ? err.message : "Could not remove photo");
-              });
-            }}
-            className="text-sm text-red-400 hover:text-red-300 disabled:opacity-50"
+            onClick={() => fileInputRef.current?.click()}
+            className={
+              compact
+                ? "rounded-md border border-slate-600 px-2.5 py-1 text-xs font-medium text-white hover:border-slate-500 disabled:opacity-50"
+                : "rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium text-white hover:border-slate-500 disabled:opacity-50"
+            }
           >
-            {labels.removePhoto}
+            {labels.changePhoto}
           </button>
-        )}
-        <p className="text-xs text-slate-500">{labels.hint}</p>
+          {avatarUrl ? (
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => {
+                handleRemove().catch((err) => {
+                  onError?.(err instanceof Error ? err.message : "Could not remove photo");
+                });
+              }}
+              className={`text-red-400 hover:text-red-300 disabled:opacity-50 ${compact ? "text-xs" : "text-sm"}`}
+            >
+              {labels.removePhoto}
+            </button>
+          ) : null}
+        </div>
+        {labels.hint && !compact ? (
+          <p className="text-xs text-slate-500">{labels.hint}</p>
+        ) : null}
       </div>
     </div>
   );

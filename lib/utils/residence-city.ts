@@ -31,6 +31,20 @@ function resolveCountryCodeFromHint(hint: string): string | null {
   const normalized = hint.trim().toLowerCase();
   if (!normalized) return null;
 
+  const aliases: Record<string, string> = {
+    turkiye: "TR",
+    türkiye: "TR",
+    usa: "US",
+    "united states": "US",
+    "united states of america": "US",
+    uk: "GB",
+    "united kingdom": "GB",
+    "great britain": "GB",
+  };
+  if (aliases[normalized]) {
+    return aliases[normalized];
+  }
+
   if (normalized.length === 2) {
     return getCountryHubByCode(normalized.toUpperCase())?.code ?? null;
   }
@@ -75,6 +89,29 @@ function pickResidenceCitySlug(cityName: string, countryHint: string | null): st
       const slug = cityHubSlugForName(touristCity.name, touristCity.countryCode);
       if (slug) return slug;
     }
+  }
+
+  return null;
+}
+
+/** Country code for the profile owner's home base (from residence field). */
+export function resolveResidenceCountryCode(
+  residence: string | null | undefined
+): string | null {
+  if (!residence?.trim()) return null;
+
+  const { cityName, countryHint } = parseResidence(residence);
+  if (countryHint) {
+    const fromHint = resolveCountryCodeFromHint(countryHint);
+    if (fromHint) return fromHint.toUpperCase();
+  }
+
+  if (!cityName) return null;
+
+  const hintedCode = countryHint ? resolveCountryCodeFromHint(countryHint) : null;
+  const matches = findTouristCitiesByExactName(cityName, hintedCode);
+  if (matches.length > 0) {
+    return matches[0].countryCode.toUpperCase();
   }
 
   return null;

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CityHub } from "@/lib/data/city-hubs";
+import { fetchCityPinRowsForHub, type CityPinQueryRow } from "@/lib/supabase/city-pin-select";
 import { profilePath } from "@/lib/seo/site";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import type { MediaType, VisitedCity } from "@/types/database";
@@ -14,22 +15,7 @@ import {
 
 export type { CityTravelerPin, HubTravelerPin };
 
-type CityPinRow = {
-  id: string;
-  note: string | null;
-  photo_url?: string | null;
-  instagram_urls?: string[] | null;
-  media_type: MediaType | null;
-  media_url: string | null;
-  media_preview_url: string | null;
-  visit_dates: string[] | null;
-  updated_at: string;
-  profiles: {
-    username: string;
-    display_name: string | null;
-    avatar_url: string | null;
-  } | null;
-};
+type CityPinRow = CityPinQueryRow;
 
 function rowToPin(row: CityPinRow): HubTravelerPin | null {
   const profile = row.profiles;
@@ -101,19 +87,9 @@ export async function fetchRecentCityPins(
   hub: CityHub,
   limit = 12
 ): Promise<HubTravelerPin[]> {
-  const code = hub.countryCode.toUpperCase();
+  const rows = await fetchCityPinRowsForHub(supabase, hub, 40);
 
-  const { data } = await supabase
-    .from("visited_cities")
-    .select(
-      "id, note, media_type, media_url, media_preview_url, photo_url, instagram_urls, visit_dates, updated_at, profiles!inner(username, display_name, avatar_url)"
-    )
-    .eq("country_code", code)
-    .ilike("city_name", hub.name.trim())
-    .order("updated_at", { ascending: false })
-    .limit(40);
-
-  const pins = ((data as CityPinRow[] | null) ?? [])
+  const pins = rows
     .map(rowToPin)
     .filter((pin): pin is HubTravelerPin => pin !== null);
 

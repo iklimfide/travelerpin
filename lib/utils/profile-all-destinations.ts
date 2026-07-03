@@ -5,7 +5,8 @@ import type { ParkType, VisitedCity, VisitedCountry, VisitedPark, WishlistCountr
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
 import { profilePinImageUrl } from "@/lib/storage/hub-photo-url";
-import { buildProfileTrips, type ProfileTrip } from "@/lib/utils/profile-page";
+import { buildProfileTrips, deprioritizeResidenceCountry, type ProfileTrip } from "@/lib/utils/profile-page";
+import { resolveResidenceCountryCode } from "@/lib/utils/residence-city";
 
 function countryHubSlug(code: string): string | null {
   return getCountryHubByCode(code)?.slug ?? null;
@@ -63,8 +64,10 @@ export function buildProfileAllDestinations(
   visitedCities: VisitedCity[],
   visitedParks: VisitedPark[],
   wishlistCountries: WishlistCountry[],
-  visitedCodes: string[]
+  visitedCodes: string[],
+  residence?: string | null
 ): ProfileAllDestinations {
+  const residenceCountryCode = resolveResidenceCountryCode(residence);
   const countryList = buildVisitedCountryList(
     visitedCountries,
     visitedCities,
@@ -95,48 +98,58 @@ export function buildProfileAllDestinations(
     parksByCountry.set(code, list);
   }
 
-  const countries: ProfileCountryDestination[] = countryList.map((country) => {
-    const code = country.code.toUpperCase();
-    const cities = citiesByCountry.get(code) ?? [];
-    const parks = parksByCountry.get(code) ?? [];
+  const countries: ProfileCountryDestination[] = deprioritizeResidenceCountry(
+    countryList.map((country) => {
+      const code = country.code.toUpperCase();
+      const cities = citiesByCountry.get(code) ?? [];
+      const parks = parksByCountry.get(code) ?? [];
 
-    let imageUrl: string | null = null;
-    for (const city of cities) {
-      imageUrl = mediaImageUrl(city);
-      if (imageUrl) break;
-    }
-    if (!imageUrl) {
-      for (const park of parks) {
-        imageUrl = mediaImageUrl(park);
+      let imageUrl: string | null = null;
+      for (const city of cities) {
+        imageUrl = mediaImageUrl(city);
         if (imageUrl) break;
       }
-    }
+      if (!imageUrl) {
+        for (const park of parks) {
+          imageUrl = mediaImageUrl(park);
+          if (imageUrl) break;
+        }
+      }
 
-    return {
-      code: country.code,
-      name: country.name,
-      countrySlug: countryHubSlug(country.code),
-      imageUrl,
-      cityCount: cities.length,
-      parkCount: parks.length,
-      visitedId: visitedByCode.get(code)?.id,
-      visitedViaPlacesOnly: visitedCodeSet.has(code) && !visitedByCode.has(code),
-    };
-  });
+      return {
+        code: country.code,
+        name: country.name,
+        countrySlug: countryHubSlug(country.code),
+        imageUrl,
+        cityCount: cities.length,
+        parkCount: parks.length,
+        visitedId: visitedByCode.get(code)?.id,
+        visitedViaPlacesOnly: visitedCodeSet.has(code) && !visitedByCode.has(code),
+      };
+    }),
+    residenceCountryCode,
+    (country) => country.code,
+    () => 0
+  );
 
-  const parks: ProfileParkDestination[] = [...visitedParks]
-    .sort((a, b) => a.park_name.localeCompare(b.park_name, undefined, { sensitivity: "base" }))
-    .map((park) => ({
-      id: park.id,
-      parkName: formatCityDisplayName(park.park_name),
-      parkSlug: findParkHubSlug(park.park_name, park.country_code),
-      countryCode: park.country_code,
-      countryName: park.country_name,
-      countrySlug: countryHubSlug(park.country_code),
-      imageUrl: mediaImageUrl(park) ?? getDefaultParkHeroImage(park.park_type),
-      parkType: park.park_type,
-      note: park.note,
-    }));
+  const parks: ProfileParkDestination[] = deprioritizeResidenceCountry(
+    [...visitedParks]
+      .sort((a, b) => a.park_name.localeCompare(b.park_name, undefined, { sensitivity: "base" }))
+      .map((park) => ({
+        id: park.id,
+        parkName: formatCityDisplayName(park.park_name),
+        parkSlug: findParkHubSlug(park.park_name, park.country_code),
+        countryCode: park.country_code,
+        countryName: park.country_name,
+        countrySlug: countryHubSlug(park.country_code),
+        imageUrl: mediaImageUrl(park) ?? getDefaultParkHeroImage(park.park_type),
+        parkType: park.park_type,
+        note: park.note,
+      })),
+    residenceCountryCode,
+    (park) => park.countryCode,
+    (a, b) => a.parkName.localeCompare(b.parkName, undefined, { sensitivity: "base" })
+  );
 
   const wishlist: ProfileWishlistDestination[] = [...wishlistCountries]
     .sort((a, b) => a.country_name.localeCompare(b.country_name, undefined, { sensitivity: "base" }))
@@ -149,7 +162,7 @@ export function buildProfileAllDestinations(
 
   return {
     countries,
-    cities: buildProfileTrips(visitedCities, visitedParks),
+    cities: buildProfileTrips(visitedCities, visitedParks, residence),
     parks,
     wishlist,
   };

@@ -7,6 +7,7 @@ export type PublicProfile = {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
+  cover_url: string | null;
   bio: string | null;
   residence: string | null;
   profession: string | null;
@@ -15,7 +16,7 @@ export type PublicProfile = {
 };
 
 const EXTENDED_SELECT =
-  "id, username, display_name, avatar_url, bio, residence, profession, marital_status, wishlist_public";
+  "id, username, display_name, avatar_url, cover_url, bio, residence, profession, marital_status, wishlist_public";
 const BASE_SELECT = "id, username, display_name";
 
 /** Load profile for public pages; tolerates missing profile-detail migration. */
@@ -35,6 +36,7 @@ export async function fetchPublicProfile(
     return {
       ...extended,
       avatar_url: extended.avatar_url ?? null,
+      cover_url: extended.cover_url ?? null,
       bio: extended.bio ?? null,
       residence: extended.residence ?? null,
       profession: extended.profession ?? null,
@@ -65,6 +67,7 @@ export async function fetchPublicProfile(
   return {
     ...profile,
     avatar_url: null,
+    cover_url: null,
     bio: null,
     residence: null,
     profession: null,

@@ -34,6 +34,7 @@ export const profileSettingsSchema = z
     profession: z.enum(professionValues as [string, ...string[]]).nullable().optional(),
     marital_status: z.enum(maritalValues as [string, ...string[]]).nullable().optional(),
     avatar_url: z.string().url().nullable().optional(),
+    cover_url: z.string().url().nullable().optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "No fields to update",
@@ -42,4 +43,4 @@ export const profileSettingsSchema = z
 export type ProfileSettingsInput = z.infer<typeof profileSettingsSchema>;
 
 export const PROFILE_SELECT =
-  "username, display_name, avatar_url, bio, residence, profession, marital_status, wishlist_public";
+  "username, display_name, avatar_url, cover_url, bio, residence, profession, marital_status, wishlist_public";

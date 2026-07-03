@@ -7,9 +7,10 @@ import {
 } from "@/lib/seo/share-card-fonts";
 import { getSiteUrl } from "@/lib/seo/site";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
+import { WORLD_COUNTRY_TOTAL, worldCoveragePercent } from "@/lib/utils/profile-page";
 import { getTravelerBadgeLabel } from "@/lib/utils/traveler-badge";
 import type { TravelUpdateDelta } from "@/lib/utils/travel-update";
-import type { VisitedCity } from "@/types/database";
+import type { TravelStats, VisitedCity } from "@/types/database";
 
 export const TRAVEL_UPDATE_SQUARE_SIZE = { width: 1080, height: 1080 } as const;
 export const TRAVEL_UPDATE_STORY_SIZE = { width: 1080, height: 1920 } as const;
@@ -23,7 +24,14 @@ type BuildTravelUpdateImageOptions = {
   visitedCountryCodes: string[];
   visitedCities: VisitedCity[];
   format: TravelUpdateImageFormat;
+  bio?: string;
+  residence?: string | null;
+  coverUrl?: string | null;
+  isOwnProfile?: boolean;
 };
+
+const STORY_HERO_SUBTITLE =
+  "Collect the places you've been and share how your map grows over time.";
 
 const T = {
   white: "#ffffff",
@@ -46,7 +54,18 @@ type CardLayoutProps = {
   delta: TravelUpdateDelta;
   mapSrc: string;
   siteUrl: string;
+  bio: string;
+  residence: string | null;
+  coverUrl: string | null;
+  isOwnProfile: boolean;
+  visitedCountryCodes: string[];
 };
+
+function truncateStoryBio(text: string, maxLen = 108): string {
+  const trimmed = text.trim();
+  if (trimmed.length <= maxLen) return trimmed;
+  return `${trimmed.slice(0, maxLen - 1).trimEnd()}…`;
+}
 
 function profileInitial(name: string): string {
   const trimmed = name.trim();
@@ -629,7 +648,530 @@ function MapPreview({ mapSrc, height }: { mapSrc: string; height: number }) {
   );
 }
 
-function SquareLayout(props: CardLayoutProps) {
+function StoryWorldProgress({ countryCount }: { countryCount: number }) {
+  const coverage = worldCoveragePercent(countryCount);
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        padding: "22px 24px",
+        borderRadius: "24px",
+        background: "#f8fafc",
+        border: `1px solid ${T.blueLine}`,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "space-between",
+          marginBottom: "12px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            fontFamily: FONT.sans,
+            fontSize: "28px",
+            fontWeight: 700,
+            color: T.ink,
+          }}
+        >
+          🌍 World explored
+        </div>
+        <div
+          style={{
+            display: "flex",
+            fontFamily: FONT.sans,
+            fontSize: "40px",
+            fontWeight: 800,
+            color: T.blue,
+            lineHeight: 1,
+          }}
+        >
+          {coverage}%
+        </div>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          height: "14px",
+          borderRadius: "999px",
+          background: "#dbeafe",
+          overflow: "hidden",
+          marginBottom: "12px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            width: `${coverage}%`,
+            height: "100%",
+            background: T.blue,
+            borderRadius: "999px",
+          }}
+        />
+      </div>
+      <div
+        style={{
+          display: "flex",
+          fontFamily: FONT.sans,
+          fontSize: "24px",
+          fontWeight: 600,
+          color: T.muted,
+        }}
+      >
+        {`${countryCount} of ${WORLD_COUNTRY_TOTAL} countries pinned`}
+      </div>
+    </div>
+  );
+}
+
+function StoryStatCounters({ stats }: { stats: TravelStats }) {
+  const items = [
+    { value: stats.countries, label: "Country" },
+    { value: stats.cities, label: "City" },
+    { value: stats.nationalParks, label: "Nat. park" },
+    { value: stats.themeParks, label: "Theme park" },
+  ];
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        width: "100%",
+        padding: "20px 12px",
+        borderRadius: "24px",
+        background: "#f8fafc",
+        border: `1px solid ${T.blueLine}`,
+      }}
+    >
+      {items.map((item, index) => (
+        <div
+          key={item.label}
+          style={{
+            display: "flex",
+            flex: 1,
+            flexDirection: "column",
+            alignItems: "center",
+            borderRight: index < items.length - 1 ? `1px solid #e2e8f0` : "none",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              fontFamily: FONT.sans,
+              fontSize: "36px",
+              fontWeight: 800,
+              color: T.ink,
+              lineHeight: 1,
+              marginBottom: "6px",
+            }}
+          >
+            {String(item.value)}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              fontFamily: FONT.sans,
+              fontSize: "20px",
+              fontWeight: 600,
+              color: "#7b8798",
+              textAlign: "center",
+            }}
+          >
+            {item.label}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StoryHero({
+  displayName,
+  coverUrl,
+  residence,
+  isOwnProfile,
+  hasUpdate,
+}: {
+  displayName: string;
+  coverUrl: string | null;
+  residence: string | null;
+  isOwnProfile: boolean;
+  hasUpdate: boolean;
+}) {
+  const heroTitle = isOwnProfile ? "My Travel Map" : `${displayName}'s Travel Map`;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        height: "320px",
+        padding: "36px 40px 28px",
+        overflow: "hidden",
+        color: T.white,
+      }}
+    >
+      {coverUrl ? (
+        <img
+          src={coverUrl}
+          alt=""
+          width={1080}
+          height={320}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(135deg, #1e293b 0%, #334155 55%, #475569 100%)",
+          }}
+        />
+      )}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(180deg, rgba(15,23,42,0.18) 0%, rgba(15,23,42,0.72) 100%)",
+        }}
+      />
+
+      <div style={{ display: "flex", position: "relative", flexDirection: "column", gap: "14px" }}>
+        {residence ? (
+          <div
+            style={{
+              display: "flex",
+              alignSelf: "flex-start",
+              alignItems: "center",
+              gap: "8px",
+              padding: "8px 16px",
+              borderRadius: "999px",
+              background: "rgba(255,255,255,0.92)",
+              color: T.ink,
+              fontFamily: FONT.sans,
+              fontSize: "22px",
+              fontWeight: 700,
+            }}
+          >
+            <span style={{ display: "flex" }}>📍</span>
+            {residence}
+          </div>
+        ) : null}
+
+        <div
+          style={{
+            display: "flex",
+            fontFamily: FONT.sans,
+            fontSize: "52px",
+            fontWeight: 800,
+            lineHeight: 1.05,
+            letterSpacing: "-0.03em",
+            maxWidth: "760px",
+          }}
+        >
+          {heroTitle}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            fontFamily: FONT.sans,
+            fontSize: "24px",
+            fontWeight: 500,
+            lineHeight: 1.45,
+            color: "rgba(255,255,255,0.88)",
+            maxWidth: "720px",
+          }}
+        >
+          {hasUpdate ? "✨ Your map keeps growing — share the latest version." : STORY_HERO_SUBTITLE}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StoryIdentityCard({
+  displayName,
+  avatarUrl,
+  bio,
+  stats,
+}: {
+  displayName: string;
+  avatarUrl: string | null;
+  bio: string;
+  stats: TravelStats;
+}) {
+  const badgeLabel = getTravelerBadgeLabel(stats.countries);
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        marginTop: "-72px",
+        padding: "0 36px 28px",
+        position: "relative",
+        zIndex: 2,
+      }}
+    >
+      {avatarUrl ? (
+        <img
+          src={avatarUrl}
+          alt=""
+          width={168}
+          height={168}
+          style={{
+            width: "168px",
+            height: "168px",
+            borderRadius: "36px",
+            border: "8px solid #eef3f9",
+            objectFit: "cover",
+            marginBottom: "18px",
+            boxShadow: "0 16px 36px rgba(15,23,42,0.14)",
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            width: "168px",
+            height: "168px",
+            borderRadius: "36px",
+            border: "8px solid #eef3f9",
+            background: T.blueSoft,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontFamily: FONT.sans,
+            fontSize: "64px",
+            fontWeight: 700,
+            color: T.blue,
+            marginBottom: "18px",
+          }}
+        >
+          {profileInitial(displayName)}
+        </div>
+      )}
+
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "14px",
+          padding: "28px 28px 24px",
+          borderRadius: "32px",
+          background: T.white,
+          border: `1px solid ${T.blueLine}`,
+          boxShadow: "0 18px 44px rgba(15,23,42,0.08)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            fontFamily: FONT.sans,
+            fontSize: "44px",
+            fontWeight: 800,
+            color: T.ink,
+            letterSpacing: "-0.02em",
+            textAlign: "center",
+          }}
+        >
+          {displayName}
+        </div>
+
+        {badgeLabel ? (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "8px 16px",
+              borderRadius: "999px",
+              background: T.violetSoft,
+              border: "1px solid #ddd6fe",
+              color: T.violet,
+              fontFamily: FONT.sans,
+              fontSize: "22px",
+              fontWeight: 600,
+            }}
+          >
+            <span style={{ display: "flex" }}>★</span>
+            {badgeLabel}
+          </div>
+        ) : null}
+
+        <div
+          style={{
+            display: "flex",
+            fontFamily: FONT.sans,
+            fontSize: "26px",
+            fontWeight: 500,
+            lineHeight: 1.45,
+            color: T.muted,
+            textAlign: "center",
+            maxWidth: "900px",
+          }}
+        >
+          {truncateStoryBio(bio)}
+        </div>
+
+        <StoryWorldProgress countryCount={stats.countries} />
+        <StoryStatCounters stats={stats} />
+      </div>
+    </div>
+  );
+}
+
+function StoryMapSection({
+  displayName,
+  isOwnProfile,
+  mapSrc,
+  countryCount,
+  visitedCountryCodes,
+  siteUrl,
+}: {
+  displayName: string;
+  isOwnProfile: boolean;
+  mapSrc: string;
+  countryCount: number;
+  visitedCountryCodes: string[];
+  siteUrl: string;
+}) {
+  const coverage = worldCoveragePercent(countryCount);
+  const flags = visitedCountryCodes.slice(0, 8);
+  const mapTitle = isOwnProfile ? "My world map" : `${displayName}'s world map`;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "18px",
+        padding: "0 36px",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          fontFamily: FONT.sans,
+          fontSize: "34px",
+          fontWeight: 800,
+          color: T.ink,
+        }}
+      >
+        {mapTitle}
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          position: "relative",
+          height: "380px",
+          borderRadius: "28px",
+          overflow: "hidden",
+          background: "#d4e8f8",
+          border: `1px solid ${T.blueLine}`,
+        }}
+      >
+        <img
+          src={mapSrc}
+          alt=""
+          width={1008}
+          height={380}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+        <div
+          style={{
+            display: "flex",
+            position: "absolute",
+            top: "18px",
+            right: "18px",
+            flexDirection: "column",
+            alignItems: "center",
+            padding: "12px 16px",
+            borderRadius: "18px",
+            background: "rgba(255,255,255,0.94)",
+            border: `1px solid ${T.blueLine}`,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              fontFamily: FONT.sans,
+              fontSize: "28px",
+              fontWeight: 800,
+              color: T.blue,
+              lineHeight: 1,
+            }}
+          >
+            {coverage}%
+          </div>
+          <div
+            style={{
+              display: "flex",
+              fontFamily: FONT.sans,
+              fontSize: "14px",
+              fontWeight: 700,
+              color: T.muted,
+              letterSpacing: "0.08em",
+              marginTop: "4px",
+            }}
+          >
+            EXPLORED
+          </div>
+        </div>
+      </div>
+
+      {flags.length > 0 ? (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "14px",
+            padding: "0 4px 8px",
+            overflow: "hidden",
+          }}
+        >
+          {flags.map((code) => (
+            <img
+              key={code}
+              src={`${siteUrl}${countryCodeToFlagUrl(code)}`}
+              alt=""
+              width={52}
+              height={52}
+              style={{
+                width: "52px",
+                height: "52px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "3px solid #eef3f9",
+              }}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function SquareLayout(
+  props: Pick<CardLayoutProps, "displayName" | "avatarUrl" | "delta" | "mapSrc" | "siteUrl">
+) {
   const { displayName, avatarUrl, delta, mapSrc, siteUrl } = props;
   const badgeLabel = getTravelerBadgeLabel(delta.currentStats.countries);
 
@@ -673,8 +1215,18 @@ function SquareLayout(props: CardLayoutProps) {
 }
 
 function StoryLayout(props: CardLayoutProps) {
-  const { displayName, avatarUrl, delta, mapSrc, siteUrl } = props;
-  const badgeLabel = getTravelerBadgeLabel(delta.currentStats.countries);
+  const {
+    displayName,
+    avatarUrl,
+    delta,
+    mapSrc,
+    siteUrl,
+    bio,
+    residence,
+    coverUrl,
+    isOwnProfile,
+    visitedCountryCodes,
+  } = props;
 
   return (
     <div
@@ -683,34 +1235,41 @@ function StoryLayout(props: CardLayoutProps) {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        background: T.white,
+        background: "#eef3f9",
         fontFamily: FONT.sans,
-        padding: "40px 40px 0",
-        gap: "24px",
       }}
     >
-      <ProfileHeader
+      <StoryHero
         displayName={displayName}
-        avatarUrl={avatarUrl}
-        badgeLabel={badgeLabel}
-        worldPercent={delta.worldPercent}
-        avatarSize={84}
+        coverUrl={coverUrl}
+        residence={residence}
+        isOwnProfile={isOwnProfile}
+        hasUpdate={delta.hasChanges}
       />
 
-      <HeadlineTitle hasUpdate={delta.hasChanges} centered />
+      <StoryIdentityCard
+        displayName={displayName}
+        avatarUrl={avatarUrl}
+        bio={bio}
+        stats={delta.currentStats}
+      />
 
-      <MapPreview mapSrc={mapSrc} height={620} />
+      <div style={{ display: "flex", flex: 1, minHeight: "24px" }} />
 
-      <StatsRow delta={delta} />
+      <StoryMapSection
+        displayName={displayName}
+        isOwnProfile={isOwnProfile}
+        mapSrc={mapSrc}
+        countryCount={delta.currentStats.countries}
+        visitedCountryCodes={visitedCountryCodes}
+        siteUrl={siteUrl}
+      />
 
-      <UpdateSection delta={delta} siteUrl={siteUrl} stacked />
-
-      <div style={{ display: "flex", flex: 1 }} />
-
-      <div style={{ display: "flex", flexDirection: "column", margin: "0 -40px" }}>
-        <LandmarkStrip />
+      <div style={{ display: "flex", flexDirection: "column", marginTop: "28px" }}>
         <FooterBar centered />
       </div>
+
+      <div style={{ display: "flex", height: "120px" }} />
     </div>
   );
 }
@@ -722,6 +1281,10 @@ export async function buildTravelUpdateImage({
   visitedCountryCodes,
   visitedCities,
   format,
+  bio = "",
+  residence = null,
+  coverUrl = null,
+  isOwnProfile = true,
 }: BuildTravelUpdateImageOptions): Promise<ImageResponse> {
   const mapSrc = shareCardMapDataUrl(visitedCountryCodes, visitedCities);
   const siteUrl = getSiteUrl();
@@ -735,13 +1298,24 @@ export async function buildTravelUpdateImage({
     delta,
     mapSrc,
     siteUrl,
+    bio,
+    residence,
+    coverUrl,
+    isOwnProfile,
+    visitedCountryCodes,
   };
 
   return new ImageResponse(
     format === "story" ? (
       <StoryLayout {...layoutProps} />
     ) : (
-      <SquareLayout {...layoutProps} />
+      <SquareLayout
+        displayName={displayName}
+        avatarUrl={avatarUrl}
+        delta={delta}
+        mapSrc={mapSrc}
+        siteUrl={siteUrl}
+      />
     ),
     {
       ...size,

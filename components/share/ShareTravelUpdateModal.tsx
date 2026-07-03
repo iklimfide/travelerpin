@@ -11,6 +11,8 @@ import {
   XIcon,
 } from "@/components/share/SharePlatformIcons";
 import { finalizeTravelShare } from "@/lib/client/travel-share-snapshot";
+import { captureProfileStoryCard } from "@/lib/client/capture-profile-story-card";
+import { captureProfileSquareCard } from "@/lib/client/capture-profile-square-card";
 import { profileMessages, shareMessages } from "@/lib/i18n/client-messages";
 import { buildTravelUpdateShareText } from "@/lib/utils/travel-update";
 import { profileShareUrl } from "@/lib/seo/site";
@@ -22,7 +24,6 @@ type ShareTravelUpdateModalProps = {
   username: string;
   displayName: string;
   delta: TravelUpdateDelta;
-  imageApiPath?: string;
   persistShareSnapshot?: boolean;
 };
 
@@ -36,7 +37,6 @@ export function ShareTravelUpdateModal({
   username,
   displayName,
   delta,
-  imageApiPath = "/api/me/travel-update-image",
   persistShareSnapshot = true,
 }: ShareTravelUpdateModalProps) {
   const router = useRouter();
@@ -81,17 +81,23 @@ export function ShareTravelUpdateModal({
     setDownloading(format);
     let success = false;
     try {
-      const separator = imageApiPath.includes("?") ? "&" : "?";
-      const response = await fetch(`${imageApiPath}${separator}format=${format}`);
-      if (!response.ok) return;
-      const blob = await response.blob();
+      const blob =
+        format === "story"
+          ? await captureProfileStoryCard()
+          : await captureProfileSquareCard(displayName);
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `travelerpin-update-${format}.png`;
+      anchor.download = `travelerpin-${format}-${username}.png`;
       anchor.click();
       URL.revokeObjectURL(url);
       success = true;
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message === "missing-capture-region"
+          ? profileMessages.storyCaptureMissing
+          : profileMessages.storyCaptureFailed;
+      window.alert(message);
     } finally {
       setDownloading(null);
     }

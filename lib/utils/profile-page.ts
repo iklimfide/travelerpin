@@ -8,6 +8,7 @@ import { cityVisitCount } from "@/lib/utils/visit-date";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
 import { profilePinImageUrl } from "@/lib/storage/hub-photo-url";
+import { resolveResidenceCountryCode } from "@/lib/utils/residence-city";
 import type { VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 
 export const WORLD_COUNTRY_TOTAL = 195;
@@ -64,22 +65,6 @@ function mediaImageUrl(item: {
   return profilePinImageUrl(item);
 }
 
-export function resolveProfileCoverUrl(
-  cities: VisitedCity[],
-  parks: VisitedPark[] = []
-): string | null {
-  const candidates = [...cities, ...parks].sort(
-    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-  );
-
-  for (const place of candidates) {
-    const url = mediaImageUrl(place);
-    if (url) return url;
-  }
-
-  return null;
-}
-
 function cityTripImage(city: VisitedCity): string {
   return mediaImageUrl(city) ?? DEFAULT_CITY_HERO_IMAGE;
 }
@@ -96,9 +81,33 @@ function tripBadge(city: VisitedCity, isRecent: boolean): ProfileTrip["badge"] {
   return null;
 }
 
+function sortTripsByDateDesc(a: ProfileTrip, b: ProfileTrip): number {
+  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+}
+
+export function deprioritizeResidenceCountry<T>(
+  items: T[],
+  residenceCountryCode: string | null | undefined,
+  getCountryCode: (item: T) => string,
+  compareWithinGroup: (a: T, b: T) => number
+): T[] {
+  if (!residenceCountryCode) {
+    return [...items].sort(compareWithinGroup);
+  }
+
+  const homeCode = residenceCountryCode.toUpperCase();
+  return [...items].sort((a, b) => {
+    const aIsHome = getCountryCode(a).toUpperCase() === homeCode;
+    const bIsHome = getCountryCode(b).toUpperCase() === homeCode;
+    if (aIsHome !== bIsHome) return aIsHome ? 1 : -1;
+    return compareWithinGroup(a, b);
+  });
+}
+
 export function buildProfileTrips(
   cities: VisitedCity[],
-  parks: VisitedPark[] = []
+  parks: VisitedPark[] = [],
+  residence?: string | null
 ): ProfileTrip[] {
   const sortedCities = [...cities].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -139,8 +148,11 @@ export function buildProfileTrips(
     badge: null,
   }));
 
-  return [...cityTrips, ...parkTrips].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  return deprioritizeResidenceCountry(
+    [...cityTrips, ...parkTrips],
+    resolveResidenceCountryCode(residence),
+    (trip) => trip.countryCode,
+    sortTripsByDateDesc
   );
 }
 

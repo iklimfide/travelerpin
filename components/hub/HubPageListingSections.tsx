@@ -18,6 +18,7 @@ type HubPageListingSectionsLabels = {
   photosHeading: string;
   instagramHeading: string;
   noInstagramPostsYet: string;
+  noPhotosYet: string;
   addYourPhotoCta: string;
   addYourInstagramCta: string;
   viewPin: string;
@@ -91,7 +92,18 @@ export function HubPageListingSections({
   labels,
 }: HubPageListingSectionsProps) {
   const [editOpen, setEditOpen] = useState(false);
+  const [editMediaFocus, setEditMediaFocus] = useState<"photo" | "instagram" | undefined>();
   const canOpenEdit = canEditMedia && (ownerCity || ownerPark);
+
+  function openEditModal(mediaFocus?: "photo" | "instagram") {
+    setEditMediaFocus(mediaFocus);
+    setEditOpen(true);
+  }
+
+  function closeEditModal() {
+    setEditOpen(false);
+    setEditMediaFocus(undefined);
+  }
 
   const pictureLabels = {
     photosHeading: labels.photosHeading,
@@ -109,7 +121,8 @@ export function HubPageListingSections({
           city={ownerCity}
           park={ownerPark}
           visitedCountries={visitedCountries}
-          onClose={() => setEditOpen(false)}
+          mediaFocus={editMediaFocus}
+          onClose={closeEditModal}
         />
       ) : null}
 
@@ -134,12 +147,14 @@ export function HubPageListingSections({
         hubName={hubName}
         variant="photos"
         headingId={headingIds.photos}
+        alwaysShow
+        emptyLabel={labels.noPhotosYet}
         headingCta={mediaHeadingCta(
           labels.addYourPhotoCta,
           canEditMedia,
           isLoggedIn,
           loginHref,
-          () => setEditOpen(true)
+          () => openEditModal("photo")
         )}
         pins={memoryPins.filter((pin) => pinHasPhotoMedia(pin))}
         labels={pictureLabels}
@@ -156,7 +171,7 @@ export function HubPageListingSections({
           canEditMedia,
           isLoggedIn,
           loginHref,
-          () => setEditOpen(true)
+          () => openEditModal("instagram")
         )}
         pins={memoryPins.filter((pin) => pinHasInstagramMedia(pin))}
         labels={pictureLabels}

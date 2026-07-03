@@ -1,6 +1,10 @@
-import sharp from "sharp";
-
 const SUPABASE_HOST = /\.supabase\.co$/;
+
+type SharpModule = typeof import("sharp").default;
+
+async function loadSharp(): Promise<SharpModule> {
+  return (await import("sharp")).default;
+}
 
 export function isAllowedOgImageUrl(url: string, siteUrl?: string): boolean {
   try {
@@ -29,6 +33,7 @@ async function fetchAndConvertToPng(
   const input = Buffer.from(await response.arrayBuffer());
   if (input.length === 0) return null;
 
+  const sharp = await loadSharp();
   let pipeline = sharp(input).rotate();
   if (options?.maxWidth || options?.maxHeight) {
     pipeline = pipeline.resize(options.maxWidth, options.maxHeight, {
