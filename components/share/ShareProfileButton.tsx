@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ShareSheetModal } from "@/components/share/ShareSheetModal";
-import { buildShareText } from "@/lib/seo/profile";
+import { buildShareText, buildShareUrlOnly } from "@/lib/seo/profile";
 import { profileShareUrl } from "@/lib/seo/site";
 import { shareMessages } from "@/lib/i18n/client-messages";
 import type { TravelStats } from "@/types/database";
@@ -29,22 +29,24 @@ export function useShareProfile({
   const [open, setOpen] = useState(false);
 
   const shareUrl = profileShareUrl(username);
+  // Messengers already show OG title/description on the preview card — send URL only.
+  const shareUrlOnly = buildShareUrlOnly(username, shareUrl);
+  // X benefits from explicit caption text in the composer.
   const shareText = buildShareText(displayName, stats, username, {
     url: shareUrl,
     isOwnProfile,
   });
-  const captionText = shareText.replace(shareUrl, "").trim();
 
   const shareLinks = {
-    whatsapp: `https://wa.me/?text=${encode(shareText)}`,
-    telegram: `https://t.me/share/url?url=${encode(shareUrl)}&text=${encode(captionText)}`,
+    whatsapp: `https://wa.me/?text=${encode(shareUrlOnly)}`,
+    telegram: `https://t.me/share/url?url=${encode(shareUrlOnly)}`,
     x: `https://x.com/intent/post?text=${encode(shareText)}`,
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encode(shareUrl)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encode(shareUrlOnly)}`,
   };
 
   async function handleCopy() {
     try {
-      await navigator.clipboard.writeText(shareText);
+      await navigator.clipboard.writeText(shareUrlOnly);
       await onShareComplete?.();
     } catch {
       if (typeof window !== "undefined") {

@@ -1,7 +1,8 @@
+import { OG_IMAGE_LAYOUT_VERSION } from "@/lib/seo/og";
 import { getR2PublicBaseUrl } from "@/lib/storage/r2";
 
 export function profileOgSnapshotKey(username: string): string {
-  return `og-snapshots/${username.trim().toLowerCase()}.png`;
+  return `og-snapshots/${username.trim().toLowerCase()}.v${OG_IMAGE_LAYOUT_VERSION}.png`;
 }
 
 export function profileOgSnapshotPublicUrl(username: string): string | null {

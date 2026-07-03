@@ -36,6 +36,7 @@ export function buildProfileDescription(
   return `${profileShareHeadline(displayName, false)} ${PROFILE_SHARE_DESCRIPTION}`;
 }
 
+/** Full caption + URL. Prefer buildShareUrlOnly for apps that already show OG previews. */
 export function buildShareText(
   displayName: string,
   _stats: TravelStats,
@@ -43,6 +44,11 @@ export function buildShareText(
   options?: { url?: string; isOwnProfile?: boolean }
 ): string {
   const url = options?.url ?? profileShareUrl(username);
-  const isOwnProfile = options?.isOwnProfile ?? true;
+  const isOwnProfile = options?.isOwnProfile ?? false;
   return `${profileShareHeadline(displayName, isOwnProfile)}\n\n${PROFILE_SHARE_DESCRIPTION}\n\n${url}`;
+}
+
+/** URL only — WhatsApp/Telegram already render title + description from OG tags. */
+export function buildShareUrlOnly(username: string, url?: string): string {
+  return url ?? profileShareUrl(username);
 }

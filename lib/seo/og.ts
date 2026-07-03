@@ -4,7 +4,8 @@ import { getSiteUrl } from "@/lib/seo/site";
 
 export const OG_IMAGE_SIZE = { width: 1200, height: 630 } as const;
 
-export const OG_IMAGE_LAYOUT_VERSION = 10;
+/** Bump when OG snapshot format changes so stale R2 previews are ignored. */
+export const OG_IMAGE_LAYOUT_VERSION = 11;
 
 export function profileOgImageVersion(
   stats: TravelStats,
