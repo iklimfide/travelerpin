@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { revalidateParkHubForPin } from "@/lib/cache/revalidate-park-hub";
+import { publishParkHubOnPin } from "@/lib/supabase/published-hubs";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
 import { quickParkSchema } from "@/lib/validations/park";
 
@@ -77,6 +78,7 @@ export async function POST(request: Request) {
   }
 
   revalidateParkHubForPin(park.country_code, park.park_name);
+  await publishParkHubOnPin(supabase, park);
 
   return NextResponse.json({ park, added: true, alreadyHad: false });
 }

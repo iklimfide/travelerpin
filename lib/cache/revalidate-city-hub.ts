@@ -2,6 +2,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { revalidateCountryHubForPin } from "@/lib/cache/revalidate-country-hub";
 import { findCityHubSlug } from "@/lib/data/city-hubs";
 import { cityPath } from "@/lib/seo/site";
+import { buildCitySlug } from "@/lib/utils/city-slug";
 
 export function cityPinsCacheTag(countryCode: string, cityName: string): string {
   return `city-pins:${countryCode.toUpperCase()}:${cityName.trim().toLowerCase()}`;
@@ -12,8 +13,6 @@ export function revalidateCityHubForPin(countryCode: string, cityName: string): 
   revalidateTag(cityPinsCacheTag(countryCode, cityName), "max");
   revalidateCountryHubForPin(countryCode);
 
-  const slug = findCityHubSlug(countryCode, cityName);
-  if (slug) {
-    revalidatePath(cityPath(slug));
-  }
+  const slug = findCityHubSlug(countryCode, cityName) ?? buildCitySlug(cityName);
+  revalidatePath(cityPath(slug));
 }

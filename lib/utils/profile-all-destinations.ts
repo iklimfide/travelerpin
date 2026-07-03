@@ -1,5 +1,5 @@
 import { buildVisitedCountryList } from "@/lib/map/travel-lists";
-import { getCountryHubByCode } from "@/lib/data/country-hubs";
+import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findParkHubSlug } from "@/lib/data/park-hubs";
 import type { ParkType, VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
@@ -8,8 +8,8 @@ import { profilePinImageUrl } from "@/lib/storage/hub-photo-url";
 import { buildProfileTrips, deprioritizeResidenceCountry, type ProfileTrip } from "@/lib/utils/profile-page";
 import { resolveResidenceCountryCode } from "@/lib/utils/residence-city";
 
-function countryHubSlug(code: string): string | null {
-  return getCountryHubByCode(code)?.slug ?? null;
+function countryHubSlug(countryCode: string, countryName?: string): string | null {
+  return resolveCountryHubSlug(countryCode, countryName);
 }
 
 function mediaImageUrl(item: {

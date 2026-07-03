@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ParkPageContent } from "@/components/park/ParkPageContent";
-import { getParkHubBySlug, listParkHubSlugs } from "@/lib/data/park-hubs";
+import { listPopularParkHubSlugs } from "@/lib/data/park-hubs";
 import { buildParkPageTitle, DEFAULT_DESCRIPTION, getSiteUrl, parkPath, parkUrl } from "@/lib/seo/site";
 import { getDefaultParkHeroAlt, getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
 import { getCachedRecentParkPins, getCachedRecentParkTravelers } from "@/lib/supabase/park-travelers-cache";
@@ -10,6 +10,7 @@ import { fetchRecentParkPins } from "@/lib/supabase/park-travelers";
 import { mergeOwnerHubPin, pinsWithContent, countHubMediaItems, pinHasGalleryMedia } from "@/lib/supabase/hub-traveler-pin";
 import { countCountryWishlisters } from "@/lib/supabase/country-pin-count";
 import { countParkPinners, loadParkPageUserState } from "@/lib/supabase/park-visitor-state";
+import { loadPublicParkHubBySlug } from "@/lib/supabase/park-hub-access";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizeParkSlug } from "@/lib/utils/park-slug";
@@ -20,9 +21,10 @@ type PageProps = {
 };
 
 export const revalidate = 300;
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return listParkHubSlugs().map((slug) => ({ slug }));
+  return listPopularParkHubSlugs().map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -30,7 +32,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const slug = sanitizeParkSlug(rawSlug);
   if (!slug) return { title: "Park" };
 
-  const hub = getParkHubBySlug(slug);
+  const supabase = await createClient();
+  const hub = await loadPublicParkHubBySlug(supabase, slug);
   if (!hub) return { title: "Park not found" };
 
   const title = buildParkPageTitle(hub.name);
@@ -54,20 +57,20 @@ export default async function ParkHubPage({ params }: PageProps) {
   const slug = sanitizeParkSlug(rawSlug);
   if (!slug) notFound();
 
-  const hub = getParkHubBySlug(slug);
+  const supabase = await createClient();
+  const hub = await loadPublicParkHubBySlug(supabase, slug);
   if (!hub) notFound();
 
   const returnPath = parkPath(slug);
   const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;
   const registerHref = `/register?next=${encodeURIComponent(returnPath)}`;
 
-  const [t, tCommon, cachedParkPins, travelers, user, supabase] = await Promise.all([
+  const [t, tCommon, cachedParkPins, travelers, user] = await Promise.all([
     getTranslations("parkHub"),
     getTranslations("common"),
     getCachedRecentParkPins(hub),
     getCachedRecentParkTravelers(hub),
     getAuthUser(),
-    createClient(),
   ]);
 
   const { visitorState, ownerPark, ownerHubPin, visitedCountries } = await loadParkPageUserState(

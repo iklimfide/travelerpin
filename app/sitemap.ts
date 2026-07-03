@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { getSiteUrl, profilePath, countryPath, cityPath } from "@/lib/seo/site";
+import { getSiteUrl, profilePath, countryPath, cityPath, parkPath } from "@/lib/seo/site";
 import { listCountryHubSlugs } from "@/lib/data/country-hubs";
-import { listCityHubSlugs } from "@/lib/data/city-hubs";
+import { listPublicCityHubSlugs } from "@/lib/supabase/city-hub-access";
+import { listPublicParkHubSlugs } from "@/lib/supabase/park-hub-access";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl();
@@ -26,7 +27,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  for (const slug of listCityHubSlugs()) {
+  const supabase = await createClient();
+
+  for (const slug of await listPublicCityHubSlugs(supabase)) {
     entries.push({
       url: `${siteUrl}${cityPath(slug)}`,
       lastModified: now,
@@ -35,7 +38,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  const supabase = await createClient();
+  for (const slug of await listPublicParkHubSlugs(supabase)) {
+    entries.push({
+      url: `${siteUrl}${parkPath(slug)}`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.65,
+    });
+  }
+
   if (supabase) {
     const { data: profiles } = await supabase
       .from("profiles")

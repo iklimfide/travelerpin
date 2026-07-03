@@ -89,9 +89,6 @@
       "topCities": "Top 10 cities",
       "topPlaces": "Top 10 places"
     },
-    "relatedSearches": {
-      "title": "People also search for"
-    },
     "subtitle": "Tap a country to explore the sample map. Sign up when you're ready to build and share your own.",
     "demoLabel": "{name}'s journey",
     "demoTravelerStory": "{name} has visited {countries} countries and {cities} cities and pinned them.",
@@ -239,6 +236,15 @@
     "instagramHeading": "Instagram posts",
     "noInstagramPostsYet": "No Instagram posts added for this park yet.",
     "noPhotosYet": "No photos added for this park yet."
+  },
+  "parksListing": {
+    "home": "Home",
+    "themeParksTitle": "Theme parks",
+    "themeParksDescription": "Explore popular theme parks and botanical gardens on TravelerPin.",
+    "nationalParksTitle": "National parks",
+    "nationalParksDescription": "Explore national parks travelers pin on TravelerPin.",
+    "parkCount": "{count, plural, one {# park} other {# parks}}",
+    "inCountry": "in {country}"
   },
   "auth": {
     "email": "Email",

@@ -30,6 +30,16 @@
       "capital": "Brasília",
       "language": "Portuguese"
     },
+    "canada": {
+      "slug": "canada",
+      "code": "CA",
+      "name": "Canada",
+      "currency": "Canadian dollar (CAD)",
+      "plugType": "Type A, B",
+      "visaNote": "Most visa-exempt visitors flying to Canada need an eTA. Check IRCC requirements for your passport before travel.",
+      "capital": "Ottawa",
+      "language": "English, French"
+    },
     "egypt": {
       "slug": "egypt",
       "code": "EG",

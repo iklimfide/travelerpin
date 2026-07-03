@@ -2,6 +2,7 @@ import type { TouristPark } from "./tourist-parks";
 import { TOURIST_PARKS } from "./tourist-parks";
 import { matchesParkTypeFilter } from "@/lib/utils/park-type";
 import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
+import { buildParkSlug } from "@/lib/utils/park-slug";
 
 export type { ParkType, TouristPark } from "./tourist-parks";
 
@@ -56,4 +57,11 @@ export function searchTouristParksInCountries(
   );
 
   return results.sort((a, b) => compareNames(a.name, b.name)).slice(0, limit);
+}
+
+export function findTouristParksBySlug(slug: string): TouristPark[] {
+  const target = slug.trim().toLowerCase();
+  if (!target) return [];
+
+  return TOURIST_PARKS.filter((park) => buildParkSlug(park.name) === target);
 }

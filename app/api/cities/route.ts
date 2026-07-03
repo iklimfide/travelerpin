@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { revalidateCityHubForPin } from "@/lib/cache/revalidate-city-hub";
+import { publishCityHubOnPin } from "@/lib/supabase/published-hubs";
 import { cityInputSchema } from "@/lib/validations/city";
 import { resolveCityMediaFields } from "@/lib/utils/city-media";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
@@ -73,6 +74,7 @@ export async function POST(request: Request) {
   }
 
   revalidateCityHubForPin(city.country_code, city.city_name);
+  await publishCityHubOnPin(supabase, city);
 
   return NextResponse.json(city);
 }

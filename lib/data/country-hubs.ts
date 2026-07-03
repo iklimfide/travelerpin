@@ -1,5 +1,6 @@
 import rawCountries from "@/data/countries.json";
 import rawHomeBestCountries from "@/data/home-best-country-hubs.json";
+import { buildCountrySlug } from "@/lib/utils/country-slug";
 
 export type CountryHub = {
   slug: string;
@@ -38,6 +39,21 @@ export function getCountryHubBySlug(slug: string): CountryHub | null {
 
 export function getCountryHubByCode(code: string): CountryHub | null {
   return byCode.get(code.toUpperCase()) ?? null;
+}
+
+export function resolveCountryHubSlug(countryCode: string, countryName?: string): string | null {
+  const byCodeHub = getCountryHubByCode(countryCode);
+  if (byCodeHub) return byCodeHub.slug;
+
+  if (!countryName) return null;
+
+  const slug = buildCountrySlug(countryName);
+  const bySlugHub = getCountryHubBySlug(slug);
+  if (bySlugHub && bySlugHub.code.toUpperCase() === countryCode.toUpperCase()) {
+    return bySlugHub.slug;
+  }
+
+  return null;
 }
 
 export function listCountryHubSlugs(): string[] {

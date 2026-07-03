@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
+import { publishCityHubOnPin } from "@/lib/supabase/published-hubs";
+import { revalidateCityHubForPin } from "@/lib/cache/revalidate-city-hub";
 import { quickDestinationSchema } from "@/lib/validations/destination";
 
 export async function POST(request: Request) {
@@ -111,6 +113,9 @@ export async function POST(request: Request) {
   if (cityError) {
     return NextResponse.json({ error: cityError.message }, { status: 500 });
   }
+
+  revalidateCityHubForPin(city.country_code, city.city_name);
+  await publishCityHubOnPin(supabase, city);
 
   return NextResponse.json({ city, added: true, alreadyHad: false });
 }

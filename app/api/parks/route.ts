@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { parkInputSchema } from "@/lib/validations/park";
 import { revalidateParkHubForPin } from "@/lib/cache/revalidate-park-hub";
+import { publishParkHubOnPin } from "@/lib/supabase/published-hubs";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
 import { resolveCityMediaFields } from "@/lib/utils/city-media";
 import { geocodeCity } from "@/lib/utils/geocode";
@@ -85,6 +86,7 @@ export async function POST(request: Request) {
   }
 
   revalidateParkHubForPin(park.country_code, park.park_name);
+  await publishParkHubOnPin(supabase, park);
 
   return NextResponse.json(park);
 }

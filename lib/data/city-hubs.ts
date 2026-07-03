@@ -2,6 +2,7 @@ import rawCities from "@/data/city-hubs.json";
 import { searchTouristCities, type TouristCity } from "@/lib/data/tourist-cities";
 import { searchTouristParks, type TouristPark } from "@/lib/data/tourist-park-search";
 import { getCountryHubByCode, type CountryHub } from "@/lib/data/country-hubs";
+import { buildCitySlug } from "@/lib/utils/city-slug";
 
 export type CityHub = {
   slug: string;
@@ -22,11 +23,16 @@ const catalog = rawCities as CityHubsFile;
 
 const bySlug = new Map<string, CityHub>();
 const byCountryAndName = new Map<string, CityHub>();
+const featuredSlugs = new Set<string>();
+
+function cityCatalogKey(countryCode: string, cityName: string): string {
+  return `${countryCode.toUpperCase()}:${cityName.trim().toLocaleLowerCase("tr")}`;
+}
 
 for (const hub of Object.values(catalog.cities)) {
+  featuredSlugs.add(hub.slug.toLowerCase());
   bySlug.set(hub.slug.toLowerCase(), hub);
-  const key = `${hub.countryCode.toUpperCase()}:${hub.name.toLocaleLowerCase("tr")}`;
-  byCountryAndName.set(key, hub);
+  byCountryAndName.set(cityCatalogKey(hub.countryCode, hub.name), hub);
 }
 
 export function getCityHubBySlug(slug: string): CityHub | null {
@@ -34,8 +40,7 @@ export function getCityHubBySlug(slug: string): CityHub | null {
 }
 
 export function findCityHubSlug(countryCode: string, cityName: string): string | null {
-  const key = `${countryCode.toUpperCase()}:${cityName.trim().toLocaleLowerCase("tr")}`;
-  return byCountryAndName.get(key)?.slug ?? null;
+  return byCountryAndName.get(cityCatalogKey(countryCode, cityName))?.slug ?? null;
 }
 
 export function findCityHubByName(cityName: string): CityHub | null {
@@ -52,7 +57,67 @@ export function findCityHubByName(cityName: string): CityHub | null {
 }
 
 export function listCityHubSlugs(): string[] {
-  return [...bySlug.keys()].sort((a, b) => a.localeCompare(b));
+  return [...featuredSlugs].sort((a, b) => a.localeCompare(b));
+}
+
+export function listFeaturedCityHubSlugs(): string[] {
+  return listCityHubSlugs();
+}
+
+export function isFeaturedCityHub(slug: string): boolean {
+  return featuredSlugs.has(slug.toLowerCase());
+}
+
+export function ensureCityHubFromTouristCity(
+  city: TouristCity,
+  countryName?: string
+): CityHub {
+  const catalogHub = byCountryAndName.get(cityCatalogKey(city.countryCode, city.name));
+  if (catalogHub) return catalogHub;
+
+  const slug = buildCitySlug(city.name);
+  const existing = bySlug.get(slug.toLowerCase());
+  if (existing && existing.countryCode === city.countryCode.toUpperCase()) {
+    return existing;
+  }
+
+  const countryHub = getCountryHubByCode(city.countryCode);
+  const hub: CityHub = {
+    slug,
+    name: city.name,
+    countryCode: city.countryCode.toUpperCase(),
+    countrySlug: countryHub?.slug ?? city.countryCode.toLowerCase(),
+    countryName: countryName ?? countryHub?.name ?? city.countryCode,
+  };
+
+  bySlug.set(slug.toLowerCase(), hub);
+  byCountryAndName.set(cityCatalogKey(city.countryCode, city.name), hub);
+  return hub;
+}
+
+export function hubFromCityFields(fields: {
+  cityName: string;
+  countryCode: string;
+  countryName: string;
+}): CityHub {
+  const touristMatches = searchTouristCities(fields.countryCode, fields.cityName, 5);
+  const exact = touristMatches.find(
+    (city) => city.name.toLocaleLowerCase("tr") === fields.cityName.trim().toLocaleLowerCase("tr")
+  );
+
+  if (exact) {
+    return ensureCityHubFromTouristCity(exact, fields.countryName);
+  }
+
+  return ensureCityHubFromTouristCity(
+    {
+      countryCode: fields.countryCode,
+      name: fields.cityName,
+      latitude: 0,
+      longitude: 0,
+    },
+    fields.countryName
+  );
 }
 
 export function getCityHubTouristCity(hub: CityHub): TouristCity | null {

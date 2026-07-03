@@ -1,6 +1,5 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { revalidateCountryHubForPin } from "@/lib/cache/revalidate-country-hub";
-import { getParkHubBySlug } from "@/lib/data/park-hubs";
 import { parkPath } from "@/lib/seo/site";
 import { buildParkSlug } from "@/lib/utils/park-slug";
 
@@ -19,7 +18,5 @@ export function revalidateParkHubForPin(countryCode: string, parkName: string): 
 
   const slug = buildParkSlug(parkName, countryCode);
   revalidateTag(parkHubPinsCacheTag(slug), "max");
-  if (getParkHubBySlug(slug)) {
-    revalidatePath(parkPath(slug));
-  }
+  revalidatePath(parkPath(slug));
 }

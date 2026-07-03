@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { CityPageContent } from "@/components/city/CityPageContent";
-import { getCityHubContext } from "@/lib/data/city-hubs";
-import { listCityHubSlugs } from "@/lib/data/city-hubs";
+import { listFeaturedCityHubSlugs } from "@/lib/data/city-hubs";
 import { loadCityPageUserState } from "@/lib/supabase/city-visitor-state";
+import { loadPublicCityHubContext } from "@/lib/supabase/city-hub-access";
+import { loadPublishedParkKeys, touristParkIsPubliclyLinked } from "@/lib/supabase/park-hub-access";
 import { countCityPinners, fetchRecentCityPins } from "@/lib/supabase/city-travelers";
 import {
   countHubMediaItems,
@@ -27,9 +28,10 @@ type PageProps = {
 };
 
 export const revalidate = 300;
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return listCityHubSlugs().map((slug) => ({ slug }));
+  return listFeaturedCityHubSlugs().map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -37,7 +39,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const slug = sanitizeCitySlug(rawSlug);
   if (!slug) return { title: "City" };
 
-  const context = getCityHubContext(slug);
+  const supabase = await createClient();
+  const context = await loadPublicCityHubContext(supabase, slug);
   if (!context) return { title: "City not found" };
 
   const { hub } = context;
@@ -62,20 +65,20 @@ export default async function CityHubPage({ params }: PageProps) {
   const slug = sanitizeCitySlug(rawSlug);
   if (!slug) notFound();
 
-  const context = getCityHubContext(slug);
+  const supabase = await createClient();
+  const context = await loadPublicCityHubContext(supabase, slug);
   if (!context) notFound();
 
-  const { hub, touristCity, parks } = context;
+  const { hub, touristCity, parks: allParks } = context;
   const returnPath = cityPath(slug);
   const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;
   const registerHref = `/register?next=${encodeURIComponent(returnPath)}`;
 
-  const [t, tCommon, cachedCityPins, user, supabase] = await Promise.all([
+  const [t, tCommon, cachedCityPins, user] = await Promise.all([
     getTranslations("cityHub"),
     getTranslations("common"),
     getCachedRecentCityPinsWithPreviews(hub),
     getAuthUser(),
-    createClient(),
   ]);
 
   const { visitorState, ownerCity, ownerHubPin, visitedCountries } = await loadCityPageUserState(
@@ -83,6 +86,9 @@ export default async function CityHubPage({ params }: PageProps) {
     user?.id,
     hub
   );
+
+  const publishedParkKeys = await loadPublishedParkKeys(supabase);
+  const parks = allParks.filter((park) => touristParkIsPubliclyLinked(park, publishedParkKeys));
 
   let cityPins = cachedCityPins;
   if (supabase) {

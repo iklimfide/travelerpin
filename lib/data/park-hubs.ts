@@ -3,6 +3,10 @@ import type { ParkType } from "@/lib/data/tourist-park-search";
 import { getCountryHubByCode } from "@/lib/data/country-hubs";
 import { buildParkSlug } from "@/lib/utils/park-slug";
 import { parkPinMatchesHub, uniqueParkSearchNames } from "@/lib/utils/park-hub-match";
+import {
+  parkHubMatchesCategory,
+  type ParkCategorySlug,
+} from "@/lib/utils/park-category";
 
 export type ParkHub = {
   slug: string;
@@ -17,6 +21,7 @@ export type ParkHub = {
 };
 
 const bySlug = new Map<string, ParkHub>();
+const popularSlugs = new Set<string>();
 
 function registerPark(input: {
   name: string;
@@ -46,6 +51,8 @@ function registerPark(input: {
 }
 
 for (const park of POPULAR_PARKS) {
+  const slug = buildParkSlug(park.parkName, park.countryCode);
+  popularSlugs.add(slug);
   registerPark({
     name: park.parkName,
     searchNames: park.label !== park.parkName ? [park.label] : [],
@@ -70,11 +77,43 @@ export function findParkHubSlug(parkName: string, countryCode: string): string |
     }
   }
 
-  return null;
+  return buildParkSlug(parkName, countryCode);
 }
 
 export function listParkHubSlugs(): string[] {
-  return [...bySlug.keys()].sort((a, b) => a.localeCompare(b));
+  return [...popularSlugs].sort((a, b) => a.localeCompare(b));
+}
+
+export function listPopularParkHubSlugs(): string[] {
+  return listParkHubSlugs();
+}
+
+export function isPopularParkHub(slug: string): boolean {
+  return popularSlugs.has(slug.toLowerCase());
+}
+
+export function hubFromParkFields(fields: {
+  parkName: string;
+  parkType: ParkType;
+  countryCode: string;
+  countryName: string;
+  latitude: number;
+  longitude: number;
+}): ParkHub {
+  return ensureParkHubFromTouristPark({
+    name: fields.parkName,
+    parkType: fields.parkType,
+    countryCode: fields.countryCode,
+    countryName: fields.countryName,
+    latitude: fields.latitude,
+    longitude: fields.longitude,
+  });
+}
+
+export function listParkHubsByCategory(category: ParkCategorySlug): ParkHub[] {
+  return [...bySlug.values()]
+    .filter((hub) => isPopularParkHub(hub.slug) && parkHubMatchesCategory(hub, category))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 }
 
 export function ensureParkHubFromTouristPark(park: {

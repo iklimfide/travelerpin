@@ -4,6 +4,7 @@
 // https://bestroadtrip.com/data · https://ourairports.com/data/
 
 import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
+import { buildCitySlug } from "@/lib/utils/city-slug";
 
 export type TouristCity = {
   countryCode: string;
@@ -23605,4 +23606,11 @@ export function searchTouristCitiesInCountries(
   );
 
   return results.sort((a, b) => compareCityNames(a.name, b.name)).slice(0, limit);
+}
+
+export function findTouristCitiesBySlug(slug: string): TouristCity[] {
+  const target = slug.trim().toLowerCase();
+  if (!target) return [];
+
+  return TOURIST_CITIES.filter((city) => buildCitySlug(city.name) === target);
 }

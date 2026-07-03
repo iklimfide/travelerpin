@@ -14,6 +14,7 @@ import {
 } from "@/lib/supabase/hub-traveler-pin";
 import { countCountryPinners, countCountryWishlisters } from "@/lib/supabase/country-pin-count";
 import { loadCountryPageUserState } from "@/lib/supabase/country-visitor-state";
+import { loadPublishedCityKeys, publicCityHubSlug } from "@/lib/supabase/city-hub-access";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { countryPath, countryUrl, buildCountryPageTitle, DEFAULT_DESCRIPTION } from "@/lib/seo/site";
@@ -75,6 +76,9 @@ export default async function CountryHubPage({ params }: PageProps) {
 
   const { visitorState, editOwnerCity, editOwnerPark, ownerHubPin, visitedCountries } =
     await loadCountryPageUserState(supabase, user?.id, hub);
+
+  const publishedCityKeys = await loadPublishedCityKeys(supabase);
+  const capitalCitySlug = publicCityHubSlug(hub.code, hub.capital, publishedCityKeys);
 
   let countryPins = cachedCountryPins;
   if (supabase) {
@@ -165,6 +169,7 @@ export default async function CountryHubPage({ params }: PageProps) {
       <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden">
         <CountryPageContent
           hub={hub}
+          capitalCitySlug={capitalCitySlug}
           travelers={travelers}
           memoryPins={memoryPins}
           visitorState={visitorState}

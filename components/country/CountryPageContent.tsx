@@ -6,7 +6,6 @@ import { CountryPagePinStatsBlock } from "@/components/country/CountryPagePinSta
 import { HubPageListingSections } from "@/components/hub/HubPageListingSections";
 import { HubPageTopBar } from "@/components/hub/HubPageTopBar";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
-import { findCityHubSlug } from "@/lib/data/city-hubs";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { cityPath } from "@/lib/seo/site";
 import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
@@ -17,6 +16,7 @@ import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database"
 
 type CountryPageContentProps = {
   hub: CountryHub;
+  capitalCitySlug: string | null;
   travelers: CountryTraveler[];
   memoryPins: HubTravelerPin[];
   visitorState: CountryVisitorState;
@@ -64,6 +64,7 @@ type CountryPageContentProps = {
 
 export function CountryPageContent({
   hub,
+  capitalCitySlug,
   travelers,
   memoryPins,
   visitorState,
@@ -76,7 +77,6 @@ export function CountryPageContent({
   labels,
 }: CountryPageContentProps) {
   const flagUrl = countryCodeToFlagUrl(hub.code);
-  const capitalCitySlug = findCityHubSlug(hub.code, hub.capital);
   const featuredPin = memoryPins[0] ?? null;
   const hasOwnerPin = Boolean(editOwnerCity || editOwnerPark);
 

@@ -1,8 +1,9 @@
 import { buildVisitedCountryList } from "@/lib/map/travel-lists";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
-import { getCountryHubByCode } from "@/lib/data/country-hubs";
+import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findCityHubSlug } from "@/lib/data/city-hubs";
 import { findParkHubSlug } from "@/lib/data/park-hubs";
+import { buildCitySlug } from "@/lib/utils/city-slug";
 import type { ParkType } from "@/lib/data/tourist-park-search";
 import { cityVisitCount } from "@/lib/utils/visit-date";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
@@ -13,12 +14,12 @@ import type { VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "
 
 export const WORLD_COUNTRY_TOTAL = 195;
 
-function countryHubSlug(code: string): string | null {
-  return getCountryHubByCode(code)?.slug ?? null;
+function countryHubSlug(countryCode: string, countryName?: string): string | null {
+  return resolveCountryHubSlug(countryCode, countryName);
 }
 
 function cityHubSlug(countryCode: string, cityName: string): string | null {
-  return findCityHubSlug(countryCode, cityName);
+  return findCityHubSlug(countryCode, cityName) ?? buildCitySlug(cityName);
 }
 
 export type ProfileTrip = {
@@ -190,7 +191,7 @@ export function buildProfileSummary(
     ? {
         name: wishlistCountries[0].country_name,
         code: wishlistCountries[0].country_code,
-        countrySlug: countryHubSlug(wishlistCountries[0].country_code),
+        countrySlug: countryHubSlug(wishlistCountries[0].country_code, wishlistCountries[0].country_name),
       }
     : null;
 
