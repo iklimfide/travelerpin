@@ -8,7 +8,6 @@ import type { ParkType } from "@/lib/data/tourist-park-search";
 import { cityVisitCount } from "@/lib/utils/visit-date";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
-import { profilePinImageUrl } from "@/lib/storage/hub-photo-url";
 import { resolveResidenceCountryCode } from "@/lib/utils/residence-city";
 import type { VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 
@@ -56,22 +55,8 @@ export type LatestVisitedCountry = {
   countrySlug: string | null;
 };
 
-function mediaImageUrl(item: {
-  media_type: string | null;
-  media_url: string | null;
-  media_preview_url?: string | null;
-  photo_url?: string | null;
-  instagram_urls?: string[] | null;
-}): string | null {
-  return profilePinImageUrl(item);
-}
-
-function cityTripImage(city: VisitedCity): string {
-  return mediaImageUrl(city) ?? DEFAULT_CITY_HERO_IMAGE;
-}
-
 function parkTripImage(park: VisitedPark): string {
-  return mediaImageUrl(park) ?? getDefaultParkHeroImage(park.park_type);
+  return getDefaultParkHeroImage(park.park_type);
 }
 
 function tripBadge(city: VisitedCity, isRecent: boolean): ProfileTrip["badge"] {
@@ -125,7 +110,7 @@ export function buildProfileTrips(
     countryCode: city.country_code,
     countryName: city.country_name,
     countrySlug: countryHubSlug(city.country_code),
-    imageUrl: cityTripImage(city),
+    imageUrl: DEFAULT_CITY_HERO_IMAGE,
     note: city.note,
     visitCount: cityVisitCount(city),
     createdAt: city.created_at,
