@@ -20,6 +20,7 @@ const DEMO_PROFILE: PublicProfile = {
   cover_url: null,
   bio: DEMO_PERSONA.bio,
   residence: DEMO_PERSONA.residence,
+  instagram_url: null,
   profession: null,
   marital_status: null,
   wishlist_public: true,
@@ -82,6 +83,8 @@ export async function loadDemoPublicProfilePage(
     ...buildDemoPageRows(),
     isLoggedIn: !!authUser,
     currentUsername,
+    followState: { isFollowing: false, followerCount: 128, followingCount: 42 },
+    canFollow: false,
   };
 }
 

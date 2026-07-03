@@ -70,6 +70,8 @@ export async function PublicProfileView({
     visitedCodes,
     wishlistCodes,
     isLoggedIn,
+    followState,
+    canFollow,
   } = data;
 
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
@@ -151,6 +153,7 @@ export async function PublicProfileView({
             residenceHref={residenceHref}
             heroTitle={heroTitle}
             heroSubtitle={t("travelDiarySubtitle")}
+            showNotifications={isLoggedIn && !embedded}
           />
 
           <div className="profile-main">
@@ -159,6 +162,7 @@ export async function PublicProfileView({
               displayName={displayName}
               username={profile.username}
               bio={profile.bio}
+              instagramUrl={profile.instagram_url}
               fallbackBio={profileDescription}
               stats={stats}
               isOwnProfile={isOwnProfile}
@@ -172,6 +176,10 @@ export async function PublicProfileView({
                 share: t("shareProfile"),
                 edit: t("editProfile"),
               }}
+              followUsername={!isOwnProfile ? profile.username : undefined}
+              followState={followState}
+              canFollow={canFollow}
+              isLoggedIn={isLoggedIn}
             />
 
             {hasMapContent ? (

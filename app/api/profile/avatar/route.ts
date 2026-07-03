@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { LIMITS } from "@/lib/constants";
 import { optimizeAvatar } from "@/lib/utils/image";
-import { PROFILE_SELECT } from "@/lib/validations/profile";
+import { updateProfileSettings } from "@/lib/supabase/profile-settings";
 
 const AVATAR_BUCKET = "avatars";
 const AVATAR_PATH = (userId: string) => `${userId}/avatar.webp`;
@@ -61,15 +61,12 @@ export async function POST(request: Request) {
 
   const avatarUrl = `${publicUrl}?v=${Date.now()}`;
 
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .update({ avatar_url: avatarUrl })
-    .eq("id", user.id)
-    .select(PROFILE_SELECT)
-    .single();
+  const { profile, error } = await updateProfileSettings(supabase, user.id, {
+    avatar_url: avatarUrl,
+  });
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error || !profile) {
+    return NextResponse.json({ error: error ?? "Failed to update profile" }, { status: 500 });
   }
 
   return NextResponse.json({ url: avatarUrl, profile });
@@ -91,15 +88,12 @@ export async function DELETE() {
 
   await supabase.storage.from(AVATAR_BUCKET).remove([AVATAR_PATH(user.id)]);
 
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .update({ avatar_url: null })
-    .eq("id", user.id)
-    .select(PROFILE_SELECT)
-    .single();
+  const { profile, error } = await updateProfileSettings(supabase, user.id, {
+    avatar_url: null,
+  });
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error || !profile) {
+    return NextResponse.json({ error: error ?? "Failed to update profile" }, { status: 500 });
   }
 
   return NextResponse.json(profile);

@@ -1,4 +1,5 @@
 import type { QuickDestinationInput } from "@/lib/validations/destination";
+import { offerShareAfterPin } from "@/lib/client/share-pin-prompt";
 
 export async function quickAddDestination(
   payload: QuickDestinationInput
@@ -18,9 +19,17 @@ export async function quickAddDestination(
   }
 
   const data = await res.json();
+  const added = Boolean(data.added);
+  if (added) {
+    offerShareAfterPin(
+      payload.kind === "country"
+        ? { kind: "country", name: payload.country_name }
+        : { kind: "city", name: payload.city_name }
+    );
+  }
   return {
     ok: true,
-    added: Boolean(data.added),
+    added,
     alreadyHad: Boolean(data.alreadyHad),
   };
 }

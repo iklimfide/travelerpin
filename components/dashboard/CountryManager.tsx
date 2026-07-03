@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { countryMessages, wishlistMessages } from "@/lib/i18n/client-messages";
 import { CountryCityPickerSheet } from "@/components/map/CountryCityPickerSheet";
 import { COUNTRY_LIST, searchCountries, getCountryName } from "@/lib/data/countries";
+import { addVisitedCountry } from "@/lib/client/country-actions";
 import {
   countryHasMappedPlaces,
   isCountryRemoveBlockedByPlacesError,
@@ -107,18 +108,9 @@ export function CountryManager({
   }, [query, visitedByCode, wishlistByCode, visitedCodeSet]);
 
   async function addVisited(code: string) {
-    const res = await fetch("/api/countries", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        country_code: code,
-        country_name: getCountryName(code),
-      }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      await modal.alert(data.error ?? "Failed to add country", { variant: "error" });
+    const result = await addVisitedCountry(code);
+    if (!result.ok) {
+      await modal.alert(result.error, { variant: "error" });
       return false;
     }
     return true;

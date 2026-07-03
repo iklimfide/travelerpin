@@ -7,8 +7,7 @@ import type { VisitedPark } from "@/types/database";
 import type { CountryTraveler } from "@/lib/supabase/country-travelers";
 import {
   type HubTravelerPin,
-  buildHubTravelerPinMedia,
-  hubPhotoDisplayUrl,
+  createHubTravelerPin,
   sortHubTravelerPins,
   uniqueHubTravelers,
 } from "@/lib/supabase/hub-traveler-pin";
@@ -35,31 +34,27 @@ function rowToPin(row: ParkPinRow, hub: ParkHub): HubTravelerPin | null {
   if (!profile?.username) return null;
 
   const username = profile.username.toLowerCase();
-  const media = buildHubTravelerPinMedia(row);
 
-  return {
+  return createHubTravelerPin({
     id: row.id,
     placeLabel: null,
     note: row.note,
-    photoUrl: media.photoUrl,
-    instagramUrls: media.instagramUrls,
-    mediaType: media.mediaType,
-    mediaUrl: media.mediaUrl,
-    mediaDisplayUrl: media.mediaDisplayUrl,
-    mediaPreviewUrl: media.mediaPreviewUrl,
+    mediaRow: row,
     visitDates: row.visit_dates ?? [],
     pinnedAt: row.updated_at,
     username,
     displayName: resolveProfileDisplayName(profile.display_name, profile.username),
     avatarUrl: profile.avatar_url,
+    instagramProfileUrl: profile.instagram_url ?? null,
     profilePath: profilePath(username),
-  };
+  });
 }
 
 type OwnerProfile = {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
+  instagram_url?: string | null;
 };
 
 export function visitedParkToHubPin(
@@ -71,25 +66,20 @@ export function visitedParkToHubPin(
   if (!profile.username) return null;
 
   const username = profile.username.toLowerCase();
-  const media = buildHubTravelerPinMedia(park);
 
-  return {
+  return createHubTravelerPin({
     id: park.id,
     placeLabel: null,
     note: park.note,
-    photoUrl: media.photoUrl,
-    instagramUrls: media.instagramUrls,
-    mediaType: media.mediaType,
-    mediaUrl: media.mediaUrl,
-    mediaDisplayUrl: media.mediaDisplayUrl,
-    mediaPreviewUrl: media.mediaPreviewUrl,
+    mediaRow: park,
     visitDates: park.visit_dates ?? [],
     pinnedAt: park.updated_at,
     username,
     displayName: resolveProfileDisplayName(profile.display_name, profile.username),
     avatarUrl: profile.avatar_url,
+    instagramProfileUrl: profile.instagram_url ?? null,
     profilePath: profilePath(username),
-  };
+  });
 }
 
 export async function fetchRecentParkPins(

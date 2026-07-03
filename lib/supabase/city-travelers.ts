@@ -7,7 +7,7 @@ import type { MediaType, VisitedCity } from "@/types/database";
 import {
   type CityTravelerPin,
   type HubTravelerPin,
-  buildHubTravelerPinMedia,
+  createHubTravelerPin,
   pinsWithContent,
   sortHubTravelerPins,
   uniqueHubTravelers,
@@ -22,33 +22,28 @@ function rowToPin(row: CityPinRow): HubTravelerPin | null {
   if (!profile?.username) return null;
 
   const username = profile.username.toLowerCase();
-  const media = buildHubTravelerPinMedia(row);
 
-  return {
+  return createHubTravelerPin({
     id: row.id,
     placeLabel: null,
     note: row.note,
-    photoUrl: media.photoUrl,
-    instagramUrls: media.instagramUrls,
-    mediaType: media.mediaType,
-    mediaUrl: media.mediaUrl,
-    mediaDisplayUrl: media.mediaDisplayUrl,
-    mediaPreviewUrl:
-      row.media_preview_url ??
-      media.mediaPreviewUrl,
+    mediaRow: row,
+    mediaPreviewUrl: row.media_preview_url,
     visitDates: row.visit_dates ?? [],
     pinnedAt: row.updated_at,
     username,
     displayName: resolveProfileDisplayName(profile.display_name, profile.username),
     avatarUrl: profile.avatar_url,
+    instagramProfileUrl: profile.instagram_url ?? null,
     profilePath: profilePath(username),
-  };
+  });
 }
 
 type OwnerProfile = {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
+  instagram_url?: string | null;
 };
 
 export function visitedCityToHubPin(
@@ -61,25 +56,21 @@ export function visitedCityToHubPin(
   if (!profile.username) return null;
 
   const username = profile.username.toLowerCase();
-  const media = buildHubTravelerPinMedia(city);
 
-  return {
+  return createHubTravelerPin({
     id: city.id,
     placeLabel: null,
     note: city.note,
-    photoUrl: media.photoUrl,
-    instagramUrls: media.instagramUrls,
-    mediaType: media.mediaType,
-    mediaUrl: media.mediaUrl,
-    mediaDisplayUrl: media.mediaDisplayUrl,
-    mediaPreviewUrl: city.media_preview_url ?? media.mediaPreviewUrl,
+    mediaRow: city,
+    mediaPreviewUrl: city.media_preview_url,
     visitDates: city.visit_dates ?? [],
     pinnedAt: city.updated_at,
     username,
     displayName: resolveProfileDisplayName(profile.display_name, profile.username),
     avatarUrl: profile.avatar_url,
+    instagramProfileUrl: profile.instagram_url ?? null,
     profilePath: profilePath(username),
-  };
+  });
 }
 
 export async function fetchRecentCityPins(

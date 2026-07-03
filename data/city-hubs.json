@@ -6,7 +6,7 @@
       "countryCode": "AR",
       "countrySlug": "argentina",
       "countryName": "Argentina",
-      "heroImage": "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1589909202802-8f4aadce1849.jpg",
       "heroImageAlt": "Buenos Aires"
     },
     "canberra": {
@@ -15,7 +15,7 @@
       "countryCode": "AU",
       "countrySlug": "australia",
       "countryName": "Australia",
-      "heroImage": "https://images.unsplash.com/photo-1672264597620-d792bb6de88d?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1672264597620-d792bb6de88d.jpg",
       "heroImageAlt": "Canberra"
     },
     "brasilia": {
@@ -24,7 +24,7 @@
       "countryCode": "BR",
       "countrySlug": "brazil",
       "countryName": "Brazil",
-      "heroImage": "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1483729558449-99ef09a8c325.jpg",
       "heroImageAlt": "Brasília"
     },
     "cairo": {
@@ -33,7 +33,7 @@
       "countryCode": "EG",
       "countrySlug": "egypt",
       "countryName": "Egypt",
-      "heroImage": "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1547471080-7cc2caa01a7e.jpg",
       "heroImageAlt": "Cairo"
     },
     "paris": {
@@ -42,7 +42,7 @@
       "countryCode": "FR",
       "countrySlug": "france",
       "countryName": "France",
-      "heroImage": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1502602898657-3e91760cbb34.jpg",
       "heroImageAlt": "Paris"
     },
     "berlin": {
@@ -51,7 +51,7 @@
       "countryCode": "DE",
       "countrySlug": "germany",
       "countryName": "Germany",
-      "heroImage": "https://images.unsplash.com/photo-1775045309134-7525be4e2f2d?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1775045309134-7525be4e2f2d.jpg",
       "heroImageAlt": "Brandenburg Gate, Berlin"
     },
     "athens": {
@@ -60,7 +60,7 @@
       "countryCode": "GR",
       "countrySlug": "greece",
       "countryName": "Greece",
-      "heroImage": "https://images.unsplash.com/photo-1555993539-1732b0258235?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1555993539-1732b0258235.jpg",
       "heroImageAlt": "Athens"
     },
     "new-delhi": {
@@ -69,7 +69,7 @@
       "countryCode": "IN",
       "countrySlug": "india",
       "countryName": "India",
-      "heroImage": "https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1587474260584-136574528ed5.jpg",
       "heroImageAlt": "New Delhi"
     },
     "jakarta": {
@@ -78,7 +78,7 @@
       "countryCode": "ID",
       "countrySlug": "indonesia",
       "countryName": "Indonesia",
-      "heroImage": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1558618666-fcd25c85cd64.jpg",
       "heroImageAlt": "Jakarta"
     },
     "rome": {
@@ -87,7 +87,7 @@
       "countryCode": "IT",
       "countrySlug": "italy",
       "countryName": "Italy",
-      "heroImage": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1552832230-c0197dd311b5.jpg",
       "heroImageAlt": "Rome"
     },
     "tokyo": {
@@ -96,7 +96,7 @@
       "countryCode": "JP",
       "countrySlug": "japan",
       "countryName": "Japan",
-      "heroImage": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1540959733332-eab4deabeeaf.jpg",
       "heroImageAlt": "Tokyo"
     },
     "mexico-city": {
@@ -105,7 +105,7 @@
       "countryCode": "MX",
       "countrySlug": "mexico",
       "countryName": "Mexico",
-      "heroImage": "https://images.unsplash.com/photo-1522083165195-3424ed129620?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1522083165195-3424ed129620.jpg",
       "heroImageAlt": "Mexico City"
     },
     "rabat": {
@@ -114,7 +114,7 @@
       "countryCode": "MA",
       "countrySlug": "morocco",
       "countryName": "Morocco",
-      "heroImage": "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1548013146-72479768bada.jpg",
       "heroImageAlt": "Rabat"
     },
     "lisbon": {
@@ -123,7 +123,7 @@
       "countryCode": "PT",
       "countrySlug": "portugal",
       "countryName": "Portugal",
-      "heroImage": "https://images.unsplash.com/photo-1555881400-74d7acaacd8b?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1555881400-74d7acaacd8b.jpg",
       "heroImageAlt": "Lisbon"
     },
     "seoul": {
@@ -132,7 +132,7 @@
       "countryCode": "KR",
       "countrySlug": "south-korea",
       "countryName": "South Korea",
-      "heroImage": "https://images.unsplash.com/photo-1517154421773-0529f29ea451?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1517154421773-0529f29ea451.jpg",
       "heroImageAlt": "Seoul"
     },
     "madrid": {
@@ -141,7 +141,7 @@
       "countryCode": "ES",
       "countrySlug": "spain",
       "countryName": "Spain",
-      "heroImage": "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1539037116277-4db20889f2d4.jpg",
       "heroImageAlt": "Madrid"
     },
     "bangkok": {
@@ -150,7 +150,7 @@
       "countryCode": "TH",
       "countrySlug": "thailand",
       "countryName": "Thailand",
-      "heroImage": "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1508009603885-50cf7c579365.jpg",
       "heroImageAlt": "Bangkok"
     },
     "ankara": {
@@ -159,7 +159,7 @@
       "countryCode": "TR",
       "countrySlug": "turkey",
       "countryName": "Turkey",
-      "heroImage": "https://images.unsplash.com/photo-1650802315195-f58a8663c9be?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1650802315195-f58a8663c9be.jpg",
       "heroImageAlt": "Ankara"
     },
     "antalya": {
@@ -184,7 +184,7 @@
       "countryCode": "GB",
       "countrySlug": "united-kingdom",
       "countryName": "United Kingdom",
-      "heroImage": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1513635269975-59663e0ac1ad.jpg",
       "heroImageAlt": "London"
     },
     "washington-d-c": {
@@ -194,7 +194,7 @@
       "countrySlug": "united-states",
       "countryName": "United States",
       "touristCityName": "Washington",
-      "heroImage": "https://images.unsplash.com/photo-1501466044931-62695aada8e9?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1501466044931-62695aada8e9.jpg",
       "heroImageAlt": "Washington, D.C."
     },
     "hanoi": {
@@ -203,7 +203,7 @@
       "countryCode": "VN",
       "countrySlug": "vietnam",
       "countryName": "Vietnam",
-      "heroImage": "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1596422846543-75c6fc197f07.jpg",
       "heroImageAlt": "Hanoi"
     },
     "barcelona": {
@@ -212,7 +212,7 @@
       "countryCode": "ES",
       "countrySlug": "spain",
       "countryName": "Spain",
-      "heroImage": "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1583422409516-2895a77efded.jpg",
       "heroImageAlt": "Barcelona"
     },
     "amsterdam": {
@@ -221,7 +221,7 @@
       "countryCode": "NL",
       "countrySlug": "netherlands",
       "countryName": "Netherlands",
-      "heroImage": "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1534351590666-13e3e96b5017.jpg",
       "heroImageAlt": "Amsterdam"
     },
     "vienna": {
@@ -230,7 +230,7 @@
       "countryCode": "AT",
       "countrySlug": "austria",
       "countryName": "Austria",
-      "heroImage": "https://images.unsplash.com/photo-1605012574745-2d3b3e5b5b5b?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
       "heroImageAlt": "Vienna"
     },
     "prague": {
@@ -240,7 +240,7 @@
       "countrySlug": "czech-republic",
       "countryName": "Czech Republic",
       "touristCityName": "Prague 1",
-      "heroImage": "https://images.unsplash.com/photo-1541849546-216b3d09d218?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
       "heroImageAlt": "Prague"
     },
     "brussels": {
@@ -249,7 +249,7 @@
       "countryCode": "BE",
       "countrySlug": "belgium",
       "countryName": "Belgium",
-      "heroImage": "https://images.unsplash.com/photo-1559128010-7c1b4769d6d5?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
       "heroImageAlt": "Brussels"
     },
     "venice": {
@@ -258,7 +258,7 @@
       "countryCode": "IT",
       "countrySlug": "italy",
       "countryName": "Italy",
-      "heroImage": "https://images.unsplash.com/photo-1523906839108-9bad4dec3b60?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
       "heroImageAlt": "Venice"
     },
     "new-york": {
@@ -267,7 +267,7 @@
       "countryCode": "US",
       "countrySlug": "united-states",
       "countryName": "United States",
-      "heroImage": "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=400&q=80",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1496442226666-8d4d0e62e6e9.jpg",
       "heroImageAlt": "New York"
     },
     "los-angeles": {

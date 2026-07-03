@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
 import { publishCityHubOnPin } from "@/lib/supabase/published-hubs";
+import { notifyFollowersAfterCityPin } from "@/lib/supabase/notify-pin-followers";
 import { revalidateCityHubForPin } from "@/lib/cache/revalidate-city-hub";
 import { cityBatchSchema } from "@/lib/validations/city-batch";
 
@@ -89,6 +90,7 @@ export async function POST(request: Request) {
   for (const city of inserted ?? []) {
     revalidateCityHubForPin(city.country_code, city.city_name);
     await publishCityHubOnPin(supabase, city);
+    await notifyFollowersAfterCityPin(supabase, user.id, city);
   }
 
   return NextResponse.json({

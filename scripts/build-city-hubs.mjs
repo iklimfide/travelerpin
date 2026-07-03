@@ -13,115 +13,115 @@ const TOURIST_CITY_NAME_OVERRIDES = {
 /** Optional Unsplash hero images per city slug. */
 const HERO_IMAGES = {
   paris: {
-    url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1502602898657-3e91760cbb34.jpg",
     alt: "Paris",
   },
   rome: {
-    url: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1552832230-c0197dd311b5.jpg",
     alt: "Rome",
   },
   london: {
-    url: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1513635269975-59663e0ac1ad.jpg",
     alt: "London",
   },
   tokyo: {
-    url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1540959733332-eab4deabeeaf.jpg",
     alt: "Tokyo",
   },
   "new-delhi": {
-    url: "https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1587474260584-136574528ed5.jpg",
     alt: "New Delhi",
   },
   cairo: {
-    url: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1547471080-7cc2caa01a7e.jpg",
     alt: "Cairo",
   },
   bangkok: {
-    url: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1508009603885-50cf7c579365.jpg",
     alt: "Bangkok",
   },
   madrid: {
-    url: "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1539037116277-4db20889f2d4.jpg",
     alt: "Madrid",
   },
   berlin: {
-    url: "https://images.unsplash.com/photo-1775045309134-7525be4e2f2d?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1775045309134-7525be4e2f2d.jpg",
     alt: "Brandenburg Gate, Berlin",
   },
   athens: {
-    url: "https://images.unsplash.com/photo-1555993539-1732b0258235?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1555993539-1732b0258235.jpg",
     alt: "Athens",
   },
   lisbon: {
-    url: "https://images.unsplash.com/photo-1555881400-74d7acaacd8b?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1555881400-74d7acaacd8b.jpg",
     alt: "Lisbon",
   },
   seoul: {
-    url: "https://images.unsplash.com/photo-1517154421773-0529f29ea451?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1517154421773-0529f29ea451.jpg",
     alt: "Seoul",
   },
   "mexico-city": {
-    url: "https://images.unsplash.com/photo-1522083165195-3424ed129620?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1522083165195-3424ed129620.jpg",
     alt: "Mexico City",
   },
   "buenos-aires": {
-    url: "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1589909202802-8f4aadce1849.jpg",
     alt: "Buenos Aires",
   },
   jakarta: {
-    url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1558618666-fcd25c85cd64.jpg",
     alt: "Jakarta",
   },
   hanoi: {
-    url: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1596422846543-75c6fc197f07.jpg",
     alt: "Hanoi",
   },
   ankara: {
-    url: "https://images.unsplash.com/photo-1650802315195-f58a8663c9be?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1650802315195-f58a8663c9be.jpg",
     alt: "Ankara",
   },
   canberra: {
-    url: "https://images.unsplash.com/photo-1672264597620-d792bb6de88d?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1672264597620-d792bb6de88d.jpg",
     alt: "Canberra",
   },
   brasilia: {
-    url: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1483729558449-99ef09a8c325.jpg",
     alt: "Brasília",
   },
   rabat: {
-    url: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1548013146-72479768bada.jpg",
     alt: "Rabat",
   },
   "washington-d-c": {
-    url: "https://images.unsplash.com/photo-1501466044931-62695aada8e9?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1501466044931-62695aada8e9.jpg",
     alt: "Washington, D.C.",
   },
   barcelona: {
-    url: "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1583422409516-2895a77efded.jpg",
     alt: "Barcelona",
   },
   amsterdam: {
-    url: "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1534351590666-13e3e96b5017.jpg",
     alt: "Amsterdam",
   },
   vienna: {
-    url: "https://images.unsplash.com/photo-1605012574745-2d3b3e5b5b5b?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
     alt: "Vienna",
   },
   prague: {
-    url: "https://images.unsplash.com/photo-1541849546-216b3d09d218?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
     alt: "Prague",
   },
   brussels: {
-    url: "https://images.unsplash.com/photo-1559128010-7c1b4769d6d5?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
     alt: "Brussels",
   },
   venice: {
-    url: "https://images.unsplash.com/photo-1523906839108-9bad4dec3b60?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
     alt: "Venice",
   },
   "new-york": {
-    url: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=400&q=80",
+    url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1496442226666-8d4d0e62e6e9.jpg",
     alt: "New York",
   },
 };

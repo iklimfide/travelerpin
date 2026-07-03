@@ -5,7 +5,7 @@
     "countryCode": "ES",
     "countrySlug": "spain",
     "countryName": "Spain",
-    "heroImage": "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=400&q=80",
+    "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1583422409516-2895a77efded.jpg",
     "heroImageAlt": "Barcelona"
   },
   {
@@ -14,7 +14,7 @@
     "countryCode": "NL",
     "countrySlug": "netherlands",
     "countryName": "Netherlands",
-    "heroImage": "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?auto=format&fit=crop&w=400&q=80",
+    "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1534351590666-13e3e96b5017.jpg",
     "heroImageAlt": "Amsterdam"
   },
   {
@@ -23,7 +23,7 @@
     "countryCode": "AT",
     "countrySlug": "austria",
     "countryName": "Austria",
-    "heroImage": "https://images.unsplash.com/photo-1605012574745-2d3b3e5b5b5b?auto=format&fit=crop&w=400&q=80",
+    "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
     "heroImageAlt": "Vienna"
   },
   {
@@ -33,7 +33,7 @@
     "countrySlug": "czech-republic",
     "countryName": "Czech Republic",
     "touristCityName": "Prague 1",
-    "heroImage": "https://images.unsplash.com/photo-1541849546-216b3d09d218?auto=format&fit=crop&w=400&q=80",
+    "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
     "heroImageAlt": "Prague"
   },
   {
@@ -42,7 +42,7 @@
     "countryCode": "BE",
     "countrySlug": "belgium",
     "countryName": "Belgium",
-    "heroImage": "https://images.unsplash.com/photo-1559128010-7c1b4769d6d5?auto=format&fit=crop&w=400&q=80",
+    "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
     "heroImageAlt": "Brussels"
   },
   {
@@ -51,7 +51,7 @@
     "countryCode": "IT",
     "countrySlug": "italy",
     "countryName": "Italy",
-    "heroImage": "https://images.unsplash.com/photo-1523906839108-9bad4dec3b60?auto=format&fit=crop&w=400&q=80",
+    "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
     "heroImageAlt": "Venice"
   },
   {
@@ -60,7 +60,7 @@
     "countryCode": "US",
     "countrySlug": "united-states",
     "countryName": "United States",
-    "heroImage": "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=400&q=80",
+    "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/photo-1496442226666-8d4d0e62e6e9.jpg",
     "heroImageAlt": "New York"
   }
 ]

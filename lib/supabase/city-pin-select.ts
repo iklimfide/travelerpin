@@ -4,16 +4,22 @@ import { isMissingColumnSchemaError } from "@/lib/supabase/pin-media-schema";
 import type { MediaType } from "@/types/database";
 
 const MEDIA_FIELDS = "media_type, media_url, media_preview_url, photo_url, instagram_urls";
-const PROFILE_JOIN = "profiles!inner(username, display_name, avatar_url)";
+const PROFILE_JOIN =
+  "profiles!inner(username, display_name, avatar_url, instagram_url)";
+const PROFILE_JOIN_LEGACY = "profiles!inner(username, display_name, avatar_url)";
 
 const CITY_PIN_SELECT_FULL = `id, city_name, note, ${MEDIA_FIELDS}, visit_dates, updated_at, ${PROFILE_JOIN}`;
+const CITY_PIN_SELECT_FULL_LEGACY_PROFILE = `id, city_name, note, ${MEDIA_FIELDS}, visit_dates, updated_at, ${PROFILE_JOIN_LEGACY}`;
 const CITY_PIN_SELECT_NO_VISIT_DATES = `id, city_name, note, ${MEDIA_FIELDS}, updated_at, ${PROFILE_JOIN}`;
-const CITY_PIN_SELECT_LEGACY_WITH_VISIT_DATES = `id, city_name, note, media_type, media_url, media_preview_url, visit_dates, updated_at, ${PROFILE_JOIN}`;
-const CITY_PIN_SELECT_LEGACY = `id, city_name, note, media_type, media_url, media_preview_url, updated_at, ${PROFILE_JOIN}`;
+const CITY_PIN_SELECT_NO_VISIT_DATES_LEGACY_PROFILE = `id, city_name, note, ${MEDIA_FIELDS}, updated_at, ${PROFILE_JOIN_LEGACY}`;
+const CITY_PIN_SELECT_LEGACY_WITH_VISIT_DATES = `id, city_name, note, media_type, media_url, media_preview_url, visit_dates, updated_at, ${PROFILE_JOIN_LEGACY}`;
+const CITY_PIN_SELECT_LEGACY = `id, city_name, note, media_type, media_url, media_preview_url, updated_at, ${PROFILE_JOIN_LEGACY}`;
 const CITY_PIN_SELECT_HUB_FULL = `id, note, ${MEDIA_FIELDS}, visit_dates, updated_at, ${PROFILE_JOIN}`;
+const CITY_PIN_SELECT_HUB_FULL_LEGACY_PROFILE = `id, note, ${MEDIA_FIELDS}, visit_dates, updated_at, ${PROFILE_JOIN_LEGACY}`;
 const CITY_PIN_SELECT_HUB_NO_VISIT_DATES = `id, note, ${MEDIA_FIELDS}, updated_at, ${PROFILE_JOIN}`;
-const CITY_PIN_SELECT_HUB_LEGACY_WITH_VISIT_DATES = `id, note, media_type, media_url, media_preview_url, visit_dates, updated_at, ${PROFILE_JOIN}`;
-const CITY_PIN_SELECT_HUB_LEGACY = `id, note, media_type, media_url, media_preview_url, updated_at, ${PROFILE_JOIN}`;
+const CITY_PIN_SELECT_HUB_NO_VISIT_DATES_LEGACY_PROFILE = `id, note, ${MEDIA_FIELDS}, updated_at, ${PROFILE_JOIN_LEGACY}`;
+const CITY_PIN_SELECT_HUB_LEGACY_WITH_VISIT_DATES = `id, note, media_type, media_url, media_preview_url, visit_dates, updated_at, ${PROFILE_JOIN_LEGACY}`;
+const CITY_PIN_SELECT_HUB_LEGACY = `id, note, media_type, media_url, media_preview_url, updated_at, ${PROFILE_JOIN_LEGACY}`;
 
 export type CityPinQueryRow = {
   id: string;
@@ -30,6 +36,7 @@ export type CityPinQueryRow = {
     username: string;
     display_name: string | null;
     avatar_url: string | null;
+    instagram_url?: string | null;
   } | null;
 };
 
@@ -97,7 +104,9 @@ export async function fetchCityPinRowsByCountry(
   return selectWithVariants<CityPinQueryRow>(
     [
       CITY_PIN_SELECT_FULL,
+      CITY_PIN_SELECT_FULL_LEGACY_PROFILE,
       CITY_PIN_SELECT_NO_VISIT_DATES,
+      CITY_PIN_SELECT_NO_VISIT_DATES_LEGACY_PROFILE,
       CITY_PIN_SELECT_LEGACY_WITH_VISIT_DATES,
       CITY_PIN_SELECT_LEGACY,
     ],
@@ -116,7 +125,9 @@ export async function fetchCityPinRowsForHub(
   return selectWithVariants<CityPinQueryRow>(
     [
       CITY_PIN_SELECT_HUB_FULL,
+      CITY_PIN_SELECT_HUB_FULL_LEGACY_PROFILE,
       CITY_PIN_SELECT_HUB_NO_VISIT_DATES,
+      CITY_PIN_SELECT_HUB_NO_VISIT_DATES_LEGACY_PROFILE,
       CITY_PIN_SELECT_HUB_LEGACY_WITH_VISIT_DATES,
       CITY_PIN_SELECT_HUB_LEGACY,
     ],

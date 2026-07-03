@@ -44,23 +44,28 @@ export function HubMemories({ hubName, pins, labels }: HubMemoriesProps) {
 
             return (
               <li key={pin.id} className="city-page__memory">
-                {hasMedia ? (
+                {hasMedia && pin.mediaType === "photo" && pin.mediaUrl ? (
+                  <Link
+                    href={pin.profilePath}
+                    className="city-page__memory-thumb-btn"
+                    aria-label={`${pin.displayName} — ${labels.viewMap}`}
+                  >
+                    <Image
+                      src={pin.mediaUrl}
+                      alt=""
+                      width={112}
+                      height={112}
+                      className="city-page__memory-thumb-image"
+                      sizes="112px"
+                    />
+                  </Link>
+                ) : hasMedia ? (
                   <button
                     type="button"
                     className="city-page__memory-thumb-btn"
                     onClick={() => setExpandedPin(pin)}
                     aria-label={`${labels.viewPin} — ${pin.displayName}`}
                   >
-                    {pin.mediaType === "photo" && pin.mediaUrl ? (
-                      <Image
-                        src={pin.mediaUrl}
-                        alt=""
-                        width={112}
-                        height={112}
-                        className="city-page__memory-thumb-image"
-                        sizes="112px"
-                      />
-                    ) : null}
                     {pin.mediaType === "instagram" && pin.mediaUrl ? (
                       <InstagramMemoryThumb
                         postUrl={pin.mediaUrl}

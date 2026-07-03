@@ -19,6 +19,8 @@ export type HubTravelerPin = {
   username: string;
   displayName: string;
   avatarUrl: string | null;
+  /** Public Instagram profile URL from the traveler's settings, if any. */
+  instagramProfileUrl: string | null;
   profilePath: string;
 };
 
@@ -54,6 +56,79 @@ export function buildHubTravelerPinMedia(row: PinMediaRow) {
     mediaType,
     mediaDisplayUrl: hubPhotoDisplayUrl(photoUrl),
     mediaPreviewUrl: photoUrl,
+  };
+}
+
+type HubTravelerPinIdentity = {
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  instagramProfileUrl?: string | null;
+  profilePath: string;
+};
+
+type HubTravelerPinInput = HubTravelerPinIdentity & {
+  id: string;
+  placeLabel: string | null;
+  note: string | null;
+  visitDates?: string[];
+  pinnedAt: string;
+  mediaRow: PinMediaRow;
+  mediaPreviewUrl?: string | null;
+};
+
+/**
+ * Build a hub pin and fill missing media from the traveler profile:
+ * avatar → photos, Instagram profile link → Instagram section.
+ */
+export function createHubTravelerPin(input: HubTravelerPinInput): HubTravelerPin {
+  const media = buildHubTravelerPinMedia(input.mediaRow);
+  const instagramProfileUrl = input.instagramProfileUrl ?? null;
+
+  const hasExplicitPhoto =
+    Boolean(media.photoUrl) || (media.mediaType === "photo" && Boolean(media.mediaUrl));
+  const hasExplicitInstagram =
+    media.instagramUrls.length > 0 ||
+    (media.mediaType === "instagram" && Boolean(media.mediaUrl));
+
+  const photoUrl = hasExplicitPhoto
+    ? (media.photoUrl ?? media.mediaUrl)
+    : input.avatarUrl;
+
+  const instagramUrls = hasExplicitInstagram
+    ? media.instagramUrls.length > 0
+      ? media.instagramUrls
+      : media.mediaUrl
+        ? [media.mediaUrl]
+        : []
+    : instagramProfileUrl
+      ? [instagramProfileUrl]
+      : [];
+
+  const mediaUrl = photoUrl ?? instagramUrls[0] ?? null;
+  const mediaType: MediaType | null = photoUrl
+    ? "photo"
+    : instagramUrls.length > 0
+      ? "instagram"
+      : null;
+
+  return {
+    id: input.id,
+    placeLabel: input.placeLabel,
+    note: input.note,
+    photoUrl,
+    instagramUrls,
+    mediaType,
+    mediaUrl,
+    mediaDisplayUrl: hubPhotoDisplayUrl(photoUrl),
+    mediaPreviewUrl: input.mediaPreviewUrl ?? photoUrl,
+    visitDates: input.visitDates ?? [],
+    pinnedAt: input.pinnedAt,
+    username: input.username,
+    displayName: input.displayName,
+    avatarUrl: input.avatarUrl,
+    instagramProfileUrl,
+    profilePath: input.profilePath,
   };
 }
 

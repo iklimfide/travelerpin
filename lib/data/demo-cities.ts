@@ -3,6 +3,24 @@ import type { VisitedCity } from "@/types/database";
 /** Showcase pins for visitors exploring the site before signing up */
 export const DEMO_CITIES: VisitedCity[] = [
   {
+    id: "demo-los-angeles",
+    user_id: "demo",
+    city_name: "Los Angeles",
+    country_code: "US",
+    country_name: "United States",
+    latitude: 34.0522,
+    longitude: -118.2437,
+    note: "Home base in LA: ocean mornings, canyon sunsets, and weekend trips from the city.",
+    media_type: null,
+    media_url: null,
+    photo_url: "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/demo/jennifer-los-angeles.jpg",
+    instagram_urls: ["https://www.instagram.com/p/CuK0zZ9t8rK/"],
+    media_preview_url: null,
+    visit_dates: ["2025-05"],
+    created_at: "2025-05-18T12:00:00.000Z",
+    updated_at: "2025-05-18T12:00:00.000Z",
+  },
+  {
     id: "demo-paris",
     user_id: "demo",
     city_name: "Paris",

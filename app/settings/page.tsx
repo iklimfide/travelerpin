@@ -5,8 +5,8 @@ import { getTranslations } from "next-intl/server";
 import { ProfileSettingsForm } from "@/components/dashboard/ProfileSettingsForm";
 import { LogOutButton } from "@/components/auth/LogOutButton";
 import { createClient } from "@/lib/supabase/server";
+import { fetchProfileSettings } from "@/lib/supabase/profile-settings";
 import { computeTravelStats } from "@/lib/utils/stats";
-import { PROFILE_SELECT } from "@/lib/validations/profile";
 import { profilePath } from "@/lib/seo/site";
 import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
 
@@ -30,14 +30,11 @@ export default async function ProfileSettingsPage() {
 
   const t = await getTranslations("settings");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select(PROFILE_SELECT)
-    .eq("id", user.id)
-    .single();
+  const profile = await fetchProfileSettings(supabase, user.id);
 
   if (!profile) {
-    redirect("/login");
+    // Authenticated but profile row is missing — not a sign-out.
+    redirect("/");
   }
 
   const [{ data: countries }, { data: cities }, { data: parks }] = await Promise.all([

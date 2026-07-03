@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { ShareSheetModal } from "@/components/share/ShareSheetModal";
 import { useShareProfile } from "@/components/share/ShareProfileButton";
 import { ProfileSettingsIcon, ProfileShareIcon } from "@/components/profile/ProfileActionIcons";
+import { ProfileFollowButton } from "@/components/profile/ProfileFollowButton";
+import { ProfileFollowStats } from "@/components/profile/ProfileFollowStats";
 import { finalizeTravelShare } from "@/lib/client/travel-share-snapshot";
 import type { TravelStats } from "@/types/database";
 
@@ -15,6 +18,14 @@ type ProfileActionButtonsProps = {
   isOwnProfile: boolean;
   shareLabel: string;
   editLabel: string;
+  followUsername?: string;
+  followState?: {
+    isFollowing: boolean;
+    followerCount: number;
+    followingCount: number;
+  } | null;
+  canFollow?: boolean;
+  isLoggedIn?: boolean;
 };
 
 export function ProfileActionButtons({
@@ -24,6 +35,10 @@ export function ProfileActionButtons({
   isOwnProfile,
   shareLabel,
   editLabel,
+  followUsername,
+  followState,
+  canFollow = false,
+  isLoggedIn = false,
 }: ProfileActionButtonsProps) {
   const router = useRouter();
 
@@ -40,6 +55,9 @@ export function ProfileActionButtons({
     onShareComplete: isOwnProfile ? handleShareComplete : undefined,
   });
 
+  const showFollow = Boolean(followUsername && followState);
+  const showOwnFollowStats = isOwnProfile && followState;
+
   return (
     <>
       <div className="profile-actions" data-story-exclude="">
@@ -51,13 +69,37 @@ export function ProfileActionButtons({
         >
           <ProfileShareIcon />
         </button>
-        {isOwnProfile ? (
-          <Link href="/settings" className="profile-small-action" aria-label={editLabel}>
-            <ProfileSettingsIcon />
-          </Link>
-        ) : (
-          <span className="profile-small-action profile-small-action--placeholder" aria-hidden />
-        )}
+
+        <div className="profile-actions__end">
+          {showFollow ? (
+            <Suspense fallback={null}>
+              <ProfileFollowButton
+                username={followUsername!}
+                displayName={displayName}
+                initialFollowing={followState!.isFollowing}
+                initialFollowerCount={followState!.followerCount}
+                initialFollowingCount={followState!.followingCount}
+                canFollow={canFollow}
+                isLoggedIn={isLoggedIn}
+                variant="actionBar"
+              />
+            </Suspense>
+          ) : showOwnFollowStats ? (
+            <ProfileFollowStats
+              username={username}
+              displayName={displayName}
+              followerCount={followState!.followerCount}
+              followingCount={followState!.followingCount}
+              className="profile-follow-stats--compact profile-follow-stats--solo"
+            />
+          ) : null}
+
+          {isOwnProfile ? (
+            <Link href="/settings" className="profile-small-action" aria-label={editLabel}>
+              <ProfileSettingsIcon />
+            </Link>
+          ) : null}
+        </div>
       </div>
 
       <ShareSheetModal

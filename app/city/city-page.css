@@ -946,6 +946,46 @@ html.dark .city-page__travelers--row .city-page__traveler-link:hover {
   background: #0f172a;
 }
 
+.city-page__memory-lightbox-instagram-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  text-decoration: none;
+  color: inherit;
+}
+
+.city-page__memory-lightbox-instagram-profile:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.city-page__memory-lightbox-instagram-profile-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.city-page__memory-lightbox-instagram-profile-name {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.city-page__memory-lightbox-instagram-profile-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #be185d;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
 .city-page__memory-lightbox-media--instagram {
   max-width: 100%;
 }

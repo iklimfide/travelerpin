@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { LIMITS } from "@/lib/constants";
 import { optimizeCover } from "@/lib/utils/image";
-import { PROFILE_SELECT } from "@/lib/validations/profile";
+import { updateProfileSettings } from "@/lib/supabase/profile-settings";
 
 const COVER_BUCKET = "covers";
 const COVER_PATH = (userId: string) => `${userId}/cover.webp`;
@@ -61,15 +61,12 @@ export async function POST(request: Request) {
 
   const coverUrl = `${publicUrl}?v=${Date.now()}`;
 
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .update({ cover_url: coverUrl })
-    .eq("id", user.id)
-    .select(PROFILE_SELECT)
-    .single();
+  const { profile, error } = await updateProfileSettings(supabase, user.id, {
+    cover_url: coverUrl,
+  });
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error || !profile) {
+    return NextResponse.json({ error: error ?? "Failed to update profile" }, { status: 500 });
   }
 
   return NextResponse.json({ url: coverUrl, profile });
@@ -91,15 +88,12 @@ export async function DELETE() {
 
   await supabase.storage.from(COVER_BUCKET).remove([COVER_PATH(user.id)]);
 
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .update({ cover_url: null })
-    .eq("id", user.id)
-    .select(PROFILE_SELECT)
-    .single();
+  const { profile, error } = await updateProfileSettings(supabase, user.id, {
+    cover_url: null,
+  });
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error || !profile) {
+    return NextResponse.json({ error: error ?? "Failed to update profile" }, { status: 500 });
   }
 
   return NextResponse.json(profile);

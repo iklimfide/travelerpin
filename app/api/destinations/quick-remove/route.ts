@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { deletePinNotifications } from "@/lib/supabase/notifications";
 import { quickDestinationSchema } from "@/lib/validations/destination";
 
 export async function POST(request: Request) {
@@ -64,6 +65,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: countryError.message }, { status: 500 });
     }
 
+    await deletePinNotifications(supabase, user.id, "country", visitedCountry.id);
+
     return NextResponse.json({
       removed: true,
       countryRemoved: true,
@@ -93,6 +96,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: cityError.message }, { status: 500 });
   }
 
+  await deletePinNotifications(supabase, user.id, "city", existingCity.id);
+
   const { count: remainingCities } = await supabase
     .from("visited_cities")
     .select("id", { count: "exact", head: true })
@@ -101,16 +106,27 @@ export async function POST(request: Request) {
 
   let countryRemoved = false;
   if ((remainingCities ?? 0) === 0) {
-    const { error: countryError } = await supabase
+    const { data: countryRow } = await supabase
       .from("visited_countries")
-      .delete()
+      .select("id")
       .eq("user_id", user.id)
-      .eq("country_code", code);
+      .eq("country_code", code)
+      .maybeSingle();
 
-    if (countryError) {
-      return NextResponse.json({ error: countryError.message }, { status: 500 });
+    if (countryRow) {
+      const { error: countryError } = await supabase
+        .from("visited_countries")
+        .delete()
+        .eq("id", countryRow.id)
+        .eq("user_id", user.id);
+
+      if (countryError) {
+        return NextResponse.json({ error: countryError.message }, { status: 500 });
+      }
+
+      await deletePinNotifications(supabase, user.id, "country", countryRow.id);
+      countryRemoved = true;
     }
-    countryRemoved = true;
   }
 
   return NextResponse.json({

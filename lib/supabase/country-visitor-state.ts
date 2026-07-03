@@ -4,8 +4,7 @@ import {
   GUEST_COUNTRY_VISITOR_STATE,
   type CountryVisitorState,
 } from "@/lib/data/country-visitor-state";
-import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
-import { buildHubTravelerPinMedia } from "@/lib/supabase/hub-traveler-pin";
+import { createHubTravelerPin, type HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
 import { profilePath } from "@/lib/seo/site";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
@@ -20,56 +19,48 @@ export type CountryPageUserState = {
   visitedCountries: VisitedCountry[];
 };
 
-function hubPinFromCity(
-  city: VisitedCity,
-  profile: { username: string; display_name: string | null; avatar_url: string | null }
-): HubTravelerPin {
-  const username = profile.username.toLowerCase();
-  const media = buildHubTravelerPinMedia(city);
+type OwnerProfile = {
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  instagram_url?: string | null;
+};
 
-  return {
+function hubPinFromCity(city: VisitedCity, profile: OwnerProfile): HubTravelerPin {
+  const username = profile.username.toLowerCase();
+
+  return createHubTravelerPin({
     id: `city:${city.id}`,
     placeLabel: city.city_name,
     note: city.note,
-    photoUrl: media.photoUrl,
-    instagramUrls: media.instagramUrls,
-    mediaType: media.mediaType,
-    mediaUrl: media.mediaUrl,
-    mediaDisplayUrl: media.mediaDisplayUrl,
-    mediaPreviewUrl: city.media_preview_url ?? media.mediaPreviewUrl,
+    mediaRow: city,
+    mediaPreviewUrl: city.media_preview_url,
     visitDates: city.visit_dates ?? [],
     pinnedAt: city.updated_at,
     username,
     displayName: resolveProfileDisplayName(profile.display_name, profile.username),
     avatarUrl: profile.avatar_url,
+    instagramProfileUrl: profile.instagram_url ?? null,
     profilePath: profilePath(username),
-  };
+  });
 }
 
-function hubPinFromPark(
-  park: VisitedPark,
-  profile: { username: string; display_name: string | null; avatar_url: string | null }
-): HubTravelerPin {
+function hubPinFromPark(park: VisitedPark, profile: OwnerProfile): HubTravelerPin {
   const username = profile.username.toLowerCase();
-  const media = buildHubTravelerPinMedia(park);
 
-  return {
+  return createHubTravelerPin({
     id: `park:${park.id}`,
     placeLabel: park.park_name,
     note: park.note,
-    photoUrl: media.photoUrl,
-    instagramUrls: media.instagramUrls,
-    mediaType: media.mediaType,
-    mediaUrl: media.mediaUrl,
-    mediaDisplayUrl: media.mediaDisplayUrl,
-    mediaPreviewUrl: media.mediaPreviewUrl,
+    mediaRow: park,
     visitDates: park.visit_dates ?? [],
     pinnedAt: park.updated_at,
     username,
     displayName: resolveProfileDisplayName(profile.display_name, profile.username),
     avatarUrl: profile.avatar_url,
+    instagramProfileUrl: profile.instagram_url ?? null,
     profilePath: profilePath(username),
-  };
+  });
 }
 
 export async function loadCountryPageUserState(
@@ -144,7 +135,7 @@ export async function loadCountryPageUserState(
       .order("country_name", { ascending: true }),
     supabase
       .from("profiles")
-      .select("username, display_name, avatar_url")
+      .select("username, display_name, avatar_url, instagram_url")
       .eq("id", userId)
       .maybeSingle(),
   ]);

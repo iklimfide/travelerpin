@@ -1,5 +1,6 @@
 import type { CityBatchInput } from "@/lib/validations/city-batch";
 import type { CityInput } from "@/lib/validations/city";
+import { offerShareAfterPin } from "@/lib/client/share-pin-prompt";
 
 export async function addCity(
   payload: Pick<CityInput, "city_name" | "country_code" | "country_name"> &
@@ -17,6 +18,7 @@ export async function addCity(
   }
 
   const city = await res.json();
+  offerShareAfterPin({ kind: "city", name: payload.city_name });
   return { ok: true, city };
 }
 
@@ -38,9 +40,18 @@ export async function addCitiesBatch(
   }
 
   const data = await res.json();
+  const added = (data.added as number) ?? 0;
+  if (added > 0) {
+    const firstName = payload.cities[0]?.city_name;
+    offerShareAfterPin(
+      added === 1 && firstName
+        ? { kind: "city", name: firstName }
+        : { kind: "places", name: "places" }
+    );
+  }
   return {
     ok: true,
-    added: (data.added as number) ?? 0,
+    added,
     skipped: (data.skipped as number) ?? 0,
   };
 }

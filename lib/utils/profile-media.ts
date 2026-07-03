@@ -1,6 +1,6 @@
 import {
-  buildHubTravelerPinMedia,
   countHubMediaItems,
+  createHubTravelerPin,
   expandHubPinGalleryItems,
   pinHasGalleryMedia,
   sortHubTravelerPins,
@@ -15,56 +15,44 @@ type ProfileIdentity = {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
+  instagram_url?: string | null;
 };
 
-function profilePinFields(profile: ProfileIdentity) {
-  const username = profile.username.toLowerCase();
-  return {
-    username,
-    displayName: resolveProfileDisplayName(profile.display_name, profile.username),
-    avatarUrl: profile.avatar_url,
-    profilePath: profilePath(username),
-  };
-}
-
 function cityToProfilePin(city: VisitedCity, profile: ProfileIdentity): HubTravelerPin {
-  const media = buildHubTravelerPinMedia(city);
-  const identity = profilePinFields(profile);
+  const username = profile.username.toLowerCase();
 
-  return {
+  return createHubTravelerPin({
     id: `city:${city.id}`,
     placeLabel: city.city_name,
     note: city.note,
-    photoUrl: media.photoUrl,
-    instagramUrls: media.instagramUrls,
-    mediaType: media.mediaType,
-    mediaUrl: media.mediaUrl,
-    mediaDisplayUrl: media.mediaDisplayUrl,
-    mediaPreviewUrl: city.media_preview_url ?? media.mediaPreviewUrl,
+    mediaRow: city,
+    mediaPreviewUrl: city.media_preview_url,
     visitDates: city.visit_dates ?? [],
     pinnedAt: city.updated_at,
-    ...identity,
-  };
+    username,
+    displayName: resolveProfileDisplayName(profile.display_name, profile.username),
+    avatarUrl: profile.avatar_url,
+    instagramProfileUrl: profile.instagram_url ?? null,
+    profilePath: profilePath(username),
+  });
 }
 
 function parkToProfilePin(park: VisitedPark, profile: ProfileIdentity): HubTravelerPin {
-  const media = buildHubTravelerPinMedia(park);
-  const identity = profilePinFields(profile);
+  const username = profile.username.toLowerCase();
 
-  return {
+  return createHubTravelerPin({
     id: `park:${park.id}`,
     placeLabel: park.park_name,
     note: park.note,
-    photoUrl: media.photoUrl,
-    instagramUrls: media.instagramUrls,
-    mediaType: media.mediaType,
-    mediaUrl: media.mediaUrl,
-    mediaDisplayUrl: media.mediaDisplayUrl,
-    mediaPreviewUrl: media.mediaPreviewUrl,
+    mediaRow: park,
     visitDates: park.visit_dates ?? [],
     pinnedAt: park.updated_at,
-    ...identity,
-  };
+    username,
+    displayName: resolveProfileDisplayName(profile.display_name, profile.username),
+    avatarUrl: profile.avatar_url,
+    instagramProfileUrl: profile.instagram_url ?? null,
+    profilePath: profilePath(username),
+  });
 }
 
 export const PROFILE_MEDIA_PREVIEW_LIMIT = 6;

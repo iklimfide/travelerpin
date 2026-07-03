@@ -57,7 +57,7 @@ export async function loadParkPageUserState(
         .order("country_name", { ascending: true }),
       supabase
         .from("profiles")
-        .select("username, display_name, avatar_url")
+        .select("username, display_name, avatar_url, instagram_url")
         .eq("id", userId)
         .maybeSingle(),
     ]);

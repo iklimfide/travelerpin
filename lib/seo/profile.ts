@@ -1,15 +1,15 @@
 import type { TravelStats } from "@/types/database";
 import { BRAND } from "@/lib/constants";
-import { profileShareUrl } from "@/lib/seo/site";
+import { DEFAULT_DESCRIPTION, profileShareUrl } from "@/lib/seo/site";
 
 /** Open Graph / Twitter card title for public profile links. */
-export function buildProfileOgTitle(_displayName: string): string {
-  return `I can answer "How many countries have you visited?" with a single link.`;
+export function buildProfileOgTitle(displayName: string): string {
+  return `${displayName} traveled and pinned the places they've visited`;
 }
 
 /** Open Graph / Twitter card description for public profile links. */
 export function buildProfileOgDescription(): string {
-  return `Create your own travel map on ${BRAND.name} and share your journey with just one link.`;
+  return DEFAULT_DESCRIPTION;
 }
 
 export function buildProfileTitle(

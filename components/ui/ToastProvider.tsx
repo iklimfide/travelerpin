@@ -22,9 +22,11 @@ export type ToastActionOptions = {
   message: string;
   actionLabel: string;
   dismissLabel?: string;
+  secondaryActionLabel?: string;
   fields?: ToastSelectField[];
   onAction: (fieldValues?: Record<string, string>) => void | Promise<void>;
   onDismiss?: () => void;
+  onSecondaryAction?: () => void | Promise<void>;
   durationMs?: number;
   accent?: "blue" | "emerald";
 };
@@ -52,10 +54,12 @@ type ToastState =
       message: string;
       actionLabel: string;
       dismissLabel: string;
+      secondaryActionLabel?: string;
       fields?: ToastSelectField[];
       fieldValues: Record<string, string>;
       onAction: (fieldValues?: Record<string, string>) => void | Promise<void>;
       onDismiss?: () => void;
+      onSecondaryAction?: () => void | Promise<void>;
       accent: "blue" | "emerald";
     }
   | null;
@@ -102,10 +106,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         message: options.message,
         actionLabel: options.actionLabel,
         dismissLabel: options.dismissLabel ?? "No",
+        secondaryActionLabel: options.secondaryActionLabel,
         fields: options.fields,
         fieldValues,
         onAction: options.onAction,
         onDismiss: options.onDismiss,
+        onSecondaryAction: options.onSecondaryAction,
         accent: options.accent ?? "blue",
       });
       if (options.durationMs != null) {
@@ -131,6 +137,20 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       const fieldValues =
         toast.fields && toast.fields.length > 0 ? toast.fieldValues : undefined;
       await toast.onAction(fieldValues);
+      dismiss();
+    } catch {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleSecondaryActionClick() {
+    if (!toast || toast.kind !== "action" || actionLoading || !toast.onSecondaryAction) {
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      await toast.onSecondaryAction();
       dismiss();
     } catch {
       setActionLoading(false);
@@ -196,23 +216,35 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             </div>
           )}
           {toast.kind === "action" && (
-            <div className="mt-3 flex gap-2">
-              <button
-                type="button"
-                onClick={handleDismissClick}
-                disabled={actionLoading}
-                className="flex-1 rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {toast.dismissLabel}
-              </button>
-              <button
-                type="button"
-                onClick={handleActionClick}
-                disabled={actionLoading}
-                className="toast-action__btn-primary flex-1 rounded-lg px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {actionLoading ? "…" : toast.actionLabel}
-              </button>
+            <div className="mt-3 space-y-2">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleDismissClick}
+                  disabled={actionLoading}
+                  className="flex-1 rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 hover:border-slate-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {toast.dismissLabel}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleActionClick}
+                  disabled={actionLoading}
+                  className="toast-action__btn-primary flex-1 rounded-lg px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {actionLoading ? "…" : toast.actionLabel}
+                </button>
+              </div>
+              {toast.secondaryActionLabel && toast.onSecondaryAction ? (
+                <button
+                  type="button"
+                  onClick={handleSecondaryActionClick}
+                  disabled={actionLoading}
+                  className="w-full rounded-lg px-2 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {toast.secondaryActionLabel}
+                </button>
+              ) : null}
             </div>
           )}
         </div>

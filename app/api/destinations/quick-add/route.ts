@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
 import { publishCityHubOnPin } from "@/lib/supabase/published-hubs";
+import {
+  notifyFollowersAfterCityPin,
+  notifyFollowersAfterCountryPin,
+} from "@/lib/supabase/notify-pin-followers";
 import { revalidateCityHubForPin } from "@/lib/cache/revalidate-city-hub";
 import { quickDestinationSchema } from "@/lib/validations/destination";
 
@@ -67,6 +71,8 @@ export async function POST(request: Request) {
       .eq("user_id", user.id)
       .eq("country_code", code);
 
+    await notifyFollowersAfterCountryPin(supabase, user.id, country);
+
     return NextResponse.json({ country, added: true, alreadyHad: false });
   }
 
@@ -116,6 +122,7 @@ export async function POST(request: Request) {
 
   revalidateCityHubForPin(city.country_code, city.city_name);
   await publishCityHubOnPin(supabase, city);
+  await notifyFollowersAfterCityPin(supabase, user.id, city);
 
   return NextResponse.json({ city, added: true, alreadyHad: false });
 }

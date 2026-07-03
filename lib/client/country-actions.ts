@@ -1,12 +1,14 @@
 import { getCountryName } from "@/lib/data/countries";
+import { offerShareAfterPin } from "@/lib/client/share-pin-prompt";
 
 export async function addVisitedCountry(code: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const countryName = getCountryName(code);
   const res = await fetch("/api/countries", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       country_code: code,
-      country_name: getCountryName(code),
+      country_name: countryName,
     }),
   });
 
@@ -15,6 +17,7 @@ export async function addVisitedCountry(code: string): Promise<{ ok: true } | { 
     return { ok: false, error: (data.error as string) ?? "Failed to add country" };
   }
 
+  offerShareAfterPin({ kind: "country", name: countryName });
   return { ok: true };
 }
 

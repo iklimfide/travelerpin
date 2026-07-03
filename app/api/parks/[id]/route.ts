@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { revalidateParkHubForPin } from "@/lib/cache/revalidate-park-hub";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
+import { deletePinNotifications } from "@/lib/supabase/notifications";
 import { resolveCityMediaFields } from "@/lib/utils/city-media";
 import { parkInputSchema } from "@/lib/validations/park";
 import {
@@ -148,6 +149,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  await deletePinNotifications(supabase, user.id, "park", id);
   revalidateParkHubForPin(existing.country_code, existing.park_name);
 
   return NextResponse.json({ success: true });

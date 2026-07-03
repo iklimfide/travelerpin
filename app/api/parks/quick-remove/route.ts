@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { revalidateParkHubForPin } from "@/lib/cache/revalidate-park-hub";
 import { createClient } from "@/lib/supabase/server";
+import { deletePinNotifications } from "@/lib/supabase/notifications";
 import { PARK_TYPES } from "@/types/database";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 
@@ -60,6 +61,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: deleteError.message }, { status: 500 });
   }
 
+  await deletePinNotifications(supabase, user.id, "park", park.id);
   revalidateParkHubForPin(code, data.park_name);
 
   const [{ count: cityCount }, { count: parkCount }, { data: countryRow }] =
@@ -92,6 +94,7 @@ export async function POST(request: Request) {
     if (countryError) {
       return NextResponse.json({ error: countryError.message }, { status: 500 });
     }
+    await deletePinNotifications(supabase, user.id, "country", countryRow.id);
     countryRemoved = true;
   }
 

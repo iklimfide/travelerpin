@@ -1,4 +1,5 @@
 import type { QuickParkInput } from "@/lib/validations/park";
+import { offerShareAfterPin } from "@/lib/client/share-pin-prompt";
 
 export async function quickAddPark(
   payload: QuickParkInput
@@ -18,9 +19,19 @@ export async function quickAddPark(
   }
 
   const data = await res.json();
+  const added = Boolean(data.added);
+  if (added) {
+    const kind =
+      payload.park_type === "national_park"
+        ? "national_park"
+        : payload.park_type === "theme_park"
+          ? "theme_park"
+          : "park";
+    offerShareAfterPin({ kind, name: payload.park_name });
+  }
   return {
     ok: true,
-    added: Boolean(data.added),
+    added,
     alreadyHad: Boolean(data.alreadyHad),
   };
 }

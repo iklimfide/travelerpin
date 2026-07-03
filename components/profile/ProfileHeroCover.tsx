@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { NotificationsNavLink } from "@/components/notifications/NotificationsNavLink";
 
 type ProfileHeroCoverProps = {
   coverUrl: string | null;
@@ -8,6 +9,7 @@ type ProfileHeroCoverProps = {
   residenceHref?: string | null;
   heroTitle: ReactNode;
   heroSubtitle: string;
+  showNotifications?: boolean;
 };
 
 export function ProfileHeroCover({
@@ -16,6 +18,7 @@ export function ProfileHeroCover({
   residenceHref,
   heroTitle,
   heroSubtitle,
+  showNotifications = false,
 }: ProfileHeroCoverProps) {
   const residencePill = residence ? (
     <>
@@ -49,8 +52,9 @@ export function ProfileHeroCover({
               <div className="profile-city-pill">{residencePill}</div>
             )
           ) : (
-            <span />
+            <span aria-hidden />
           )}
+          {showNotifications ? <NotificationsNavLink variant="hero" /> : <span aria-hidden />}
         </div>
 
         <div className="profile-hero-title">

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { deletePinNotifications } from "@/lib/supabase/notifications";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -64,6 +65,8 @@ export async function DELETE(_request: Request, context: RouteContext) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  await deletePinNotifications(supabase, user.id, "country", id);
 
   return NextResponse.json({ success: true });
 }

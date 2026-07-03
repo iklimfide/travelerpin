@@ -1,5 +1,14 @@
 import type { ParkBatchInput } from "@/lib/validations/park";
 import type { ParkInput } from "@/lib/validations/park";
+import { offerShareAfterPin } from "@/lib/client/share-pin-prompt";
+
+function parkPinKind(
+  parkType: ParkInput["park_type"]
+): "national_park" | "theme_park" | "park" {
+  if (parkType === "national_park") return "national_park";
+  if (parkType === "theme_park") return "theme_park";
+  return "park";
+}
 
 export async function addPark(
   payload: Pick<ParkInput, "park_name" | "park_type" | "country_code" | "country_name"> &
@@ -16,6 +25,10 @@ export async function addPark(
     return { ok: false, error: (data.error as string) ?? "Failed to add park" };
   }
 
+  offerShareAfterPin({
+    kind: parkPinKind(payload.park_type),
+    name: payload.park_name,
+  });
   return { ok: true, park: await res.json() };
 }
 
@@ -37,9 +50,18 @@ export async function addParksBatch(
   }
 
   const data = await res.json();
+  const added = (data.added as number) ?? 0;
+  if (added > 0) {
+    const first = payload.parks[0];
+    offerShareAfterPin(
+      added === 1 && first
+        ? { kind: parkPinKind(first.park_type), name: first.park_name }
+        : { kind: "places", name: "places" }
+    );
+  }
   return {
     ok: true,
-    added: (data.added as number) ?? 0,
+    added,
     skipped: (data.skipped as number) ?? 0,
   };
 }

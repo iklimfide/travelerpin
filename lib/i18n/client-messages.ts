@@ -18,6 +18,7 @@ export const modalMessages = enMessages.modal;
 export const authMessages = enMessages.auth;
 export const settingsMessages = enMessages.settings;
 export const dashboardNavMessages = enMessages.dashboardNav;
+export const notificationMessages = enMessages.notifications;
 export const saveDestinationMessages = enMessages.saveDestination;
 
 export function formatMessage(

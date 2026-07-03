@@ -140,6 +140,46 @@ export function computeTravelUpdateDelta(
   };
 }
 
+/** Delta used for post-pin share prompts. No snapshot yet counts as a first share. */
+export function computeSharePromptDelta(
+  snapshot: TravelShareSnapshot | null,
+  stats: TravelStats,
+  visitedCountryCodes: string[],
+  visitedCountries: VisitedCountry[],
+  visitedCities: VisitedCity[],
+  visitedParks: VisitedPark[]
+): TravelUpdateDelta {
+  if (snapshot) {
+    return computeTravelUpdateDelta(
+      snapshot,
+      stats,
+      visitedCountryCodes,
+      visitedCountries,
+      visitedCities,
+      visitedParks
+    );
+  }
+
+  const parksDelta = stats.nationalParks + stats.themeParks;
+  const hasChanges = stats.countries > 0 || stats.cities > 0 || parksDelta > 0;
+  const newCountries = visitedCountries
+    .map((country) => ({
+      code: country.country_code.toUpperCase(),
+      name: country.country_name,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  return {
+    hasChanges,
+    countriesDelta: stats.countries,
+    citiesDelta: stats.cities,
+    parksDelta,
+    newCountries,
+    currentStats: stats,
+    worldPercent: worldCoveragePercent(stats.countries),
+  };
+}
+
 export function buildTravelUpdateShareText(
   displayName: string,
   delta: TravelUpdateDelta,

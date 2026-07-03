@@ -3,12 +3,14 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { InstagramEmbed } from "@/components/media/InstagramEmbed";
+import { InstagramIcon } from "@/components/share/SharePlatformIcons";
 import { HubExternalPhoto } from "@/components/hub/HubExternalPhoto";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { formatVisitDatesList } from "@/lib/utils/visit-date";
 import { getIntlLocale } from "@/lib/i18n/config";
 import { hubPinPhotoSrc } from "@/lib/storage/hub-photo-url";
 import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
+import { toInstagramEmbedUrl } from "@/lib/utils/instagram";
 import type { MediaType } from "@/types/database";
 
 type HubMemoryLightboxProps = {
@@ -111,10 +113,35 @@ export function HubMemoryLightbox({
 
         {mediaType === "instagram" && mediaUrl ? (
           <div className="city-page__memory-lightbox-media city-page__memory-lightbox-media--instagram">
-            <InstagramEmbed
-              postUrl={mediaUrl}
-              title={`${hubName} — ${pin.displayName} on Instagram`}
-            />
+            {toInstagramEmbedUrl(mediaUrl) ? (
+              <InstagramEmbed
+                postUrl={mediaUrl}
+                title={`${hubName} — ${pin.displayName} on Instagram`}
+              />
+            ) : (
+              <a
+                href={mediaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="city-page__memory-lightbox-instagram-profile"
+              >
+                <ProfileAvatar
+                  avatarUrl={pin.avatarUrl}
+                  displayName={pin.displayName}
+                  username={pin.username}
+                  size="md"
+                />
+                <span className="city-page__memory-lightbox-instagram-profile-copy">
+                  <span className="city-page__memory-lightbox-instagram-profile-name">
+                    {pin.displayName}
+                  </span>
+                  <span className="city-page__memory-lightbox-instagram-profile-link">
+                    <InstagramIcon className="h-4 w-4" />
+                    Instagram profile
+                  </span>
+                </span>
+              </a>
+            )}
           </div>
         ) : null}
 

@@ -16,8 +16,11 @@ import type {
   VisitedCountry,
   VisitedPark,
   WishlistCountry,
+  ProfileFollowState,
 } from "@/types/database";
 import { getAuthUser } from "@/lib/supabase/auth";
+import { isDemoProfileUsername } from "@/lib/data/jennifer-demo-page";
+import { loadProfileFollowState } from "@/lib/supabase/profile-follows";
 
 export type PublicProfilePageData = {
   profile: PublicProfile;
@@ -30,6 +33,8 @@ export type PublicProfilePageData = {
   wishlistCodes: string[];
   isLoggedIn: boolean;
   currentUsername: string | null;
+  followState: ProfileFollowState | null;
+  canFollow: boolean;
 };
 
 async function loadWishlistCountries(
@@ -121,6 +126,16 @@ export const loadPublicProfilePage = cache(
         ? getWishlistCountryCodes(wishlistCountries)
         : [];
 
+    const followState = await loadProfileFollowState(
+      supabase,
+      profile.id,
+      authUser?.id ?? null
+    );
+    const canFollow =
+      Boolean(authUser) &&
+      !isOwnProfile &&
+      !isDemoProfileUsername(profile.username);
+
     return {
       profile,
       visitedCountries,
@@ -132,6 +147,8 @@ export const loadPublicProfilePage = cache(
       wishlistCodes,
       isLoggedIn: !!authUser,
       currentUsername,
+      followState,
+      canFollow,
     };
   }
 );

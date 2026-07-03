@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidateCityHubForPin } from "@/lib/cache/revalidate-city-hub";
 import { cityInputSchema } from "@/lib/validations/city";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
+import { deletePinNotifications } from "@/lib/supabase/notifications";
 import { formatVisitedCitySaveError, updateVisitedCityRow } from "@/lib/supabase/visited-city-update";
 import { resolveCityMediaFields } from "@/lib/utils/city-media";
 import { geocodeCity } from "@/lib/utils/geocode";
@@ -140,6 +141,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  await deletePinNotifications(supabase, user.id, "city", id);
   revalidateCityHubForPin(existing.country_code, existing.city_name);
 
   return NextResponse.json({ success: true });

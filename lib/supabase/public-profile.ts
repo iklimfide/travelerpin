@@ -10,12 +10,15 @@ export type PublicProfile = {
   cover_url: string | null;
   bio: string | null;
   residence: string | null;
+  instagram_url: string | null;
   profession: string | null;
   marital_status: string | null;
   wishlist_public: boolean;
 };
 
 const EXTENDED_SELECT =
+  "id, username, display_name, avatar_url, cover_url, bio, residence, instagram_url, profession, marital_status, wishlist_public";
+const LEGACY_EXTENDED_SELECT =
   "id, username, display_name, avatar_url, cover_url, bio, residence, profession, marital_status, wishlist_public";
 const BASE_SELECT = "id, username, display_name";
 
@@ -39,9 +42,30 @@ export async function fetchPublicProfile(
       cover_url: extended.cover_url ?? null,
       bio: extended.bio ?? null,
       residence: extended.residence ?? null,
+      instagram_url: extended.instagram_url ?? null,
       profession: extended.profession ?? null,
       marital_status: extended.marital_status ?? null,
       wishlist_public: extended.wishlist_public === true,
+    };
+  }
+
+  const { data: legacyExtended, error: legacyExtendedError } = await supabase
+    .from("profiles")
+    .select(LEGACY_EXTENDED_SELECT)
+    .eq("username", normalized)
+    .single();
+
+  if (!legacyExtendedError && legacyExtended) {
+    return {
+      ...legacyExtended,
+      avatar_url: legacyExtended.avatar_url ?? null,
+      cover_url: legacyExtended.cover_url ?? null,
+      bio: legacyExtended.bio ?? null,
+      residence: legacyExtended.residence ?? null,
+      instagram_url: null,
+      profession: legacyExtended.profession ?? null,
+      marital_status: legacyExtended.marital_status ?? null,
+      wishlist_public: legacyExtended.wishlist_public === true,
     };
   }
 
@@ -70,6 +94,7 @@ export async function fetchPublicProfile(
     cover_url: null,
     bio: null,
     residence: null,
+    instagram_url: null,
     profession: null,
     marital_status: null,
     wishlist_public: wishlistPublic,

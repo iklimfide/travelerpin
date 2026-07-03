@@ -6,7 +6,7 @@ import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import type { MediaType } from "@/types/database";
 import {
   type HubTravelerPin,
-  buildHubTravelerPinMedia,
+  createHubTravelerPin,
   pinsWithContent,
   sortHubTravelerPins,
 } from "@/lib/supabase/hub-traveler-pin";
@@ -26,6 +26,7 @@ type CityPinRow = {
     username: string;
     display_name: string | null;
     avatar_url: string | null;
+    instagram_url?: string | null;
   } | null;
 };
 
@@ -43,6 +44,7 @@ type ParkPinRow = {
     username: string;
     display_name: string | null;
     avatar_url: string | null;
+    instagram_url?: string | null;
   } | null;
 };
 
@@ -51,27 +53,21 @@ function cityRowToPin(row: CityPinRow): HubTravelerPin | null {
   if (!profile?.username || !row.city_name) return null;
 
   const username = profile.username.toLowerCase();
-  const media = buildHubTravelerPinMedia(row);
 
-  return {
+  return createHubTravelerPin({
     id: `city:${row.id}`,
     placeLabel: row.city_name,
     note: row.note,
-    photoUrl: media.photoUrl,
-    instagramUrls: media.instagramUrls,
-    mediaType: media.mediaType,
-    mediaUrl: media.mediaUrl,
-    mediaDisplayUrl: media.mediaDisplayUrl,
-    mediaPreviewUrl:
-      row.media_preview_url ??
-      media.mediaPreviewUrl,
+    mediaRow: row,
+    mediaPreviewUrl: row.media_preview_url,
     visitDates: row.visit_dates ?? [],
     pinnedAt: row.updated_at,
     username,
     displayName: resolveProfileDisplayName(profile.display_name, profile.username),
     avatarUrl: profile.avatar_url,
+    instagramProfileUrl: profile.instagram_url ?? null,
     profilePath: profilePath(username),
-  };
+  });
 }
 
 function parkRowToPin(row: ParkPinRow): HubTravelerPin | null {
@@ -79,25 +75,20 @@ function parkRowToPin(row: ParkPinRow): HubTravelerPin | null {
   if (!profile?.username) return null;
 
   const username = profile.username.toLowerCase();
-  const media = buildHubTravelerPinMedia(row);
 
-  return {
+  return createHubTravelerPin({
     id: `park:${row.id}`,
     placeLabel: row.park_name,
     note: row.note,
-    photoUrl: media.photoUrl,
-    instagramUrls: media.instagramUrls,
-    mediaType: media.mediaType,
-    mediaUrl: media.mediaUrl,
-    mediaDisplayUrl: media.mediaDisplayUrl,
-    mediaPreviewUrl: media.mediaPreviewUrl,
+    mediaRow: row,
     visitDates: row.visit_dates ?? [],
     pinnedAt: row.updated_at,
     username,
     displayName: resolveProfileDisplayName(profile.display_name, profile.username),
     avatarUrl: profile.avatar_url,
+    instagramProfileUrl: profile.instagram_url ?? null,
     profilePath: profilePath(username),
-  };
+  });
 }
 
 export async function fetchRecentCountryPins(

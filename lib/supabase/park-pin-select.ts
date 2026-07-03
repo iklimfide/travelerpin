@@ -2,12 +2,16 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { MediaType } from "@/types/database";
 
 const MEDIA_FIELDS = "media_type, media_url, photo_url, instagram_urls";
-const PROFILE_JOIN = "profiles!inner(username, display_name, avatar_url)";
+const PROFILE_JOIN =
+  "profiles!inner(username, display_name, avatar_url, instagram_url)";
+const PROFILE_JOIN_LEGACY = "profiles!inner(username, display_name, avatar_url)";
 
 const PARK_PIN_SELECT_FULL = `id, park_name, country_code, note, ${MEDIA_FIELDS}, visit_dates, updated_at, ${PROFILE_JOIN}`;
+const PARK_PIN_SELECT_FULL_LEGACY_PROFILE = `id, park_name, country_code, note, ${MEDIA_FIELDS}, visit_dates, updated_at, ${PROFILE_JOIN_LEGACY}`;
 const PARK_PIN_SELECT_NO_VISIT_DATES = `id, park_name, country_code, note, ${MEDIA_FIELDS}, updated_at, ${PROFILE_JOIN}`;
-const PARK_PIN_SELECT_LEGACY = `id, park_name, country_code, note, media_type, media_url, updated_at, ${PROFILE_JOIN}`;
-const PARK_PIN_SELECT_LEGACY_WITH_VISIT_DATES = `id, park_name, country_code, note, media_type, media_url, visit_dates, updated_at, ${PROFILE_JOIN}`;
+const PARK_PIN_SELECT_NO_VISIT_DATES_LEGACY_PROFILE = `id, park_name, country_code, note, ${MEDIA_FIELDS}, updated_at, ${PROFILE_JOIN_LEGACY}`;
+const PARK_PIN_SELECT_LEGACY = `id, park_name, country_code, note, media_type, media_url, updated_at, ${PROFILE_JOIN_LEGACY}`;
+const PARK_PIN_SELECT_LEGACY_WITH_VISIT_DATES = `id, park_name, country_code, note, media_type, media_url, visit_dates, updated_at, ${PROFILE_JOIN_LEGACY}`;
 
 export type ParkPinQueryRow = {
   id: string;
@@ -24,6 +28,7 @@ export type ParkPinQueryRow = {
     username: string;
     display_name: string | null;
     avatar_url: string | null;
+    instagram_url?: string | null;
   } | null;
 };
 
@@ -52,7 +57,9 @@ function isMissingColumnError(message: string): boolean {
 
 const PARK_PIN_SELECT_VARIANTS = [
   PARK_PIN_SELECT_FULL,
+  PARK_PIN_SELECT_FULL_LEGACY_PROFILE,
   PARK_PIN_SELECT_NO_VISIT_DATES,
+  PARK_PIN_SELECT_NO_VISIT_DATES_LEGACY_PROFILE,
   PARK_PIN_SELECT_LEGACY_WITH_VISIT_DATES,
   PARK_PIN_SELECT_LEGACY,
 ] as const;
