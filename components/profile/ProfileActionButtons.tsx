@@ -41,7 +41,7 @@ export function ProfileActionButtons({
 
   async function handleShareComplete() {
     if (!isOwnProfile) return;
-    await finalizeTravelShare(() => router.refresh());
+    await finalizeTravelShare(() => router.refresh(), username);
   }
 
   const { open, setOpen, shareLinks, handleCopy } = useShareProfile({

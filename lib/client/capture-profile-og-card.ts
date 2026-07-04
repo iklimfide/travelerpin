@@ -1,5 +1,3 @@
-import { PROFILE_STORY_CAPTURE_ID } from "@/lib/client/capture-profile-story-card";
-
 export const PROFILE_OG_CAPTURE_ID = "profile-og-capture";
 
 export const OG_CARD_WIDTH = 1200;
@@ -59,31 +57,34 @@ async function fitMobileProfileToOgPng(dataUrl: string): Promise<Blob> {
 }
 
 /**
- * Screenshot the live mobile profile (hero + identity + map) for the link preview card.
- * Falls back to the legacy hidden OG host if the live region is missing.
+ * Screenshot the owner's profile for the link preview card.
+ * Prefers the dedicated OG host (own profile only), then the username-scoped live region.
  */
-export async function captureProfileOgCard(): Promise<Blob> {
-  const liveProfile = document.getElementById(PROFILE_STORY_CAPTURE_ID);
+export async function captureProfileOgCard(username: string): Promise<Blob> {
+  const { profileStoryCaptureId } = await import("@/lib/client/capture-profile-story-card");
   const legacyHost = document.getElementById(PROFILE_OG_CAPTURE_ID);
-  const element = liveProfile ?? legacyHost;
+  const liveProfile = document.getElementById(profileStoryCaptureId(username));
+  // Never fall back to another profile's capture region (e.g. homepage Jennifer demo).
+  const element = legacyHost ?? liveProfile;
 
   if (!element) {
     throw new Error("missing-capture-region");
   }
 
-  if (liveProfile) {
+  if (element === liveProfile) {
     liveProfile.scrollIntoView({ block: "start", behavior: "instant" });
   }
 
   await new Promise((resolve) => window.setTimeout(resolve, 250));
 
   const { toPng } = await import("html-to-image");
+  const isLive = element === liveProfile;
   const dataUrl = await toPng(element, {
-    pixelRatio: liveProfile ? 2 : 1,
+    pixelRatio: isLive ? 2 : 1,
     cacheBust: true,
     backgroundColor: OG_BACKGROUND,
-    width: liveProfile ? undefined : OG_CARD_WIDTH,
-    height: liveProfile ? undefined : OG_CARD_HEIGHT,
+    width: isLive ? undefined : OG_CARD_WIDTH,
+    height: isLive ? undefined : OG_CARD_HEIGHT,
     filter: (node) => {
       if (!(node instanceof HTMLElement)) return true;
       return node.dataset.storyExclude === undefined;

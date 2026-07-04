@@ -2,6 +2,10 @@ import { formatMessage, profileMessages } from "@/lib/i18n/client-messages";
 
 export const PROFILE_SQUARE_CAPTURE_ID = "profile-square-capture";
 
+export function profileSquareCaptureId(username: string): string {
+  return `${PROFILE_SQUARE_CAPTURE_ID}-${username.trim().toLowerCase()}`;
+}
+
 const SQUARE_SIZE = 1080;
 const SQUARE_BACKGROUND = "#f4f7fb";
 
@@ -72,8 +76,11 @@ export function buildSquareCaptureTitle(displayName: string): string {
 }
 
 /** Screenshot the world map panel with a personalized travel-map title. */
-export async function captureProfileSquareCard(displayName: string): Promise<Blob> {
-  const element = document.getElementById(PROFILE_SQUARE_CAPTURE_ID);
+export async function captureProfileSquareCard(
+  displayName: string,
+  username: string
+): Promise<Blob> {
+  const element = document.getElementById(profileSquareCaptureId(username));
   if (!element) {
     throw new Error("missing-capture-region");
   }

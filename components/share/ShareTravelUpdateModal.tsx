@@ -49,8 +49,8 @@ export function ShareTravelUpdateModal({
   const completeShare = useCallback(async () => {
     onClose();
     if (!persistShareSnapshot) return;
-    await finalizeTravelShare(() => router.refresh());
-  }, [onClose, persistShareSnapshot, router]);
+    await finalizeTravelShare(() => router.refresh(), username);
+  }, [onClose, persistShareSnapshot, router, username]);
 
   async function downloadImage(format: "square" | "story") {
     setDownloading(format);
@@ -58,8 +58,8 @@ export function ShareTravelUpdateModal({
     try {
       const blob =
         format === "story"
-          ? await captureProfileStoryCard()
-          : await captureProfileSquareCard(displayName);
+          ? await captureProfileStoryCard(username)
+          : await captureProfileSquareCard(displayName, username);
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;

@@ -1,5 +1,10 @@
 export const PROFILE_STORY_CAPTURE_ID = "profile-story-capture";
 
+/** Username-scoped so homepage demo (Jennifer) never shadows another profile. */
+export function profileStoryCaptureId(username: string): string {
+  return `${PROFILE_STORY_CAPTURE_ID}-${username.trim().toLowerCase()}`;
+}
+
 const STORY_WIDTH = 1080;
 const STORY_HEIGHT = 1920;
 const STORY_BACKGROUND = "#f4f7fb";
@@ -60,8 +65,8 @@ async function fitCaptureToStoryPng(dataUrl: string): Promise<Blob> {
 }
 
 /** Screenshot the live profile header (hero + card + map) for a 9:16 story PNG. */
-export async function captureProfileStoryCard(): Promise<Blob> {
-  const element = document.getElementById(PROFILE_STORY_CAPTURE_ID);
+export async function captureProfileStoryCard(username: string): Promise<Blob> {
+  const element = document.getElementById(profileStoryCaptureId(username));
   if (!element) {
     throw new Error("missing-capture-region");
   }

@@ -105,8 +105,8 @@ export function ProfileTravelUpdateCard({
 
   const handleShareComplete = useCallback(async () => {
     if (!persistShareSnapshot) return;
-    await finalizeTravelShare(() => router.refresh());
-  }, [persistShareSnapshot, router]);
+    await finalizeTravelShare(() => router.refresh(), username);
+  }, [persistShareSnapshot, router, username]);
 
   const { open, setOpen, shareLinks, handleCopy } = useShareProfile({
     username,

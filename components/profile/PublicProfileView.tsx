@@ -135,7 +135,10 @@ export async function PublicProfileView({
         </div>
       ) : null}
       <div className="profile-shell">
-        <div id="profile-story-capture" className="profile-story-capture">
+        <div
+          id={`profile-story-capture-${profile.username.toLowerCase()}`}
+          className="profile-story-capture"
+        >
           <ProfileHeroCover
             coverUrl={coverUrl}
             residence={profile.residence}
@@ -177,7 +180,10 @@ export async function PublicProfileView({
             />
 
             {hasMapContent ? (
-              <div id="profile-square-capture" className="profile-square-capture">
+              <div
+                id={`profile-square-capture-${profile.username.toLowerCase()}`}
+                className="profile-square-capture"
+              >
                 <ProfileMapPanel
                   visitedCountryCodes={visitedCodes}
                   wishlistCountryCodes={visibleWishlistCodes}
