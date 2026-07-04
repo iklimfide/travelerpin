@@ -13,7 +13,8 @@ import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
 
-export const runtime = "edge";
+// Node runtime: travel-update image bundle exceeds the 1 MB Edge Function limit.
+export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   const supabase = await createClient();

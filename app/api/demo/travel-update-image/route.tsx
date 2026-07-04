@@ -10,7 +10,8 @@ import { buildProfileDescription } from "@/lib/seo/profile";
 import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 
-export const runtime = "edge";
+// Node runtime: demo profile data + image bundle exceeds the 1 MB Edge Function limit.
+export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
