@@ -12,6 +12,7 @@ import { AuthModalProvider } from "@/components/auth/AuthModalProvider";
 import { SharePinPromptProvider } from "@/components/share/SharePinPromptProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { ClearPwaArtifacts } from "@/components/dev/ClearPwaArtifacts";
+import { DevMobilePreview } from "@/components/dev/DevMobilePreview";
 import { OwnProfileShellGate } from "@/components/dashboard/OwnProfileShellGate";
 import "./globals.css";
 
@@ -84,20 +85,22 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full min-w-0 flex-col overflow-x-hidden bg-background text-foreground">
-        <OwnProfileShellGate>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <ThemeProvider>
-              <ClearPwaArtifacts />
-              <ModalProvider>
-                <ToastProvider>
-                  <SharePinPromptProvider>
-                    <AuthModalProvider>{children}</AuthModalProvider>
-                  </SharePinPromptProvider>
-                </ToastProvider>
-              </ModalProvider>
-            </ThemeProvider>
-          </NextIntlClientProvider>
-        </OwnProfileShellGate>
+        <DevMobilePreview>
+          <OwnProfileShellGate>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              <ThemeProvider>
+                <ClearPwaArtifacts />
+                <ModalProvider>
+                  <ToastProvider>
+                    <SharePinPromptProvider>
+                      <AuthModalProvider>{children}</AuthModalProvider>
+                    </SharePinPromptProvider>
+                  </ToastProvider>
+                </ModalProvider>
+              </ThemeProvider>
+            </NextIntlClientProvider>
+          </OwnProfileShellGate>
+        </DevMobilePreview>
       </body>
     </html>
   );

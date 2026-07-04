@@ -18,6 +18,7 @@ type CountryPageContentProps = {
   hub: CountryHub;
   capitalCitySlug: string | null;
   travelers: CountryTraveler[];
+  wishlistTravelers?: CountryTraveler[];
   memoryPins: HubTravelerPin[];
   visitorState: CountryVisitorState;
   editOwnerCity: VisitedCity | null;
@@ -49,6 +50,8 @@ type CountryPageContentProps = {
     editYourPinSaved: string;
     recentTravelers: string;
     noTravelersYet: string;
+    wantTravelers: string;
+    noWantTravelersYet: string;
     pinCountry: string;
     photosHeading: string;
     instagramHeading: string;
@@ -66,6 +69,7 @@ export function CountryPageContent({
   hub,
   capitalCitySlug,
   travelers,
+  wishlistTravelers = [],
   memoryPins,
   visitorState,
   editOwnerCity,
@@ -137,6 +141,44 @@ export function CountryPageContent({
           ))}
         </section>
 
+        <HubPageListingSections
+          hubName={hub.name}
+          travelers={travelers}
+          wishlistTravelers={wishlistTravelers}
+          memoryPins={memoryPins}
+          loginHref={loginHref}
+          isLoggedIn={visitorState.isLoggedIn}
+          hasOwnerPin={visitorState.isOnMap}
+          canEditMedia={hasOwnerPin}
+          visitedCountries={visitedCountries}
+          ownerCity={editOwnerCity}
+          ownerPark={editOwnerPark}
+          headingIds={{
+            travelers: "country-travelers-heading",
+            wishlist: "country-wishlist-heading",
+            photos: "country-photos-heading",
+            instagram: "country-instagram-heading",
+          }}
+          labels={{
+            recentTravelers: labels.recentTravelers,
+            noTravelersYet: labels.noTravelersYet,
+            wantTravelers: labels.wantTravelers,
+            noWantTravelersYet: labels.noWantTravelersYet,
+            pinCta: labels.pinCountry,
+            pinItTooCta: labels.pinItTooCta,
+            photosHeading: labels.photosHeading,
+            instagramHeading: labels.instagramHeading,
+            noInstagramPostsYet: labels.noInstagramPostsYet,
+            noPhotosYet: labels.noPhotosYet,
+            addYourPhotoCta: labels.addYourPhotoCta,
+            addYourInstagramCta: labels.addYourInstagramCta,
+            viewPin: labels.viewPin,
+            viewMap: labels.viewTravelMap,
+            close: labels.close,
+            instagramPost: labels.instagramPost,
+          }}
+        />
+
         {featuredPin?.note ? (
           <section className="city-page__featured-pin" aria-label={labels.viewPin}>
             <Link href={featuredPin.profilePath} className="city-page__featured-pin-author">
@@ -154,40 +196,6 @@ export function CountryPageContent({
             <p className="city-page__featured-pin-note">{featuredPin.note}</p>
           </section>
         ) : null}
-
-        <HubPageListingSections
-          hubName={hub.name}
-          travelers={travelers}
-          memoryPins={memoryPins}
-          loginHref={loginHref}
-          isLoggedIn={visitorState.isLoggedIn}
-          hasOwnerPin={visitorState.isOnMap}
-          canEditMedia={hasOwnerPin}
-          visitedCountries={visitedCountries}
-          ownerCity={editOwnerCity}
-          ownerPark={editOwnerPark}
-          headingIds={{
-            travelers: "country-travelers-heading",
-            photos: "country-photos-heading",
-            instagram: "country-instagram-heading",
-          }}
-          labels={{
-            recentTravelers: labels.recentTravelers,
-            noTravelersYet: labels.noTravelersYet,
-            pinCta: labels.pinCountry,
-            pinItTooCta: labels.pinItTooCta,
-            photosHeading: labels.photosHeading,
-            instagramHeading: labels.instagramHeading,
-            noInstagramPostsYet: labels.noInstagramPostsYet,
-            noPhotosYet: labels.noPhotosYet,
-            addYourPhotoCta: labels.addYourPhotoCta,
-            addYourInstagramCta: labels.addYourInstagramCta,
-            viewPin: labels.viewPin,
-            viewMap: labels.viewTravelMap,
-            close: labels.close,
-            instagramPost: labels.instagramPost,
-          }}
-        />
       </div>
     </div>
   );

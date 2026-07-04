@@ -1,3 +1,12 @@
+/** Fold Turkish I variants so "İstanbul" and "Istanbul" compare equal. */
+export function normalizeCityKey(value: string): string {
+  return value
+    .trim()
+    .toLocaleLowerCase("tr")
+    .replaceAll("ı", "i")
+    .replaceAll("İ", "i");
+}
+
 /** "rust" → "Rust", "new york" → "New York", "(ko tapu)" → "(Ko Tapu)" */
 export function formatCityDisplayName(name: string): string {
   const trimmed = name.trim().replace(/\s+/g, " ");

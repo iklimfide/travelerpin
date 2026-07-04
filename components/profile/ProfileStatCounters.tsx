@@ -1,7 +1,4 @@
-import Link from "next/link";
-
 type ProfileStatCountersProps = {
-  allHref: string;
   countries: number;
   cities: number;
   nationalParks: number;
@@ -13,22 +10,20 @@ type ProfileStatCountersProps = {
 };
 
 type StatItemProps = {
-  href: string;
   value: number;
   label: string;
 };
 
-function StatItem({ href, value, label }: StatItemProps) {
+function StatItem({ value, label }: StatItemProps) {
   return (
-    <Link href={href} className="profile-stat profile-stat-link">
+    <div className="profile-stat">
       <strong>{value}</strong>
       <span>{label}</span>
-    </Link>
+    </div>
   );
 }
 
 export function ProfileStatCounters({
-  allHref,
   countries,
   cities,
   nationalParks,
@@ -40,10 +35,10 @@ export function ProfileStatCounters({
 }: ProfileStatCountersProps) {
   return (
     <div className="profile-stats">
-      <StatItem href={allHref} value={countries} label={countriesLabel} />
-      <StatItem href={allHref} value={cities} label={citiesLabel} />
-      <StatItem href={allHref} value={nationalParks} label={nationalParksLabel} />
-      <StatItem href={allHref} value={themeParks} label={themeParksLabel} />
+      <StatItem value={countries} label={countriesLabel} />
+      <StatItem value={cities} label={citiesLabel} />
+      <StatItem value={nationalParks} label={nationalParksLabel} />
+      <StatItem value={themeParks} label={themeParksLabel} />
     </div>
   );
 }

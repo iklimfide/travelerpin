@@ -13,7 +13,7 @@ export async function HomeHero() {
         {t("eyebrow")}
       </div>
 
-      <h1 className="mb-5 text-[clamp(42px,5.7vw,72px)] leading-[0.95] font-extrabold tracking-[-0.065em] text-[#071126]">
+      <h1 className="mb-5 text-[clamp(34px,4.6vw,52px)] leading-[1.05] font-extrabold tracking-[-0.055em] text-[#071126]">
         {t("heroHeadline")}
       </h1>
 

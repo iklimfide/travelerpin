@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { parkInputSchema } from "@/lib/validations/park";
 import { revalidateParkHubForPin } from "@/lib/cache/revalidate-park-hub";
+import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { publishParkHubOnPin } from "@/lib/supabase/published-hubs";
 import { notifyFollowersAfterParkPin } from "@/lib/supabase/notify-pin-followers";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
@@ -87,6 +88,7 @@ export async function POST(request: Request) {
   }
 
   revalidateParkHubForPin(park.country_code, park.park_name);
+  await revalidateProfileForPin(supabase, user.id);
   await publishParkHubOnPin(supabase, park);
   await notifyFollowersAfterParkPin(supabase, user.id, park);
 

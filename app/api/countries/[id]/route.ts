@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { createClient } from "@/lib/supabase/server";
 import { deletePinNotifications } from "@/lib/supabase/notifications";
 
@@ -67,6 +68,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
   }
 
   await deletePinNotifications(supabase, user.id, "country", id);
+  await revalidateProfileForPin(supabase, user.id);
 
   return NextResponse.json({ success: true });
 }

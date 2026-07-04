@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { revalidateCityHubForPin } from "@/lib/cache/revalidate-city-hub";
+import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { publishCityHubOnPin } from "@/lib/supabase/published-hubs";
 import { notifyFollowersAfterCityPin } from "@/lib/supabase/notify-pin-followers";
 import { cityInputSchema } from "@/lib/validations/city";
@@ -75,6 +76,7 @@ export async function POST(request: Request) {
   }
 
   revalidateCityHubForPin(city.country_code, city.city_name);
+  await revalidateProfileForPin(supabase, user.id);
   await publishCityHubOnPin(supabase, city);
   await notifyFollowersAfterCityPin(supabase, user.id, city);
 

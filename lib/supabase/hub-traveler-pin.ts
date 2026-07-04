@@ -75,15 +75,22 @@ type HubTravelerPinInput = HubTravelerPinIdentity & {
   pinnedAt: string;
   mediaRow: PinMediaRow;
   mediaPreviewUrl?: string | null;
+  /**
+   * When true, pins without media fall back to the traveler avatar and Instagram
+   * profile URL. Default is false so country/city/profile galleries only show
+   * real pin photos — not one PP copy per city pin.
+   */
+  fillMissingMediaFromProfile?: boolean;
 };
 
 /**
- * Build a hub pin and fill missing media from the traveler profile:
- * avatar → photos, Instagram profile link → Instagram section.
+ * Build a hub pin. Gallery media comes from the pin only unless
+ * fillMissingMediaFromProfile is explicitly enabled.
  */
 export function createHubTravelerPin(input: HubTravelerPinInput): HubTravelerPin {
   const media = buildHubTravelerPinMedia(input.mediaRow);
   const instagramProfileUrl = input.instagramProfileUrl ?? null;
+  const fillFromProfile = input.fillMissingMediaFromProfile === true;
 
   const hasExplicitPhoto =
     Boolean(media.photoUrl) || (media.mediaType === "photo" && Boolean(media.mediaUrl));
@@ -93,7 +100,9 @@ export function createHubTravelerPin(input: HubTravelerPinInput): HubTravelerPin
 
   const photoUrl = hasExplicitPhoto
     ? (media.photoUrl ?? media.mediaUrl)
-    : input.avatarUrl;
+    : fillFromProfile
+      ? input.avatarUrl
+      : null;
 
   const instagramUrls = hasExplicitInstagram
     ? media.instagramUrls.length > 0
@@ -101,7 +110,7 @@ export function createHubTravelerPin(input: HubTravelerPinInput): HubTravelerPin
       : media.mediaUrl
         ? [media.mediaUrl]
         : []
-    : instagramProfileUrl
+    : fillFromProfile && instagramProfileUrl
       ? [instagramProfileUrl]
       : [];
 

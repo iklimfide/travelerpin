@@ -839,8 +839,9 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 
 .profile-hero-card {
   position: relative;
-  min-height: 230px;
-  padding: 28px 24px 86px;
+  /* Extra bottom space so title/subtitle stay above the overlapping avatar. */
+  min-height: 268px;
+  padding: 22px 20px 128px;
   border-radius: 0 0 30px 30px;
   overflow: hidden;
   box-shadow: var(--profile-shadow);
@@ -974,25 +975,27 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   z-index: 3;
   left: auto;
   bottom: auto;
-  margin-top: 14px;
-  max-width: 320px;
+  margin-top: 10px;
+  max-width: min(100%, 340px);
   color: white;
 }
 
 .profile-hero-title h1 {
-  font-size: 38px;
-  line-height: 1.05;
-  letter-spacing: -1.4px;
+  font-size: clamp(22px, 6.2vw, 28px);
+  line-height: 1.12;
+  letter-spacing: -0.8px;
   font-weight: 800;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
+  text-shadow: 0 1px 10px rgba(15, 23, 42, 0.28);
 }
 
 .profile-hero-title p {
   margin-top: 0;
-  font-size: 17px;
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.88);
-  max-width: 320px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.92);
+  max-width: min(100%, 280px);
+  text-shadow: 0 1px 8px rgba(15, 23, 42, 0.3);
 }
 
 .profile-route-line {
@@ -1132,13 +1135,17 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   gap: 6px;
   margin-top: 10px;
   max-width: min(100%, 320px);
+  border: none;
   border-radius: 999px;
   background: #fff1f2;
   padding: 7px 12px;
   color: #be185d;
+  font: inherit;
   font-size: 0.82rem;
   font-weight: 700;
+  text-align: left;
   text-decoration: none;
+  cursor: pointer;
   overflow-wrap: anywhere;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
@@ -1189,6 +1196,29 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.profile-metrics-link {
+  text-decoration: none;
+  color: inherit;
+  border-radius: 24px;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.profile-metrics-link:hover {
+  transform: translateY(-1px);
+}
+
+.profile-metrics-link:hover .profile-world-progress__percent,
+.profile-metrics-link:hover .profile-stat strong {
+  color: #2563eb;
+}
+
+.profile-metrics-link:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
 }
 
 .profile-world-progress {
@@ -1439,9 +1469,12 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   --city-shadow: 0 14px 28px rgba(16, 32, 60, 0.08);
   --city-text: #142033;
   --city-muted: #7a8798;
-  padding: 0 22px;
+  /* Full width of profile shell — minimal side inset */
+  padding: 0 8px;
   margin-top: 28px;
   min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .profile-media-sections .city-page__section {
@@ -1449,56 +1482,68 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 }
 
 .profile-media-sections .city-page__section + .city-page__section {
-  margin-top: 28px;
+  margin-top: 16px;
 }
 
-.profile-media-sections .city-page__section-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -1px;
-  color: var(--profile-text, #142033);
-  margin-bottom: 14px;
-}
-
-.profile-media-sections .city-page__section-title--with-cta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.profile-media-sections .city-page__section-title > span:first-child {
-  min-width: 0;
-}
-
-.profile-media-sections .city-page__section-title-cta {
-  flex-shrink: 0;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0;
-  line-height: 1.2;
-}
-
-.profile-media-sections .profile-media-view-all {
-  margin-left: 0;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0;
-  color: #2563eb;
-  white-space: nowrap;
-}
-
-.profile-media-sections .profile-media-view-all:hover {
-  text-decoration: underline;
-}
-
+.profile-media-sections .profile-media-box,
 .profile-media-sections .city-page__hub-photo-gallery {
   overflow: hidden;
+  width: 100%;
   border: 1px solid var(--city-border);
-  border-radius: 28px;
+  border-radius: 24px;
   background: var(--city-card);
   padding: 0;
   box-shadow: var(--city-shadow);
+}
+
+.profile-media-box__head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 56px 10px;
+}
+
+.profile-media-box__title {
+  margin: 0;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.35px;
+  line-height: 1.2;
+  color: var(--profile-text, #142033);
+}
+
+.profile-media-box__all,
+.profile-media-sections .profile-media-box__all {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border: none;
+  border-radius: 999px;
+  background: #f5f7fb;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.2;
+  color: #2563eb;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.profile-media-box__all:hover,
+.profile-media-sections .profile-media-box__all:hover {
+  background: #eff6ff;
+  text-decoration: none;
 }
 
 .profile-media-sections .city-page__traveler-pictures-grid {
@@ -1558,7 +1603,8 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 }
 
 .profile-media-sections .city-page__memory-thumb-embed {
-  transform: scale(calc(100cqi / 326)) translateY(calc(-54px * 100cqi / 326));
+  /* Skip Instagram embed header (avatar/username) so the post photo fills the thumb. */
+  transform: scale(calc(100cqi / 326)) translateY(-740px);
   transform-origin: top left;
 }
 
@@ -1578,10 +1624,10 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 
 .profile-media-sections .city-page__empty {
   margin: 0;
-  border: 1px dashed var(--city-border);
-  border-radius: 24px;
-  background: var(--city-card);
-  padding: 24px 20px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 16px 14px 18px;
   text-align: center;
   font-size: 14px;
   color: var(--city-muted);
@@ -1647,25 +1693,18 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 .profile-media-page__panels {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 18px 22px 28px;
+  gap: 16px;
+  padding: 18px 8px 28px;
+  margin-top: 0;
 }
 
-.profile-media-page__panel {
-  padding: 18px 16px 16px;
-  border-radius: 24px;
-  border: 1px solid #e8eef5;
-  background: #f7f9fc;
-  box-shadow: 0 4px 14px rgba(25, 43, 68, 0.06);
+.profile-media-page__panel-anchor {
+  scroll-margin-top: 16px;
+  min-width: 0;
 }
 
-.profile-media-page__panel-title {
-  margin: 0 0 14px;
-  padding: 0 4px;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: #142033;
+.profile-media-page .profile-media-sections .city-page__section + .city-page__section {
+  margin-top: 0;
 }
 
 .profile-media-instagram-stack {
@@ -1700,7 +1739,7 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
-  padding: 0 22px;
+  padding: 0 8px;
   margin-top: 18px;
   margin-bottom: 0;
 }
@@ -1720,6 +1759,7 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   background: #fff;
   text-decoration: none;
   text-align: center;
+  cursor: pointer;
 }
 
 .profile-media-page__tab--active {
@@ -2173,6 +2213,67 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   margin-top: 8px;
 }
 
+.profile-all-box {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 20px;
+  background: #f5f7fb;
+  scroll-margin-top: 16px;
+}
+
+.profile-all-box:first-of-type {
+  margin-top: 8px;
+}
+
+.profile-all-box__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.profile-all-box__title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.profile-all-box__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--profile-text);
+  line-height: 1.2;
+}
+
+.profile-all-box__all {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #2563eb;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.profile-all-box__all:hover {
+  background: #eff6ff;
+}
+
+.profile-all-box__empty {
+  margin: 0;
+  padding: 8px 2px 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--profile-muted);
+}
+
 .profile-all-section__count {
   font-size: 14px;
   font-weight: 700;
@@ -2183,6 +2284,11 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+/* Always 2×N (preview shows up to 3 rows = 6 items). */
+.profile-all-grid--preview {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .profile-all-grid .profile-trip {
@@ -2283,7 +2389,7 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 }
 
 @media (min-width: 390px) {
-  .profile-all-grid {
+  .profile-all-grid:not(.profile-all-grid--preview) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
   }
@@ -2322,8 +2428,12 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 }
 
 @media (min-width: 520px) {
-  .profile-all-grid {
+  .profile-all-grid:not(.profile-all-grid--preview) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .profile-all-grid--preview {
     gap: 12px;
   }
 
@@ -2365,8 +2475,12 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 }
 
 @media (min-width: 768px) {
-  .profile-all-grid {
+  .profile-all-grid:not(.profile-all-grid--preview) {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+  }
+
+  .profile-all-grid--preview {
     gap: 14px;
   }
 
@@ -3761,4 +3875,89 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 .notifications-item__chevron {
   color: #94a3b8;
   font-size: 1.2rem;
+}
+
+/* Dev-only mobile preview (Chrome tab, no DevTools device mode) */
+.dev-mobile-toggle {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 2147483000;
+  padding: 10px 14px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 999px;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.22);
+  cursor: pointer;
+}
+
+.dev-mobile-toggle:hover {
+  background: #1e293b;
+}
+
+.dev-mobile-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 24px;
+  background:
+    radial-gradient(circle at top, #dbeafe 0%, transparent 42%),
+    #0f172a;
+}
+
+.dev-mobile-shell__chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: min(100%, 390px);
+}
+
+.dev-mobile-shell__label {
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.dev-mobile-shell__exit {
+  padding: 8px 12px;
+  border: 1px solid rgba(248, 250, 252, 0.16);
+  border-radius: 999px;
+  background: rgba(248, 250, 252, 0.08);
+  color: #f8fafc;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dev-mobile-shell__exit:hover {
+  background: rgba(248, 250, 252, 0.14);
+}
+
+.dev-mobile-shell__frame {
+  flex: 1 1 auto;
+  width: 390px;
+  max-width: 100%;
+  min-height: 640px;
+  height: calc(100dvh - 72px);
+  border-radius: 28px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(248, 250, 252, 0.08),
+    0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.dev-mobile-shell__iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
 }

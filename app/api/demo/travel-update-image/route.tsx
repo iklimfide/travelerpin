@@ -7,7 +7,6 @@ import { buildTravelUpdateImage } from "@/lib/seo/travel-update-image";
 import { loadTravelUpdateCardAssets } from "@/lib/seo/travel-update-card-assets";
 import { getOgAssetOriginFromRequest } from "@/lib/seo/og-asset-origin";
 import { buildProfileDescription } from "@/lib/seo/profile";
-import { loadPublicProfilePage } from "@/lib/supabase/profile-page-data";
 import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 
@@ -22,8 +21,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const data =
-    (await loadPublicProfilePage(username)) ?? (await loadDemoPublicProfilePage(username));
+  const data = await loadDemoPublicProfilePage(username);
 
   if (!data) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });

@@ -66,9 +66,9 @@ function isCaptureExcluded(node: Node): boolean {
   return node.dataset.storyExclude !== undefined || node.classList.contains("profile-see-all");
 }
 
-/** e.g. "Arif GÜVENÇ's Travel Map" */
+/** e.g. "Jennifer's Travel Map" */
 export function buildSquareCaptureTitle(displayName: string): string {
-  return formatMessage(profileMessages.travelDiaryTitleVisitor, { name: displayName });
+  return formatMessage(profileMessages.travelDiaryTitle, { name: displayName });
 }
 
 /** Screenshot the world map panel with a personalized travel-map title. */

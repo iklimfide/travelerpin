@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { createClient } from "@/lib/supabase/server";
 import { countrySchema } from "@/lib/validations/country";
 import { isCountryVisited } from "@/lib/utils/country-status";
@@ -53,6 +54,8 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  await revalidateProfileForPin(supabase, user.id);
 
   return NextResponse.json(country);
 }

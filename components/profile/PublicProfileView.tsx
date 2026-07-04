@@ -108,20 +108,9 @@ export async function PublicProfileView({
   );
   const demoProfileHref = profilePageHref ?? (embedded && isDemoProfile ? profilePath(profile.username) : undefined);
   const residenceHref = resolveResidenceCityHref(profile.residence);
-  const heroTitle = isOwnProfile
-    ? t("travelDiaryTitle")
-    : demoProfileHref
-      ? (
-          <>
-            <Link href={demoProfileHref} className="profile-hero-name-link">
-              {displayName}
-            </Link>
-            {t("travelDiaryTitleVisitorSuffix")}
-          </>
-        )
-      : t("travelDiaryTitleVisitor", { name: displayName });
+  const heroTitle = t("travelDiaryTitle", { name: displayName });
 
-  const ogCaptureHeroTitle = `${displayName}'s Travel Map`;
+  const ogCaptureHeroTitle = t("travelDiaryTitle", { name: displayName });
   const ogCaptureDescription = (
     profile.bio?.trim() ||
     profileDescription
@@ -152,7 +141,11 @@ export async function PublicProfileView({
             residence={profile.residence}
             residenceHref={residenceHref}
             heroTitle={heroTitle}
-            heroSubtitle={t("travelDiarySubtitle")}
+            heroSubtitle={
+              isOwnProfile
+                ? t("travelDiarySubtitle")
+                : t("travelDiarySubtitleVisitor", { name: displayName })
+            }
             showNotifications={isLoggedIn && !embedded}
           />
 
@@ -163,7 +156,9 @@ export async function PublicProfileView({
               username={profile.username}
               bio={profile.bio}
               instagramUrl={profile.instagram_url}
-              fallbackBio={profileDescription}
+              instagramSampleNotice={
+                isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
+              }
               stats={stats}
               isOwnProfile={isOwnProfile}
               countryCount={stats.countries}
@@ -174,7 +169,6 @@ export async function PublicProfileView({
                 nationalParks: t("statNationalParksShort"),
                 themeParks: t("statThemeParksShort"),
                 share: t("shareProfile"),
-                edit: t("editProfile"),
               }}
               followUsername={!isOwnProfile ? profile.username : undefined}
               followState={followState}
@@ -194,11 +188,6 @@ export async function PublicProfileView({
                   isLoggedIn={isLoggedIn}
                   canEditMap={isOwnProfile}
                   countryCount={stats.countries}
-                  title={
-                    isOwnProfile
-                      ? t("worldMapTitle")
-                      : t("worldMapTitleVisitor", { name: displayName })
-                  }
                   detailLabel={t("mapDetail")}
                   exploredBadgeLabel={t("mapExploredBadge")}
                   detailHref={profileAllPath(profile.username)}
@@ -278,7 +267,7 @@ export async function PublicProfileView({
                     viewMap: t("viewMap"),
                     close: t("closePin"),
                     instagramPost: t("instagramPost"),
-                    viewAll: t("viewAll"),
+                    viewAll: t("allDestinationsAll"),
                     editMedia: tCommon("edit"),
                     removeMedia: tCommon("delete"),
                     removePhotoTitle: t("removePhotoTitle"),

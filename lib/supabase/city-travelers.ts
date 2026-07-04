@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CityHub } from "@/lib/data/city-hubs";
 import { fetchCityPinRowsForHub, type CityPinQueryRow } from "@/lib/supabase/city-pin-select";
 import { profilePath } from "@/lib/seo/site";
+import { normalizeCityKey } from "@/lib/utils/city-name";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import type { MediaType, VisitedCity } from "@/types/database";
 import {
@@ -52,7 +53,7 @@ export function visitedCityToHubPin(
   profile: OwnerProfile
 ): HubTravelerPin | null {
   if (city.country_code.toUpperCase() !== hub.countryCode.toUpperCase()) return null;
-  if (city.city_name.trim().toLowerCase() !== hub.name.trim().toLowerCase()) return null;
+  if (normalizeCityKey(city.city_name) !== normalizeCityKey(hub.name)) return null;
   if (!profile.username) return null;
 
   const username = profile.username.toLowerCase();

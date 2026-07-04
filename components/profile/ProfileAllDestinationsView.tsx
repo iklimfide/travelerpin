@@ -32,6 +32,9 @@ import type { ProfileAllDestinations } from "@/lib/utils/profile-all-destination
 import type { ProfileTrip } from "@/lib/utils/profile-page";
 import type { TravelStats, VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 
+/** Preview grid: 2 columns × 3 rows. */
+const PREVIEW_LIMIT = 6;
+
 type ProfileAllDestinationsViewProps = {
   username: string;
   displayName: string;
@@ -47,34 +50,6 @@ type ProfileAllDestinationsViewProps = {
   stats: TravelStats;
 };
 
-function DestinationSection({
-  title,
-  count,
-  showHead = true,
-  children,
-}: {
-  title: string;
-  count: number;
-  showHead?: boolean;
-  children: ReactNode;
-}) {
-  if (count === 0) return null;
-
-  return (
-    <section className="profile-all-section">
-      {showHead ? (
-        <div className="profile-section-head">
-          <h2 className="profile-section-title">{title}</h2>
-          <span className="profile-all-section__count">{count}</span>
-        </div>
-      ) : null}
-      <div className="profile-all-grid" role="list" aria-label={title}>
-        {children}
-      </div>
-    </section>
-  );
-}
-
 type ProfileAllTab = "countries" | "cities" | "parks" | "wishlist";
 
 const PROFILE_ALL_TABS: { id: ProfileAllTab; label: string; icon: string }[] = [
@@ -83,6 +58,56 @@ const PROFILE_ALL_TABS: { id: ProfileAllTab; label: string; icon: string }[] = [
   { id: "parks", label: saveDestinationMessages.tabParks, icon: "🏞️" },
   { id: "wishlist", label: saveDestinationMessages.tabWishlist, icon: "⭐" },
 ];
+
+function sectionId(tab: ProfileAllTab): string {
+  return `profile-all-${tab}`;
+}
+
+function DestinationSection({
+  id,
+  title,
+  count,
+  expanded,
+  onToggleExpand,
+  children,
+}: {
+  id: string;
+  title: string;
+  count: number;
+  expanded: boolean;
+  onToggleExpand: () => void;
+  children: ReactNode;
+}) {
+  const canExpand = count > PREVIEW_LIMIT;
+
+  return (
+    <section id={id} className="profile-all-section profile-all-box">
+      <div className="profile-all-box__head">
+        <div className="profile-all-box__title-row">
+          <h2 className="profile-all-box__title">{title}</h2>
+          <span className="profile-all-section__count">{count}</span>
+        </div>
+        {canExpand ? (
+          <button
+            type="button"
+            className="profile-all-box__all"
+            onClick={onToggleExpand}
+            aria-expanded={expanded}
+          >
+            {expanded ? profileMessages.allDestinationsLess : profileMessages.allDestinationsAll}
+          </button>
+        ) : null}
+      </div>
+      {count === 0 ? (
+        <p className="profile-all-box__empty">{profileMessages.allDestinationsTabEmpty}</p>
+      ) : (
+        <div className="profile-all-grid profile-all-grid--preview" role="list" aria-label={title}>
+          {children}
+        </div>
+      )}
+    </section>
+  );
+}
 
 function ProfileAllDestinationsNav({
   displayName,
@@ -141,10 +166,14 @@ export function ProfileAllDestinationsView({
   const [editingCityId, setEditingCityId] = useState<string | null>(null);
   const [editingParkId, setEditingParkId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ProfileAllTab>("countries");
+  const [expanded, setExpanded] = useState<Record<ProfileAllTab, boolean>>({
+    countries: false,
+    cities: false,
+    parks: false,
+    wishlist: false,
+  });
 
-  const title = isOwnProfile
-    ? profileMessages.allDestinationsTitle
-    : formatMessage(profileMessages.allDestinationsTitleVisitor, { name: displayName });
+  const title = formatMessage(profileMessages.allDestinationsTitle, { name: displayName });
 
   const badgeLabels: Record<NonNullable<ProfileTrip["badge"]>, string> = {
     recent: profileMessages.tripBadgeRecent,
@@ -164,10 +193,21 @@ export function ProfileAllDestinationsView({
     visitedParks.length > 0 ||
     wishlistCodes.length > 0;
 
-  const mapTitle = profileMessages.worldMapTitleShort;
-
   const editingCity = visitedCities.find((city) => city.id === editingCityId);
   const editingPark = visitedParks.find((park) => park.id === editingParkId);
+
+  function toggleExpanded(tab: ProfileAllTab) {
+    setExpanded((prev) => ({ ...prev, [tab]: !prev[tab] }));
+  }
+
+  function handleTabChange(tab: ProfileAllTab) {
+    setActiveTab(tab);
+    document.getElementById(sectionId(tab))?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function visibleItems<T>(items: T[], tab: ProfileAllTab): T[] {
+    return expanded[tab] ? items : items.slice(0, PREVIEW_LIMIT);
+  }
 
   async function handleDeleteCity(id: string) {
     const confirmed = await modal.confirm(modalMessages.deleteCityMessage, {
@@ -249,21 +289,7 @@ export function ProfileAllDestinationsView({
     router.refresh();
   }
 
-  const visitedContentCount =
-    destinations.countries.length + destinations.cities.length + destinations.parks.length;
-
-  const hasNavContent = visitedContentCount > 0 || destinations.wishlist.length > 0;
-
-  const showCountries = activeTab === "countries";
-  const showCities = activeTab === "cities";
-  const showParks = activeTab === "parks";
-  const showWishlist = activeTab === "wishlist";
-
-  const tabContentCount =
-    (showCountries ? destinations.countries.length : 0) +
-    (showCities ? destinations.cities.length : 0) +
-    (showParks ? destinations.parks.length : 0) +
-    (showWishlist ? destinations.wishlist.length : 0);
+  const hasNavContent = totalCount > 0;
 
   const ownerActions = isOwnProfile
     ? {
@@ -271,6 +297,11 @@ export function ProfileAllDestinationsView({
         removeLabel: commonMessages.delete,
       }
     : null;
+
+  const countries = visibleItems(destinations.countries, "countries");
+  const cities = visibleItems(destinations.cities, "cities");
+  const parks = visibleItems(destinations.parks, "parks");
+  const wishlist = visibleItems(destinations.wishlist, "wishlist");
 
   return (
     <div className="profile-page profile-all-page">
@@ -294,7 +325,6 @@ export function ProfileAllDestinationsView({
               isLoggedIn={isLoggedIn}
               canEditMap={isOwnProfile}
               countryCount={stats.countries}
-              title={mapTitle}
               exploredBadgeLabel={profileMessages.mapExploredBadge}
             />
           </div>
@@ -309,21 +339,18 @@ export function ProfileAllDestinationsView({
                 displayName={displayName}
                 isOwnProfile={isOwnProfile}
                 activeTab={activeTab}
-                onTabChange={setActiveTab}
+                onTabChange={handleTabChange}
               />
             ) : null}
 
-            {tabContentCount === 0 ? (
-              <p className="profile-empty">{profileMessages.allDestinationsTabEmpty}</p>
-            ) : null}
-
-            {showCountries ? (
             <DestinationSection
+              id={sectionId("countries")}
               title={profileMessages.allDestinationsCountries}
               count={destinations.countries.length}
-              showHead={false}
+              expanded={expanded.countries}
+              onToggleExpand={() => toggleExpanded("countries")}
             >
-              {destinations.countries.map((country) => (
+              {countries.map((country) => (
                 <ProfileCountryDestinationCard
                   key={country.code}
                   country={country}
@@ -341,15 +368,15 @@ export function ProfileAllDestinationsView({
                 />
               ))}
             </DestinationSection>
-            ) : null}
 
-            {showCities ? (
             <DestinationSection
+              id={sectionId("cities")}
               title={profileMessages.allDestinationsCities}
               count={destinations.cities.length}
-              showHead={false}
+              expanded={expanded.cities}
+              onToggleExpand={() => toggleExpanded("cities")}
             >
-              {destinations.cities.map((trip) => (
+              {cities.map((trip) => (
                 <ProfileTripCard
                   key={trip.id}
                   trip={trip}
@@ -373,15 +400,15 @@ export function ProfileAllDestinationsView({
                 />
               ))}
             </DestinationSection>
-            ) : null}
 
-            {showParks ? (
             <DestinationSection
+              id={sectionId("parks")}
               title={profileMessages.allDestinationsParks}
               count={destinations.parks.length}
-              showHead={false}
+              expanded={expanded.parks}
+              onToggleExpand={() => toggleExpanded("parks")}
             >
-              {destinations.parks.map((park) => (
+              {parks.map((park) => (
                 <ProfileParkDestinationCard
                   key={park.id}
                   park={park}
@@ -402,15 +429,15 @@ export function ProfileAllDestinationsView({
                 />
               ))}
             </DestinationSection>
-            ) : null}
 
-            {showWishlist ? (
             <DestinationSection
+              id={sectionId("wishlist")}
               title={profileMessages.wishlistCountries}
               count={destinations.wishlist.length}
-              showHead={false}
+              expanded={expanded.wishlist}
+              onToggleExpand={() => toggleExpanded("wishlist")}
             >
-              {destinations.wishlist.map((country) => (
+              {wishlist.map((country) => (
                 <ProfileWishlistDestinationCard
                   key={country.id}
                   country={country}
@@ -427,7 +454,6 @@ export function ProfileAllDestinationsView({
                 />
               ))}
             </DestinationSection>
-            ) : null}
           </main>
         )}
       </div>

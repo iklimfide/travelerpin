@@ -38,9 +38,16 @@ export async function POST(request: Request) {
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
-    const optimized = await optimizeImage(buffer);
-    const fileName = `${user.id}/${getWebpFileName(file.name)}`;
-    const publicUrl = await uploadPhotoToR2(fileName, optimized, "image/webp");
+    const optimized = await optimizeImage(buffer, file.type);
+    const fileName =
+      optimized.extension === "webp"
+        ? `${user.id}/${getWebpFileName(file.name)}`
+        : `${user.id}/${getWebpFileName(file.name).replace(/\.webp$/i, `.${optimized.extension}`)}`;
+    const publicUrl = await uploadPhotoToR2(
+      fileName,
+      optimized.buffer,
+      optimized.contentType
+    );
 
     return NextResponse.json({ url: publicUrl });
   } catch (error) {

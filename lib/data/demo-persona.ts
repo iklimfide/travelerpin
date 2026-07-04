@@ -5,6 +5,7 @@ export const DEMO_PERSONA = {
   avatarUrl: "/demo/jennifer-avatar.png",
   bio: "Weekend city breaks, national parks, and theme parks — pinning every stop along the way.",
   residence: "Los Angeles",
+  instagramUrl: "https://www.instagram.com/jennifer.travels/",
   visitedCountries: 35,
   visitedCities: 124,
   wishlistCountries: 8,

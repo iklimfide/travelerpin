@@ -13,6 +13,8 @@ import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database"
 type HubPageListingSectionsLabels = {
   recentTravelers: string;
   noTravelersYet: string;
+  wantTravelers: string;
+  noWantTravelersYet: string;
   pinCta: string;
   pinItTooCta: string;
   photosHeading: string;
@@ -30,6 +32,7 @@ type HubPageListingSectionsLabels = {
 type HubPageListingSectionsProps = {
   hubName: string;
   travelers: CountryTraveler[];
+  wishlistTravelers?: CountryTraveler[];
   memoryPins: HubTravelerPin[];
   loginHref: string;
   isLoggedIn: boolean;
@@ -41,6 +44,7 @@ type HubPageListingSectionsProps = {
   travelersLayout?: "list" | "row";
   headingIds: {
     travelers: string;
+    wishlist: string;
     photos: string;
     instagram: string;
   };
@@ -79,6 +83,7 @@ function pinItHeadingCta(
 export function HubPageListingSections({
   hubName,
   travelers,
+  wishlistTravelers = [],
   memoryPins,
   loginHref,
   isLoggedIn,
@@ -140,6 +145,17 @@ export function HubPageListingSections({
           recentTravelers: labels.recentTravelers,
           noTravelersYet: labels.noTravelersYet,
           pinCta: labels.pinCta,
+        }}
+      />
+
+      <HubRecentTravelers
+        travelers={wishlistTravelers}
+        headingId={headingIds.wishlist}
+        layout={travelersLayout}
+        labels={{
+          recentTravelers: labels.wantTravelers,
+          noTravelersYet: labels.noWantTravelersYet,
+          pinCta: "",
         }}
       />
 

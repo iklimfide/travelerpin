@@ -52,10 +52,15 @@ export function HubRecentTravelers({
         </ul>
       ) : (
         <p className="city-page__empty">
-          {labels.noTravelersYet}{" "}
-          <Link href={registerHref} className="city-page__link">
-            {labels.pinCta}
-          </Link>
+          {labels.noTravelersYet}
+          {labels.pinCta ? (
+            <>
+              {" "}
+              <Link href={registerHref} className="city-page__link">
+                {labels.pinCta}
+              </Link>
+            </>
+          ) : null}
         </p>
       )}
     </section>

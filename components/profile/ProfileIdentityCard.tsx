@@ -1,25 +1,13 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileActionButtons } from "@/components/profile/ProfileActionButtons";
+import { ProfileInstagramLink } from "@/components/profile/ProfileInstagramLink";
 import { ProfileStatCounters } from "@/components/profile/ProfileStatCounters";
 import { ProfileWorldProgress } from "@/components/profile/ProfileWorldProgress";
 import { TravelerBadge } from "@/components/profile/TravelerBadge";
 import { profileAllPath } from "@/lib/seo/site";
 import type { TravelStats } from "@/types/database";
-
-function InstagramProfileIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="3" y="3" width="18" height="18" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-function displayInstagramUrl(url: string): string {
-  return url.replace(/\/$/, "");
-}
 
 type ProfileIdentityCardProps = {
   avatarUrl: string | null;
@@ -27,7 +15,8 @@ type ProfileIdentityCardProps = {
   username: string;
   bio: string | null;
   instagramUrl?: string | null;
-  fallbackBio: string;
+  /** Demo/sample profiles: show this toast instead of opening Instagram. */
+  instagramSampleNotice?: string | null;
   stats: TravelStats;
   isOwnProfile: boolean;
   countryCount: number;
@@ -37,7 +26,6 @@ type ProfileIdentityCardProps = {
     nationalParks: string;
     themeParks: string;
     share: string;
-    edit: string;
   };
   profileHref?: string;
   followUsername?: string;
@@ -56,7 +44,7 @@ export async function ProfileIdentityCard({
   username,
   bio,
   instagramUrl,
-  fallbackBio,
+  instagramSampleNotice,
   stats,
   isOwnProfile,
   countryCount,
@@ -67,6 +55,9 @@ export async function ProfileIdentityCard({
   canFollow = false,
   isLoggedIn = false,
 }: ProfileIdentityCardProps) {
+  const t = await getTranslations("profile");
+  const allHref = profileAllPath(username);
+
   return (
     <section className="profile-card">
       <ProfileActionButtons
@@ -75,7 +66,6 @@ export async function ProfileIdentityCard({
         stats={stats}
         isOwnProfile={isOwnProfile}
         shareLabel={labels.share}
-        editLabel={labels.edit}
         followUsername={followUsername}
         followState={followState}
         canFollow={canFollow}
@@ -119,25 +109,19 @@ export async function ProfileIdentityCard({
       </div>
 
       {instagramUrl ? (
-        <a
-          href={instagramUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="profile-instagram-link"
-          data-story-exclude=""
-        >
-          <InstagramProfileIcon />
-          <span>{displayInstagramUrl(instagramUrl)}</span>
-        </a>
+        <ProfileInstagramLink url={instagramUrl} sampleNotice={instagramSampleNotice} />
       ) : null}
 
-      <p className="profile-desc">{bio?.trim() || fallbackBio}</p>
+      {bio?.trim() ? <p className="profile-desc">{bio.trim()}</p> : null}
 
-      <div className="profile-metrics">
+      <Link
+        href={allHref}
+        className="profile-metrics profile-metrics-link"
+        aria-label={t("allDestinationsTitle", { name: displayName })}
+      >
         <ProfileWorldProgress countryCount={countryCount} />
 
         <ProfileStatCounters
-          allHref={profileAllPath(username)}
           countries={stats.countries}
           cities={stats.cities}
           nationalParks={stats.nationalParks}
@@ -147,7 +131,7 @@ export async function ProfileIdentityCard({
           nationalParksLabel={labels.nationalParks}
           themeParksLabel={labels.themeParks}
         />
-      </div>
+      </Link>
     </section>
   );
 }

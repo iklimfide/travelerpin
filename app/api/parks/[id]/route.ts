@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { revalidateParkHubForPin } from "@/lib/cache/revalidate-park-hub";
+import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
 import { deletePinNotifications } from "@/lib/supabase/notifications";
 import { resolveCityMediaFields } from "@/lib/utils/city-media";
@@ -109,6 +110,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   ) {
     revalidateParkHubForPin(existing.country_code, existing.park_name);
   }
+  await revalidateProfileForPin(supabase, user.id);
 
   return NextResponse.json(park);
 }
@@ -151,6 +153,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
   await deletePinNotifications(supabase, user.id, "park", id);
   revalidateParkHubForPin(existing.country_code, existing.park_name);
+  await revalidateProfileForPin(supabase, user.id);
 
   return NextResponse.json({ success: true });
 }

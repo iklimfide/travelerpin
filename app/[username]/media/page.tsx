@@ -5,11 +5,9 @@ import { ProfileMediaPageView } from "@/components/profile/ProfileMediaPageView"
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import {
   buildProfileMediaPins,
-  PROFILE_MEDIA_PAGE_SIZE,
   splitProfileMediaItems,
 } from "@/lib/utils/profile-media";
 import { DEFAULT_DESCRIPTION, profileMediaPath } from "@/lib/seo/site";
-import { loadDemoPublicProfilePage } from "@/lib/data/jennifer-demo-page";
 import { loadPublicProfilePage } from "@/lib/supabase/profile-page-data";
 
 type PageProps = {
@@ -17,22 +15,17 @@ type PageProps = {
   searchParams: Promise<{ tab?: string; page?: string }>;
 };
 
-export const revalidate = 60;
+export const revalidate = false;
 
 function parseTab(value: string | undefined): "photos" | "instagram" {
   return value === "instagram" ? "instagram" : "photos";
-}
-
-function parsePage(value: string | undefined): number {
-  const parsed = Number.parseInt(value ?? "1", 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
 }
 
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { username } = await params;
   const { tab: tabParam } = await searchParams;
   const tab = parseTab(tabParam);
-  const data = (await loadPublicProfilePage(username)) ?? (await loadDemoPublicProfilePage(username));
+  const data = await loadPublicProfilePage(username);
 
   if (!data) {
     return { title: "Traveler not found" };
@@ -55,11 +48,10 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
 
 export default async function ProfileMediaPage({ params, searchParams }: PageProps) {
   const { username } = await params;
-  const { tab: tabParam, page: pageParam } = await searchParams;
+  const { tab: tabParam } = await searchParams;
   const tab = parseTab(tabParam);
-  const requestedPage = parsePage(pageParam);
 
-  const data = (await loadPublicProfilePage(username)) ?? (await loadDemoPublicProfilePage(username));
+  const data = await loadPublicProfilePage(username);
 
   if (!data) {
     notFound();
@@ -70,11 +62,6 @@ export default async function ProfileMediaPage({ params, searchParams }: PagePro
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
   const memoryPins = buildProfileMediaPins(data.visitedCities, data.visitedParks, profile);
   const { photos, instagram } = splitProfileMediaItems(memoryPins);
-  const activeItems = tab === "photos" ? photos : instagram;
-  const totalPages = Math.max(1, Math.ceil(activeItems.length / PROFILE_MEDIA_PAGE_SIZE));
-  const page = Math.min(requestedPage, totalPages);
-  const offset = (page - 1) * PROFILE_MEDIA_PAGE_SIZE;
-  const pageItems = activeItems.slice(offset, offset + PROFILE_MEDIA_PAGE_SIZE);
 
   if (memoryPins.length === 0) {
     notFound();
@@ -89,11 +76,8 @@ export default async function ProfileMediaPage({ params, searchParams }: PagePro
       displayName={displayName}
       isOwnProfile={isOwnProfile}
       tab={tab}
-      page={page}
-      totalPages={totalPages}
       photoCount={photos.length}
       instagramCount={instagram.length}
-      items={pageItems}
       allPhotoItems={photos}
       allInstagramItems={instagram}
       visitedCountries={data.visitedCountries}
@@ -109,7 +93,8 @@ export default async function ProfileMediaPage({ params, searchParams }: PagePro
         viewMap: t("viewMap"),
         close: t("closePin"),
         instagramPost: t("instagramPost"),
-        viewAll: t("viewAll"),
+        viewAll: t("allDestinationsAll"),
+        viewLess: t("allDestinationsLess"),
         editMedia: tCommon("edit"),
         removeMedia: tCommon("delete"),
         removePhotoTitle: t("removePhotoTitle"),
@@ -122,9 +107,6 @@ export default async function ProfileMediaPage({ params, searchParams }: PagePro
         mediaPageTabInstagram: t("mediaPageTabInstagram"),
         mediaPageBack: t("mediaPageBack"),
         mediaPageEmpty: t("mediaPageEmpty"),
-        mediaPagePrev: t("mediaPagePrev"),
-        mediaPageNext: t("mediaPageNext"),
-        mediaPageStatus: t.raw("mediaPageStatus"),
       }}
     />
   );

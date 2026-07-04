@@ -3,19 +3,18 @@ import type { Metadata } from "next";
 import { ProfileAllDestinationsView } from "@/components/profile/ProfileAllDestinationsView";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { buildProfileAllDestinations } from "@/lib/utils/profile-all-destinations";
-import { DEFAULT_DESCRIPTION, profileAllPath } from "@/lib/seo/site";
-import { loadDemoPublicProfilePage } from "@/lib/data/jennifer-demo-page";
+import { DEFAULT_DESCRIPTION, profileAllPath, travelMapTitle } from "@/lib/seo/site";
 import { loadPublicProfilePage } from "@/lib/supabase/profile-page-data";
 
 type PageProps = {
   params: Promise<{ username: string }>;
 };
 
-export const revalidate = 60;
+export const revalidate = false;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
-  const data = (await loadPublicProfilePage(username)) ?? (await loadDemoPublicProfilePage(username));
+  const data = await loadPublicProfilePage(username);
 
   if (!data) {
     return { title: "Traveler not found" };
@@ -27,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   );
 
   return {
-    title: `${displayName} — All destinations`,
+    title: travelMapTitle(displayName),
     description: DEFAULT_DESCRIPTION,
     alternates: {
       canonical: profileAllPath(data.profile.username),
@@ -37,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProfileAllDestinationsPage({ params }: PageProps) {
   const { username } = await params;
-  const data = (await loadPublicProfilePage(username)) ?? (await loadDemoPublicProfilePage(username));
+  const data = await loadPublicProfilePage(username);
 
   if (!data) {
     notFound();

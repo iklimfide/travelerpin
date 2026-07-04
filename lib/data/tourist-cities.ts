@@ -23563,14 +23563,25 @@ export function findTouristCitiesByExactName(
   cityName: string,
   countryCode?: string | null
 ): TouristCity[] {
-  const needle = cityName.trim().toLocaleLowerCase("tr");
+  // Inline fold (avoid importing app utils into this generated data module).
+  const needle = cityName
+    .trim()
+    .toLocaleLowerCase("tr")
+    .replaceAll("ı", "i")
+    .replaceAll("İ", "i");
   if (!needle) return [];
 
   const pool = countryCode
     ? TOURIST_CITIES.filter((city) => city.countryCode === countryCode.toUpperCase())
     : TOURIST_CITIES;
 
-  return pool.filter((city) => city.name.toLocaleLowerCase("tr") === needle);
+  return pool.filter((city) => {
+    const name = city.name
+      .toLocaleLowerCase("tr")
+      .replaceAll("ı", "i")
+      .replaceAll("İ", "i");
+    return name === needle;
+  });
 }
 
 export function searchTouristCities(

@@ -1,67 +1,15 @@
 import { NextResponse } from "next/server";
+import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { createClient } from "@/lib/supabase/server";
-import { revalidateCityHubForPin } from "@/lib/cache/revalidate-city-hub";
-import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
-import { notifyFollowersAfterCityPin } from "@/lib/supabase/notify-pin-followers";
-import { publishCityHubOnPin } from "@/lib/supabase/published-hubs";
-import { formatVisitedCitySaveError, insertVisitedCityRow } from "@/lib/supabase/visited-city-update";
+import { ensureResidenceCityPin } from "@/lib/supabase/ensure-residence-city-pin";
 import { updateProfileSettings } from "@/lib/supabase/profile-settings";
-import { profileSettingsSchema, type ProfileSettingsInput } from "@/lib/validations/profile";
+import { profileSettingsSchema } from "@/lib/validations/profile";
 
-type ResidenceCityInput = NonNullable<ProfileSettingsInput["residence_city"]>;
-
-async function ensureResidenceCityPin(
-  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
-  userId: string,
-  input: ResidenceCityInput
-): Promise<{ ok: true } | { ok: false; error: string }> {
-  const code = input.country_code.toUpperCase();
-
-  const countryResult = await ensureVisitedCountry(
-    supabase,
-    userId,
-    code,
-    input.country_name
-  );
-  if (!countryResult.ok) return countryResult;
-
-  const { data: existingCity } = await supabase
-    .from("visited_cities")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("country_code", code)
-    .ilike("city_name", input.city_name)
-    .maybeSingle();
-
-  if (existingCity) return { ok: true };
-
-  const { data: city, error } = await insertVisitedCityRow(supabase, {
-    user_id: userId,
-    city_name: input.city_name,
-    country_code: code,
-    country_name: input.country_name,
-    latitude: input.latitude ?? null,
-    longitude: input.longitude ?? null,
-    note: null,
-    photo_url: null,
-    instagram_urls: [],
-    media_type: null,
-    media_url: null,
-    media_preview_url: null,
-    visit_dates: [],
-  });
-
-  if (error) {
-    return { ok: false, error: formatVisitedCitySaveError(error.message) };
-  }
-
-  revalidateCityHubForPin(city.country_code, city.city_name);
-  await publishCityHubOnPin(supabase, city);
-  await notifyFollowersAfterCityPin(supabase, userId, city);
-
-  return { ok: true };
-}
-
+/**
+ * Profile settings update.
+ * Residence is always a city pin: selecting a home city pins it like Add City,
+ * and profiles.residence stores the city name for the profile pill.
+ */
 export async function PATCH(request: Request) {
   const supabase = await createClient();
   if (!supabase) {
@@ -97,18 +45,39 @@ export async function PATCH(request: Request) {
     updates.display_name = data.display_name || null;
   }
   if (data.bio !== undefined) updates.bio = data.bio || null;
-  if (data.residence !== undefined) updates.residence = data.residence || null;
   if (data.instagram_url !== undefined) updates.instagram_url = data.instagram_url || null;
   if (data.profession !== undefined) updates.profession = data.profession || null;
   if (data.marital_status !== undefined) updates.marital_status = data.marital_status || null;
   if (data.avatar_url !== undefined) updates.avatar_url = data.avatar_url;
-  if (data.residence_city) updates.residence = data.residence_city.city_name;
 
+  // Residence label on the profile. City pins are independent:
+  // - Set/change home → pin the new city (old home city stays on the map).
+  // - Clear home → remove the label only (city pin is never deleted here).
   if (data.residence_city) {
-    const pinResult = await ensureResidenceCityPin(supabase, user.id, data.residence_city);
+    const pinResult = await ensureResidenceCityPin(
+      supabase,
+      user.id,
+      {
+        city_name: data.residence_city.city_name,
+        country_code: data.residence_city.country_code,
+        country_name: data.residence_city.country_name,
+        latitude: data.residence_city.latitude ?? null,
+        longitude: data.residence_city.longitude ?? null,
+      },
+      { notify: true }
+    );
     if (!pinResult.ok) {
       return NextResponse.json({ error: pinResult.error }, { status: 500 });
     }
+    updates.residence = data.residence_city.city_name;
+  } else if (data.residence !== undefined) {
+    if (data.residence?.trim()) {
+      return NextResponse.json(
+        { error: "Choose your city from the list to set where you live." },
+        { status: 400 }
+      );
+    }
+    updates.residence = null;
   }
 
   const { profile, error } = await updateProfileSettings(supabase, user.id, updates);
@@ -116,6 +85,8 @@ export async function PATCH(request: Request) {
   if (error || !profile) {
     return NextResponse.json({ error: error ?? "Failed to update profile" }, { status: 500 });
   }
+
+  await revalidateProfileForPin(supabase, user.id);
 
   return NextResponse.json(profile);
 }

@@ -6,6 +6,7 @@ import { listFeaturedCityHubSlugs } from "@/lib/data/city-hubs";
 import { loadCityPageUserState } from "@/lib/supabase/city-visitor-state";
 import { loadPublicCityHubContext } from "@/lib/supabase/city-hub-access";
 import { loadPublishedParkKeys, touristParkIsPubliclyLinked } from "@/lib/supabase/park-hub-access";
+import { getDemoPinsForCityHub, mergeDemoHubPins } from "@/lib/data/demo-hub-pins";
 import { countCityPinners, fetchRecentCityPins } from "@/lib/supabase/city-travelers";
 import {
   countHubMediaItems,
@@ -14,7 +15,10 @@ import {
   pinsWithContent,
   uniqueHubTravelers,
 } from "@/lib/supabase/hub-traveler-pin";
-import { countCountryWishlisters } from "@/lib/supabase/country-pin-count";
+import {
+  countCountryWishlisters,
+  fetchRecentCountryWishlisters,
+} from "@/lib/supabase/country-pin-count";
 import { getCachedRecentCityPinsWithPreviews } from "@/lib/supabase/city-travelers-cache";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -98,12 +102,16 @@ export default async function CityHubPage({ params }: PageProps) {
     }
   }
 
-  const hubPins = mergeOwnerHubPin(cityPins, ownerHubPin);
+  const demoPins = getDemoPinsForCityHub(hub);
+  const hubPins = mergeOwnerHubPin(mergeDemoHubPins(cityPins, demoPins), ownerHubPin);
   const memoryPins = pinsWithContent(hubPins);
   const travelers = uniqueHubTravelers(hubPins);
   const mediaCounts = countHubMediaItems(hubPins);
-  const pinCount = await countCityPinners(supabase, hub);
-  const wishlistCount = await countCountryWishlisters(supabase, hub.countryCode);
+  const pinCount = Math.max(await countCityPinners(supabase, hub), travelers.length);
+  const [wishlistCount, wishlistTravelers] = await Promise.all([
+    countCountryWishlisters(supabase, hub.countryCode),
+    fetchRecentCountryWishlisters(supabase, hub.countryCode),
+  ]);
   const pinCountItems: { label: string; href?: string }[] =
     pinCount > 0
       ? [
@@ -113,6 +121,7 @@ export default async function CityHubPage({ params }: PageProps) {
           },
           {
             label: t("travelersWantToVisit", { count: wishlistCount }),
+            href: "#city-wishlist-heading",
           },
           {
             label: t("photosAdded", { count: mediaCounts.photos }),
@@ -125,7 +134,10 @@ export default async function CityHubPage({ params }: PageProps) {
         ]
       : [
           { label: t("noTravelersPinned") },
-          { label: t("travelersWantToVisit", { count: wishlistCount }) },
+          {
+            label: t("travelersWantToVisit", { count: wishlistCount }),
+            href: "#city-wishlist-heading",
+          },
         ];
 
   const labels = {
@@ -148,6 +160,8 @@ export default async function CityHubPage({ params }: PageProps) {
     editYourPinSaved: t("editYourPinSaved"),
     recentTravelers: t("recentTravelers", { city: hub.name }),
     noTravelersYet: t("noTravelersYet", { city: hub.name }),
+    wantTravelers: t("wantTravelers", { city: hub.name }),
+    noWantTravelersYet: t("noWantTravelersYet"),
     pinCity: t("pinCity", { city: hub.name }),
     photosHeading: t("photosHeading"),
     instagramHeading: t("instagramHeading"),
@@ -167,6 +181,7 @@ export default async function CityHubPage({ params }: PageProps) {
         touristCity={touristCity}
         parks={parks}
         travelers={travelers}
+        wishlistTravelers={wishlistTravelers}
         memoryPins={memoryPins}
         visitorState={visitorState}
         ownerCity={ownerCity}

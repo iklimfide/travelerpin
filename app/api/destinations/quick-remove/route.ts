@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { createClient } from "@/lib/supabase/server";
 import { deletePinNotifications } from "@/lib/supabase/notifications";
 import { quickDestinationSchema } from "@/lib/validations/destination";
@@ -66,6 +67,7 @@ export async function POST(request: Request) {
     }
 
     await deletePinNotifications(supabase, user.id, "country", visitedCountry.id);
+    await revalidateProfileForPin(supabase, user.id);
 
     return NextResponse.json({
       removed: true,
@@ -128,6 +130,8 @@ export async function POST(request: Request) {
       countryRemoved = true;
     }
   }
+
+  await revalidateProfileForPin(supabase, user.id);
 
   return NextResponse.json({
     removed: true,

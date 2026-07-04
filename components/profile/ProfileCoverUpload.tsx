@@ -38,25 +38,38 @@ export function ProfileCoverUpload({
     const formData = new FormData();
     formData.set("file", file);
 
-    const res = await fetch("/api/profile/cover", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error ?? "Could not upload cover photo");
+    let res: Response;
+    try {
+      res = await fetch("/api/profile/cover", {
+        method: "POST",
+        body: formData,
+      });
+    } catch {
+      throw new Error("Could not upload cover photo. Check your connection and try again.");
     }
 
-    const data = await res.json();
+    const data = (await res.json().catch(() => null)) as { error?: string; url?: string } | null;
+    if (!res.ok) {
+      throw new Error(data?.error ?? "Could not upload cover photo");
+    }
+    if (!data?.url) {
+      throw new Error("Could not upload cover photo");
+    }
+
     onChange(data.url);
   }
 
   async function handleRemove() {
-    const res = await fetch("/api/profile/cover", { method: "DELETE" });
+    let res: Response;
+    try {
+      res = await fetch("/api/profile/cover", { method: "DELETE" });
+    } catch {
+      throw new Error("Could not remove cover photo. Check your connection and try again.");
+    }
+
+    const data = (await res.json().catch(() => null)) as { error?: string } | null;
     if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error ?? "Could not remove cover photo");
+      throw new Error(data?.error ?? "Could not remove cover photo");
     }
     onChange(null);
   }

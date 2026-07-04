@@ -7,6 +7,7 @@ import {
   notifyFollowersAfterCountryPin,
 } from "@/lib/supabase/notify-pin-followers";
 import { revalidateCityHubForPin } from "@/lib/cache/revalidate-city-hub";
+import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { quickDestinationSchema } from "@/lib/validations/destination";
 
 export async function POST(request: Request) {
@@ -72,6 +73,7 @@ export async function POST(request: Request) {
       .eq("country_code", code);
 
     await notifyFollowersAfterCountryPin(supabase, user.id, country);
+    await revalidateProfileForPin(supabase, user.id);
 
     return NextResponse.json({ country, added: true, alreadyHad: false });
   }
@@ -121,6 +123,7 @@ export async function POST(request: Request) {
   }
 
   revalidateCityHubForPin(city.country_code, city.city_name);
+  await revalidateProfileForPin(supabase, user.id);
   await publishCityHubOnPin(supabase, city);
   await notifyFollowersAfterCityPin(supabase, user.id, city);
 

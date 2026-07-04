@@ -15,7 +15,8 @@ type ProfileMapPanelProps = {
   isLoggedIn: boolean;
   canEditMap: boolean;
   countryCount: number;
-  title: string;
+  /** When omitted, the map section has no heading (page already shows the title). */
+  title?: string;
   exploredBadgeLabel: string;
   detailLabel?: string;
   detailHref?: string;
@@ -37,17 +38,20 @@ export function ProfileMapPanel({
   detailHref = "#travel-map",
 }: ProfileMapPanelProps) {
   const coverage = worldCoveragePercent(countryCount);
+  const showHead = Boolean(title || detailLabel);
 
   return (
     <section id="profile-map" className="profile-section">
-      <div className="profile-section-head">
-        <h2 className="profile-section-title">{title}</h2>
-        {detailLabel ? (
-          <a href={detailHref} className="profile-see-all">
-            {detailLabel}
-          </a>
-        ) : null}
-      </div>
+      {showHead ? (
+        <div className="profile-section-head">
+          {title ? <h2 className="profile-section-title">{title}</h2> : <span />}
+          {detailLabel ? (
+            <a href={detailHref} className="profile-see-all">
+              {detailLabel}
+            </a>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="profile-map-panel">
         <div className="profile-mini-map">

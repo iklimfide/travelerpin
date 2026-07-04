@@ -3,6 +3,11 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { CountryPageContent } from "@/components/country/CountryPageContent";
 import { getCountryHubBySlug, listCountryHubSlugs } from "@/lib/data/country-hubs";
+import {
+  getDemoPinsForCountry,
+  mergeDemoCountryTravelers,
+  mergeDemoHubPins,
+} from "@/lib/data/demo-hub-pins";
 import { getCachedRecentCountryTravelers } from "@/lib/supabase/country-travelers-cache";
 import { getCachedRecentCountryPins } from "@/lib/supabase/country-memory-pins-cache";
 import { fetchRecentCountryPins } from "@/lib/supabase/country-memory-pins";
@@ -12,7 +17,11 @@ import {
   pinHasGalleryMedia,
   pinsWithContent,
 } from "@/lib/supabase/hub-traveler-pin";
-import { countCountryPinners, countCountryWishlisters } from "@/lib/supabase/country-pin-count";
+import {
+  countCountryPinners,
+  countCountryWishlisters,
+  fetchRecentCountryWishlisters,
+} from "@/lib/supabase/country-pin-count";
 import { loadCountryPageUserState } from "@/lib/supabase/country-visitor-state";
 import { loadPublishedCityKeys, publicCityHubSlug } from "@/lib/supabase/city-hub-access";
 import { getAuthUser } from "@/lib/supabase/auth";
@@ -65,7 +74,7 @@ export default async function CountryHubPage({ params }: PageProps) {
   const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;
   const registerHref = `/register?next=${encodeURIComponent(returnPath)}`;
 
-  const [t, tCommon, travelers, cachedCountryPins, user, supabase] = await Promise.all([
+  const [t, tCommon, cachedTravelers, cachedCountryPins, user, supabase] = await Promise.all([
     getTranslations("countryHub"),
     getTranslations("common"),
     getCachedRecentCountryTravelers(hub.code),
@@ -88,11 +97,16 @@ export default async function CountryHubPage({ params }: PageProps) {
     }
   }
 
-  const hubPins = mergeOwnerHubPin(countryPins, ownerHubPin);
+  const demoPins = getDemoPinsForCountry(hub.code);
+  const travelers = mergeDemoCountryTravelers(cachedTravelers, hub.code);
+  const hubPins = mergeOwnerHubPin(mergeDemoHubPins(countryPins, demoPins), ownerHubPin);
   const memoryPins = pinsWithContent(hubPins);
   const mediaCounts = countHubMediaItems(hubPins);
-  const pinCount = await countCountryPinners(supabase, hub.code);
-  const wishlistCount = await countCountryWishlisters(supabase, hub.code);
+  const pinCount = Math.max(await countCountryPinners(supabase, hub.code), travelers.length);
+  const [wishlistCount, wishlistTravelers] = await Promise.all([
+    countCountryWishlisters(supabase, hub.code),
+    fetchRecentCountryWishlisters(supabase, hub.code),
+  ]);
   const pinCountItems: { label: string; href?: string }[] =
     pinCount > 0
       ? [
@@ -102,6 +116,7 @@ export default async function CountryHubPage({ params }: PageProps) {
           },
           {
             label: t("travelersWantToVisit", { count: wishlistCount }),
+            href: "#country-wishlist-heading",
           },
           {
             label: t("photosAdded", { count: mediaCounts.photos }),
@@ -114,7 +129,10 @@ export default async function CountryHubPage({ params }: PageProps) {
         ]
       : [
           { label: t("noTravelersPinned") },
-          { label: t("travelersWantToVisit", { count: wishlistCount }) },
+          {
+            label: t("travelersWantToVisit", { count: wishlistCount }),
+            href: "#country-wishlist-heading",
+          },
         ];
 
   const jsonLd = {
@@ -148,6 +166,8 @@ export default async function CountryHubPage({ params }: PageProps) {
     editYourPinSaved: t("editYourPinSaved"),
     recentTravelers: t("recentTravelers", { country: hub.name }),
     noTravelersYet: t("noTravelersYet", { country: hub.name }),
+    wantTravelers: t("wantTravelers", { country: hub.name }),
+    noWantTravelersYet: t("noWantTravelersYet"),
     pinCountry: t("pinCountry"),
     photosHeading: t("photosHeading"),
     instagramHeading: t("instagramHeading"),
@@ -171,6 +191,7 @@ export default async function CountryHubPage({ params }: PageProps) {
           hub={hub}
           capitalCitySlug={capitalCitySlug}
           travelers={travelers}
+          wishlistTravelers={wishlistTravelers}
           memoryPins={memoryPins}
           visitorState={visitorState}
           editOwnerCity={editOwnerCity}

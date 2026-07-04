@@ -17,23 +17,23 @@ import {
   profileOgImageVersion,
 } from "@/lib/seo/og";
 import {
-  MY_MAP_TITLE,
   profilePath,
+  travelMapTitle,
   profileUrl as buildProfileUrl,
   getSiteUrl,
 } from "@/lib/seo/site";
-import { loadDemoPublicProfilePage } from "@/lib/data/jennifer-demo-page";
 import { loadPublicProfilePage } from "@/lib/supabase/profile-page-data";
 
 type PageProps = {
   params: Promise<{ username: string }>;
 };
 
-export const revalidate = 60;
+// Pin/map data is tag-cached indefinitely; busted on pin/profile writes.
+export const revalidate = false;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
-  const data = (await loadPublicProfilePage(username)) ?? (await loadDemoPublicProfilePage(username));
+  const data = await loadPublicProfilePage(username);
 
   if (!data) {
     return { title: "Traveler not found" };
@@ -44,11 +44,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const wishlistCount = data.wishlistCodes.length;
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
   const isOwnProfile = data.currentUsername === profile.username;
-  const title = isOwnProfile
-    ? MY_MAP_TITLE
-    : displayName === profile.username
-      ? `@${profile.username}`
-      : `${displayName} (@${profile.username})`;
+  const title = travelMapTitle(displayName);
   const ogTitle = buildProfileOgTitle(displayName);
   const ogDescription = buildProfileOgDescription();
   const url = buildProfileUrl(profile.username);
@@ -89,7 +85,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PublicProfilePage({ params }: PageProps) {
   const { username } = await params;
-  const data = (await loadPublicProfilePage(username)) ?? (await loadDemoPublicProfilePage(username));
+  const data = await loadPublicProfilePage(username);
 
   if (!data) {
     notFound();

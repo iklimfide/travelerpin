@@ -19,6 +19,7 @@ import type { VisitedCountry, VisitedPark } from "@/types/database";
 type ParkPageContentProps = {
   hub: ParkHub;
   travelers: CountryTraveler[];
+  wishlistTravelers?: CountryTraveler[];
   memoryPins: HubTravelerPin[];
   visitorState: ParkVisitorState;
   ownerPark: VisitedPark | null;
@@ -46,6 +47,8 @@ type ParkPageContentProps = {
     editYourPinSaved: string;
     recentTravelers: string;
     noTravelersYet: string;
+    wantTravelers: string;
+    noWantTravelersYet: string;
     pinPark: string;
     photosHeading: string;
     instagramHeading: string;
@@ -62,6 +65,7 @@ type ParkPageContentProps = {
 export function ParkPageContent({
   hub,
   travelers,
+  wishlistTravelers = [],
   memoryPins,
   visitorState,
   ownerPark,
@@ -141,6 +145,43 @@ export function ParkPageContent({
           ))}
         </section>
 
+        <HubPageListingSections
+          hubName={hub.name}
+          travelers={travelers}
+          wishlistTravelers={wishlistTravelers}
+          memoryPins={memoryPins}
+          loginHref={loginHref}
+          isLoggedIn={visitorState.isLoggedIn}
+          hasOwnerPin={Boolean(ownerPark)}
+          canEditMedia={Boolean(ownerPark)}
+          visitedCountries={visitedCountries}
+          ownerPark={ownerPark}
+          headingIds={{
+            travelers: "park-travelers-heading",
+            wishlist: "park-wishlist-heading",
+            photos: "park-photos-heading",
+            instagram: "park-instagram-heading",
+          }}
+          labels={{
+            recentTravelers: labels.recentTravelers,
+            noTravelersYet: labels.noTravelersYet,
+            wantTravelers: labels.wantTravelers,
+            noWantTravelersYet: labels.noWantTravelersYet,
+            pinCta: labels.pinPark,
+            pinItTooCta: labels.pinItTooCta,
+            photosHeading: labels.photosHeading,
+            instagramHeading: labels.instagramHeading,
+            noInstagramPostsYet: labels.noInstagramPostsYet,
+            noPhotosYet: labels.noPhotosYet,
+            addYourPhotoCta: labels.addYourPhotoCta,
+            addYourInstagramCta: labels.addYourInstagramCta,
+            viewPin: labels.viewPin,
+            viewMap: labels.viewTravelMap,
+            close: labels.close,
+            instagramPost: labels.instagramPost,
+          }}
+        />
+
         {featuredPin?.note ? (
           <section className="city-page__featured-pin" aria-label={labels.viewPin}>
             <Link href={featuredPin.profilePath} className="city-page__featured-pin-author">
@@ -158,39 +199,6 @@ export function ParkPageContent({
             <p className="city-page__featured-pin-note">{featuredPin.note}</p>
           </section>
         ) : null}
-
-        <HubPageListingSections
-          hubName={hub.name}
-          travelers={travelers}
-          memoryPins={memoryPins}
-          loginHref={loginHref}
-          isLoggedIn={visitorState.isLoggedIn}
-          hasOwnerPin={Boolean(ownerPark)}
-          canEditMedia={Boolean(ownerPark)}
-          visitedCountries={visitedCountries}
-          ownerPark={ownerPark}
-          headingIds={{
-            travelers: "park-travelers-heading",
-            photos: "park-photos-heading",
-            instagram: "park-instagram-heading",
-          }}
-          labels={{
-            recentTravelers: labels.recentTravelers,
-            noTravelersYet: labels.noTravelersYet,
-            pinCta: labels.pinPark,
-            pinItTooCta: labels.pinItTooCta,
-            photosHeading: labels.photosHeading,
-            instagramHeading: labels.instagramHeading,
-            noInstagramPostsYet: labels.noInstagramPostsYet,
-            noPhotosYet: labels.noPhotosYet,
-            addYourPhotoCta: labels.addYourPhotoCta,
-            addYourInstagramCta: labels.addYourInstagramCta,
-            viewPin: labels.viewPin,
-            viewMap: labels.viewTravelMap,
-            close: labels.close,
-            instagramPost: labels.instagramPost,
-          }}
-        />
       </div>
     </div>
   );

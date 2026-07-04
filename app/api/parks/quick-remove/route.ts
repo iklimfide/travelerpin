@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { revalidateParkHubForPin } from "@/lib/cache/revalidate-park-hub";
+import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { createClient } from "@/lib/supabase/server";
 import { deletePinNotifications } from "@/lib/supabase/notifications";
 import { PARK_TYPES } from "@/types/database";
@@ -63,6 +64,7 @@ export async function POST(request: Request) {
 
   await deletePinNotifications(supabase, user.id, "park", park.id);
   revalidateParkHubForPin(code, data.park_name);
+  await revalidateProfileForPin(supabase, user.id);
 
   const [{ count: cityCount }, { count: parkCount }, { data: countryRow }] =
     await Promise.all([

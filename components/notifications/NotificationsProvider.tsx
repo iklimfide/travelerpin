@@ -12,7 +12,7 @@ type NotificationsContextValue = {
   isOpen: boolean;
 };
 
-const NotificationsContext = createContext<NotificationsContextValue | null>(null);
+export const NotificationsContext = createContext<NotificationsContextValue | null>(null);
 
 export function useNotifications(): NotificationsContextValue {
   const context = useContext(NotificationsContext);

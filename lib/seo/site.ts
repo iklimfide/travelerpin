@@ -91,7 +91,11 @@ export const DEFAULT_DESCRIPTION =
   "Create your personal travel map. Pin countries, cities, parks, and places you've visited, track your travel progress, and share your journey with a single link.";
 
 export const HOME_TITLE = "TravelerPin - Your Travel Map";
-export const MY_MAP_TITLE = "My Travel Map";
+export const MY_MAP_TITLE = "Travel Map";
+
+export function travelMapTitle(displayName: string): string {
+  return `${displayName}'s Travel Map`;
+}
 export const EXPLORE_TITLE = "Explore Travelers & Travel Maps";
 
 export function buildCountryPageTitle(countryName: string): string {

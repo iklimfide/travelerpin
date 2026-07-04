@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useNotifications } from "@/components/notifications/NotificationsProvider";
+import {
+  NotificationsContext,
+} from "@/components/notifications/NotificationsProvider";
 import { fetchNotifications } from "@/lib/client/notification-actions";
 
 function BellIcon() {
@@ -20,7 +23,7 @@ type NotificationsNavLinkProps = {
 
 export function NotificationsNavLink({ variant = "bottomBar" }: NotificationsNavLinkProps) {
   const pathname = usePathname();
-  const { openNotifications, isOpen } = useNotifications();
+  const notifications = useContext(NotificationsContext);
   const active = pathname.startsWith("/notifications");
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -36,7 +39,7 @@ export function NotificationsNavLink({ variant = "bottomBar" }: NotificationsNav
     return () => {
       cancelled = true;
     };
-  }, [pathname, isOpen]);
+  }, [pathname, notifications?.isOpen]);
 
   const isHero = variant === "hero";
   const buttonClass = isHero
@@ -47,22 +50,41 @@ export function NotificationsNavLink({ variant = "bottomBar" }: NotificationsNav
     : "dashboard-bottom-bar__icon dashboard-bottom-bar__icon--badge-host";
   const badgeClass = isHero ? "profile-hero-notifications__badge" : "dashboard-bottom-bar__badge";
 
+  const icon = (
+    <span className={iconClass}>
+      <BellIcon />
+      {unreadCount > 0 ? (
+        <span className={badgeClass} aria-label={`${unreadCount} unread notifications`}>
+          {unreadCount > 9 ? "9+" : unreadCount}
+        </span>
+      ) : null}
+    </span>
+  );
+
+  // OwnProfileShellGate mounts the provider only after client auth resolves.
+  // Fall back to a link so SSR / first paint does not crash.
+  if (!notifications) {
+    return (
+      <Link
+        href="/notifications"
+        className={buttonClass}
+        aria-current={active ? "page" : undefined}
+        aria-label="Notifications"
+      >
+        {icon}
+      </Link>
+    );
+  }
+
   return (
     <button
       type="button"
       className={buttonClass}
       aria-current={active ? "page" : undefined}
       aria-label="Notifications"
-      onClick={openNotifications}
+      onClick={notifications.openNotifications}
     >
-      <span className={iconClass}>
-        <BellIcon />
-        {unreadCount > 0 ? (
-          <span className={badgeClass} aria-label={`${unreadCount} unread notifications`}>
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
-        ) : null}
-      </span>
+      {icon}
     </button>
   );
 }

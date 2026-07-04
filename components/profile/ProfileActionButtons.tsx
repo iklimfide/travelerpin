@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { ShareSheetModal } from "@/components/share/ShareSheetModal";
 import { useShareProfile } from "@/components/share/ShareProfileButton";
-import { ProfileSettingsIcon, ProfileShareIcon } from "@/components/profile/ProfileActionIcons";
+import { ProfileShareIcon } from "@/components/profile/ProfileActionIcons";
 import { ProfileFollowButton } from "@/components/profile/ProfileFollowButton";
 import { ProfileFollowStats } from "@/components/profile/ProfileFollowStats";
 import { finalizeTravelShare } from "@/lib/client/travel-share-snapshot";
@@ -17,7 +16,6 @@ type ProfileActionButtonsProps = {
   stats: TravelStats;
   isOwnProfile: boolean;
   shareLabel: string;
-  editLabel: string;
   followUsername?: string;
   followState?: {
     isFollowing: boolean;
@@ -34,7 +32,6 @@ export function ProfileActionButtons({
   stats,
   isOwnProfile,
   shareLabel,
-  editLabel,
   followUsername,
   followState,
   canFollow = false,
@@ -92,12 +89,6 @@ export function ProfileActionButtons({
               followingCount={followState!.followingCount}
               className="profile-follow-stats--compact profile-follow-stats--solo"
             />
-          ) : null}
-
-          {isOwnProfile ? (
-            <Link href="/settings" className="profile-small-action" aria-label={editLabel}>
-              <ProfileSettingsIcon />
-            </Link>
           ) : null}
         </div>
       </div>

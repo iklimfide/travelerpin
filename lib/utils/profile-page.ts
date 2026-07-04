@@ -6,9 +6,12 @@ import { findParkHubSlug } from "@/lib/data/park-hubs";
 import { buildCitySlug } from "@/lib/utils/city-slug";
 import type { ParkType } from "@/lib/data/tourist-park-search";
 import { cityVisitCount } from "@/lib/utils/visit-date";
-import { formatCityDisplayName } from "@/lib/utils/city-name";
+import { formatCityDisplayName, normalizeCityKey } from "@/lib/utils/city-name";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
-import { resolveResidenceCountryCode } from "@/lib/utils/residence-city";
+import {
+  resolveResidenceCityPinInput,
+  resolveResidenceCountryCode,
+} from "@/lib/utils/residence-city";
 import type { VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 
 export const WORLD_COUNTRY_TOTAL = 195;
@@ -134,12 +137,30 @@ export function buildProfileTrips(
     badge: null,
   }));
 
-  return deprioritizeResidenceCountry(
+  const residencePin = resolveResidenceCityPinInput(residence);
+  const residenceKey = residencePin
+    ? `${residencePin.country_code.toUpperCase()}:${normalizeCityKey(residencePin.city_name)}`
+    : null;
+
+  const sorted = deprioritizeResidenceCountry(
     [...cityTrips, ...parkTrips],
     resolveResidenceCountryCode(residence),
     (trip) => trip.countryCode,
     sortTripsByDateDesc
   );
+
+  // Home city always leads the list (it is a pin, and must stay visible in previews).
+  if (!residenceKey) return sorted;
+
+  const homeIndex = sorted.findIndex(
+    (trip) =>
+      trip.kind === "city" &&
+      `${trip.countryCode.toUpperCase()}:${normalizeCityKey(trip.placeName)}` === residenceKey
+  );
+  if (homeIndex <= 0) return sorted;
+
+  const homeTrip = sorted[homeIndex];
+  return [homeTrip, ...sorted.slice(0, homeIndex), ...sorted.slice(homeIndex + 1)];
 }
 
 export function buildProfileSummary(

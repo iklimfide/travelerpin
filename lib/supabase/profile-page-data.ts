@@ -21,8 +21,16 @@ import type {
   ProfileFollowState,
 } from "@/types/database";
 import { getAuthUser } from "@/lib/supabase/auth";
-import { isDemoProfileUsername } from "@/lib/data/jennifer-demo-page";
+import { profileCacheTag, revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
+import {
+  DEMO_PUBLIC_PROFILE_BUNDLE,
+  isDemoProfileUsername,
+  loadDemoPublicProfilePage,
+} from "@/lib/data/jennifer-demo-page";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { ensureResidenceCityPinFromLabel } from "@/lib/supabase/ensure-residence-city-pin";
 import { loadProfileFollowState } from "@/lib/supabase/profile-follows";
+import { hasResidenceCityPinned } from "@/lib/utils/residence-city";
 
 export type PublicProfilePageData = {
   profile: PublicProfile;
@@ -101,6 +109,11 @@ export function getCachedPublicProfileBundle(
 ): Promise<PublicProfileBundle | null> {
   const key = username.trim().toLowerCase();
 
+  // Sample profile is code-only — never touch Supabase for @jennifer.
+  if (isDemoProfileUsername(key)) {
+    return Promise.resolve(DEMO_PUBLIC_PROFILE_BUNDLE);
+  }
+
   return unstable_cache(
     async () => {
       const supabase = createPublicSupabaseClient();
@@ -123,13 +136,20 @@ export function getCachedPublicProfileBundle(
       };
     },
     ["public-profile-bundle", key],
-    { revalidate: 60, tags: [`profile:${key}`] }
+    // Indefinite until pin/profile write calls revalidateProfileForPin.
+    { revalidate: false, tags: [profileCacheTag(key)] }
   )();
 }
 
-/** Single cached loader for profile metadata + page (avoids duplicate Supabase round-trips). */
+/**
+ * Public profile page loader. Demo username always uses in-memory sample data.
+ * Real profiles use the cached Supabase bundle.
+ */
 export const loadPublicProfilePage = cache(
   async (username: string): Promise<PublicProfilePageData | null> => {
+    const demo = await loadDemoPublicProfilePage(username);
+    if (demo) return demo;
+
     const [bundle, authUser] = await Promise.all([
       getCachedPublicProfileBundle(username),
       getAuthUser(),
@@ -157,20 +177,56 @@ export const loadPublicProfilePage = cache(
         currentUsername != null &&
         currentUsername.toLowerCase() === profile.username.toLowerCase();
 
-      if (isOwnProfile) {
-        // Owners always see live pins (cache is for public/crawler traffic).
-        const rows = await loadProfileRows(supabase, profile);
-        visitedCountries = rows.visitedCountries;
-        visitedCities = rows.visitedCities;
-        visitedParks = rows.visitedParks;
+      // Private wishlist is owner-only and not in the public pin cache.
+      if (isOwnProfile && !profile.wishlist_public) {
         wishlistCountries = await loadWishlistCountries(supabase, profile, true);
       }
 
+      // Follow state stays live — not part of the long-lived pin cache.
       followState = await loadProfileFollowState(
         supabase,
         profile.id,
         authUser.id
       );
+    }
+
+    // Auto-pin home city when missing (e.g. residence "İstanbul").
+    // Prefer the owner's session (RLS). Fall back to service role when available.
+    if (
+      profile.residence?.trim() &&
+      !hasResidenceCityPinned(visitedCities, profile.residence)
+    ) {
+      const ownerClient =
+        isOwnProfile && authUser ? await createClient() : null;
+      const adminClient = createAdminSupabaseClient();
+      const writers = [ownerClient, adminClient].filter(
+        (client): client is NonNullable<typeof client> => Boolean(client)
+      );
+
+      for (const writer of writers) {
+        const residencePin = await ensureResidenceCityPinFromLabel(
+          writer,
+          profile.id,
+          profile.residence,
+          { notify: false }
+        );
+        if (!residencePin.ok) {
+          console.error(
+            "Residence auto-pin failed",
+            profile.username,
+            residencePin.error
+          );
+          continue;
+        }
+        if (residencePin.created) {
+          await revalidateProfileForPin(writer, profile.id);
+          const rows = await loadProfileRows(writer, profile);
+          visitedCountries = rows.visitedCountries;
+          visitedCities = rows.visitedCities;
+          visitedParks = rows.visitedParks;
+        }
+        break;
+      }
     }
 
     const stats = computeTravelStats(visitedCountries, visitedCities, visitedParks);

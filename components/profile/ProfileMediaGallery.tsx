@@ -6,7 +6,6 @@ import { InstagramMemoryThumb } from "@/components/city/InstagramMemoryThumb";
 import { HubExternalPhoto } from "@/components/hub/HubExternalPhoto";
 import { HubMemoryLightbox } from "@/components/hub/HubMemoryLightbox";
 import { HubSectionCta } from "@/components/hub/HubSectionCta";
-import { HubSectionHeading } from "@/components/hub/HubSectionHeading";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
 import { useModal } from "@/components/ui/ModalProvider";
 import { modalMessages } from "@/lib/i18n/client-messages";
@@ -29,8 +28,9 @@ type ProfileMediaGalleryLabels = {
   viewPin: string;
   viewMap: string;
   close: string;
-    instagramPost: string;
-    viewAll: string;
+  instagramPost: string;
+  viewAll: string;
+  viewLess?: string;
   editMedia: string;
   removeMedia: string;
   removePhotoTitle: string;
@@ -46,7 +46,13 @@ type ProfileMediaGalleryProps = {
   items: HubGalleryItem[];
   alwaysShow?: boolean;
   emptyLabel?: string;
+  /** Link to the full media page (profile preview). */
   viewAllHref?: string;
+  /** Expand/collapse all items in-place (media page). */
+  onViewAll?: () => void;
+  viewAllExpanded?: boolean;
+  /** Show All only when there are more items than the preview. */
+  showViewAll?: boolean;
   hideHeading?: boolean;
   isOwnProfile: boolean;
   visitedCountries: VisitedCountry[];
@@ -55,8 +61,6 @@ type ProfileMediaGalleryProps = {
   labels: ProfileMediaGalleryLabels;
   /** When set, photo tiles get a DOM id for in-page scroll targets. */
   photoAnchorPrefix?: string;
-  /** Instagram cards with an uploaded photo can jump to the related photo tile. */
-  onScrollToRelatedPhoto?: (photoItemId: string) => void;
 };
 
 function MediaItemActions({
@@ -107,7 +111,6 @@ function GalleryTile({
   onEdit,
   onRemove,
   photoAnchorPrefix,
-  onScrollToRelatedPhoto,
 }: {
   item: HubGalleryItem;
   hubName: string;
@@ -117,7 +120,6 @@ function GalleryTile({
   onEdit: () => void;
   onRemove: () => void;
   photoAnchorPrefix?: string;
-  onScrollToRelatedPhoto?: (photoItemId: string) => void;
 }) {
   const ownerActions = isOwnProfile ? (
     <MediaItemActions
@@ -130,11 +132,8 @@ function GalleryTile({
 
   if (item.mediaType === "instagram") {
     const instagramHref = normalizeInstagramPostUrl(item.mediaUrl);
-    const relatedPhotoId =
-      item.pin.photoUrl && onScrollToRelatedPhoto
-        ? `${item.pin.id}:photo`
-        : null;
 
+    // Photos stay only in the photos section — never duplicate them under Instagram links.
     const instagramLink = (
       <a
         href={instagramHref}
@@ -151,42 +150,16 @@ function GalleryTile({
       </a>
     );
 
-    const relatedPhotoJump =
-      relatedPhotoId && item.pin.photoUrl ? (
-        <button
-          type="button"
-          className="profile-media-instagram-stack__photo"
-          onClick={() => onScrollToRelatedPhoto?.(relatedPhotoId)}
-          aria-label={`${labels.viewPin} — ${item.pin.placeLabel}`}
-        >
-          <HubExternalPhoto
-            src={item.pin.mediaDisplayUrl ?? item.pin.photoUrl}
-            alt={`${hubName} — ${item.pin.placeLabel}`}
-            width={160}
-            height={160}
-            className="city-page__traveler-picture-image"
-          />
-        </button>
-      ) : null;
-
     if (isOwnProfile) {
       return (
         <div className="profile-media-item">
-          <div className="profile-media-instagram-stack">
-            {relatedPhotoJump}
-            {instagramLink}
-          </div>
+          {instagramLink}
           {ownerActions}
         </div>
       );
     }
 
-    return (
-      <div className="profile-media-instagram-stack">
-        {relatedPhotoJump}
-        {instagramLink}
-      </div>
-    );
+    return instagramLink;
   }
 
   if (isOwnProfile) {
@@ -252,6 +225,9 @@ export function ProfileMediaGallery({
   alwaysShow = false,
   emptyLabel,
   viewAllHref,
+  onViewAll,
+  viewAllExpanded = false,
+  showViewAll,
   hideHeading = false,
   isOwnProfile,
   visitedCountries,
@@ -259,7 +235,6 @@ export function ProfileMediaGallery({
   visitedParks,
   labels,
   photoAnchorPrefix,
-  onScrollToRelatedPhoto,
 }: ProfileMediaGalleryProps) {
   const router = useRouter();
   const modal = useModal();
@@ -330,13 +305,29 @@ export function ProfileMediaGallery({
     router.refresh();
   }
 
+  const canShowViewAll = showViewAll ?? Boolean(onViewAll || viewAllHref);
+  const viewAllLabel = viewAllExpanded
+    ? (labels.viewLess ?? labels.viewAll)
+    : labels.viewAll;
+
   let headingCta: ReactNode = null;
-  if (viewAllHref) {
+  if (canShowViewAll && onViewAll) {
+    headingCta = (
+      <button
+        type="button"
+        className="profile-media-box__all"
+        onClick={onViewAll}
+        aria-expanded={viewAllExpanded}
+      >
+        {viewAllLabel}
+      </button>
+    );
+  } else if (canShowViewAll && viewAllHref) {
     headingCta = (
       <HubSectionCta
         label={labels.viewAll}
         href={viewAllHref}
-        className="profile-media-view-all"
+        className="profile-media-box__all"
       />
     );
   }
@@ -347,12 +338,17 @@ export function ProfileMediaGallery({
 
   return (
     <>
-      <section className="city-page__section" aria-labelledby={headingId}>
-        {hideHeading ? null : (
-          <HubSectionHeading id={headingId} title={heading} cta={headingCta} />
-        )}
-        {items.length > 0 ? (
-          <div className="city-page__hub-photo-gallery">
+      <section className="city-page__section profile-media-gallery-section" aria-labelledby={headingId}>
+        <div className="city-page__hub-photo-gallery profile-media-box">
+          {hideHeading ? null : (
+            <div className="profile-media-box__head">
+              <h2 id={headingId} className="profile-media-box__title">
+                {heading}
+              </h2>
+              {headingCta}
+            </div>
+          )}
+          {items.length > 0 ? (
             <ul className="city-page__traveler-pictures-grid">
               {items.map((item) => (
                 <li key={item.id}>
@@ -365,15 +361,14 @@ export function ProfileMediaGallery({
                     onEdit={() => openEditForItem(item)}
                     onRemove={() => handleRemoveItem(item)}
                     photoAnchorPrefix={photoAnchorPrefix}
-                    onScrollToRelatedPhoto={onScrollToRelatedPhoto}
                   />
                 </li>
               ))}
             </ul>
-          </div>
-        ) : emptyLabel ? (
-          <p className="city-page__empty">{emptyLabel}</p>
-        ) : null}
+          ) : emptyLabel ? (
+            <p className="city-page__empty">{emptyLabel}</p>
+          ) : null}
+        </div>
       </section>
 
       {expandedItem?.mediaType === "photo" ? (

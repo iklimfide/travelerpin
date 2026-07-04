@@ -4,6 +4,7 @@ import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
 import { publishCityHubOnPin } from "@/lib/supabase/published-hubs";
 import { notifyFollowersAfterCityPin } from "@/lib/supabase/notify-pin-followers";
 import { revalidateCityHubForPin } from "@/lib/cache/revalidate-city-hub";
+import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { cityBatchSchema } from "@/lib/validations/city-batch";
 
 export async function POST(request: Request) {
@@ -91,6 +92,9 @@ export async function POST(request: Request) {
     revalidateCityHubForPin(city.country_code, city.city_name);
     await publishCityHubOnPin(supabase, city);
     await notifyFollowersAfterCityPin(supabase, user.id, city);
+  }
+  if ((inserted ?? []).length > 0) {
+    await revalidateProfileForPin(supabase, user.id);
   }
 
   return NextResponse.json({

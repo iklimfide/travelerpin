@@ -4,9 +4,23 @@ import {
   getCityHubBySlug,
 } from "@/lib/data/city-hubs";
 import { getCountryHubByCode, listCountryHubs } from "@/lib/data/country-hubs";
-import { findTouristCitiesByExactName } from "@/lib/data/tourist-cities";
+import {
+  findTouristCitiesByExactName,
+  TOURIST_CITIES,
+} from "@/lib/data/tourist-cities";
 import { cityPath } from "@/lib/seo/site";
 import { buildCitySlug } from "@/lib/utils/city-slug";
+import { formatCityDisplayName, normalizeCityKey } from "@/lib/utils/city-name";
+
+export { normalizeCityKey };
+
+export type ResidenceCityPinInput = {
+  city_name: string;
+  country_code: string;
+  country_name: string;
+  latitude: number | null;
+  longitude: number | null;
+};
 
 function parseResidence(residence: string): {
   cityName: string;
@@ -98,23 +112,70 @@ function pickResidenceCitySlug(cityName: string, countryHint: string | null): st
 export function resolveResidenceCountryCode(
   residence: string | null | undefined
 ): string | null {
+  return resolveResidenceCityPinInput(residence)?.country_code ?? null;
+}
+
+/**
+ * Resolve a residence label (e.g. "Istanbul" or "Istanbul, Turkey") into a
+ * pin payload so the home city can be auto-added to the travel map.
+ */
+export function resolveResidenceCityPinInput(
+  residence: string | null | undefined
+): ResidenceCityPinInput | null {
   if (!residence?.trim()) return null;
 
   const { cityName, countryHint } = parseResidence(residence);
-  if (countryHint) {
-    const fromHint = resolveCountryCodeFromHint(countryHint);
-    if (fromHint) return fromHint.toUpperCase();
-  }
-
   if (!cityName) return null;
 
   const hintedCode = countryHint ? resolveCountryCodeFromHint(countryHint) : null;
-  const matches = findTouristCitiesByExactName(cityName, hintedCode);
-  if (matches.length > 0) {
-    return matches[0].countryCode.toUpperCase();
+  let matches = findTouristCitiesByExactName(cityName, hintedCode);
+  if (matches.length === 0) {
+    matches = findTouristCitiesByExactName(cityName);
   }
 
-  return null;
+  // Fallback: accent/I-fold match (covers İstanbul vs Istanbul, etc.).
+  if (matches.length === 0) {
+    const needle = normalizeCityKey(cityName);
+    matches = TOURIST_CITIES.filter((city) => {
+      if (hintedCode && city.countryCode.toUpperCase() !== hintedCode.toUpperCase()) {
+        return false;
+      }
+      return normalizeCityKey(city.name) === needle;
+    });
+  }
+
+  const city = matches[0];
+  if (!city) return null;
+
+  const countryCode = city.countryCode.toUpperCase();
+  const countryName =
+    getCountryHubByCode(countryCode)?.name ??
+    (countryHint?.trim() || countryCode);
+
+  return {
+    city_name: formatCityDisplayName(city.name),
+    country_code: countryCode,
+    country_name: countryName,
+    latitude: city.latitude,
+    longitude: city.longitude,
+  };
+}
+
+/** Whether visited cities already include this residence pin. */
+export function hasResidenceCityPinned(
+  cities: { city_name: string; country_code: string }[],
+  residence: string | null | undefined
+): boolean {
+  const input = resolveResidenceCityPinInput(residence);
+  if (!input) return true;
+
+  const code = input.country_code.toUpperCase();
+  const name = normalizeCityKey(input.city_name);
+  return cities.some(
+    (city) =>
+      city.country_code.toUpperCase() === code &&
+      normalizeCityKey(city.city_name) === name
+  );
 }
 
 export function resolveResidenceCityHref(residence: string | null | undefined): string | null {
