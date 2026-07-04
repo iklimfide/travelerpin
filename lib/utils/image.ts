@@ -17,11 +17,17 @@ export type OptimizedImage = {
  */
 function loadSharp(): SharpModule {
   const require = createRequire(join(process.cwd(), "package.json"));
-  const mod = require("sharp") as SharpModule & { default?: SharpModule };
-  const sharp = typeof mod === "function" ? mod : mod.default;
-  if (typeof sharp !== "function") {
+  const mod: unknown = require("sharp");
+  const candidate =
+    typeof mod === "function"
+      ? mod
+      : mod && typeof mod === "object" && "default" in mod
+        ? (mod as { default: unknown }).default
+        : null;
+  if (typeof candidate !== "function") {
     throw new Error("sharp module did not export a function");
   }
+  const sharp = candidate as SharpModule;
   // Probe native binding early.
   void (sharp as unknown as { versions?: { vips?: string } }).versions;
   return sharp;
