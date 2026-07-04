@@ -2,12 +2,24 @@ import { NextResponse } from "next/server";
 import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { createClient } from "@/lib/supabase/server";
 import { LIMITS } from "@/lib/constants";
+import {
+  deleteR2Objects,
+  isR2Configured,
+  parseR2ObjectKey,
+  uploadPhotoToR2,
+} from "@/lib/storage/r2";
 import { optimizeCover } from "@/lib/utils/image";
+import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { updateProfileSettings } from "@/lib/supabase/profile-settings";
 
-const COVER_BUCKET = "covers";
-const COVER_PATH = (userId: string, extension: string) =>
-  `${userId}/cover.${extension === "jpeg" ? "jpg" : extension}`;
+const COVER_KEY = (userId: string, extension: string) =>
+  `covers/${userId}/cover.${extension === "jpeg" ? "jpg" : extension}`;
+
+const COVER_KEY_VARIANTS = (userId: string) => [
+  COVER_KEY(userId, "webp"),
+  COVER_KEY(userId, "jpg"),
+  COVER_KEY(userId, "png"),
+];
 
 export async function POST(request: Request) {
   try {
@@ -22,6 +34,13 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!isR2Configured()) {
+      return NextResponse.json(
+        { error: formatPhotoUploadError("R2 not configured") },
+        { status: 503 }
+      );
     }
 
     const formData = await request.formData();
@@ -41,36 +60,11 @@ export async function POST(request: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const optimized = await optimizeCover(buffer, file.type);
-    const fileName = COVER_PATH(user.id, optimized.extension);
+    const key = COVER_KEY(user.id, optimized.extension);
 
-    // Remove previous cover variants so we don't leave stale webp/jpg side by side.
-    await supabase.storage
-      .from(COVER_BUCKET)
-      .remove([
-        COVER_PATH(user.id, "webp"),
-        COVER_PATH(user.id, "jpg"),
-        COVER_PATH(user.id, "png"),
-      ]);
+    await deleteR2Objects(COVER_KEY_VARIANTS(user.id));
 
-    const { error: uploadError } = await supabase.storage
-      .from(COVER_BUCKET)
-      .upload(fileName, optimized.buffer, {
-        contentType: optimized.contentType,
-        upsert: true,
-      });
-
-    if (uploadError) {
-      const message =
-        uploadError.message === "Bucket not found"
-          ? "Cover upload is not configured yet. Run migration 020_profile_cover.sql in Supabase."
-          : uploadError.message;
-      return NextResponse.json({ error: message }, { status: 500 });
-    }
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from(COVER_BUCKET).getPublicUrl(fileName);
-
+    const publicUrl = await uploadPhotoToR2(key, optimized.buffer, optimized.contentType);
     const coverUrl = `${publicUrl}?v=${Date.now()}`;
 
     const { profile, error } = await updateProfileSettings(supabase, user.id, {
@@ -87,7 +81,11 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("POST /api/profile/cover failed", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Could not upload cover photo" },
+      {
+        error: formatPhotoUploadError(
+          error instanceof Error ? error.message : "Could not upload cover photo"
+        ),
+      },
       { status: 500 }
     );
   }
@@ -108,11 +106,19 @@ export async function DELETE() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await supabase.storage.from(COVER_BUCKET).remove([
-      COVER_PATH(user.id, "webp"),
-      COVER_PATH(user.id, "jpg"),
-      COVER_PATH(user.id, "png"),
-    ]);
+    const { data: current } = await supabase
+      .from("profiles")
+      .select("cover_url")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const keys = COVER_KEY_VARIANTS(user.id);
+    const currentKey = current?.cover_url ? parseR2ObjectKey(current.cover_url) : null;
+    if (currentKey) keys.push(currentKey);
+
+    if (isR2Configured()) {
+      await deleteR2Objects(keys);
+    }
 
     const { profile, error } = await updateProfileSettings(supabase, user.id, {
       cover_url: null,

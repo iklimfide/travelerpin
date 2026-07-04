@@ -1,4 +1,9 @@
-import { PutObjectCommand, GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  GetObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 
 function readEnv(name: string): string | undefined {
   const raw = process.env[name];
@@ -132,6 +137,28 @@ export async function uploadPhotoToR2(
 
   const base = publicBaseUrl.replace(/\/$/, "");
   return `${base}/${key}`;
+}
+
+/** Best-effort delete; missing keys are ignored. */
+export async function deleteR2Objects(keys: string[]): Promise<void> {
+  const bucket = readEnv("R2_BUCKET_NAME");
+  if (!bucket) return;
+
+  const client = getR2Client();
+  await Promise.all(
+    keys.filter(isSafeR2ObjectKey).map(async (key) => {
+      try {
+        await client.send(
+          new DeleteObjectCommand({
+            Bucket: bucket,
+            Key: key,
+          })
+        );
+      } catch {
+        // Object may not exist (e.g. previous extension variant).
+      }
+    })
+  );
 }
 
 /** Parse object key from a public R2 URL (works on client for pub-*.r2.dev links). */

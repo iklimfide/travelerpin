@@ -2,12 +2,24 @@ import { NextResponse } from "next/server";
 import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { createClient } from "@/lib/supabase/server";
 import { LIMITS } from "@/lib/constants";
+import {
+  deleteR2Objects,
+  isR2Configured,
+  parseR2ObjectKey,
+  uploadPhotoToR2,
+} from "@/lib/storage/r2";
 import { optimizeAvatar } from "@/lib/utils/image";
+import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { updateProfileSettings } from "@/lib/supabase/profile-settings";
 
-const AVATAR_BUCKET = "avatars";
-const AVATAR_PATH = (userId: string, extension: string) =>
-  `${userId}/avatar.${extension === "jpeg" ? "jpg" : extension}`;
+const AVATAR_KEY = (userId: string, extension: string) =>
+  `avatars/${userId}/avatar.${extension === "jpeg" ? "jpg" : extension}`;
+
+const AVATAR_KEY_VARIANTS = (userId: string) => [
+  AVATAR_KEY(userId, "webp"),
+  AVATAR_KEY(userId, "jpg"),
+  AVATAR_KEY(userId, "png"),
+];
 
 export async function POST(request: Request) {
   try {
@@ -22,6 +34,13 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!isR2Configured()) {
+      return NextResponse.json(
+        { error: formatPhotoUploadError("R2 not configured") },
+        { status: 503 }
+      );
     }
 
     const formData = await request.formData();
@@ -41,35 +60,11 @@ export async function POST(request: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const optimized = await optimizeAvatar(buffer, file.type);
-    const fileName = AVATAR_PATH(user.id, optimized.extension);
+    const key = AVATAR_KEY(user.id, optimized.extension);
 
-    await supabase.storage
-      .from(AVATAR_BUCKET)
-      .remove([
-        AVATAR_PATH(user.id, "webp"),
-        AVATAR_PATH(user.id, "jpg"),
-        AVATAR_PATH(user.id, "png"),
-      ]);
+    await deleteR2Objects(AVATAR_KEY_VARIANTS(user.id));
 
-    const { error: uploadError } = await supabase.storage
-      .from(AVATAR_BUCKET)
-      .upload(fileName, optimized.buffer, {
-        contentType: optimized.contentType,
-        upsert: true,
-      });
-
-    if (uploadError) {
-      const message =
-        uploadError.message === "Bucket not found"
-          ? "Photo upload is not configured yet. Run migration 005_avatars_storage.sql in Supabase."
-          : uploadError.message;
-      return NextResponse.json({ error: message }, { status: 500 });
-    }
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(fileName);
-
+    const publicUrl = await uploadPhotoToR2(key, optimized.buffer, optimized.contentType);
     const avatarUrl = `${publicUrl}?v=${Date.now()}`;
 
     const { profile, error } = await updateProfileSettings(supabase, user.id, {
@@ -86,7 +81,11 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("POST /api/profile/avatar failed", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Could not upload photo" },
+      {
+        error: formatPhotoUploadError(
+          error instanceof Error ? error.message : "Could not upload photo"
+        ),
+      },
       { status: 500 }
     );
   }
@@ -107,11 +106,19 @@ export async function DELETE() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await supabase.storage.from(AVATAR_BUCKET).remove([
-      AVATAR_PATH(user.id, "webp"),
-      AVATAR_PATH(user.id, "jpg"),
-      AVATAR_PATH(user.id, "png"),
-    ]);
+    const { data: current } = await supabase
+      .from("profiles")
+      .select("avatar_url")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const keys = AVATAR_KEY_VARIANTS(user.id);
+    const currentKey = current?.avatar_url ? parseR2ObjectKey(current.avatar_url) : null;
+    if (currentKey) keys.push(currentKey);
+
+    if (isR2Configured()) {
+      await deleteR2Objects(keys);
+    }
 
     const { profile, error } = await updateProfileSettings(supabase, user.id, {
       avatar_url: null,
