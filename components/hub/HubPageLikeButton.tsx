@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuthGate } from "@/components/auth/useAuthGate";
+import { tapPressProps } from "@/lib/client/use-instant-action";
 
 type HubPageLikeButtonProps = {
   label: string;
@@ -52,6 +53,7 @@ export function HubPageLikeButton({
       className={`city-page__btn city-page__btn--like${liked ? " city-page__btn--active" : ""}`}
       disabled={disabled}
       onClick={handleClick}
+      {...tapPressProps(disabled)}
       aria-label={label}
       aria-pressed={liked}
     >

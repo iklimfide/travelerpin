@@ -9,8 +9,8 @@ async function loadSharp(): Promise<SharpModule> {
 export function isAllowedOgImageUrl(url: string, siteUrl?: string): boolean {
   try {
     const parsed = new URL(url);
-    if (parsed.protocol !== "https:") return false;
-    if (SUPABASE_HOST.test(parsed.hostname)) return true;
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+    if (SUPABASE_HOST.test(parsed.hostname)) return parsed.protocol === "https:";
     if (!siteUrl) return false;
     return parsed.hostname === new URL(siteUrl).hostname;
   } catch {
@@ -42,7 +42,7 @@ async function fetchAndConvertToPng(
     });
   }
 
-  return pipeline.png({ compressionLevel: 6 }).toBuffer();
+  return pipeline.toColourspace("srgb").png({ compressionLevel: 6 }).toBuffer();
 }
 
 /** Inline remote image as PNG data URL for next/og (Satori cannot load WebP or self-fetch). */

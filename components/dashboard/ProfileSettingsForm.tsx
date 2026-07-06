@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProfileAvatarUpload } from "@/components/profile/ProfileAvatar";
-import { ProfileCoverUpload } from "@/components/profile/ProfileCoverUpload";
 import {
   ResidenceCityPicker,
   type ResidenceCitySelection,
@@ -36,7 +35,6 @@ type ProfileSettingsFormProps = {
     | "username"
     | "display_name"
     | "avatar_url"
-    | "cover_url"
     | "bio"
     | "residence"
     | "instagram_url"
@@ -68,7 +66,6 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
   const username = profile.username;
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url);
-  const [coverUrl, setCoverUrl] = useState(profile.cover_url);
   const [bio, setBio] = useState(profile.bio ?? "");
   const [residenceSelection, setResidenceSelection] = useState<ResidenceCitySelection | null>(
     null
@@ -140,53 +137,26 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-8">
       <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-4">
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-          <div className="min-w-0">
-            <h2 className="truncate text-xs font-semibold uppercase tracking-wide text-slate-400">
-              {t("photoTitle")}
-            </h2>
-            <div className="mt-3">
-              <ProfileAvatarUpload
-                compact
-                avatarUrl={avatarUrl}
-                displayName={previewName}
-                username={username}
-                disabled={loading}
-                onError={(message) => modal.alert(message, { variant: "error" })}
-                labels={{
-                  changePhoto: t("changePhoto"),
-                  removePhoto: t("removePhoto"),
-                  hint: t("photoHint"),
-                }}
-                onChange={(url) => {
-                  setAvatarUrl(url);
-                  router.refresh();
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="min-w-0">
-            <h2 className="truncate text-xs font-semibold uppercase tracking-wide text-slate-400">
-              {t("coverTitle")}
-            </h2>
-            <div className="mt-3">
-              <ProfileCoverUpload
-                compact
-                coverUrl={coverUrl}
-                disabled={loading}
-                onError={(message) => modal.alert(message, { variant: "error" })}
-                labels={{
-                  changePhoto: t("changeCover"),
-                  removePhoto: t("removePhoto"),
-                }}
-                onChange={(url) => {
-                  setCoverUrl(url);
-                  router.refresh();
-                }}
-              />
-            </div>
-          </div>
+        <h2 className="truncate text-xs font-semibold uppercase tracking-wide text-slate-400">
+          {t("photoTitle")}
+        </h2>
+        <div className="mt-3">
+          <ProfileAvatarUpload
+            avatarUrl={avatarUrl}
+            displayName={previewName}
+            username={username}
+            disabled={loading}
+            onError={(message) => modal.alert(message, { variant: "error" })}
+            labels={{
+              changePhoto: t("changePhoto"),
+              removePhoto: t("removePhoto"),
+              hint: t("photoHint"),
+            }}
+            onChange={(url) => {
+              setAvatarUrl(url);
+              router.refresh();
+            }}
+          />
         </div>
       </section>
 

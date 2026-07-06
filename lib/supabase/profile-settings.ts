@@ -65,7 +65,7 @@ export async function fetchProfileSettings(
   return null;
 }
 
-const OPTIONAL_UPDATE_COLUMNS = ["share_prompt_mode", "instagram_url", "cover_url"] as const;
+const OPTIONAL_UPDATE_COLUMNS = ["share_prompt_mode", "instagram_url"] as const;
 
 /** Update profile and return settings fields; tolerates pending migrations. */
 export async function updateProfileSettings(

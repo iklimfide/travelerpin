@@ -126,3 +126,16 @@ export function shareCardMapDataUrl(
 ): string {
   return ogMapDataUrl(visitedCountryCodes, cities, [], "share-card");
 }
+
+/** Rasterize map SVG to PNG — avoids Satori/resvg colourspace failures on Windows. */
+export async function ogMapPngDataUrl(
+  visitedCountryCodes: string[],
+  cities: VisitedCity[],
+  wishlistCountryCodes: string[] = [],
+  variant: "dark" | "share-card" = "dark"
+): Promise<string> {
+  const svg = buildOgMapSvg(visitedCountryCodes, cities, wishlistCountryCodes, variant);
+  const sharp = (await import("sharp")).default;
+  const png = await sharp(Buffer.from(svg)).toColourspace("srgb").png({ compressionLevel: 6 }).toBuffer();
+  return `data:image/png;base64,${png.toString("base64")}`;
+}

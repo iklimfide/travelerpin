@@ -13,11 +13,11 @@ export async function HomeHero() {
         {t("eyebrow")}
       </div>
 
-      <h1 className="mb-5 text-[clamp(34px,4.6vw,52px)] leading-[1.05] font-extrabold tracking-[-0.055em] text-[#071126]">
+      <h1 className="mb-5 w-full max-w-none text-[clamp(26px,5.2vw,52px)] leading-[1.05] font-extrabold tracking-[-0.055em] text-[#071126]">
         {t("heroHeadline")}
       </h1>
 
-      <p className="mb-7 max-w-[560px] text-[19px] leading-relaxed text-[#64748b] max-sm:mx-auto max-sm:text-[17px]">
+      <p className="mb-7 w-full max-w-none text-[19px] leading-relaxed text-[#64748b] max-sm:mx-auto max-sm:text-center max-sm:text-[17px]">
         {t("heroDescription")}
       </p>
 

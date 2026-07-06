@@ -10,24 +10,17 @@ function absoluteAssetUrl(url: string | null, siteUrl: string): string | null {
 export async function loadTravelUpdateCardAssets(options: {
   assetOrigin: string;
   avatarSource: string | null;
-  coverSource?: string | null;
-}): Promise<{ avatarUrl: string | null; coverUrl: string | null }> {
+}): Promise<{ avatarUrl: string | null }> {
   const siteUrl = getSiteUrl();
 
-  const [avatarUrl, coverUrl] = await Promise.all([
-    loadProxiedOgImageDataUrl(absoluteAssetUrl(options.avatarSource, siteUrl), options.assetOrigin, {
+  const avatarUrl = await loadProxiedOgImageDataUrl(
+    absoluteAssetUrl(options.avatarSource, siteUrl),
+    options.assetOrigin,
+    {
       width: 336,
       height: 336,
-    }),
-    loadProxiedOgImageDataUrl(
-      absoluteAssetUrl(options.coverSource ?? null, siteUrl),
-      options.assetOrigin,
-      {
-        width: 1080,
-        height: 400,
-      }
-    ),
-  ]);
+    }
+  );
 
-  return { avatarUrl, coverUrl };
+  return { avatarUrl };
 }

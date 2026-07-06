@@ -5,16 +5,12 @@ import { ProfileOwnerTools } from "@/components/dashboard/ProfileOwnerTools";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { BRAND } from "@/lib/constants";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
+import { buildProfileDescription } from "@/lib/seo/profile";
 import {
-  buildProfileDescription,
-  buildProfileOgDescription,
-  buildProfileOgTitle,
-} from "@/lib/seo/profile";
-import {
-  OG_IMAGE_SIZE,
-  profileOgImageAlt,
-  profileOgImageUrl,
-  profileOgImageVersion,
+  PIN_MAP_OG_DESCRIPTION,
+  PIN_MAP_OG_TITLE,
+  staticOpenGraphImages,
+  staticTwitterImages,
 } from "@/lib/seo/og";
 import {
   profilePath,
@@ -40,45 +36,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { profile, stats } = data;
-  const visitedCount = data.visitedCodes.length;
-  const wishlistCount = data.wishlistCodes.length;
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
-  const isOwnProfile = data.currentUsername === profile.username;
   const title = travelMapTitle(displayName);
-  const ogTitle = buildProfileOgTitle(displayName);
-  const ogDescription = buildProfileOgDescription();
-  const url = buildProfileUrl(profile.username);
-  const ogVersion = profileOgImageVersion(stats, visitedCount, wishlistCount);
-  const ogImageUrl = profileOgImageUrl(profile.username, ogVersion);
+  const description = buildProfileDescription(displayName, stats);
 
   return {
     metadataBase: new URL(getSiteUrl()),
     title,
-    description: ogDescription,
+    description,
     alternates: {
       canonical: profilePath(profile.username),
     },
     openGraph: {
       type: "website",
-      title: ogTitle,
-      description: ogDescription,
-      url,
+      title: PIN_MAP_OG_TITLE,
+      description: PIN_MAP_OG_DESCRIPTION,
+      url: buildProfileUrl(profile.username),
       siteName: BRAND.name,
-      images: [
-        {
-          url: ogImageUrl,
-          width: OG_IMAGE_SIZE.width,
-          height: OG_IMAGE_SIZE.height,
-          alt: profileOgImageAlt(displayName),
-          type: "image/png",
-        },
-      ],
+      images: staticOpenGraphImages(),
     },
     twitter: {
       card: "summary_large_image",
-      title: ogTitle,
-      description: ogDescription,
-      images: [ogImageUrl],
+      title: PIN_MAP_OG_TITLE,
+      description: PIN_MAP_OG_DESCRIPTION,
+      images: staticTwitterImages(),
     },
   };
 }

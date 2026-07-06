@@ -1,7 +1,9 @@
 import { getCountryName } from "@/lib/data/countries";
 import { offerShareAfterPin } from "@/lib/client/share-pin-prompt";
 
-export async function addVisitedCountry(code: string): Promise<{ ok: true } | { ok: false; error: string }> {
+export async function addVisitedCountry(
+  code: string
+): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const countryName = getCountryName(code);
   const res = await fetch("/api/countries", {
     method: "POST",
@@ -17,8 +19,9 @@ export async function addVisitedCountry(code: string): Promise<{ ok: true } | { 
     return { ok: false, error: (data.error as string) ?? "Failed to add country" };
   }
 
+  const data = (await res.json()) as { id: string };
   offerShareAfterPin({ kind: "country", name: countryName });
-  return { ok: true };
+  return { ok: true, id: data.id };
 }
 
 export async function removeVisitedCountry(
@@ -36,7 +39,7 @@ export async function removeVisitedCountry(
 
 export async function addWishlistCountry(
   code: string
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const res = await fetch("/api/wishlist/countries", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -51,7 +54,8 @@ export async function addWishlistCountry(
     return { ok: false, error: (data.error as string) ?? "Failed to add to wishlist" };
   }
 
-  return { ok: true };
+  const data = (await res.json()) as { id: string };
+  return { ok: true, id: data.id };
 }
 
 export async function removeWishlistCountry(

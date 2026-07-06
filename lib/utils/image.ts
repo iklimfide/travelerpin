@@ -90,27 +90,6 @@ export async function optimizeAvatar(
   }
 }
 
-export async function optimizeCover(
-  buffer: Buffer,
-  fallbackContentType = "image/jpeg"
-): Promise<OptimizedImage> {
-  try {
-    const sharp = loadSharp();
-    const out = await sharp(buffer)
-      .rotate()
-      .resize(LIMITS.coverWidth, LIMITS.coverHeight, {
-        fit: "cover",
-        position: "centre",
-      })
-      .webp({ quality: 82 })
-      .toBuffer();
-    return { buffer: out, contentType: "image/webp", extension: "webp" };
-  } catch (error) {
-    console.error("optimizeCover: sharp failed, using original file", error);
-    return fallbackImage(buffer, fallbackContentType);
-  }
-}
-
 export function getWebpFileName(originalName: string): string {
   const base = originalName.replace(/\.[^.]+$/, "");
   const safe = base.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 50);

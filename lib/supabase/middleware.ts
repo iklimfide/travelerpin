@@ -51,13 +51,17 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  try {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
-  if (!user && error && isRecoverableAuthError(error.message)) {
-    await supabase.auth.signOut();
+    if (!user && error && isRecoverableAuthError(error.message)) {
+      await supabase.auth.signOut();
+    }
+  } catch {
+    // Supabase slow/unreachable — don't block the request.
   }
 
   return supabaseResponse;

@@ -3,8 +3,13 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ParkPageContent } from "@/components/park/ParkPageContent";
 import { listPopularParkHubSlugs } from "@/lib/data/park-hubs";
-import { buildParkPageTitle, DEFAULT_DESCRIPTION, getSiteUrl, parkPath, parkUrl } from "@/lib/seo/site";
-import { getDefaultParkHeroAlt, getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
+import { buildParkPageTitle, DEFAULT_DESCRIPTION, parkPath, parkUrl } from "@/lib/seo/site";
+import {
+  PIN_MAP_OG_DESCRIPTION,
+  PIN_MAP_OG_TITLE,
+  staticOpenGraphImages,
+  staticTwitterImages,
+} from "@/lib/seo/og";
 import { getDemoPinsForParkHub, mergeDemoHubPins } from "@/lib/data/demo-hub-pins";
 import { getCachedRecentParkPins } from "@/lib/supabase/park-travelers-cache";
 import { fetchRecentParkPins } from "@/lib/supabase/park-travelers";
@@ -47,17 +52,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!hub) return { title: "Park not found" };
 
   const title = buildParkPageTitle(hub.name);
-  const ogImage = `${getSiteUrl()}${getDefaultParkHeroImage(hub.parkType)}`;
 
   return {
     title,
     description: DEFAULT_DESCRIPTION,
     alternates: { canonical: parkPath(slug) },
     openGraph: {
-      title,
-      description: DEFAULT_DESCRIPTION,
+      title: PIN_MAP_OG_TITLE,
+      description: PIN_MAP_OG_DESCRIPTION,
       url: parkUrl(slug),
-      images: [{ url: ogImage, alt: getDefaultParkHeroAlt(hub.parkType) }],
+      images: staticOpenGraphImages(),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: PIN_MAP_OG_TITLE,
+      description: PIN_MAP_OG_DESCRIPTION,
+      images: staticTwitterImages(),
     },
   };
 }

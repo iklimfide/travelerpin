@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { createClient } from "@/lib/supabase/server";
 import { countrySchema } from "@/lib/validations/country";
-import { isCountryVisited } from "@/lib/utils/country-status";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -30,13 +29,6 @@ export async function POST(request: Request) {
 
   const data = parsed.data;
   const code = data.country_code.toUpperCase();
-
-  if (await isCountryVisited(supabase, user.id, code)) {
-    return NextResponse.json(
-      { error: "This country is already on your visited map" },
-      { status: 409 }
-    );
-  }
 
   const { data: country, error } = await supabase
     .from("wishlist_countries")

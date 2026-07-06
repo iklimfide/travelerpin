@@ -26,7 +26,6 @@ type BuildTravelUpdateImageOptions = {
   format: TravelUpdateImageFormat;
   bio?: string;
   residence?: string | null;
-  coverUrl?: string | null;
   isOwnProfile?: boolean;
 };
 
@@ -56,7 +55,6 @@ type CardLayoutProps = {
   siteUrl: string;
   bio: string;
   residence: string | null;
-  coverUrl: string | null;
   isOwnProfile: boolean;
   visitedCountryCodes: string[];
 };
@@ -793,13 +791,11 @@ function StoryStatCounters({ stats }: { stats: TravelStats }) {
 
 function StoryHero({
   displayName,
-  coverUrl,
   residence,
   isOwnProfile,
   hasUpdate,
 }: {
   displayName: string;
-  coverUrl: string | null;
   residence: string | null;
   isOwnProfile: boolean;
   hasUpdate: boolean;
@@ -818,29 +814,13 @@ function StoryHero({
         color: T.white,
       }}
     >
-      {coverUrl ? (
-        <img
-          src={coverUrl}
-          alt=""
-          width={1080}
-          height={320}
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
-        />
-      ) : (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "linear-gradient(135deg, #1e293b 0%, #334155 55%, #475569 100%)",
-          }}
-        />
-      )}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(135deg, #1e293b 0%, #334155 55%, #475569 100%)",
+        }}
+      />
       <div
         style={{
           position: "absolute",
@@ -1223,7 +1203,6 @@ function StoryLayout(props: CardLayoutProps) {
     siteUrl,
     bio,
     residence,
-    coverUrl,
     isOwnProfile,
     visitedCountryCodes,
   } = props;
@@ -1241,7 +1220,6 @@ function StoryLayout(props: CardLayoutProps) {
     >
       <StoryHero
         displayName={displayName}
-        coverUrl={coverUrl}
         residence={residence}
         isOwnProfile={isOwnProfile}
         hasUpdate={delta.hasChanges}
@@ -1283,7 +1261,6 @@ export async function buildTravelUpdateImage({
   format,
   bio = "",
   residence = null,
-  coverUrl = null,
   isOwnProfile = true,
 }: BuildTravelUpdateImageOptions): Promise<ImageResponse> {
   const mapSrc = shareCardMapDataUrl(visitedCountryCodes, visitedCities);
@@ -1300,7 +1277,6 @@ export async function buildTravelUpdateImage({
     siteUrl,
     bio,
     residence,
-    coverUrl,
     isOwnProfile,
     visitedCountryCodes,
   };

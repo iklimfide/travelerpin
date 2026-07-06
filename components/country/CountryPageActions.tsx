@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   addVisitedCountry,
   addWishlistCountry,
@@ -14,6 +14,7 @@ import { useAuthGate } from "@/components/auth/useAuthGate";
 import type { CountryVisitorState } from "@/lib/data/country-visitor-state";
 import { isCountryRemoveBlockedByPlacesError } from "@/lib/utils/country-remove";
 import { HubPageLikeButton } from "@/components/hub/HubPageLikeButton";
+import { tapPressProps } from "@/lib/client/use-instant-action";
 
 type CountryPageActionsProps = {
   countryCode: string;
@@ -41,30 +42,69 @@ export function CountryPageActions({
   const modal = useModal();
   const toast = useToast();
   const authGate = useAuthGate();
-  const [busy, setBusy] = useState(false);
   const [state, setState] = useState(initialState);
+  const [optimisticOnMap, setOptimisticOnMap] = useState<boolean | null>(null);
+  const [optimisticWishlist, setOptimisticWishlist] = useState<boolean | null>(null);
+  const visitedAddToken = useRef(0);
+  const wishlistAddToken = useRef(0);
 
   useEffect(() => {
     setState(initialState);
+    setOptimisticOnMap(null);
+    setOptimisticWishlist(null);
   }, [initialState]);
 
-  const onMap = state.isOnMap;
-  const onWishlist = Boolean(state.wishlistId);
-  const visitedLocked = onMap && state.visitedViaPlacesOnly;
+  const onMap = state.visitedViaPlacesOnly
+    ? true
+    : optimisticOnMap !== null
+      ? optimisticOnMap
+      : state.isOnMap;
+  const onWishlist =
+    optimisticWishlist !== null ? optimisticWishlist : Boolean(state.wishlistId);
+  const visitedLocked = state.visitedViaPlacesOnly;
   const wishlistDisabled = onMap;
 
-  async function handleVisited() {
+  function refreshInBackground() {
+    void Promise.resolve().then(() => router.refresh());
+  }
+
+  function handleVisited() {
     if (!state.isLoggedIn) {
       authGate.requireLogin();
       return;
     }
-    if (busy || visitedLocked) return;
+    if (state.visitedViaPlacesOnly) {
+      toast.show(labels.removePlacesFirst);
+      return;
+    }
 
-    setBusy(true);
-    try {
-      if (onMap && state.visitedId) {
-        const result = await removeVisitedCountry(state.visitedId);
+    if (onMap) {
+      if (!state.visitedId) {
+        visitedAddToken.current += 1;
+        setOptimisticOnMap(false);
+        setState((current) => ({ ...current, isOnMap: false }));
+        toast.show(labels.countryRemoved);
+        return;
+      }
+
+      const prevId = state.visitedId;
+      const nextOnMap = state.visitedViaPlacesOnly;
+      setOptimisticOnMap(nextOnMap);
+      setState((current) => ({
+        ...current,
+        visitedId: null,
+        isOnMap: nextOnMap,
+      }));
+      toast.show(labels.countryRemoved);
+
+      void removeVisitedCountry(prevId).then(async (result) => {
         if (!result.ok) {
+          setOptimisticOnMap(null);
+          setState((current) => ({
+            ...current,
+            visitedId: prevId,
+            isOnMap: true,
+          }));
           if (isCountryRemoveBlockedByPlacesError(result.error)) {
             toast.show(labels.removePlacesFirst);
             return;
@@ -72,73 +112,118 @@ export function CountryPageActions({
           await modal.alert(result.error, { variant: "error" });
           return;
         }
-        setState((current) => ({
-          ...current,
-          visitedId: null,
-          isOnMap: current.visitedViaPlacesOnly,
-        }));
-        toast.show(labels.countryRemoved);
-      } else if (!onMap) {
-        const result = await addVisitedCountry(countryCode);
-        if (!result.ok) {
-          await modal.alert(result.error, { variant: "error" });
-          return;
-        }
-        setState((current) => ({
-          ...current,
-          isOnMap: true,
-          wishlistId: null,
-        }));
-        toast.show(labels.countryAdded);
-      }
-      router.refresh();
-    } finally {
-      setBusy(false);
+        setOptimisticOnMap(null);
+        refreshInBackground();
+      });
+      return;
     }
+
+    const token = ++visitedAddToken.current;
+    setOptimisticOnMap(true);
+    setOptimisticWishlist(false);
+    setState((current) => ({
+      ...current,
+      isOnMap: true,
+      wishlistId: null,
+    }));
+    toast.show(labels.countryAdded);
+
+    void addVisitedCountry(countryCode).then(async (result) => {
+      if (token !== visitedAddToken.current) {
+        if (result.ok) {
+          void removeVisitedCountry(result.id);
+        }
+        return;
+      }
+
+      if (!result.ok) {
+        setOptimisticOnMap(null);
+        setState((current) => ({
+          ...current,
+          isOnMap: false,
+        }));
+        await modal.alert(result.error, { variant: "error" });
+        return;
+      }
+
+      setOptimisticOnMap(null);
+      setState((current) => ({
+        ...current,
+        visitedId: result.id,
+        isOnMap: true,
+      }));
+      refreshInBackground();
+    });
   }
 
-  async function handleWantToVisit() {
+  function handleWantToVisit() {
     if (!state.isLoggedIn) {
       authGate.requireLogin();
       return;
     }
-    if (busy || wishlistDisabled) return;
+    if (wishlistDisabled) return;
 
-    setBusy(true);
-    try {
-      if (onWishlist && state.wishlistId) {
-        const result = await removeWishlistCountry(state.wishlistId);
-        if (!result.ok) {
-          await modal.alert(result.error, { variant: "error" });
-          return;
-        }
-        setState((current) => ({ ...current, wishlistId: null }));
+    if (onWishlist) {
+      if (!state.wishlistId) {
+        wishlistAddToken.current += 1;
+        setOptimisticWishlist(false);
         toast.show(labels.wishlistRemoved);
-      } else {
-        const result = await addWishlistCountry(countryCode);
+        return;
+      }
+
+      const prevId = state.wishlistId;
+      setOptimisticWishlist(false);
+      setState((current) => ({ ...current, wishlistId: null }));
+      toast.show(labels.wishlistRemoved);
+
+      void removeWishlistCountry(prevId).then(async (result) => {
         if (!result.ok) {
+          setOptimisticWishlist(null);
+          setState((current) => ({ ...current, wishlistId: prevId }));
           await modal.alert(result.error, { variant: "error" });
           return;
         }
-        toast.show(labels.wishlistAdded);
-      }
-      router.refresh();
-    } finally {
-      setBusy(false);
+        refreshInBackground();
+      });
+      return;
     }
+
+    const token = ++wishlistAddToken.current;
+    setOptimisticWishlist(true);
+    toast.show(labels.wishlistAdded);
+
+    void addWishlistCountry(countryCode).then(async (result) => {
+      if (token !== wishlistAddToken.current) {
+        if (result.ok) {
+          void removeWishlistCountry(result.id);
+        }
+        return;
+      }
+
+      if (!result.ok) {
+        setOptimisticWishlist(null);
+        await modal.alert(result.error, { variant: "error" });
+        return;
+      }
+
+      setOptimisticWishlist(null);
+      setState((current) => ({ ...current, wishlistId: result.id }));
+      refreshInBackground();
+    });
   }
 
   return (
     <div className="city-page__actions">
       <label
         className={`city-page__btn city-page__btn--visited ${onMap ? "city-page__btn--active" : ""}`}
+        {...tapPressProps(visitedLocked)}
       >
         <input
           type="checkbox"
           className="city-page__btn-check"
           checked={onMap}
-          disabled={busy || visitedLocked}
-          onChange={() => void handleVisited()}
+          disabled={visitedLocked}
+          onChange={handleVisited}
           aria-label={labels.visited}
         />
         <span>{labels.visited}</span>
@@ -146,13 +231,14 @@ export function CountryPageActions({
       <div className="city-page__actions-secondary">
         <label
           className={`city-page__btn city-page__btn--wish ${onWishlist ? "city-page__btn--active" : ""}`}
+          {...tapPressProps(wishlistDisabled)}
         >
           <input
             type="checkbox"
             className="city-page__btn-check city-page__btn-check--wish"
             checked={onWishlist}
-            disabled={busy || wishlistDisabled}
-            onChange={() => void handleWantToVisit()}
+            disabled={wishlistDisabled}
+            onChange={handleWantToVisit}
             aria-label={labels.wantToVisit}
           />
           <span>{labels.wantToVisit}</span>
@@ -161,7 +247,6 @@ export function CountryPageActions({
           label={labels.like}
           loginHref={loginHref}
           isLoggedIn={state.isLoggedIn}
-          disabled={busy}
         />
       </div>
     </div>

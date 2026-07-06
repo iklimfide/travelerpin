@@ -80,11 +80,11 @@ export async function HomeDesktopProductPanel({
             {BRAND.name}
           </p>
 
-          <h2 className="mx-auto max-w-[520px] text-[clamp(32px,3.2vw,44px)] font-bold leading-[1.05] tracking-[-0.04em] text-[#071126]">
+          <h2 className="w-full max-w-none text-[clamp(26px,3.2vw,44px)] font-bold leading-[1.05] tracking-[-0.04em] text-[#071126]">
             {t("desktopPanelTitle")}
           </h2>
 
-          <p className="mx-auto mt-4 max-w-[520px] text-[18px] leading-relaxed text-[#64748b]">
+          <p className="mt-4 w-full max-w-none text-[18px] leading-relaxed text-[#64748b]">
             {t("desktopPanelSubtitle")}
           </p>
 

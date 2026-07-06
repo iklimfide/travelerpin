@@ -8,7 +8,6 @@ import { ProfileIdentityCard } from "@/components/profile/ProfileIdentityCard";
 import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
 import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections";
 import { ProfileSummaryGrid } from "@/components/profile/ProfileSummaryGrid";
-import { ProfileOgCaptureHost } from "@/components/profile/ProfileOgCaptureHost";
 import { BRAND } from "@/lib/constants";
 import { isDemoProfileUsername } from "@/lib/data/jennifer-demo-page";
 import {
@@ -86,7 +85,6 @@ export async function PublicProfileView({
     visitedParks.length > 0 ||
     visibleWishlistCodes.length > 0;
 
-  const coverUrl = profile.cover_url;
   const trips = buildProfileTrips(visitedCities, visitedParks, profile.residence);
   const mediaPins = buildProfileMediaPins(visitedCities, visitedParks, profile);
   const summary = buildProfileSummary(
@@ -109,12 +107,6 @@ export async function PublicProfileView({
   const demoProfileHref = profilePageHref ?? (embedded && isDemoProfile ? profilePath(profile.username) : undefined);
   const residenceHref = resolveResidenceCityHref(profile.residence);
   const heroTitle = t("travelDiaryTitle", { name: displayName });
-
-  const ogCaptureHeroTitle = t("travelDiaryTitle", { name: displayName });
-  const ogCaptureDescription = (
-    profile.bio?.trim() ||
-    profileDescription
-  ).replace(new RegExp(`${BRAND.name}\\.$`), `${BRAND.name}.com`);
   const badgeTier = getTravelerBadgeTier(stats.countries);
   const badgeLabel = badgeTier ? tBadge(badgeTier) : null;
   const badgeShellClassName = badgeTier ? BADGE_TIER_THEMES[badgeTier].shell : "";
@@ -140,7 +132,6 @@ export async function PublicProfileView({
           className="profile-story-capture"
         >
           <ProfileHeroCover
-            coverUrl={coverUrl}
             residence={profile.residence}
             residenceHref={residenceHref}
             heroTitle={heroTitle}
@@ -340,29 +331,6 @@ export async function PublicProfileView({
   return (
     <TravelMapFocusShell>
       {profileBody}
-      {isOwnProfile ? (
-        <ProfileOgCaptureHost
-          heroTitle={ogCaptureHeroTitle}
-          description={ogCaptureDescription}
-          avatarUrl={profile.avatar_url}
-          displayName={displayName}
-          username={profile.username}
-          stats={stats}
-          badgeLabel={badgeLabel}
-          badgeShellClassName={badgeShellClassName}
-          worldExploredLabel={t("worldExplored")}
-          worldExploredCaption={t("worldExploredCaption", {
-            pinned: stats.countries,
-            total: WORLD_COUNTRY_TOTAL,
-          })}
-          statLabels={{
-            countries: t("statCountriesShort"),
-            cities: t("statCitiesShort"),
-            nationalParks: t("statNationalParksShort"),
-            themeParks: t("statThemeParksShort"),
-          }}
-        />
-      ) : null}
     </TravelMapFocusShell>
   );
 }

@@ -6,6 +6,12 @@ import { listParkHubsByCategory } from "@/lib/data/park-hubs";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { DEFAULT_DESCRIPTION, parkCategoryPath, parkCategoryUrl } from "@/lib/seo/site";
 import {
+  PIN_MAP_OG_DESCRIPTION,
+  PIN_MAP_OG_TITLE,
+  staticOpenGraphImages,
+  staticTwitterImages,
+} from "@/lib/seo/og";
+import {
   PARK_CATEGORY_SLUGS,
   parseParkCategorySlug,
   type ParkCategorySlug,
@@ -47,9 +53,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       canonical: parkCategoryPath(category),
     },
     openGraph: {
-      title,
-      description: DEFAULT_DESCRIPTION,
+      title: PIN_MAP_OG_TITLE,
+      description: PIN_MAP_OG_DESCRIPTION,
       url: parkCategoryUrl(category),
+      images: staticOpenGraphImages(),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: PIN_MAP_OG_TITLE,
+      description: PIN_MAP_OG_DESCRIPTION,
+      images: staticTwitterImages(),
     },
   };
 }

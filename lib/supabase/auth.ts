@@ -11,11 +11,14 @@ export const getAuthUser = cache(async (): Promise<User | null> => {
   const supabase = await createClient();
   if (!supabase) return null;
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  return user;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user;
+  } catch {
+    return null;
+  }
 });
 
 export const getLoggedInUsername = cache(async (): Promise<string | null> => {

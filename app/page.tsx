@@ -7,23 +7,31 @@ import { HomeBelowFoldSections } from "@/components/home/HomeBelowFoldSections";
 import { HomeLandingSection } from "@/components/home/HomeLandingSection";
 import { DEMO_PERSONA } from "@/lib/data/demo-persona";
 import { loadDemoPublicProfilePage } from "@/lib/data/jennifer-demo-page";
-import { DEFAULT_DESCRIPTION, HOME_TITLE, getSiteUrl, profilePath } from "@/lib/seo/site";
+import { HOME_TITLE, getSiteUrl, profilePath } from "@/lib/seo/site";
+import {
+  PIN_MAP_OG_DESCRIPTION,
+  PIN_MAP_OG_TITLE,
+  staticOpenGraphImages,
+  staticTwitterImages,
+} from "@/lib/seo/og";
 import { getAuthUser } from "@/lib/supabase/auth";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { absolute: HOME_TITLE },
-    description: DEFAULT_DESCRIPTION,
+    description: PIN_MAP_OG_DESCRIPTION,
     alternates: { canonical: "/" },
     openGraph: {
-      title: HOME_TITLE,
-      description: DEFAULT_DESCRIPTION,
+      title: PIN_MAP_OG_TITLE,
+      description: PIN_MAP_OG_DESCRIPTION,
       url: getSiteUrl(),
+      images: staticOpenGraphImages(),
     },
     twitter: {
       card: "summary_large_image",
-      title: HOME_TITLE,
-      description: DEFAULT_DESCRIPTION,
+      title: PIN_MAP_OG_TITLE,
+      description: PIN_MAP_OG_DESCRIPTION,
+      images: staticTwitterImages(),
     },
   };
 }

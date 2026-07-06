@@ -142,7 +142,7 @@ export function buildProfileAllDestinations(
         countryCode: park.country_code,
         countryName: park.country_name,
         countrySlug: countryHubSlug(park.country_code),
-        imageUrl: mediaImageUrl(park) ?? getDefaultParkHeroImage(park.park_type),
+        imageUrl: getDefaultParkHeroImage(park.park_type),
         parkType: park.park_type,
         note: park.note,
       })),

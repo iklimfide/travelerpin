@@ -22,8 +22,13 @@ import {
 import { getCachedRecentCityPinsWithPreviews } from "@/lib/supabase/city-travelers-cache";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
-import { cityPath, cityUrl, buildCityPageTitle, DEFAULT_DESCRIPTION, getSiteUrl } from "@/lib/seo/site";
-import { DEFAULT_CITY_HERO_ALT, DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
+import { cityPath, cityUrl, buildCityPageTitle, DEFAULT_DESCRIPTION } from "@/lib/seo/site";
+import {
+  PIN_MAP_OG_DESCRIPTION,
+  PIN_MAP_OG_TITLE,
+  staticOpenGraphImages,
+  staticTwitterImages,
+} from "@/lib/seo/og";
 import { sanitizeCitySlug } from "@/lib/utils/sanitize-city-slug";
 import "../city-page.css";
 
@@ -49,17 +54,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const { hub } = context;
   const title = buildCityPageTitle(hub.name);
-  const ogImage = `${getSiteUrl()}${DEFAULT_CITY_HERO_IMAGE}`;
 
   return {
     title,
     description: DEFAULT_DESCRIPTION,
     alternates: { canonical: cityPath(slug) },
     openGraph: {
-      title,
-      description: DEFAULT_DESCRIPTION,
+      title: PIN_MAP_OG_TITLE,
+      description: PIN_MAP_OG_DESCRIPTION,
       url: cityUrl(slug),
-      images: [{ url: ogImage, alt: hub.heroImageAlt ?? DEFAULT_CITY_HERO_ALT }],
+      images: staticOpenGraphImages(),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: PIN_MAP_OG_TITLE,
+      description: PIN_MAP_OG_DESCRIPTION,
+      images: staticTwitterImages(),
     },
   };
 }

@@ -27,6 +27,12 @@ import { loadPublishedCityKeys, publicCityHubSlug } from "@/lib/supabase/city-hu
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { countryPath, countryUrl, buildCountryPageTitle, DEFAULT_DESCRIPTION } from "@/lib/seo/site";
+import {
+  PIN_MAP_OG_DESCRIPTION,
+  PIN_MAP_OG_TITLE,
+  staticOpenGraphImages,
+  staticTwitterImages,
+} from "@/lib/seo/og";
 import { sanitizeCountrySlug } from "@/lib/utils/sanitize-country-slug";
 import "../../city/city-page.css";
 
@@ -55,9 +61,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: DEFAULT_DESCRIPTION,
     alternates: { canonical: countryPath(slug) },
     openGraph: {
-      title,
-      description: DEFAULT_DESCRIPTION,
+      title: PIN_MAP_OG_TITLE,
+      description: PIN_MAP_OG_DESCRIPTION,
       url: countryUrl(slug),
+      images: staticOpenGraphImages(),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: PIN_MAP_OG_TITLE,
+      description: PIN_MAP_OG_DESCRIPTION,
+      images: staticTwitterImages(),
     },
   };
 }

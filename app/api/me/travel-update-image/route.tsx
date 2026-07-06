@@ -41,7 +41,7 @@ export async function GET(request: Request) {
       fetchTravelShareSnapshot(supabase, user.id),
       supabase
         .from("profiles")
-        .select("display_name, avatar_url, cover_url, username, bio, residence")
+        .select("display_name, avatar_url, username, bio, residence")
         .eq("id", user.id)
         .maybeSingle(),
     ]);
@@ -72,10 +72,9 @@ export async function GET(request: Request) {
   const bio =
     profile?.bio?.trim() ||
     buildProfileDescription(displayName, stats);
-  const { avatarUrl, coverUrl } = await loadTravelUpdateCardAssets({
+  const { avatarUrl } = await loadTravelUpdateCardAssets({
     assetOrigin: getOgAssetOriginFromRequest(request),
     avatarSource: profile?.avatar_url ?? null,
-    coverSource: profile?.cover_url ?? null,
   });
 
   const response = await buildTravelUpdateImage({
@@ -87,7 +86,6 @@ export async function GET(request: Request) {
     format,
     bio,
     residence: profile?.residence ?? null,
-    coverUrl,
     isOwnProfile: true,
   });
 

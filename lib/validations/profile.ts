@@ -55,7 +55,6 @@ export const profileSettingsSchema = z
     profession: z.enum(professionValues as [string, ...string[]]).nullable().optional(),
     marital_status: z.enum(maritalValues as [string, ...string[]]).nullable().optional(),
     avatar_url: z.string().url().nullable().optional(),
-    cover_url: z.string().url().nullable().optional(),
     residence_city: z
       .object({
         city_name: z.string().min(1).max(100).transform(formatCityDisplayName),
@@ -74,4 +73,4 @@ export const profileSettingsSchema = z
 export type ProfileSettingsInput = z.infer<typeof profileSettingsSchema>;
 
 export const PROFILE_SELECT =
-  "username, display_name, avatar_url, cover_url, bio, residence, instagram_url, profession, marital_status, wishlist_public, share_prompt_mode";
+  "username, display_name, avatar_url, bio, residence, instagram_url, profession, marital_status, wishlist_public, share_prompt_mode";

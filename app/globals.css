@@ -675,6 +675,64 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
     background-color: #059669 !important;
     color: #ffffff !important;
   }
+
+  .toast {
+    border-width: 2px;
+    border-style: solid;
+    font-weight: 600;
+  }
+
+  .toast--success {
+    border-color: #3b82f6;
+    background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+    color: #1e3a8a;
+    box-shadow: 0 16px 40px -12px rgb(37 99 235 / 0.45);
+  }
+
+  html.dark .toast--success {
+    border-color: rgb(59 130 246 / 0.7);
+    background: linear-gradient(180deg, rgb(30 58 138 / 0.7) 0%, rgb(15 23 42) 100%);
+    color: #dbeafe;
+  }
+
+  .toast--error {
+    border-color: #ef4444;
+    background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%);
+    color: #991b1b;
+    box-shadow: 0 16px 40px -12px rgb(239 68 68 / 0.4);
+  }
+
+  html.dark .toast--error {
+    border-color: rgb(239 68 68 / 0.7);
+    background: linear-gradient(180deg, rgb(127 29 29 / 0.7) 0%, rgb(15 23 42) 100%);
+    color: #fecaca;
+  }
+
+  .toast--warning {
+    border-color: #f59e0b;
+    background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
+    color: #92400e;
+    box-shadow: 0 16px 40px -12px rgb(245 158 11 / 0.42);
+  }
+
+  html.dark .toast--warning {
+    border-color: rgb(245 158 11 / 0.7);
+    background: linear-gradient(180deg, rgb(120 53 15 / 0.7) 0%, rgb(15 23 42) 100%);
+    color: #fde68a;
+  }
+
+  .toast--info {
+    border-color: #10b981;
+    background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+    color: #065f46;
+    box-shadow: 0 16px 40px -12px rgb(16 185 129 / 0.45);
+  }
+
+  html.dark .toast--info {
+    border-color: rgb(16 185 129 / 0.7);
+    background: linear-gradient(180deg, rgb(6 78 59 / 0.7) 0%, rgb(15 23 42) 100%);
+    color: #d1fae5;
+  }
 }
 
 /* Guest auth links on marketing pages */
@@ -846,28 +904,6 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   overflow: hidden;
   box-shadow: var(--profile-shadow);
   background: linear-gradient(135deg, #729ac6 0%, #a9c4df 44%, #c7daf0 100%);
-}
-
-.profile-cover-upload-preview {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 2.35 / 1;
-  overflow: hidden;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #729ac6 0%, #a9c4df 44%, #c7daf0 100%);
-}
-
-.profile-cover-upload-preview--compact {
-  width: 80px;
-  height: 80px;
-  aspect-ratio: 1;
-  border-radius: 9999px;
-}
-
-.profile-hero-cover-image {
-  z-index: 0;
-  object-fit: cover;
-  object-position: center;
 }
 
 .profile-hero-overlay {
@@ -3336,96 +3372,6 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   .profile-hero-card {
     border-radius: 34px 34px 34px 34px;
   }
-}
-
-/* Off-screen 1200×630 region for OG link-preview screenshots (edge-to-edge gradient). */
-.profile-og-capture {
-  position: fixed;
-  left: -12000px;
-  top: 0;
-  width: 1200px;
-  height: 630px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 32px 36px;
-  background: linear-gradient(135deg, #729ac6 0%, #a9c4df 44%, #c7daf0 100%);
-  pointer-events: none;
-  z-index: -1;
-  box-sizing: border-box;
-}
-
-.profile-og-capture__title {
-  margin: 0 0 10px;
-  font-size: 40px;
-  font-weight: 800;
-  line-height: 1.08;
-  color: #fff;
-}
-
-.profile-og-capture__desc {
-  margin: 0 0 22px;
-  max-width: 900px;
-  font-size: 17px;
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.88);
-}
-
-.profile-og-capture__row {
-  display: flex;
-  align-items: center;
-  gap: 22px;
-}
-
-.profile-og-capture__avatar-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.profile-og-capture__avatar {
-  width: 112px;
-  height: 112px;
-  border-radius: 32px;
-  object-fit: cover;
-  border: 8px solid #eef3f9;
-  background: #fff;
-}
-
-.profile-og-capture__avatar--fallback {
-  display: grid;
-  place-items: center;
-  font-size: 38px;
-  font-weight: 800;
-  color: #2563eb;
-  background: #dbeafe;
-}
-
-.profile-og-capture__badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 14px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.profile-og-capture__metrics {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-  max-width: 720px;
-}
-
-.profile-og-capture__panel {
-  background: #fff !important;
-  border: 1px solid #dfe5ee;
 }
 
 .profile-follow-row {

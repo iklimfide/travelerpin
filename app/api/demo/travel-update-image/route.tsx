@@ -39,10 +39,9 @@ export async function GET(request: Request) {
   );
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
   const bio = profile.bio?.trim() || buildProfileDescription(displayName, stats);
-  const { avatarUrl, coverUrl } = await loadTravelUpdateCardAssets({
+  const { avatarUrl } = await loadTravelUpdateCardAssets({
     assetOrigin: getOgAssetOriginFromRequest(request),
     avatarSource: profile.avatar_url,
-    coverSource: profile.cover_url,
   });
 
   const response = await buildTravelUpdateImage({
@@ -54,7 +53,6 @@ export async function GET(request: Request) {
     format,
     bio,
     residence: profile.residence,
-    coverUrl,
     isOwnProfile: false,
   });
 

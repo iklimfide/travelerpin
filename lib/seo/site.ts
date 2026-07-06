@@ -1,5 +1,4 @@
 import { BRAND } from "@/lib/constants";
-import { OG_IMAGE_LAYOUT_VERSION } from "@/lib/seo/og";
 
 export function getSiteUrl(): string {
   let url: string;
@@ -46,9 +45,7 @@ export function profileUrl(username: string): string {
 
 /** Profile URL with a stable share query param to bust link-preview caches. */
 export function profileShareUrl(username: string): string {
-  const url = new URL(profilePath(username), `${getSiteUrl()}/`);
-  url.searchParams.set("share", String(OG_IMAGE_LAYOUT_VERSION));
-  return url.toString();
+  return profileUrl(username);
 }
 
 export function countryPath(slug: string): string {

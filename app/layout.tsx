@@ -4,6 +4,12 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { BRAND } from "@/lib/constants";
 import { DEFAULT_DESCRIPTION, DEFAULT_KEYWORDS, getSiteUrl } from "@/lib/seo/site";
+import {
+  PIN_MAP_OG_DESCRIPTION,
+  PIN_MAP_OG_TITLE,
+  staticOpenGraphImages,
+  staticTwitterImages,
+} from "@/lib/seo/og";
 import { defaultLocale, type Locale } from "@/lib/i18n/config";
 import enMessages from "@/messages/en.json";
 import { ModalProvider } from "@/components/ui/ModalProvider";
@@ -39,23 +45,15 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: siteUrl,
     siteName: BRAND.name,
-    title: BRAND.name,
-    description: DEFAULT_DESCRIPTION,
-    images: [
-      {
-        url: "/opengraph-image",
-        width: 1200,
-        height: 630,
-        alt: BRAND.name,
-        type: "image/png",
-      },
-    ],
+    title: PIN_MAP_OG_TITLE,
+    description: PIN_MAP_OG_DESCRIPTION,
+    images: staticOpenGraphImages(),
   },
   twitter: {
     card: "summary_large_image",
-    title: BRAND.name,
-    description: DEFAULT_DESCRIPTION,
-    images: [`${siteUrl}/opengraph-image`],
+    title: PIN_MAP_OG_TITLE,
+    description: PIN_MAP_OG_DESCRIPTION,
+    images: staticTwitterImages(),
   },
   robots: {
     index: true,

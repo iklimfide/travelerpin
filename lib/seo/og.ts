@@ -1,30 +1,32 @@
-import type { TravelStats } from "@/types/database";
-import { BRAND } from "@/lib/constants";
+import type { Metadata } from "next";
 import { getSiteUrl } from "@/lib/seo/site";
 
-export const OG_IMAGE_SIZE = { width: 1200, height: 630 } as const;
+export const OG_IMAGE_PATH = "/images/og-share-card.png";
 
-/** Bump when OG snapshot format changes so stale R2 previews are ignored. */
-export const OG_IMAGE_LAYOUT_VERSION = 12;
+export const OG_IMAGE_SIZE = { width: 1024, height: 540 } as const;
 
-export function profileOgImageVersion(
-  stats: TravelStats,
-  visitedCount: number,
-  wishlistCount: number
-): string {
-  return `${OG_IMAGE_LAYOUT_VERSION}.${stats.countries}.${stats.cities}.${visitedCount}.${wishlistCount}`;
+export const PIN_MAP_OG_TITLE = "Traveler's Pin Map";
+
+export const PIN_MAP_OG_DESCRIPTION =
+  'Answer "How many countries have been explored?" with a single link. Share a global map of shared adventures.';
+
+export function staticOgImageUrl(): string {
+  return `${getSiteUrl()}${OG_IMAGE_PATH}`;
 }
 
-export function profileOgImagePath(username: string, version?: string): string {
-  const path = `/og/u/${username.toLowerCase()}`;
-  if (!version) return path;
-  return `${path}?v=${encodeURIComponent(version)}`;
+export const STATIC_OG_IMAGE = {
+  url: OG_IMAGE_PATH,
+  width: OG_IMAGE_SIZE.width,
+  height: OG_IMAGE_SIZE.height,
+  alt: PIN_MAP_OG_TITLE,
+  type: "image/png",
+} as const;
+
+/** Shared Open Graph image block for every public page. */
+export function staticOpenGraphImages(): NonNullable<Metadata["openGraph"]>["images"] {
+  return [STATIC_OG_IMAGE];
 }
 
-export function profileOgImageUrl(username: string, version?: string): string {
-  return `${getSiteUrl()}${profileOgImagePath(username, version)}`;
-}
-
-export function profileOgImageAlt(displayName: string): string {
-  return `${displayName}'s travel map on ${BRAND.name}`;
+export function staticTwitterImages(): NonNullable<Metadata["twitter"]>["images"] {
+  return [staticOgImageUrl()];
 }

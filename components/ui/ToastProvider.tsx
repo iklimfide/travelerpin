@@ -18,6 +18,13 @@ export type ToastSelectField = {
   defaultValue: string;
 };
 
+export type ToastVariant = "success" | "error" | "warning" | "info";
+
+export type ToastShowOptions = {
+  durationMs?: number;
+  variant?: ToastVariant;
+};
+
 export type ToastActionOptions = {
   message: string;
   actionLabel: string;
@@ -32,7 +39,7 @@ export type ToastActionOptions = {
 };
 
 type ToastContextValue = {
-  show: (message: string, durationMs?: number) => void;
+  show: (message: string, durationMsOrOptions?: number | ToastShowOptions) => void;
   showAction: (options: ToastActionOptions) => void;
   dismiss: () => void;
 };
@@ -41,6 +48,57 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 
 const DEFAULT_TOAST_DURATION_MS = 4000;
 
+function inferToastVariant(message: string): ToastVariant {
+  const lower = message.toLowerCase();
+
+  if (
+    lower.includes("fail") ||
+    lower.includes("error") ||
+    lower.includes("invalid") ||
+    lower.includes("unable")
+  ) {
+    return "error";
+  }
+
+  if (
+    lower.includes("first") ||
+    lower.includes("login") ||
+    lower.includes("already") ||
+    lower.includes("pick ")
+  ) {
+    return "warning";
+  }
+
+  if (lower.includes("removed") || lower.includes("unchecked")) {
+    return "info";
+  }
+
+  if (
+    lower.includes("added") ||
+    lower.includes("saved") ||
+    lower.includes("success") ||
+    lower.includes("selected")
+  ) {
+    return "success";
+  }
+
+  return "success";
+}
+
+function parseShowArgs(durationMsOrOptions?: number | ToastShowOptions): {
+  durationMs: number;
+  variant?: ToastVariant;
+} {
+  if (typeof durationMsOrOptions === "number") {
+    return { durationMs: durationMsOrOptions };
+  }
+
+  return {
+    durationMs: durationMsOrOptions?.durationMs ?? DEFAULT_TOAST_DURATION_MS,
+    variant: durationMsOrOptions?.variant,
+  };
+}
+
 const FALLBACK_TOAST: ToastContextValue = {
   show: () => {},
   showAction: () => {},
@@ -48,7 +106,7 @@ const FALLBACK_TOAST: ToastContextValue = {
 };
 
 type ToastState =
-  | { kind: "message"; message: string }
+  | { kind: "message"; message: string; variant: ToastVariant }
   | {
       kind: "action";
       message: string;
@@ -84,9 +142,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const show = useCallback(
-    (message: string, durationMs = DEFAULT_TOAST_DURATION_MS) => {
+    (message: string, durationMsOrOptions?: number | ToastShowOptions) => {
+      const { durationMs, variant } = parseShowArgs(durationMsOrOptions);
       dismiss();
-      setToast({ kind: "message", message });
+      setToast({
+        kind: "message",
+        message,
+        variant: variant ?? inferToastVariant(message),
+      });
       timerRef.current = setTimeout(dismiss, durationMs);
     },
     [dismiss]
@@ -179,7 +242,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               ? `toast-action toast-action--${toast.accent} ${
                   toast.fields?.length ? "w-[min(100vw-2rem,24rem)]" : "w-[min(100vw-2rem,20rem)]"
                 }`
-              : "w-[min(100vw-2rem,20rem)] border border-slate-600 bg-slate-900/95 text-slate-100"
+              : `toast toast--${toast.variant} w-[min(100vw-2rem,20rem)]`
           }`}
         >
           <p>{toast.message}</p>

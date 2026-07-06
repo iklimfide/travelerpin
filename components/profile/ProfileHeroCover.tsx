@@ -1,10 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { NotificationsNavLink } from "@/components/notifications/NotificationsNavLink";
 
 type ProfileHeroCoverProps = {
-  coverUrl: string | null;
   residence: string | null;
   residenceHref?: string | null;
   heroTitle: ReactNode;
@@ -13,7 +11,6 @@ type ProfileHeroCoverProps = {
 };
 
 export function ProfileHeroCover({
-  coverUrl,
   residence,
   residenceHref,
   heroTitle,
@@ -30,16 +27,6 @@ export function ProfileHeroCover({
   return (
     <header className="profile-hero">
       <div className="profile-hero-card">
-        {coverUrl ? (
-          <Image
-            src={coverUrl}
-            alt=""
-            fill
-            priority
-            sizes="(max-width: 480px) 100vw, 480px"
-            className="profile-hero-cover-image"
-          />
-        ) : null}
         <div className="profile-hero-overlay" aria-hidden />
 
         <div className="profile-hero-top">
