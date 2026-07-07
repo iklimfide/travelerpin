@@ -32583,14 +32583,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 9.185643
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Pavia",
-    "latitude": 45.18583,
-    "longitude": 9.16313
-  },
-  {
     "parkType": "theme_park",
     "countryCode": "IT",
     "countryName": "Italy",
