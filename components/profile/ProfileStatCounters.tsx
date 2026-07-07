@@ -15,10 +15,22 @@ type StatItemProps = {
 };
 
 function StatItem({ value, label }: StatItemProps) {
+  const lines = label.split("\n");
+
   return (
     <div className="profile-stat">
       <strong>{value}</strong>
-      <span>{label}</span>
+      {lines.length > 1 ? (
+        <span className="profile-stat__label profile-stat__label--multiline" aria-label={lines.join(" ")}>
+          {lines.map((line, index) => (
+            <span key={index} className="profile-stat__label-line">
+              {line}
+            </span>
+          ))}
+        </span>
+      ) : (
+        <span>{label}</span>
+      )}
     </div>
   );
 }

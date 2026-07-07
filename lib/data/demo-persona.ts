@@ -3,7 +3,7 @@ export const DEMO_PERSONA = {
   name: "Jennifer",
   username: "jennifer",
   avatarUrl: "/demo/jennifer-avatar.png",
-  bio: "Weekend city breaks, national parks, and theme parks — pinning every stop along the way.",
+  bio: "Weekend city breaks, Natura&Parks, and theme parks — pinning every stop along the way.",
   residence: "Los Angeles",
   instagramUrl: "https://www.instagram.com/jennifer.travels/",
   visitedCountries: 35,

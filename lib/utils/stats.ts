@@ -5,7 +5,7 @@ import type {
   VisitedPark,
   WishlistCountry,
 } from "@/types/database";
-import { isThemeParkType } from "@/lib/utils/park-type";
+import { isNaturaParkType, isThemeParkType } from "@/lib/utils/park-type";
 import { cityVisitCount } from "@/lib/utils/visit-date";
 
 function countryVisitTotals(
@@ -43,7 +43,7 @@ export function computeTravelStats(
   return {
     countries: countryTotals.size,
     cities: cities.length,
-    nationalParks: parks.filter((p) => p.park_type === "national_park").length,
+    nationalParks: parks.filter((p) => isNaturaParkType(p.park_type)).length,
     themeParks: parks.filter((p) => isThemeParkType(p.park_type)).length,
   };
 }

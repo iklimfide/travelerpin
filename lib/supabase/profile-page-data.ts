@@ -141,6 +141,28 @@ export function getCachedPublicProfileBundle(
   )();
 }
 
+/** Cached public profile + stats for OG metadata (no auth round-trip). */
+export async function loadPublicProfileMetadata(
+  username: string
+): Promise<{ profile: PublicProfile; stats: TravelStats } | null> {
+  const demo = await loadDemoPublicProfilePage(username);
+  if (demo) {
+    return { profile: demo.profile, stats: demo.stats };
+  }
+
+  const bundle = await getCachedPublicProfileBundle(username);
+  if (!bundle) return null;
+
+  return {
+    profile: bundle.profile,
+    stats: computeTravelStats(
+      bundle.visitedCountries,
+      bundle.visitedCities,
+      bundle.visitedParks
+    ),
+  };
+}
+
 /**
  * Public profile page loader. Demo username always uses in-memory sample data.
  * Real profiles use the cached Supabase bundle.

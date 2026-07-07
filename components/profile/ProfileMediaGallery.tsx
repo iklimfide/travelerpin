@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { InstagramMemoryThumb } from "@/components/city/InstagramMemoryThumb";
+import { ProfileInstagramLinkCard } from "@/components/profile/ProfileInstagramLinkCard";
 import { HubExternalPhoto } from "@/components/hub/HubExternalPhoto";
 import { HubMemoryLightbox } from "@/components/hub/HubMemoryLightbox";
 import { HubSectionCta } from "@/components/hub/HubSectionCta";
@@ -140,13 +140,9 @@ function GalleryTile({
         target="_blank"
         rel="noopener noreferrer"
         className="city-page__traveler-picture-btn profile-media-item__link"
-        aria-label={`${labels.instagramPost} — ${item.pin.placeLabel}`}
+        aria-label={`${labels.instagramPost} — ${item.pin.displayName} — ${item.pin.placeLabel}`}
       >
-        <InstagramMemoryThumb
-          postUrl={item.mediaUrl}
-          alt={`${hubName} — ${item.pin.placeLabel}`}
-          instagramLabel={labels.instagramPost}
-        />
+        <ProfileInstagramLinkCard displayName={item.pin.displayName} />
       </a>
     );
 

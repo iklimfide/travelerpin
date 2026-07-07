@@ -30,6 +30,11 @@ type ResidenceCityPickerProps = {
   value: ResidenceCitySelection | null;
   onChange: (value: ResidenceCitySelection | null) => void;
   disabled?: boolean;
+  /** API path for city search (default: authenticated destinations search). */
+  searchPath?: string;
+  /** Show "Remove" to clear home label (off on registration). */
+  allowClear?: boolean;
+  tone?: "dark" | "light";
 };
 
 export function ResidenceCityPicker({
@@ -37,9 +42,13 @@ export function ResidenceCityPicker({
   value,
   onChange,
   disabled = false,
+  searchPath = "/api/destinations/search",
+  allowClear = true,
+  tone = "dark",
 }: ResidenceCityPickerProps) {
   const t = translateSettings;
   const tCommon = translateCommon;
+  const isLight = tone === "light";
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<CitySearchResult[]>([]);
@@ -66,7 +75,7 @@ export function ResidenceCityPicker({
     async function hydrate() {
       try {
         const params = new URLSearchParams({ q: label.split(",")[0]?.trim() || label });
-        const res = await fetch(`/api/destinations/search?${params}`);
+        const res = await fetch(`${searchPath}?${params}`);
         if (!res.ok) return;
         const data = await res.json();
         const cities = (data.cities as CitySearchResult[] | undefined) ?? [];
@@ -91,7 +100,7 @@ export function ResidenceCityPicker({
     return () => {
       cancelled = true;
     };
-  }, [hydrated, initialResidence, onChange, value]);
+  }, [hydrated, initialResidence, onChange, searchPath, value]);
 
   useEffect(() => {
     if (value) return;
@@ -111,7 +120,7 @@ export function ResidenceCityPicker({
     const timer = window.setTimeout(async () => {
       try {
         const params = new URLSearchParams({ q });
-        const res = await fetch(`/api/destinations/search?${params}`, {
+        const res = await fetch(`${searchPath}?${params}`, {
           signal: controller.signal,
         });
         if (!res.ok) {
@@ -134,7 +143,7 @@ export function ResidenceCityPicker({
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [query, value]);
+  }, [query, searchPath, value]);
 
   function selectCity(city: CitySearchResult) {
     onChange({
@@ -168,7 +177,13 @@ export function ResidenceCityPicker({
     return (
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1.5 text-sm font-semibold text-blue-300">
+          <span
+            className={
+              isLight
+                ? "inline-flex items-center gap-2 rounded-full border border-wbs-blue/25 bg-wbs-blue/10 px-3 py-1.5 text-sm font-semibold text-wbs-blue"
+                : "inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1.5 text-sm font-semibold text-blue-300"
+            }
+          >
             <span aria-hidden>📍</span>
             {value.city_name}, {value.country_name}
           </span>
@@ -180,24 +195,34 @@ export function ResidenceCityPicker({
               onChange(null);
               setQuery(value.city_name);
             }}
-            className="text-sm text-slate-400 underline-offset-2 hover:text-slate-200 hover:underline disabled:opacity-50"
+            className={`text-sm underline-offset-2 hover:underline disabled:opacity-50 ${
+              isLight
+                ? "text-slate-500 hover:text-slate-700"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
           >
             {t("residenceChange")}
           </button>
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => {
-              // Clear home label only — city pin stays on the map.
-              onChange(null);
-              setQuery("");
-              setResults([]);
-              setCompletedQuery("");
-            }}
-            className="text-sm text-red-400/90 underline-offset-2 hover:text-red-300 hover:underline disabled:opacity-50"
-          >
-            {t("residenceRemove")}
-          </button>
+          {allowClear ? (
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => {
+                // Clear home label only — city pin stays on the map.
+                onChange(null);
+                setQuery("");
+                setResults([]);
+                setCompletedQuery("");
+              }}
+              className={`text-sm underline-offset-2 hover:underline disabled:opacity-50 ${
+                isLight
+                  ? "text-red-500 hover:text-red-600"
+                  : "text-red-400/90 hover:text-red-300"
+              }`}
+            >
+              {t("residenceRemove")}
+            </button>
+          ) : null}
         </div>
         <p className="text-xs text-slate-500">{t("residencePinHint")}</p>
       </div>
@@ -217,7 +242,11 @@ export function ResidenceCityPicker({
         type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-blue-500"
+        className={
+          isLight
+            ? "w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-wbs-blue focus:ring-1 focus:ring-wbs-blue/20"
+            : "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-blue-500"
+        }
         maxLength={100}
         placeholder={t("residencePlaceholder")}
         autoComplete="off"
@@ -228,7 +257,13 @@ export function ResidenceCityPicker({
       {query.trim().length >= MIN_QUERY_LENGTH ? (
         <>
           {loading || results.length > 0 ? (
-            <ul className="max-h-52 overflow-y-auto rounded-lg border border-slate-700 bg-slate-950 scrollbar-thin">
+            <ul
+              className={
+                isLight
+                  ? "max-h-52 overflow-y-auto rounded-lg border border-slate-200 bg-white scrollbar-thin"
+                  : "max-h-52 overflow-y-auto rounded-lg border border-slate-700 bg-slate-950 scrollbar-thin"
+              }
+            >
               {loading ? (
                 <li className="px-3 py-3 text-center text-sm text-slate-500">
                   {tCommon("loading")}
@@ -239,10 +274,12 @@ export function ResidenceCityPicker({
                     <button
                       type="button"
                       disabled={disabled}
-                      className="flex w-full flex-col px-3 py-2.5 text-left hover:bg-slate-800/80 disabled:opacity-50"
+                      className={`flex w-full flex-col px-3 py-2.5 text-left disabled:opacity-50 ${
+                        isLight ? "hover:bg-slate-50" : "hover:bg-slate-800/80"
+                      }`}
                       onClick={() => selectCity(city)}
                     >
-                      <span className="text-sm text-slate-200">{city.cityName}</span>
+                      <span className={`text-sm ${isLight ? "text-slate-800" : "text-slate-200"}`}>{city.cityName}</span>
                       <span className="truncate text-xs text-slate-500">{city.countryName}</span>
                     </button>
                   </li>
@@ -252,8 +289,14 @@ export function ResidenceCityPicker({
           ) : null}
 
           {showCustom ? (
-            <div className="rounded-lg border border-slate-700 bg-slate-950 p-3">
-              <p className="text-sm text-slate-400">
+            <div
+              className={
+                isLight
+                  ? "rounded-lg border border-slate-200 bg-slate-50 p-3"
+                  : "rounded-lg border border-slate-700 bg-slate-950 p-3"
+              }
+            >
+              <p className={`text-sm ${isLight ? "text-slate-600" : "text-slate-400"}`}>
                 {t("residenceCustomHint", {
                   city: formatCityDisplayName(query.trim()),
                 })}
@@ -263,7 +306,11 @@ export function ResidenceCityPicker({
                   value={customCountry}
                   onChange={(e) => setCustomCountry(e.target.value)}
                   disabled={disabled}
-                  className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+                  className={
+                    isLight
+                      ? "min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-wbs-blue focus:ring-1 focus:ring-wbs-blue/20"
+                      : "min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+                  }
                 >
                   {COUNTRY_LIST.map((country) => (
                     <option key={country.code} value={country.code}>
@@ -274,7 +321,7 @@ export function ResidenceCityPicker({
                 <button
                   type="button"
                   disabled={disabled}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50"
+                  className="rounded-lg bg-wbs-blue px-4 py-2 text-sm font-semibold text-white hover:bg-wbs-blue-hover disabled:opacity-50"
                   onClick={selectCustomCity}
                 >
                   {t("residenceCustomAdd")}

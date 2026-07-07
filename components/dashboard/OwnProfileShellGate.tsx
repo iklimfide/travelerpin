@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { DashboardAddProvider } from "@/components/dashboard/DashboardAddProvider";
 import { OwnProfileShell } from "@/components/dashboard/OwnProfileShell";
 import { createClient } from "@/lib/supabase/client";
 
@@ -9,9 +8,8 @@ import { createClient } from "@/lib/supabase/client";
  * Loads the signed-in username in the browser so the root layout does not
  * need a server-side auth/profile round-trip on every request.
  *
- * DashboardAddProvider always wraps the tree so own-profile tools
- * (ProfileOwnerTools) can call useDashboardAdd during SSR / first paint,
- * before client auth resolves and the bottom bar mounts.
+ * OwnProfileShell mounts the bottom bar once auth resolves. Must stay inside
+ * DashboardAddProvider (layout) so the bottom bar can open SaveDestinationModal.
  */
 export function OwnProfileShellGate({ children }: { children: ReactNode }) {
   const [username, setUsername] = useState<string | null>(null);
@@ -60,9 +58,5 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return (
-    <DashboardAddProvider>
-      {username ? <OwnProfileShell username={username}>{children}</OwnProfileShell> : children}
-    </DashboardAddProvider>
-  );
+  return username ? <OwnProfileShell username={username}>{children}</OwnProfileShell> : children;
 }

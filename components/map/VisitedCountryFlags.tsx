@@ -14,6 +14,8 @@ type VisitedCountryFlagsProps = {
   userParks?: VisitedPark[];
   countryCodes: string[];
   onCountryClick?: (country: { code: string; name: string }) => void;
+  /** When true, flags are decorative only (e.g. parent panel is the link). */
+  disableCountryLinks?: boolean;
   variant?: "default" | "landing";
   className?: string;
 };
@@ -102,6 +104,7 @@ export function VisitedCountryFlags({
   userParks = [],
   countryCodes,
   onCountryClick,
+  disableCountryLinks = false,
   variant = "default",
   className = "",
 }: VisitedCountryFlagsProps) {
@@ -131,7 +134,9 @@ export function VisitedCountryFlags({
           <FlagTile
             key={country.code}
             country={country}
-            linkHref={onCountryClick ? null : countryHubHref(country.code)}
+            linkHref={
+              disableCountryLinks ? null : onCountryClick ? null : countryHubHref(country.code)
+            }
             onClick={onCountryClick ? () => onCountryClick(country) : undefined}
             variant={variant}
           />

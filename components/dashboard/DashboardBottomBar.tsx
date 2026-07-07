@@ -4,12 +4,25 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
+import { NotificationsNavLink } from "@/components/notifications/NotificationsNavLink";
 import { dashboardNavMessages } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
 
 type DashboardBottomBarProps = {
   username: string;
 };
+
+function HomeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={22} height={22} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path
+        d="M4.5 10.5 12 4.5l7.5 6v8.25a1.5 1.5 0 0 1-1.5 1.5H6a1.5 1.5 0 0 1-1.5-1.5V10.5Z"
+        strokeLinejoin="round"
+      />
+      <path d="M9.75 19.5V12h4.5v7.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 function ProfileIcon() {
   return (
@@ -23,11 +36,12 @@ function ProfileIcon() {
 function SettingsIcon() {
   return (
     <svg viewBox="0 0 24 24" width={22} height={22} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
-      <circle cx="12" cy="12" r="3" />
       <path
-        d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"
+        d="M10.3 4.3c.43-1.76 2.92-1.76 3.35 0a1.72 1.72 0 0 0 2.57 1.07c1.54-.94 3.31.83 2.37 2.37a1.72 1.72 0 0 0 1.07 2.57c1.76.43 1.76 2.92 0 3.35a1.72 1.72 0 0 0-1.07 2.57c.94 1.54-.83 3.31-2.37 2.37a1.72 1.72 0 0 0-2.57 1.07c-.43 1.76-2.92 1.76-3.35 0a1.72 1.72 0 0 0-2.57-1.07c-1.54.94-3.31-.83-2.37-2.37a1.72 1.72 0 0 0-1.07-2.57c-1.76-.43-1.76-2.92 0-3.35a1.72 1.72 0 0 0 1.07-2.57c-.94-1.54.83-3.31 2.37-2.37.99.61 2.3.07 2.57-1.07Z"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
+      <circle cx="12" cy="12" r="3" />
     </svg>
   );
 }
@@ -67,6 +81,13 @@ export function DashboardBottomBar({ username }: DashboardBottomBarProps) {
   const { openAddModal } = useDashboardAdd();
   const profileHref = profilePath(username);
 
+  const homeItem: NavItem = {
+    href: "/",
+    label: dashboardNavMessages.home,
+    isActive: (path) => path === "/",
+    icon: <HomeIcon />,
+  };
+
   const profileItem: NavItem = {
     href: profileHref,
     label: dashboardNavMessages.profile,
@@ -84,11 +105,10 @@ export function DashboardBottomBar({ username }: DashboardBottomBarProps) {
   return (
     <nav className="dashboard-bottom-bar" aria-label="Dashboard navigation">
       <div className="dashboard-bottom-bar__inner">
-        <div className="dashboard-bottom-bar__side dashboard-bottom-bar__side--left">
-          <NavLink item={profileItem} pathname={pathname} />
-        </div>
+        <NavLink item={homeItem} pathname={pathname} />
+        <NavLink item={settingsItem} pathname={pathname} />
 
-        <div className="dashboard-bottom-bar__center">
+        <div className="dashboard-bottom-bar__add-slot">
           <button
             type="button"
             className="dashboard-bottom-bar__add"
@@ -99,9 +119,8 @@ export function DashboardBottomBar({ username }: DashboardBottomBarProps) {
           </button>
         </div>
 
-        <div className="dashboard-bottom-bar__side dashboard-bottom-bar__side--right">
-          <NavLink item={settingsItem} pathname={pathname} />
-        </div>
+        <NavLink item={profileItem} pathname={pathname} />
+        <NotificationsNavLink variant="bottomBar" />
       </div>
     </nav>
   );

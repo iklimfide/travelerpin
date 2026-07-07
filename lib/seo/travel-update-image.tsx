@@ -340,7 +340,7 @@ function StatsRow({ delta }: { delta: TravelUpdateDelta }) {
   const items = [
     { value: stats.countries, label: "COUNTRIES", kind: "globe" as const },
     { value: stats.cities, label: "CITIES", kind: "pin" as const },
-    { value: stats.nationalParks, label: "NAT. PARKS", kind: "mountain" as const },
+    { value: stats.nationalParks, label: "Natura&Parks", kind: "mountain" as const },
     { value: stats.themeParks, label: "THEME PARKS", kind: "park" as const },
   ];
 
@@ -732,7 +732,7 @@ function StoryStatCounters({ stats }: { stats: TravelStats }) {
   const items = [
     { value: stats.countries, label: "Country" },
     { value: stats.cities, label: "City" },
-    { value: stats.nationalParks, label: "Nat. park" },
+    { value: stats.nationalParks, label: "Natura&Parks" },
     { value: stats.themeParks, label: "Theme park" },
   ];
 

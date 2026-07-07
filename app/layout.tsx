@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
@@ -16,6 +17,7 @@ import { ModalProvider } from "@/components/ui/ModalProvider";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import { AuthModalProvider } from "@/components/auth/AuthModalProvider";
 import { SharePinPromptProvider } from "@/components/share/SharePinPromptProvider";
+import { DashboardAddProvider } from "@/components/dashboard/DashboardAddProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { ClearPwaArtifacts } from "@/components/dev/ClearPwaArtifacts";
 import { DevMobilePreview } from "@/components/dev/DevMobilePreview";
@@ -83,22 +85,27 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full min-w-0 flex-col overflow-x-hidden bg-background text-foreground">
-        <DevMobilePreview>
-          <OwnProfileShellGate>
-            <NextIntlClientProvider locale={locale} messages={messages}>
-              <ThemeProvider>
-                <ClearPwaArtifacts />
-                <ModalProvider>
-                  <ToastProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProvider>
+            <ClearPwaArtifacts />
+            <ModalProvider>
+              <ToastProvider>
+                <DashboardAddProvider>
+                  <OwnProfileShellGate>
                     <SharePinPromptProvider>
                       <AuthModalProvider>{children}</AuthModalProvider>
                     </SharePinPromptProvider>
-                  </ToastProvider>
-                </ModalProvider>
-              </ThemeProvider>
-            </NextIntlClientProvider>
-          </OwnProfileShellGate>
-        </DevMobilePreview>
+                  </OwnProfileShellGate>
+                </DashboardAddProvider>
+              </ToastProvider>
+            </ModalProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
+        {process.env.NODE_ENV === "development" ? (
+          <Suspense fallback={null}>
+            <DevMobilePreview />
+          </Suspense>
+        ) : null}
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 import type { ParkHub } from "@/lib/data/park-hubs";
 import type { ParkType } from "@/types/database";
-import { isThemeParkType } from "@/lib/utils/park-type";
+import { isNaturaParkType, isThemeParkType } from "@/lib/utils/park-type";
 
 export const PARK_CATEGORY_SLUGS = ["theme-parks", "national-parks"] as const;
 
@@ -14,10 +14,10 @@ export function parseParkCategorySlug(value: string): ParkCategorySlug | null {
 }
 
 export function parkCategorySlugForParkType(type: ParkType): ParkCategorySlug {
-  return type === "national_park" ? "national-parks" : "theme-parks";
+  return isNaturaParkType(type) ? "national-parks" : "theme-parks";
 }
 
 export function parkHubMatchesCategory(hub: ParkHub, category: ParkCategorySlug): boolean {
-  if (category === "national-parks") return hub.parkType === "national_park";
+  if (category === "national-parks") return isNaturaParkType(hub.parkType);
   return isThemeParkType(hub.parkType);
 }

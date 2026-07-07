@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { TravelMapView } from "@/components/map/TravelMapView";
 import { VisitedCountryFlags } from "@/components/map/VisitedCountryFlags";
 import { worldCoveragePercent } from "@/lib/utils/profile-page";
@@ -20,6 +21,9 @@ type ProfileMapPanelProps = {
   exploredBadgeLabel: string;
   detailLabel?: string;
   detailHref?: string;
+  /** Whole map + flags panel links here (e.g. profile /all). */
+  allHref?: string;
+  allAriaLabel?: string;
 };
 
 export function ProfileMapPanel({
@@ -36,9 +40,52 @@ export function ProfileMapPanel({
   exploredBadgeLabel,
   detailLabel,
   detailHref = "#travel-map",
+  allHref,
+  allAriaLabel,
 }: ProfileMapPanelProps) {
   const coverage = worldCoveragePercent(countryCount);
   const showHead = Boolean(title || detailLabel);
+
+  const panel = (
+    <>
+      <div className="profile-mini-map">
+        <TravelMapView
+          visitedCountryCodes={visitedCountryCodes}
+          wishlistCountryCodes={wishlistCountryCodes}
+          visitedCountries={visitedCountries}
+          wishlistCountries={wishlistCountries}
+          userCities={visitedCities}
+          userParks={visitedParks}
+          citiesCountryCodes={[
+            ...new Set(visitedCities.map((c) => c.country_code.toUpperCase())),
+          ]}
+          parksCountryCodes={[
+            ...new Set(visitedParks.map((p) => p.country_code.toUpperCase())),
+          ]}
+          isLoggedIn={isLoggedIn}
+          canEditMap={canEditMap}
+          explorable={false}
+          interactive={false}
+          showContinentFilter={false}
+          compactProfile
+        />
+        <div className="profile-map-badge" aria-label={`${coverage}% ${exploredBadgeLabel}`}>
+          <strong>{coverage}%</strong>
+          <span>{exploredBadgeLabel}</span>
+        </div>
+      </div>
+
+      <VisitedCountryFlags
+        visitedCountries={visitedCountries}
+        userCities={visitedCities}
+        userParks={visitedParks}
+        countryCodes={visitedCountryCodes}
+        variant="landing"
+        disableCountryLinks={Boolean(allHref)}
+        className="border-t border-[#d8e1ef] !px-4 !py-3"
+      />
+    </>
+  );
 
   return (
     <section id="profile-map" className="profile-section">
@@ -53,43 +100,17 @@ export function ProfileMapPanel({
         </div>
       ) : null}
 
-      <div className="profile-map-panel">
-        <div className="profile-mini-map">
-          <TravelMapView
-            visitedCountryCodes={visitedCountryCodes}
-            wishlistCountryCodes={wishlistCountryCodes}
-            visitedCountries={visitedCountries}
-            wishlistCountries={wishlistCountries}
-            userCities={visitedCities}
-            userParks={visitedParks}
-            citiesCountryCodes={[
-              ...new Set(visitedCities.map((c) => c.country_code.toUpperCase())),
-            ]}
-            parksCountryCodes={[
-              ...new Set(visitedParks.map((p) => p.country_code.toUpperCase())),
-            ]}
-            isLoggedIn={isLoggedIn}
-            canEditMap={canEditMap}
-            explorable={false}
-            interactive={false}
-            showContinentFilter={false}
-            compactProfile
-          />
-          <div className="profile-map-badge" aria-label={`${coverage}% ${exploredBadgeLabel}`}>
-            <strong>{coverage}%</strong>
-            <span>{exploredBadgeLabel}</span>
-          </div>
-        </div>
-
-        <VisitedCountryFlags
-          visitedCountries={visitedCountries}
-          userCities={visitedCities}
-          userParks={visitedParks}
-          countryCodes={visitedCountryCodes}
-          variant="landing"
-          className="border-t border-[#d8e1ef] !px-4 !py-3"
-        />
-      </div>
+      {allHref ? (
+        <Link
+          href={allHref}
+          className="profile-map-panel profile-map-panel--link"
+          aria-label={allAriaLabel}
+        >
+          {panel}
+        </Link>
+      ) : (
+        <div className="profile-map-panel">{panel}</div>
+      )}
     </section>
   );
 }

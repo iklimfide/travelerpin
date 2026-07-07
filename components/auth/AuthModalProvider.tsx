@@ -89,6 +89,7 @@ function AuthModalProviderInner({ children }: { children: ReactNode }) {
   const ctxValue = useMemo(() => ({ open, close }), [open, close]);
 
   const active = openState;
+  const isLogin = active?.mode === "login";
 
   return (
     <AuthModalContext.Provider value={ctxValue}>
@@ -99,96 +100,94 @@ function AuthModalProviderInner({ children }: { children: ReactNode }) {
           <button
             type="button"
             aria-label="Close"
-            className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/20 backdrop-blur-[2px]"
             onClick={close}
           />
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="auth-modal-title"
-            className="relative z-10 w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl"
+            className="relative z-10 max-h-[min(90vh,720px)] w-full max-w-md overflow-hidden overflow-y-auto rounded-2xl border border-slate-200/90 bg-slate-100 shadow-[0_24px_56px_rgba(15,23,42,0.14)]"
           >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 id="auth-modal-title" className="text-lg font-semibold text-white">
-                  {active.mode === "login" ? "Log in" : "Sign up"}
-                </h2>
-                <p className="mt-1 text-sm text-slate-400">
-                  Continue to TravelerPin.
-                </p>
-              </div>
+            <div className="auth-modal-header on-dark-surface flex items-center justify-between px-6 py-4">
+              <h2 id="auth-modal-title" className="auth-modal-title text-lg font-bold tracking-tight">
+                TravelerPin.com
+              </h2>
               <button
                 type="button"
                 onClick={close}
-                className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-200 hover:border-slate-500 hover:text-white"
+                className="auth-modal-close rounded-lg px-2.5 py-1.5 text-lg leading-none transition hover:bg-white/15"
+                aria-label="Close"
               >
                 ✕
               </button>
             </div>
 
-            <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                onClick={() => setOpenState({ mode: "login", next: active.next })}
-                className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold ${
-                  active.mode === "login"
-                    ? "bg-blue-600 text-white"
-                    : "border border-slate-700 text-slate-200 hover:border-slate-500"
-                }`}
-              >
-                Log in
-              </button>
-              <button
-                type="button"
-                onClick={() => setOpenState({ mode: "register", next: active.next })}
-                className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold ${
-                  active.mode === "register"
-                    ? "bg-blue-600 text-white"
-                    : "border border-slate-700 text-slate-200 hover:border-slate-500"
-                }`}
-              >
-                Sign up
-              </button>
-            </div>
+            <div className="p-6">
+              <div className="flex gap-1 rounded-xl bg-slate-200/70 p-1">
+                <button
+                  type="button"
+                  onClick={() => setOpenState({ mode: "login", next: active.next })}
+                  className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                    isLogin
+                      ? "bg-wbs-blue text-white shadow-sm on-dark-surface"
+                      : "text-slate-600 hover:text-slate-800"
+                  }`}
+                >
+                  Log in
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOpenState({ mode: "register", next: active.next })}
+                  className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                    !isLogin
+                      ? "bg-wbs-blue text-white shadow-sm on-dark-surface"
+                      : "text-slate-600 hover:text-slate-800"
+                  }`}
+                >
+                  Sign up
+                </button>
+              </div>
 
-            <div className="mt-5">
-              <AuthForm mode={active.mode} next={active.next ?? undefined} />
-            </div>
+              <div className="mt-5">
+                <AuthForm mode={active.mode} next={active.next ?? undefined} />
+              </div>
 
-            <p className="mt-5 text-center text-xs text-slate-500">
-              {active.mode === "login" ? (
-                <>
-                  Don&apos;t have an account?{" "}
-                  <button
-                    type="button"
-                    className="font-semibold text-blue-300 hover:text-blue-200"
-                    onClick={() => setOpenState({ mode: "register", next: active.next })}
-                  >
-                    Sign up
-                  </button>
-                </>
-              ) : (
-                <>
-                  Already have an account?{" "}
-                  <button
-                    type="button"
-                    className="font-semibold text-blue-300 hover:text-blue-200"
-                    onClick={() => setOpenState({ mode: "login", next: active.next })}
-                  >
-                    Log in
-                  </button>
-                </>
-              )}
-              {routeMode ? (
-                <>
-                  {" "}
-                  ·{" "}
-                  <Link href={active.next ?? "/"} className="text-slate-400 hover:text-slate-200">
-                    Back
-                  </Link>
-                </>
-              ) : null}
-            </p>
+              <p className="mt-5 text-center text-xs text-slate-500">
+                {isLogin ? (
+                  <>
+                    Don&apos;t have an account?{" "}
+                    <button
+                      type="button"
+                      className="font-semibold text-wbs-blue hover:text-wbs-blue-hover"
+                      onClick={() => setOpenState({ mode: "register", next: active.next })}
+                    >
+                      Sign up
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Already have an account?{" "}
+                    <button
+                      type="button"
+                      className="font-semibold text-wbs-blue hover:text-wbs-blue-hover"
+                      onClick={() => setOpenState({ mode: "login", next: active.next })}
+                    >
+                      Log in
+                    </button>
+                  </>
+                )}
+                {routeMode ? (
+                  <>
+                    {" "}
+                    ·{" "}
+                    <Link href={active.next ?? "/"} className="text-slate-500 hover:text-slate-700">
+                      Back
+                    </Link>
+                  </>
+                ) : null}
+              </p>
+            </div>
           </div>
         </div>
       )}

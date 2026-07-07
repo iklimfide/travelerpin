@@ -11,7 +11,7 @@ import {
   buildVisitedCountryList,
 } from "@/lib/map/travel-lists";
 import { buildVisitedParkList } from "@/lib/map/park-lists";
-import { isThemeParkType } from "@/lib/utils/park-type";
+import { isNaturaParkType, isThemeParkType } from "@/lib/utils/park-type";
 import type {
   TravelStats,
   VisitedCity,
@@ -118,7 +118,7 @@ export function TravelStatsInteractive({
   const cities = useMemo(() => buildVisitedCityList(visitedCities), [visitedCities]);
 
   const nationalParks = useMemo(
-    () => buildVisitedParkList(visitedParks.filter((park) => park.park_type === "national_park")),
+    () => buildVisitedParkList(visitedParks.filter((park) => isNaturaParkType(park.park_type))),
     [visitedParks]
   );
 

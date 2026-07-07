@@ -5,7 +5,7 @@ import { offerShareAfterPin } from "@/lib/client/share-pin-prompt";
 function parkPinKind(
   parkType: ParkInput["park_type"]
 ): "national_park" | "theme_park" | "park" {
-  if (parkType === "national_park") return "national_park";
+  if (parkType === "national_park" || parkType === "botanical_garden") return "national_park";
   if (parkType === "theme_park") return "theme_park";
   return "park";
 }

@@ -7,6 +7,7 @@ import {
   NotificationsContext,
 } from "@/components/notifications/NotificationsProvider";
 import { fetchNotifications } from "@/lib/client/notification-actions";
+import { dashboardNavMessages } from "@/lib/i18n/client-messages";
 
 function BellIcon() {
   return (
@@ -61,6 +62,10 @@ export function NotificationsNavLink({ variant = "bottomBar" }: NotificationsNav
     </span>
   );
 
+  const bottomBarLabel = !isHero ? (
+    <span className="dashboard-bottom-bar__label">{dashboardNavMessages.notifications}</span>
+  ) : null;
+
   // OwnProfileShellGate mounts the provider only after client auth resolves.
   // Fall back to a link so SSR / first paint does not crash.
   if (!notifications) {
@@ -72,6 +77,7 @@ export function NotificationsNavLink({ variant = "bottomBar" }: NotificationsNav
         aria-label="Notifications"
       >
         {icon}
+        {bottomBarLabel}
       </Link>
     );
   }
@@ -85,6 +91,7 @@ export function NotificationsNavLink({ variant = "bottomBar" }: NotificationsNav
       onClick={notifications.openNotifications}
     >
       {icon}
+      {bottomBarLabel}
     </button>
   );
 }

@@ -8,6 +8,16 @@ import { normalizeInstagramProfileUrl } from "@/lib/utils/instagram";
 const professionValues = PROFESSION_OPTIONS.map((o) => o.value);
 const maritalValues = MARITAL_STATUS_OPTIONS.map((o) => o.value);
 
+export const residenceCitySchema = z.object({
+  city_name: z.string().min(1).max(100).transform(formatCityDisplayName),
+  country_code: z.string().length(2).transform((value) => value.toUpperCase()),
+  country_name: z.string().min(1),
+  latitude: z.number().min(-90).max(90).nullable().optional(),
+  longitude: z.number().min(-180).max(180).nullable().optional(),
+});
+
+export type ResidenceCityInput = z.infer<typeof residenceCitySchema>;
+
 export const profileSettingsSchema = z
   .object({
     wishlist_public: z.boolean().optional(),
@@ -55,16 +65,7 @@ export const profileSettingsSchema = z
     profession: z.enum(professionValues as [string, ...string[]]).nullable().optional(),
     marital_status: z.enum(maritalValues as [string, ...string[]]).nullable().optional(),
     avatar_url: z.string().url().nullable().optional(),
-    residence_city: z
-      .object({
-        city_name: z.string().min(1).max(100).transform(formatCityDisplayName),
-        country_code: z.string().length(2).transform((value) => value.toUpperCase()),
-        country_name: z.string().min(1),
-        latitude: z.number().min(-90).max(90).nullable().optional(),
-        longitude: z.number().min(-180).max(180).nullable().optional(),
-      })
-      .nullable()
-      .optional(),
+    residence_city: residenceCitySchema.nullable().optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "No fields to update",

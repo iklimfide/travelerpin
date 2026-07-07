@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { ProfileOwnerTools } from "@/components/dashboard/ProfileOwnerTools";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { BRAND } from "@/lib/constants";
@@ -8,7 +7,7 @@ import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { buildProfileDescription } from "@/lib/seo/profile";
 import {
   PIN_MAP_OG_DESCRIPTION,
-  PIN_MAP_OG_TITLE,
+  profilePinMapShareTitle,
   staticOpenGraphImages,
   staticTwitterImages,
 } from "@/lib/seo/og";
@@ -18,7 +17,7 @@ import {
   profileUrl as buildProfileUrl,
   getSiteUrl,
 } from "@/lib/seo/site";
-import { loadPublicProfilePage } from "@/lib/supabase/profile-page-data";
+import { loadPublicProfileMetadata, loadPublicProfilePage } from "@/lib/supabase/profile-page-data";
 
 type PageProps = {
   params: Promise<{ username: string }>;
@@ -29,7 +28,7 @@ export const revalidate = false;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
-  const data = await loadPublicProfilePage(username);
+  const data = await loadPublicProfileMetadata(username);
 
   if (!data) {
     return { title: "Traveler not found" };
@@ -38,6 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { profile, stats } = data;
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
   const title = travelMapTitle(displayName);
+  const shareTitle = profilePinMapShareTitle(displayName);
   const description = buildProfileDescription(displayName, stats);
 
   return {
@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     openGraph: {
       type: "website",
-      title: PIN_MAP_OG_TITLE,
+      title: shareTitle,
       description: PIN_MAP_OG_DESCRIPTION,
       url: buildProfileUrl(profile.username),
       siteName: BRAND.name,
@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
     twitter: {
       card: "summary_large_image",
-      title: PIN_MAP_OG_TITLE,
+      title: shareTitle,
       description: PIN_MAP_OG_DESCRIPTION,
       images: staticTwitterImages(),
     },

@@ -7,6 +7,10 @@ export const OG_IMAGE_SIZE = { width: 1024, height: 540 } as const;
 
 export const PIN_MAP_OG_TITLE = "Traveler's Pin Map";
 
+export function profilePinMapShareTitle(displayName: string): string {
+  return `${PIN_MAP_OG_TITLE}: ${displayName}`;
+}
+
 export const PIN_MAP_OG_DESCRIPTION =
   'Answer "How many countries have been explored?" with a single link. Share a global map of shared adventures.';
 

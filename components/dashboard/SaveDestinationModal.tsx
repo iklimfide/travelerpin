@@ -21,6 +21,10 @@ import { addPark } from "@/lib/client/park-actions";
 import { CityForm } from "@/components/dashboard/CityForm";
 import { ParkForm } from "@/components/dashboard/ParkForm";
 import {
+  SaveDestinationModalListSkeleton,
+  SaveDestinationModalStatusSkeleton,
+} from "@/components/skeletons/SaveDestinationModalSkeleton";
+import {
   commonMessages,
   cityMessages,
   countryHubMessages,
@@ -181,6 +185,35 @@ function cityToRow(city: SearchCityResult): DestinationRow {
   };
 }
 
+function visitedCityToRow(city: VisitedCity): DestinationRow {
+  return {
+    id: destinationId("city", city.country_code, city.city_name),
+    kind: "city",
+    title: city.city_name,
+    subtitle: city.country_name,
+    countryCode: city.country_code,
+    countryName: city.country_name,
+    cityName: city.city_name,
+    latitude: city.latitude ?? 0,
+    longitude: city.longitude ?? 0,
+  };
+}
+
+function visitedParkToRow(park: VisitedPark): DestinationRow {
+  return {
+    id: destinationId("park", park.country_code, park.park_name, park.park_type as ParkType),
+    kind: "park",
+    title: park.park_name,
+    subtitle: `${park.country_name} · ${parkTypeLabel(park.park_type)}`,
+    countryCode: park.country_code,
+    countryName: park.country_name,
+    parkName: park.park_name,
+    parkType: park.park_type as ParkType,
+    latitude: park.latitude ?? 0,
+    longitude: park.longitude ?? 0,
+  };
+}
+
 function parkToRow(park: SearchParkResult | PopularPark): DestinationRow {
   return {
     id: destinationId("park", park.countryCode, park.parkName, park.parkType),
@@ -254,12 +287,14 @@ function findVisitedParkForRow(
 function queryMatchesCityName(
   query: string,
   rows: DestinationRow[],
-  cities: SearchCityResult[]
+  cities: SearchCityResult[],
+  visitedCities: VisitedCity[]
 ): boolean {
   const normalized = query.toLowerCase();
   if (
     cities.some((city) => city.cityName.toLowerCase() === normalized) ||
-    rows.some((row) => row.kind === "city" && row.cityName.toLowerCase() === normalized)
+    rows.some((row) => row.kind === "city" && row.cityName.toLowerCase() === normalized) ||
+    visitedCities.some((city) => city.city_name.toLowerCase() === normalized)
   ) {
     return true;
   }
@@ -272,12 +307,14 @@ function queryMatchesCityName(
 function queryMatchesParkName(
   query: string,
   rows: DestinationRow[],
-  parks: SearchParkResult[]
+  parks: SearchParkResult[],
+  visitedParks: VisitedPark[]
 ): boolean {
   const normalized = query.toLowerCase();
   if (
     parks.some((park) => park.parkName.toLowerCase() === normalized) ||
-    rows.some((row) => row.kind === "park" && row.parkName.toLowerCase() === normalized)
+    rows.some((row) => row.kind === "park" && row.parkName.toLowerCase() === normalized) ||
+    visitedParks.some((park) => park.park_name.toLowerCase() === normalized)
   ) {
     return true;
   }
@@ -306,6 +343,7 @@ export function SaveDestinationModal({
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [loadingSearch, setLoadingSearch] = useState(false);
+  const [loadingTravelState, setLoadingTravelState] = useState(false);
   const [visitedCountries, setVisitedCountries] = useState<VisitedCountry[]>([]);
   const [visitedCities, setVisitedCities] = useState<VisitedCity[]>([]);
   const [visitedParks, setVisitedParks] = useState<VisitedPark[]>([]);
@@ -320,6 +358,7 @@ export function SaveDestinationModal({
   const [editingParkId, setEditingParkId] = useState<string | null>(null);
 
   const loadTravelState = useCallback(async () => {
+    setLoadingTravelState(true);
     try {
       const res = await fetch("/api/me/travel-state");
       if (!res.ok) return;
@@ -330,6 +369,8 @@ export function SaveDestinationModal({
       setWishlistCountries(data.wishlistCountries ?? []);
     } catch {
       // keep previous state
+    } finally {
+      setLoadingTravelState(false);
     }
   }, []);
 
@@ -483,6 +524,12 @@ export function SaveDestinationModal({
 
   const rows = useMemo((): DestinationRow[] => {
     if (trimmedQuery.length >= 2) {
+      const visitedCityRows = visitedCities
+        .filter((city) => city.city_name.toLowerCase().includes(needle))
+        .map(visitedCityToRow);
+      const visitedParkRows = visitedParks
+        .filter((park) => park.park_name.toLowerCase().includes(needle))
+        .map(visitedParkToRow);
       const countryRows = searchCountries(trimmedQuery, 8).map(countryToRow);
       const cityRows = searchCities.map(cityToRow);
       const parkRows = searchParks.map(parkToRow);
@@ -499,7 +546,15 @@ export function SaveDestinationModal({
       ).map(parkToRow);
 
       const merged = new Map<string, DestinationRow>();
-      for (const row of [...countryRows, ...popularRows, ...popularParkRows, ...cityRows, ...parkRows]) {
+      for (const row of [
+        ...visitedCityRows,
+        ...visitedParkRows,
+        ...countryRows,
+        ...popularRows,
+        ...popularParkRows,
+        ...cityRows,
+        ...parkRows,
+      ]) {
         merged.set(row.id, row);
       }
       let results = [...merged.values()];
@@ -534,7 +589,7 @@ export function SaveDestinationModal({
     }
 
     return POPULAR_DESTINATIONS.slice(0, 40).map(popularToRow);
-  }, [isWantMode, needle, searchCities, searchParks, tab, trimmedQuery.length, visitedCountryCodes]);
+  }, [isWantMode, needle, searchCities, searchParks, tab, trimmedQuery.length, visitedCountryCodes, visitedCities, visitedParks]);
 
   const editingCity = useMemo(
     () => visitedCities.find((city) => city.id === editingCityId) ?? null,
@@ -548,47 +603,62 @@ export function SaveDestinationModal({
 
   const formattedQueryName = formatCityDisplayName(trimmedQuery);
 
-  const customCountryOptions = useMemo(() => {
-    const map = new Map<string, string>();
+  const { customCountryOptions, customCountryDefault } = useMemo(() => {
+    type Entry = { value: string; label: string; priority: number };
+    const map = new Map<string, Entry>();
 
-    for (const country of visitedCountries) {
-      map.set(country.country_code.toUpperCase(), country.country_name);
-    }
-
-    for (const row of rows) {
-      if (row.kind === "country") {
-        map.set(row.countryCode.toUpperCase(), row.countryName);
+    const add = (code: string, name: string, priority: number) => {
+      const value = code.toUpperCase();
+      const existing = map.get(value);
+      if (!existing || priority < existing.priority) {
+        map.set(value, { value, label: name, priority });
       }
-    }
+    };
 
     for (const city of searchCities) {
-      map.set(city.countryCode.toUpperCase(), city.countryName);
+      add(city.countryCode, city.countryName, 0);
     }
-
     for (const park of searchParks) {
-      map.set(park.countryCode.toUpperCase(), park.countryName);
+      add(park.countryCode, park.countryName, 0);
     }
-
+    for (const row of rows) {
+      if (row.kind === "country") {
+        add(row.countryCode, row.countryName, 1);
+      }
+    }
     for (const country of searchCountries(trimmedQuery, 12)) {
-      map.set(country.code, country.name);
+      add(country.code, country.name, 1);
+    }
+    for (const country of visitedCountries) {
+      add(country.country_code, country.country_name, 2);
+    }
+    for (const country of COUNTRY_LIST) {
+      add(country.code, country.name, 3);
     }
 
-    return [...map.entries()]
-      .map(([value, label]) => ({ value, label }))
-      .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base" }));
-  }, [needle, rows, searchCities, searchParks, visitedCountries]);
+    const sorted = [...map.values()].sort(
+      (a, b) =>
+        a.priority - b.priority ||
+        a.label.localeCompare(b.label, undefined, { sensitivity: "base" })
+    );
+
+    return {
+      customCountryOptions: sorted.map(({ value, label }) => ({ value, label })),
+      customCountryDefault: sorted[0]?.value ?? COUNTRY_LIST[0]!.code,
+    };
+  }, [rows, searchCities, searchParks, trimmedQuery, visitedCountries]);
 
   const showCustomCity =
     !isWantMode &&
     trimmedQuery.length >= 2 &&
     !loadingSearch &&
-    !queryMatchesCityName(trimmedQuery, rows, searchCities);
+    !queryMatchesCityName(trimmedQuery, rows, searchCities, visitedCities);
 
   const showCustomPark =
     !isWantMode &&
     trimmedQuery.length >= 2 &&
     !loadingSearch &&
-    !queryMatchesParkName(trimmedQuery, rows, searchParks);
+    !queryMatchesParkName(trimmedQuery, rows, searchParks, visitedParks);
 
   const isCityAlreadyOnMap = useCallback(
     (cityName: string, countryCode: string) =>
@@ -702,17 +772,6 @@ export function SaveDestinationModal({
   }
 
   function promptCustomCity() {
-    if (customCountryOptions.length === 0) {
-      toast.show(saveDestinationMessages.addCountryFirst, 2500);
-      return;
-    }
-
-    if (customCountryOptions.length === 1) {
-      const option = customCountryOptions[0]!;
-      void submitCustomCity(option.value, option.label);
-      return;
-    }
-
     toast.showAction({
       message: saveDestinationMessages.customCityPrompt.replace("{name}", formattedQueryName),
       actionLabel: cityMessages.customCityAdd,
@@ -722,7 +781,7 @@ export function SaveDestinationModal({
           id: "country",
           label: cityMessages.country,
           options: customCountryOptions,
-          defaultValue: customCountryOptions[0]!.value,
+          defaultValue: customCountryDefault,
         },
       ],
       onAction: (fieldValues) => {
@@ -734,13 +793,6 @@ export function SaveDestinationModal({
   }
 
   function promptCustomPark() {
-    if (customCountryOptions.length === 0) {
-      toast.show(saveDestinationMessages.addCountryFirst, 2500);
-      return;
-    }
-
-    const defaultCountry = customCountryOptions[0]!.value;
-
     toast.showAction({
       message: saveDestinationMessages.customParkPrompt.replace("{name}", formattedQueryName),
       actionLabel: parkMessages.customParkAdd,
@@ -750,7 +802,7 @@ export function SaveDestinationModal({
           id: "country",
           label: parkMessages.country,
           options: customCountryOptions,
-          defaultValue: defaultCountry,
+          defaultValue: customCountryDefault,
         },
         {
           type: "select",
@@ -964,6 +1016,11 @@ export function SaveDestinationModal({
     { id: "want", label: saveDestinationMessages.tabWant, icon: "⭐" },
   ];
 
+  const showListSkeleton =
+    !editingCity &&
+    !editingPark &&
+    (loadingTravelState || (loadingSearch && trimmedQuery.length >= 2));
+
   return (
     <div className="save-destination-modal" role="presentation">
       <button
@@ -1032,9 +1089,13 @@ export function SaveDestinationModal({
         ) : null}
 
         <div className="save-destination-modal__status">
-          {saveDestinationMessages.visitedCount
-            .replace("{visited}", String(visitedCountryCount))
-            .replace("{total}", String(WORLD_COUNTRY_TOTAL))}
+          {loadingTravelState ? (
+            <SaveDestinationModalStatusSkeleton />
+          ) : (
+            saveDestinationMessages.visitedCount
+              .replace("{visited}", String(visitedCountryCount))
+              .replace("{total}", String(WORLD_COUNTRY_TOTAL))
+          )}
         </div>
 
         {editingCity || editingPark ? (
@@ -1074,11 +1135,10 @@ export function SaveDestinationModal({
               />
             ) : null}
           </div>
+        ) : showListSkeleton ? (
+          <SaveDestinationModalListSkeleton />
         ) : (
         <ul className="save-destination-modal__list scrollbar-thin">
-          {loadingSearch && trimmedQuery.length >= 2 ? (
-            <li className="save-destination-modal__empty">{saveDestinationMessages.loading}</li>
-          ) : (
             <>
               {rows.map((row) => {
               const marked = isWantMode ? wantedIds.has(row.id) : addedIds.has(row.id);
@@ -1192,7 +1252,6 @@ export function SaveDestinationModal({
                 <li className="save-destination-modal__empty">{saveDestinationMessages.empty}</li>
               ) : null}
             </>
-          )}
         </ul>
         )}
       </div>

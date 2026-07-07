@@ -3,6 +3,8 @@ export const BRAND = {
   domain: "travelerpin.com",
   colors: {
     primary: "#2563eb",
+    wbsBlue: "#1E96F3",
+    wbsBlueHover: "#1a87db",
     visited: "#2563eb",
     unvisited: "#334155",
     wishlist: "#d97706",
@@ -20,7 +22,7 @@ export const DEFAULT_THEME_PARK_HERO_IMAGE = "/images/theme-park-default.png";
 export const DEFAULT_THEME_PARK_HERO_ALT = "Theme park illustration";
 
 export const DEFAULT_NATIONAL_PARK_HERO_IMAGE = "/images/national-park-default.png";
-export const DEFAULT_NATIONAL_PARK_HERO_ALT = "National park illustration";
+export const DEFAULT_NATIONAL_PARK_HERO_ALT = "Natura&Parks illustration";
 
 export const LIMITS = {
   noteMaxLength: 1000,

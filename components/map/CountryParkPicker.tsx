@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addPark, addParksBatch } from "@/lib/client/park-actions";
 import { commonMessages, formatMessage, mapMessages, parkMessages } from "@/lib/i18n/client-messages";
-import { isThemeParkType, matchesParkTypeFilter, parkTypeLabel } from "@/lib/utils/park-type";
+import { matchesParkTypeFilter, parkTypeLabel } from "@/lib/utils/park-type";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -121,9 +121,7 @@ export function CountryParkPicker({
     const normalized = trimmedFilter.toLocaleLowerCase("tr");
     const exactInList = allParks.some(
       (park) =>
-        (customParkType === "theme_park"
-          ? isThemeParkType(park.parkType)
-          : park.parkType === customParkType) &&
+        matchesParkTypeFilter(park.parkType, customParkType) &&
         park.name.toLocaleLowerCase("tr") === normalized
     );
 

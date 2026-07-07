@@ -11,6 +11,6 @@ export const config = {
      * Skip session refresh for static assets, OG image routes, and public
      * media proxies — they never need auth cookies and are high-traffic.
      */
-    "/((?!_next/static|_next/image|favicon.ico|api/og-asset|api/hub-photo|api/instagram/preview|api/cities/tourist|api/parks/tourist|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|login|register|api/og-asset|api/hub-photo|api/instagram/preview|api/cities/tourist|api/parks/tourist|api/public/cities/search|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml)$).*)",
   ],
 };

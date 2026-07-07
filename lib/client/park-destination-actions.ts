@@ -22,7 +22,7 @@ export async function quickAddPark(
   const added = Boolean(data.added);
   if (added) {
     const kind =
-      payload.park_type === "national_park"
+      payload.park_type === "national_park" || payload.park_type === "botanical_garden"
         ? "national_park"
         : payload.park_type === "theme_park"
           ? "theme_park"

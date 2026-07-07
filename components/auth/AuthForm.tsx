@@ -2,11 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import { LIMITS } from "@/lib/constants";
-import { translateAuth, translateCommon } from "@/lib/i18n/client-messages";
+import { translateAuth, translateCommon, translateSettings } from "@/lib/i18n/client-messages";
 import { createClient } from "@/lib/supabase/client";
 import { formatDisplayName } from "@/lib/utils/display-name";
+import { formatAuthErrorMessage } from "@/lib/utils/auth-error-message";
 import { resolveAuthenticatedHomePath } from "@/lib/client/authenticated-home";
 import { useModal } from "@/components/ui/ModalProvider";
+import { PasswordInput } from "@/components/auth/PasswordInput";
+import {
+  ResidenceCityPicker,
+  type ResidenceCitySelection,
+} from "@/components/dashboard/ResidenceCityPicker";
 import {
   loginSchema,
   registerSchema,
@@ -29,8 +35,19 @@ function sanitizeNext(next: string | undefined): string | null {
   return null;
 }
 
+async function saveResidenceCity(residenceCity: ResidenceCitySelection): Promise<void> {
+  await fetch("/api/profile", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ residence_city: residenceCity }),
+  }).catch(() => {
+    // Non-blocking; user can set residence in profile settings later.
+  });
+}
+
 export function AuthForm({ mode, next }: AuthFormProps) {
   const t = translateAuth;
+  const tSettings = translateSettings;
   const tCommon = translateCommon;
   const supabase = createClient();
   const modal = useModal();
@@ -40,7 +57,11 @@ export function AuthForm({ mode, next }: AuthFormProps) {
     email: "",
     password: "",
     username: "",
+    passwordConfirm: "",
   });
+  const [residenceSelection, setResidenceSelection] = useState<ResidenceCitySelection | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
 
@@ -122,7 +143,15 @@ export function AuthForm({ mode, next }: AuthFormProps) {
 
     try {
       if (mode === "register") {
-        const parsed = registerSchema.safeParse(form);
+        if (!residenceSelection) {
+          await modal.alert(tSettings("residenceSelectRequired"), { variant: "error" });
+          return;
+        }
+
+        const parsed = registerSchema.safeParse({
+          ...form,
+          residence_city: residenceSelection,
+        });
         if (!parsed.success) {
           await modal.alert(parsed.error.issues[0]?.message ?? "Invalid input", {
             variant: "error",
@@ -143,13 +172,14 @@ export function AuthForm({ mode, next }: AuthFormProps) {
           return;
         }
 
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
             data: {
               username: parsed.data.username,
               display_name: formatDisplayName(parsed.data.username),
+              residence_city: parsed.data.residence_city,
             },
           },
         });
@@ -157,15 +187,27 @@ export function AuthForm({ mode, next }: AuthFormProps) {
         if (signUpError) {
           const message = signUpError.message.toLowerCase().includes("duplicate")
             ? t("usernameTaken")
-            : signUpError.message;
-          await modal.alert(message, { variant: "error" });
+            : formatAuthErrorMessage(signUpError.message, {
+                loginInvalidCredentials: t("loginInvalidCredentials"),
+                loginEmailNotConfirmed: t("loginEmailNotConfirmed"),
+              });
+          await modal.alert(message, { variant: "error", title: t("registerTitle") });
           return;
         }
 
-        const safeNext = sanitizeNext(next);
-        window.location.assign(
-          safeNext ?? (await resolveAuthenticatedHomePath(supabase))
-        );
+        if (signUpData.session) {
+          await saveResidenceCity(parsed.data.residence_city);
+          const safeNext = sanitizeNext(next);
+          window.location.assign(
+            safeNext ?? (await resolveAuthenticatedHomePath(supabase))
+          );
+          return;
+        }
+
+        await modal.alert(t("registerConfirmEmail"), {
+          variant: "info",
+          title: t("registerTitle"),
+        });
       } else {
         const parsed = loginSchema.safeParse(form);
         if (!parsed.success) {
@@ -181,7 +223,13 @@ export function AuthForm({ mode, next }: AuthFormProps) {
         });
 
         if (signInError) {
-          await modal.alert(signInError.message, { variant: "error" });
+          await modal.alert(
+            formatAuthErrorMessage(signInError.message, {
+              loginInvalidCredentials: t("loginInvalidCredentials"),
+              loginEmailNotConfirmed: t("loginEmailNotConfirmed"),
+            }),
+            { variant: "error", title: t("loginTitle") }
+          );
           return;
         }
 
@@ -217,13 +265,15 @@ export function AuthForm({ mode, next }: AuthFormProps) {
 
   const registerBlocked =
     mode === "register" &&
-    (usernameStatus !== "available" || trimmedUsername.length < LIMITS.usernameMin);
+    (usernameStatus !== "available" ||
+      trimmedUsername.length < LIMITS.usernameMin ||
+      !residenceSelection);
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {mode === "register" && (
         <div>
-          <label htmlFor="username" className="mb-1 block text-sm text-slate-400">
+          <label htmlFor="username" className="mb-1 block text-sm font-medium text-wbs-blue">
             {t("username")}
           </label>
           <input
@@ -233,14 +283,14 @@ export function AuthForm({ mode, next }: AuthFormProps) {
             onChange={(e) =>
               setForm((f) => ({ ...f, username: e.target.value.toLowerCase() }))
             }
-            className={`w-full rounded-lg border bg-slate-900 px-4 py-2.5 text-white outline-none focus:ring-1 ${
+            className={`w-full rounded-lg border bg-white px-4 py-2.5 text-slate-900 outline-none focus:ring-1 ${
               usernameStatus === "taken" ||
               usernameStatus === "reserved" ||
               usernameStatus === "invalid"
-                ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/40"
+                ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
                 : usernameStatus === "available"
-                  ? "border-emerald-500/50 focus:border-emerald-500 focus:ring-emerald-500/40"
-                  : "border-slate-700 focus:border-blue-500 focus:ring-blue-500/40"
+                  ? "border-emerald-300 focus:border-emerald-500 focus:ring-emerald-500/20"
+                  : "border-slate-200 focus:border-wbs-blue focus:ring-wbs-blue/20"
             }`}
             required
             autoComplete="username"
@@ -258,7 +308,7 @@ export function AuthForm({ mode, next }: AuthFormProps) {
       )}
 
       <div>
-        <label htmlFor="email" className="mb-1 block text-sm text-slate-400">
+        <label htmlFor="email" className="mb-1 block text-sm font-medium text-wbs-blue">
           {t("email")}
         </label>
         <input
@@ -266,32 +316,56 @@ export function AuthForm({ mode, next }: AuthFormProps) {
           type="email"
           value={form.email}
           onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-white outline-none focus:border-blue-500"
+          className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-slate-900 outline-none focus:border-wbs-blue focus:ring-1 focus:ring-wbs-blue/20"
           required
           autoComplete="email"
         />
       </div>
 
-      <div>
-        <label htmlFor="password" className="mb-1 block text-sm text-slate-400">
-          {t("password")}
-        </label>
-        <input
-          id="password"
-          type="password"
-          value={form.password}
-          onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-white outline-none focus:border-blue-500"
-          required
-          autoComplete={mode === "register" ? "new-password" : "current-password"}
+      {mode === "register" ? (
+        <div>
+          <p className="mb-1 text-sm font-medium text-wbs-blue">{tSettings("residence")}</p>
+          <ResidenceCityPicker
+            value={residenceSelection}
+            onChange={setResidenceSelection}
+            disabled={loading}
+            searchPath="/api/public/cities/search"
+            allowClear={false}
+            tone="light"
+          />
+        </div>
+      ) : null}
+
+      <PasswordInput
+        id="password"
+        label={t("password")}
+        value={form.password}
+        onChange={(password) => setForm((f) => ({ ...f, password }))}
+        autoComplete={mode === "register" ? "new-password" : "current-password"}
+        minLength={LIMITS.passwordMin}
+        showLabel={t("showPassword")}
+        hideLabel={t("hidePassword")}
+        tone="light"
+      />
+
+      {mode === "register" ? (
+        <PasswordInput
+          id="passwordConfirm"
+          label={t("passwordConfirm")}
+          value={form.passwordConfirm ?? ""}
+          onChange={(passwordConfirm) => setForm((f) => ({ ...f, passwordConfirm }))}
+          autoComplete="new-password"
           minLength={LIMITS.passwordMin}
+          showLabel={t("showPassword")}
+          hideLabel={t("hidePassword")}
+          tone="light"
         />
-      </div>
+      ) : null}
 
       <button
         type="submit"
         disabled={loading || registerBlocked}
-        className="mt-2 rounded-lg bg-blue-600 py-2.5 font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+        className="on-dark-surface mt-2 rounded-lg bg-wbs-blue py-2.5 font-medium text-white shadow-sm shadow-wbs-blue/20 transition hover:bg-wbs-blue-hover disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? tCommon("loading") : mode === "register" ? tCommon("register") : tCommon("login")}
       </button>

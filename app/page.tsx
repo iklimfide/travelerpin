@@ -10,7 +10,6 @@ import { loadDemoPublicProfilePage } from "@/lib/data/jennifer-demo-page";
 import { HOME_TITLE, getSiteUrl, profilePath } from "@/lib/seo/site";
 import {
   PIN_MAP_OG_DESCRIPTION,
-  PIN_MAP_OG_TITLE,
   staticOpenGraphImages,
   staticTwitterImages,
 } from "@/lib/seo/og";
@@ -22,14 +21,14 @@ export async function generateMetadata(): Promise<Metadata> {
     description: PIN_MAP_OG_DESCRIPTION,
     alternates: { canonical: "/" },
     openGraph: {
-      title: PIN_MAP_OG_TITLE,
+      title: "",
       description: PIN_MAP_OG_DESCRIPTION,
       url: getSiteUrl(),
       images: staticOpenGraphImages(),
     },
     twitter: {
       card: "summary_large_image",
-      title: PIN_MAP_OG_TITLE,
+      title: "",
       description: PIN_MAP_OG_DESCRIPTION,
       images: staticTwitterImages(),
     },

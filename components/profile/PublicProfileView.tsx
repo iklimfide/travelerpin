@@ -140,7 +140,6 @@ export async function PublicProfileView({
                 ? t("travelDiarySubtitle")
                 : t("travelDiarySubtitleVisitor", { name: displayName })
             }
-            showNotifications={isLoggedIn && !embedded}
           />
 
           <div className="profile-main">
@@ -185,9 +184,9 @@ export async function PublicProfileView({
                   isLoggedIn={isLoggedIn}
                   canEditMap={isOwnProfile}
                   countryCount={stats.countries}
-                  detailLabel={t("mapDetail")}
                   exploredBadgeLabel={t("mapExploredBadge")}
-                  detailHref={profileAllPath(profile.username)}
+                  allHref={profileAllPath(profile.username)}
+                  allAriaLabel={t("mapViewAll")}
                 />
               </div>
             ) : (
@@ -227,7 +226,7 @@ export async function PublicProfileView({
             <>
               <ProfileTripsRow
                 trips={trips}
-                title={t("myTrips")}
+                title={isOwnProfile ? t("myTrips") : t("visitorTrips", { name: displayName })}
                 allLabel={t("tripsAll")}
                 allHref={hasMapContent ? profileAllPath(profile.username) : undefined}
                 badgeLabels={{
