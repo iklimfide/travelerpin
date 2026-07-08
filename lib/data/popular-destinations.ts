@@ -340,7 +340,7 @@ export const POPULAR_DESTINATIONS: PopularDestination[] = [
     "countryCode": "VA",
     "cityName": "Vatican City",
     "label": "Vatican City",
-    "countryName": "Holy See (Vatican City State)",
+    "countryName": "Vatican",
     "latitude": 41.9022,
     "longitude": 12.4539
   },

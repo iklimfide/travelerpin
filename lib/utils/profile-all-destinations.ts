@@ -1,4 +1,5 @@
 import { buildVisitedCountryList } from "@/lib/map/travel-lists";
+import { getCountryName } from "@/lib/data/countries";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findParkHubSlug } from "@/lib/data/park-hubs";
 import type { ParkType, VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
@@ -140,7 +141,7 @@ export function buildProfileAllDestinations(
         parkName: formatCityDisplayName(park.park_name),
         parkSlug: findParkHubSlug(park.park_name, park.country_code),
         countryCode: park.country_code,
-        countryName: park.country_name,
+        countryName: getCountryName(park.country_code),
         countrySlug: countryHubSlug(park.country_code),
         imageUrl: getDefaultParkHeroImage(park.park_type),
         parkType: park.park_type,
@@ -152,11 +153,17 @@ export function buildProfileAllDestinations(
   );
 
   const wishlist: ProfileWishlistDestination[] = [...wishlistCountries]
-    .sort((a, b) => a.country_name.localeCompare(b.country_name, undefined, { sensitivity: "base" }))
+    .sort((a, b) =>
+      getCountryName(a.country_code).localeCompare(
+        getCountryName(b.country_code),
+        undefined,
+        { sensitivity: "base" }
+      )
+    )
     .map((country) => ({
       id: country.id,
       countryCode: country.country_code,
-      countryName: country.country_name,
+      countryName: getCountryName(country.country_code),
       countrySlug: countryHubSlug(country.country_code),
     }));
 

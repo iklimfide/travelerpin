@@ -63,6 +63,9 @@ export function DevMobilePreview() {
 
   const iframeSrc = useMemo(() => {
     const params = new URLSearchParams(searchParams.toString());
+    // Auth codes must only be exchanged once on the parent window, not in the iframe.
+    params.delete("code");
+    params.delete("next");
     params.set(EMBED_PARAM, "1");
     const qs = params.toString();
     return qs ? `${pathname}?${qs}` : `${pathname}?${EMBED_PARAM}=1`;

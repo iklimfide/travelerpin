@@ -9,6 +9,7 @@ import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEdito
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { buildPinMediaPayload, PinMediaFields } from "@/components/dashboard/PinMediaFields";
+import { ProfilePinEditFields } from "@/components/profile/ProfilePinEditFields";
 import { readInstagramUrls, readPhotoUrl, withInstagramDraftField } from "@/lib/utils/pin-media";
 import { isValidInstagramUrl } from "@/lib/utils/instagram";
 import { useModal } from "@/components/ui/ModalProvider";
@@ -43,6 +44,7 @@ type ParkFormProps = {
   onSuccess?: () => void;
   onCancel?: () => void;
   mediaFocus?: "photo" | "instagram";
+  hideHeader?: boolean;
 };
 
 export function ParkForm({
@@ -52,6 +54,7 @@ export function ParkForm({
   onSuccess,
   onCancel,
   mediaFocus,
+  hideHeader = false,
 }: ParkFormProps) {
   const isEdit = Boolean(park);
   const t = translatePark;
@@ -82,6 +85,7 @@ export function ParkForm({
   const [removePhoto, setRemovePhoto] = useState(false);
   const [instagramUrls, setInstagramUrls] = useState(() => {
     const urls = readInstagramUrls(park);
+    if (hideHeader) return withInstagramDraftField(urls);
     return mediaFocus === "instagram" ? withInstagramDraftField(urls) : urls;
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -449,7 +453,7 @@ export function ParkForm({
           photoSaved: t("photoSaved"),
           instagram: t("instagram"),
           instagramHint: t("instagramHint"),
-          addInstagram: t("addInstagram"),
+          addInstagram: hideHeader ? tCommon("addLink") : t("addInstagram"),
           removeInstagram: t("removeInstagram"),
           removePhoto: t("removePhoto"),
         }}
@@ -461,7 +465,38 @@ export function ParkForm({
         instagramUrls={instagramUrls}
         onInstagramUrlsChange={setInstagramUrls}
         autoFocusInstagram={mediaFocus === "instagram"}
+        hideInstagramHint={hideHeader}
+        defaultInstagramField={hideHeader}
+        equalActionButtons={hideHeader}
       />
+    );
+  }
+
+  if (isEdit && hideHeader && park) {
+    async function handleFormSubmit(e: React.FormEvent) {
+      e.preventDefault();
+      await handleSave();
+    }
+
+    return (
+      <form onSubmit={handleFormSubmit} className="dashboard-form-city profile-pin-edit-form">
+        <ProfilePinEditFields
+          visitDates={visitDates}
+          onVisitDatesChange={setVisitDates}
+          note={note}
+          onNoteChange={setNote}
+          savedPhotoUrl={savedPhotoUrl}
+          photoFile={photoFile}
+          onPhotoFileChange={handlePhotoFileChange}
+          removePhoto={removePhoto}
+          onRemovePhotoChange={setRemovePhoto}
+          instagramUrls={instagramUrls}
+          onInstagramUrlsChange={setInstagramUrls}
+          mediaFocus={mediaFocus}
+          loading={loading}
+          onCancel={onCancel}
+        />
+      </form>
     );
   }
 
@@ -521,9 +556,14 @@ export function ParkForm({
             />
           </div>
 
-          <CityVisitDatesEditor key={park?.id} value={visitDates} onChange={setVisitDates} />
+          <CityVisitDatesEditor
+            key={park?.id}
+            value={visitDates}
+            onChange={setVisitDates}
+          />
 
           {renderMediaFields()}
+
         </div>
 
         <div className="dashboard-form-park__footer">

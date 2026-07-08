@@ -979,9 +979,61 @@ html.dark .city-page__travelers--row .city-page__traveler-link:hover {
   color: var(--city-text);
 }
 
+.city-page__memory-lightbox-place {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 12px 16px;
+  text-align: center;
+}
+
+.city-page__memory-lightbox .city-page__memory-place-link {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--city-blue);
+  text-decoration: none;
+}
+
+.city-page__memory-lightbox-place .city-page__memory-place {
+  margin: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--city-muted);
+}
+
 .city-page__memory-lightbox-media {
   width: 100%;
   background: #0f172a;
+}
+
+.city-page__memory-lightbox-instagram-link {
+  display: flex;
+  min-height: 220px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 16px;
+  padding: 24px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f58529, #dd2a7b 50%, #8134af);
+  text-decoration: none;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 .city-page__memory-lightbox-instagram-profile {
@@ -1048,10 +1100,12 @@ html.dark .city-page__travelers--row .city-page__traveler-link:hover {
   padding: 8px 16px 0;
   font-size: 13px;
   color: var(--city-muted);
+  text-align: center;
 }
 
 .city-page__memory-lightbox-footer {
   padding: 14px 16px 16px;
+  text-align: center;
 }
 
 html.dark .city-page__memory-thumb-btn--note {

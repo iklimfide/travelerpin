@@ -21,6 +21,12 @@ type PinMediaFieldsProps = {
   onInstagramUrlsChange: (urls: string[]) => void;
   /** Opens with an empty Instagram field focused (e.g. from “Add your Instagram link”). */
   autoFocusInstagram?: boolean;
+  hideInstagramHint?: boolean;
+  /** Keeps at least one empty Instagram field visible (profile edit modals). */
+  defaultInstagramField?: boolean;
+  /** Center action buttons in two equal columns (profile edit modals). */
+  equalActionButtons?: boolean;
+  hideMediaHint?: boolean;
 };
 
 export function PinMediaFields({
@@ -33,9 +39,14 @@ export function PinMediaFields({
   instagramUrls,
   onInstagramUrlsChange,
   autoFocusInstagram = false,
+  hideInstagramHint = false,
+  defaultInstagramField = false,
+  equalActionButtons = false,
+  hideMediaHint = false,
 }: PinMediaFieldsProps) {
   const showSavedPhoto = Boolean(savedPhotoUrl) && !removePhoto && !photoFile;
   const instagramDraftRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!autoFocusInstagram) return;
@@ -59,24 +70,58 @@ export function PinMediaFields({
   }
 
   function removeInstagramField(index: number) {
-    onInstagramUrlsChange(instagramUrls.filter((_, i) => i !== index));
+    const next = instagramUrls.filter((_, i) => i !== index);
+    if (defaultInstagramField && next.length === 0) {
+      onInstagramUrlsChange([""]);
+      return;
+    }
+    onInstagramUrlsChange(next);
   }
+
+  const visibleInstagramUrls =
+    defaultInstagramField && instagramUrls.length === 0 ? [""] : instagramUrls;
 
   return (
     <div className="space-y-4">
-      <p className="text-xs text-slate-500">{labels.mediaHint}</p>
+      {!hideMediaHint ? (
+        <p className="text-xs text-slate-500">{labels.mediaHint}</p>
+      ) : null}
 
       <div className="space-y-2">
-        <p className="text-sm font-medium text-slate-300">{labels.photo}</p>
         <input
+          ref={photoInputRef}
           type="file"
           accept="image/*"
+          className="hidden"
           onChange={(e) => {
             onRemovePhotoChange(false);
             onPhotoFileChange(e.target.files?.[0] ?? null);
           }}
-          className="text-sm text-slate-400 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:text-white"
         />
+        <div className={equalActionButtons ? "pin-form-actions" : "flex flex-wrap gap-2"}>
+          <button
+            type="button"
+            onClick={() => photoInputRef.current?.click()}
+            className={
+              equalActionButtons
+                ? "pin-form-actions__btn pin-form-actions__btn--primary"
+                : "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
+            }
+          >
+            {labels.photo}
+          </button>
+          <button
+            type="button"
+            onClick={addInstagramField}
+            className={
+              equalActionButtons
+                ? "pin-form-actions__btn pin-form-actions__btn--secondary"
+                : "rounded-lg border border-blue-600 bg-transparent px-4 py-2 text-sm font-medium text-blue-400 hover:bg-blue-600/10"
+            }
+          >
+            {labels.addInstagram}
+          </button>
+        </div>
         {photoFile ? (
           <p className="text-xs text-emerald-400">{photoFile.name}</p>
         ) : showSavedPhoto ? (
@@ -94,23 +139,13 @@ export function PinMediaFields({
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm font-medium text-slate-300">{labels.instagram}</p>
-          <button
-            type="button"
-            onClick={addInstagramField}
-            className="text-xs text-blue-400 hover:text-blue-300"
-          >
-            {labels.addInstagram}
-          </button>
-        </div>
-        {instagramUrls.length > 0 ? (
+        {visibleInstagramUrls.length > 0 ? (
           <ul className="space-y-2">
-            {instagramUrls.map((url, index) => (
+            {visibleInstagramUrls.map((url, index) => (
               <li key={index} className="flex gap-2">
                 <input
                   ref={
-                    autoFocusInstagram && index === instagramUrls.length - 1
+                    autoFocusInstagram && index === visibleInstagramUrls.length - 1
                       ? instagramDraftRef
                       : undefined
                   }
@@ -120,19 +155,23 @@ export function PinMediaFields({
                   placeholder="https://www.instagram.com/p/..."
                   className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-blue-500"
                 />
-                <button
-                  type="button"
-                  onClick={() => removeInstagramField(index)}
-                  className="shrink-0 rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-400 hover:text-white"
-                  aria-label={labels.removeInstagram}
-                >
-                  ✕
-                </button>
+                {defaultInstagramField && visibleInstagramUrls.length === 1 && !url.trim() ? null : (
+                  <button
+                    type="button"
+                    onClick={() => removeInstagramField(index)}
+                    className="shrink-0 rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-400 hover:text-white"
+                    aria-label={labels.removeInstagram}
+                  >
+                    ✕
+                  </button>
+                )}
               </li>
             ))}
           </ul>
         ) : null}
-        <p className="text-xs text-slate-500">{labels.instagramHint}</p>
+        {!hideInstagramHint ? (
+          <p className="text-xs text-slate-500">{labels.instagramHint}</p>
+        ) : null}
       </div>
     </div>
   );

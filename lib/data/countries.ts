@@ -8,6 +8,11 @@ const COUNTRY_ALIAS_OVERRIDES: Partial<Record<string, string>> = {
   US: "USA",
 };
 
+/** Full display name overrides when the ISO label is not what travelers use day to day. */
+const COUNTRY_NAME_OVERRIDES: Partial<Record<string, string>> = {
+  VA: "Vatican",
+};
+
 /** Extra tokens for search — common abbreviations and alternate names. */
 const COUNTRY_SEARCH_EXTRA: Partial<Record<string, readonly string[]>> = {
   US: ["america", "u.s.", "u.s.a.", "united states"],
@@ -64,6 +69,14 @@ function countrySearchText(code: string, alias: string, official: string, name: 
 }
 
 function buildCountryOption(code: string): CountryOption {
+  const override = COUNTRY_NAME_OVERRIDES[code];
+  if (override) {
+    const official =
+      countriesLib.getName(code, "en", { select: "official" }) ?? code;
+    const searchText = countrySearchText(code, override, official, override);
+    return { code, name: override, searchText };
+  }
+
   const official =
     countriesLib.getName(code, "en", { select: "official" }) ?? code;
   const alias = countryAlias(code, official);
@@ -81,6 +94,10 @@ export const COUNTRY_LIST: CountryOption[] = Object.keys(
 
 /** English display label, e.g. Turkey (Türkiye). */
 export function getCountryName(code: string): string {
+  const normalized = code.toUpperCase();
+  const override = COUNTRY_NAME_OVERRIDES[normalized];
+  if (override) return override;
+
   const official =
     countriesLib.getName(code, "en", { select: "official" }) ??
     countriesLib.getName(code, "en") ??

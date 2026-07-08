@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import Image from "next/image";
 import { LIMITS } from "@/lib/constants";
 
@@ -69,6 +69,8 @@ export function ProfileAvatarUpload({
   disabled,
   labels,
   compact = false,
+  trailing,
+  trailingEnd,
 }: {
   avatarUrl: string | null;
   displayName: string;
@@ -82,6 +84,10 @@ export function ProfileAvatarUpload({
     removePhoto: string;
     hint: string;
   };
+  /** Renders in the center column (compact layout). */
+  trailing?: ReactNode;
+  /** Renders on the far right (compact layout). */
+  trailingEnd?: ReactNode;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   async function handleFile(file: File) {
@@ -121,15 +127,31 @@ export function ProfileAvatarUpload({
   }
 
   return (
-    <div className={compact ? "flex items-start gap-2.5" : "flex flex-wrap items-center gap-4"}>
+    <div
+      className={
+        compact
+          ? trailing || trailingEnd
+            ? "flex w-full items-center gap-2.5 sm:gap-4"
+            : "flex items-start gap-2.5"
+          : "flex flex-wrap items-center gap-4"
+      }
+    >
       <ProfileAvatar
         avatarUrl={avatarUrl}
         displayName={displayName}
         username={username}
-        size={compact ? "md" : "lg"}
+        size={compact ? "sm" : "lg"}
         className={compact ? "shrink-0" : ""}
       />
-      <div className={compact ? "min-w-0 flex flex-1 flex-col gap-1.5" : "flex flex-col gap-2"}>
+      <div
+        className={
+          compact
+            ? trailing || trailingEnd
+              ? "flex shrink-0 flex-col items-center justify-center gap-1.5"
+              : "min-w-0 flex flex-1 flex-col gap-1.5"
+            : "flex flex-col gap-2"
+        }
+      >
         <input
           ref={fileInputRef}
           type="file"
@@ -145,7 +167,13 @@ export function ProfileAvatarUpload({
             });
           }}
         />
-        <div className="flex flex-wrap items-center gap-2">
+        <div
+          className={
+            compact
+              ? "flex flex-col items-center justify-center gap-1.5"
+              : "flex flex-wrap items-center gap-2"
+          }
+        >
           <button
             type="button"
             disabled={disabled}
@@ -173,10 +201,22 @@ export function ProfileAvatarUpload({
             </button>
           ) : null}
         </div>
-        {labels.hint && !compact ? (
+        {!compact && labels.hint ? (
           <p className="text-xs text-slate-500">{labels.hint}</p>
         ) : null}
       </div>
+      {compact && (trailing || trailingEnd) ? (
+        <div className="flex min-w-0 flex-1 items-center justify-between gap-3 self-stretch">
+          {trailing ? (
+            <div className="flex min-w-0 flex-1 flex-col items-center justify-center text-center">
+              {trailing}
+            </div>
+          ) : (
+            <div className="flex-1" />
+          )}
+          {trailingEnd ? <div className="shrink-0 self-center">{trailingEnd}</div> : null}
+        </div>
+      ) : null}
     </div>
   );
 }

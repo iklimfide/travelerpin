@@ -67,11 +67,7 @@ export function HubMemories({ hubName, pins, labels }: HubMemoriesProps) {
                     aria-label={`${labels.viewPin} — ${pin.displayName}`}
                   >
                     {pin.mediaType === "instagram" && pin.mediaUrl ? (
-                      <InstagramMemoryThumb
-                        postUrl={pin.mediaUrl}
-                        alt={`${hubName} — ${pin.displayName}`}
-                        instagramLabel={labels.instagramPost}
-                      />
+                      <InstagramMemoryThumb displayName={pin.displayName} />
                     ) : null}
                   </button>
                 ) : (

@@ -47,11 +47,7 @@ function GalleryGrid({
               className="city-page__traveler-picture-btn"
               aria-label={`${labels.instagramPost} — ${item.pin.displayName}`}
             >
-              <InstagramMemoryThumb
-                postUrl={item.mediaUrl}
-                alt={`${hubName} — ${item.pin.displayName}`}
-                instagramLabel={labels.instagramPost}
-              />
+              <InstagramMemoryThumb displayName={item.pin.displayName} />
             </a>
           ) : (
             (() => {

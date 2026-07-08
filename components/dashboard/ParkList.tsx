@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ParkForm } from "@/components/dashboard/ParkForm";
+import { ProfileDestinationCardActions } from "@/components/profile/ProfileDestinationCardActions";
+import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
 import { useModal } from "@/components/ui/ModalProvider";
 import { commonMessages, modalMessages, parkMessages } from "@/lib/i18n/client-messages";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
@@ -90,16 +92,6 @@ export function ParkList({ parks, countries, embedded = false }: ParkListProps) 
   }
 
   const editingPark = parks.find((p) => p.id === editingId);
-  if (editingPark) {
-    return (
-      <ParkForm
-        park={editingPark}
-        visitedCountries={countries}
-        onSuccess={() => setEditingId(null)}
-        onCancel={() => setEditingId(null)}
-      />
-    );
-  }
 
   return (
     <section className={`flex min-w-0 max-w-full flex-col gap-4${embedded ? " profile-owner-edit-surface" : ""}`}>
@@ -184,20 +176,31 @@ export function ParkList({ parks, countries, embedded = false }: ParkListProps) 
                     </p>
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setEditingId(park.id)}
-                      className="text-sm text-emerald-400 hover:text-emerald-300"
-                    >
-                      {commonMessages.edit}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(park.id)}
-                      className="text-sm text-red-400 hover:text-red-300"
-                    >
-                      {commonMessages.delete}
-                    </button>
+                    {embedded ? (
+                      <ProfileDestinationCardActions
+                        onEdit={() => setEditingId(park.id)}
+                        onRemove={() => handleDelete(park.id)}
+                        editLabel={commonMessages.edit}
+                        removeLabel={commonMessages.delete}
+                      />
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setEditingId(park.id)}
+                          className="text-sm text-emerald-400 hover:text-emerald-300"
+                        >
+                          {commonMessages.edit}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(park.id)}
+                          className="text-sm text-red-400 hover:text-red-300"
+                        >
+                          {commonMessages.delete}
+                        </button>
+                      </>
+                    )}
                   </div>
                 </li>
               ))}
@@ -205,6 +208,14 @@ export function ParkList({ parks, countries, embedded = false }: ParkListProps) 
           )}
         </>
       )}
+      {editingPark ? (
+        <ProfileDestinationEditModal
+          city={null}
+          park={editingPark}
+          visitedCountries={countries}
+          onClose={() => setEditingId(null)}
+        />
+      ) : null}
     </section>
   );
 }

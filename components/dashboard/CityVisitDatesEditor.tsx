@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { VisitMonthYearSelect } from "@/components/dashboard/VisitMonthYearSelect";
+import { VisitYearsMultiSelect } from "@/components/dashboard/VisitYearsMultiSelect";
 import { LIMITS } from "@/lib/constants";
 import { cityMessages, formatMessage } from "@/lib/i18n/client-messages";
 import { formatVisitMonthYear, normalizeVisitDates } from "@/lib/utils/visit-date";
@@ -9,9 +10,16 @@ import { formatVisitMonthYear, normalizeVisitDates } from "@/lib/utils/visit-dat
 type CityVisitDatesEditorProps = {
   value: string[];
   onChange: (dates: string[]) => void;
+  hideHint?: boolean;
 };
 
-export function CityVisitDatesEditor({ value, onChange }: CityVisitDatesEditorProps) {
+function CityVisitDatesMonthEditor({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (dates: string[]) => void;
+}) {
   const [slots, setSlots] = useState<(string | null)[]>(() =>
     value.length > 0 ? [...value] : [null]
   );
@@ -98,4 +106,12 @@ export function CityVisitDatesEditor({ value, onChange }: CityVisitDatesEditorPr
       ) : null}
     </div>
   );
+}
+
+export function CityVisitDatesEditor({ value, onChange, hideHint = false }: CityVisitDatesEditorProps) {
+  if (hideHint) {
+    return <VisitYearsMultiSelect value={value} onChange={onChange} />;
+  }
+
+  return <CityVisitDatesMonthEditor value={value} onChange={onChange} />;
 }

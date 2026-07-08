@@ -1,8 +1,9 @@
-import { buildVisitedCountryList } from "@/lib/map/travel-lists";
+import { getCountryName } from "@/lib/data/countries";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findCityHubSlug } from "@/lib/data/city-hubs";
 import { findParkHubSlug } from "@/lib/data/park-hubs";
+import { buildVisitedCountryList } from "@/lib/map/travel-lists";
 import { buildCitySlug } from "@/lib/utils/city-slug";
 import type { ParkType } from "@/lib/data/tourist-park-search";
 import { cityVisitCount } from "@/lib/utils/visit-date";
@@ -111,7 +112,7 @@ export function buildProfileTrips(
     parkSlug: null,
     parkType: null,
     countryCode: city.country_code,
-    countryName: city.country_name,
+    countryName: getCountryName(city.country_code),
     countrySlug: countryHubSlug(city.country_code),
     imageUrl: DEFAULT_CITY_HERO_IMAGE,
     note: city.note,
@@ -128,7 +129,7 @@ export function buildProfileTrips(
     parkSlug: findParkHubSlug(park.park_name, park.country_code),
     parkType: park.park_type,
     countryCode: park.country_code,
-    countryName: park.country_name,
+    countryName: getCountryName(park.country_code),
     countrySlug: countryHubSlug(park.country_code),
     imageUrl: parkTripImage(park),
     note: park.note,
@@ -178,7 +179,7 @@ export function buildProfileSummary(
       topVisits = visits;
       topCity = {
         name: city.city_name,
-        countryName: city.country_name,
+        countryName: getCountryName(city.country_code),
         citySlug: cityHubSlug(city.country_code, city.city_name),
         countrySlug: countryHubSlug(city.country_code),
       };

@@ -6,6 +6,7 @@ import { readInstagramUrls, readPhotoUrl, type PinMediaRow } from "@/lib/utils/p
 export type HubTravelerPin = {
   id: string;
   placeLabel: string | null;
+  placePath: string | null;
   note: string | null;
   photoUrl: string | null;
   instagramUrls: string[];
@@ -70,6 +71,7 @@ type HubTravelerPinIdentity = {
 type HubTravelerPinInput = HubTravelerPinIdentity & {
   id: string;
   placeLabel: string | null;
+  placePath?: string | null;
   note: string | null;
   visitDates?: string[];
   pinnedAt: string;
@@ -124,6 +126,7 @@ export function createHubTravelerPin(input: HubTravelerPinInput): HubTravelerPin
   return {
     id: input.id,
     placeLabel: input.placeLabel,
+    placePath: input.placePath ?? null,
     note: input.note,
     photoUrl,
     instagramUrls,

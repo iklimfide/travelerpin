@@ -3,7 +3,6 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ProfileSettingsForm } from "@/components/dashboard/ProfileSettingsForm";
-import { LogOutButton } from "@/components/auth/LogOutButton";
 import { createClient } from "@/lib/supabase/server";
 import { fetchProfileSettings } from "@/lib/supabase/profile-settings";
 import { computeTravelStats } from "@/lib/utils/stats";
@@ -56,7 +55,6 @@ export default async function ProfileSettingsPage() {
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-white">{t("title")}</h1>
-            <p className="mt-1 text-sm text-slate-500">{t("subtitle")}</p>
           </div>
           {profile.username ? (
             <Link href={mapHref} className="text-sm text-blue-400 hover:text-blue-300">
@@ -66,10 +64,6 @@ export default async function ProfileSettingsPage() {
         </div>
 
         <ProfileSettingsForm profile={profile} stats={stats} />
-
-        <div className="mt-8">
-          <LogOutButton />
-        </div>
       </main>
   );
 }

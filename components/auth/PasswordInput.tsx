@@ -13,6 +13,9 @@ type PasswordInputProps = {
   hideLabel: string;
   required?: boolean;
   tone?: "dark" | "light";
+  /** Controlled visibility — when set, parent owns show/hide state. */
+  visible?: boolean;
+  onVisibleChange?: (visible: boolean) => void;
 };
 
 export function PasswordInput({
@@ -26,9 +29,22 @@ export function PasswordInput({
   hideLabel,
   required = true,
   tone = "dark",
+  visible: controlledVisible,
+  onVisibleChange,
 }: PasswordInputProps) {
-  const [visible, setVisible] = useState(false);
+  const [uncontrolledVisible, setUncontrolledVisible] = useState(false);
+  const isControlled = controlledVisible !== undefined;
+  const visible = isControlled ? controlledVisible : uncontrolledVisible;
   const isLight = tone === "light";
+
+  function toggleVisible() {
+    const next = !visible;
+    if (isControlled) {
+      onVisibleChange?.(next);
+    } else {
+      setUncontrolledVisible(next);
+    }
+  }
 
   return (
     <div>
@@ -55,7 +71,7 @@ export function PasswordInput({
         />
         <button
           type="button"
-          onClick={() => setVisible((current) => !current)}
+          onClick={toggleVisible}
           className={`absolute top-1/2 right-2 -translate-y-1/2 rounded-md p-1.5 ${
             isLight ? "text-slate-400 hover:text-slate-600" : "text-slate-400 hover:text-slate-200"
           }`}

@@ -34,10 +34,27 @@ export function normalizeVisitDates(dates: string[]): string[] {
   return unique.sort((a, b) => b.localeCompare(a));
 }
 
+/** Unique calendar years from stored YYYY-MM visit dates (newest first). */
+export function extractVisitYears(dates: string[]): number[] {
+  const years = new Set<number>();
+  for (const entry of normalizeVisitDates(dates)) {
+    const year = Number(entry.slice(0, 4));
+    if (Number.isFinite(year)) years.add(year);
+  }
+  return [...years].sort((a, b) => b - a);
+}
+
+/** Year-only selections are stored as January (YYYY-01) for DB compatibility. */
+export function yearsToVisitYearMonths(years: number[]): string[] {
+  return normalizeVisitDates(years.map((year) => `${year}-01`));
+}
+
 export function formatVisitDatesList(dates: string[], locale: string): string {
-  return normalizeVisitDates(dates)
-    .map((d) => formatVisitMonthYear(d, locale))
-    .join(", ");
+  const normalized = normalizeVisitDates(dates);
+  if (normalized.length > 0 && normalized.every((entry) => entry.endsWith("-01"))) {
+    return extractVisitYears(normalized).join(", ");
+  }
+  return normalized.map((d) => formatVisitMonthYear(d, locale)).join(", ");
 }
 
 export function formatVisitDatesSummary(

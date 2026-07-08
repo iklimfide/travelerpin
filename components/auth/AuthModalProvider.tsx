@@ -150,7 +150,11 @@ function AuthModalProviderInner({ children }: { children: ReactNode }) {
               </div>
 
               <div className="mt-5">
-                <AuthForm mode={active.mode} next={active.next ?? undefined} />
+                <AuthForm
+                  mode={active.mode}
+                  next={active.next ?? undefined}
+                  onRegisteredPendingConfirmation={close}
+                />
               </div>
 
               <p className="mt-5 text-center text-xs text-slate-500">

@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CityForm } from "@/components/dashboard/CityForm";
+import { ProfileDestinationCardActions } from "@/components/profile/ProfileDestinationCardActions";
+import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
 import { useModal } from "@/components/ui/ModalProvider";
 import {
   cityMessages,
@@ -97,16 +99,6 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
   }
 
   const editingCity = cities.find((c) => c.id === editingId);
-  if (editingCity) {
-    return (
-      <CityForm
-        city={editingCity}
-        visitedCountries={countries}
-        onSuccess={() => setEditingId(null)}
-        onCancel={() => setEditingId(null)}
-      />
-    );
-  }
 
   return (
     <section className={`flex min-w-0 max-w-full flex-col gap-4${embedded ? " profile-owner-edit-surface" : ""}`}>
@@ -200,20 +192,31 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
                     ) : null}
                   </div>
                   <div className="flex shrink-0 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setEditingId(city.id)}
-                      className="text-sm text-blue-400 hover:text-blue-300"
-                    >
-                      {commonMessages.edit}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(city.id)}
-                      className="text-sm text-red-400 hover:text-red-300"
-                    >
-                      {commonMessages.delete}
-                    </button>
+                    {embedded ? (
+                      <ProfileDestinationCardActions
+                        onEdit={() => setEditingId(city.id)}
+                        onRemove={() => handleDelete(city.id)}
+                        editLabel={commonMessages.edit}
+                        removeLabel={commonMessages.delete}
+                      />
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setEditingId(city.id)}
+                          className="text-sm text-blue-400 hover:text-blue-300"
+                        >
+                          {commonMessages.edit}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(city.id)}
+                          className="text-sm text-red-400 hover:text-red-300"
+                        >
+                          {commonMessages.delete}
+                        </button>
+                      </>
+                    )}
                   </div>
                 </li>
               );
@@ -222,6 +225,14 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
           )}
         </>
       )}
+      {editingCity ? (
+        <ProfileDestinationEditModal
+          city={editingCity}
+          park={null}
+          visitedCountries={countries}
+          onClose={() => setEditingId(null)}
+        />
+      ) : null}
     </section>
   );
 }

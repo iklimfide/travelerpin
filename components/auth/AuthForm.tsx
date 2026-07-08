@@ -2,17 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { LIMITS } from "@/lib/constants";
-import { translateAuth, translateCommon, translateSettings } from "@/lib/i18n/client-messages";
+import { translateAuth, translateCommon } from "@/lib/i18n/client-messages";
 import { createClient } from "@/lib/supabase/client";
 import { formatDisplayName } from "@/lib/utils/display-name";
 import { formatAuthErrorMessage } from "@/lib/utils/auth-error-message";
 import { resolveAuthenticatedHomePath } from "@/lib/client/authenticated-home";
 import { useModal } from "@/components/ui/ModalProvider";
 import { PasswordInput } from "@/components/auth/PasswordInput";
-import {
-  ResidenceCityPicker,
-  type ResidenceCitySelection,
-} from "@/components/dashboard/ResidenceCityPicker";
 import {
   loginSchema,
   registerSchema,
@@ -23,6 +19,8 @@ import {
 type AuthFormProps = {
   mode: "login" | "register";
   next?: string;
+  /** Called after a successful sign-up that still needs email confirmation. */
+  onRegisteredPendingConfirmation?: () => void;
 };
 
 type UsernameStatus = "idle" | "checking" | "available" | "taken" | "reserved" | "invalid";
@@ -35,19 +33,8 @@ function sanitizeNext(next: string | undefined): string | null {
   return null;
 }
 
-async function saveResidenceCity(residenceCity: ResidenceCitySelection): Promise<void> {
-  await fetch("/api/profile", {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ residence_city: residenceCity }),
-  }).catch(() => {
-    // Non-blocking; user can set residence in profile settings later.
-  });
-}
-
-export function AuthForm({ mode, next }: AuthFormProps) {
+export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFormProps) {
   const t = translateAuth;
-  const tSettings = translateSettings;
   const tCommon = translateCommon;
   const supabase = createClient();
   const modal = useModal();
@@ -59,11 +46,9 @@ export function AuthForm({ mode, next }: AuthFormProps) {
     username: "",
     passwordConfirm: "",
   });
-  const [residenceSelection, setResidenceSelection] = useState<ResidenceCitySelection | null>(
-    null
-  );
   const [loading, setLoading] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
+  const [passwordsVisible, setPasswordsVisible] = useState(false);
 
   const trimmedUsername = (form.username ?? "").trim();
 
@@ -143,18 +128,24 @@ export function AuthForm({ mode, next }: AuthFormProps) {
 
     try {
       if (mode === "register") {
-        if (!residenceSelection) {
-          await modal.alert(tSettings("residenceSelectRequired"), { variant: "error" });
+        if (form.password !== (form.passwordConfirm ?? "")) {
+          await modal.alert(t("passwordMismatch"), {
+            variant: "error",
+            title: t("registerTitle"),
+          });
           return;
         }
 
-        const parsed = registerSchema.safeParse({
-          ...form,
-          residence_city: residenceSelection,
-        });
+        const parsed = registerSchema.safeParse(form);
         if (!parsed.success) {
-          await modal.alert(parsed.error.issues[0]?.message ?? "Invalid input", {
+          const issue = parsed.error.issues[0];
+          const message =
+            issue?.path.includes("passwordConfirm") && issue.message.toLowerCase().includes("match")
+              ? t("passwordMismatch")
+              : (issue?.message ?? "Invalid input");
+          await modal.alert(message, {
             variant: "error",
+            title: t("registerTitle"),
           });
           return;
         }
@@ -179,7 +170,6 @@ export function AuthForm({ mode, next }: AuthFormProps) {
             data: {
               username: parsed.data.username,
               display_name: formatDisplayName(parsed.data.username),
-              residence_city: parsed.data.residence_city,
             },
           },
         });
@@ -196,7 +186,6 @@ export function AuthForm({ mode, next }: AuthFormProps) {
         }
 
         if (signUpData.session) {
-          await saveResidenceCity(parsed.data.residence_city);
           const safeNext = sanitizeNext(next);
           window.location.assign(
             safeNext ?? (await resolveAuthenticatedHomePath(supabase))
@@ -204,9 +193,17 @@ export function AuthForm({ mode, next }: AuthFormProps) {
           return;
         }
 
-        await modal.alert(t("registerConfirmEmail"), {
-          variant: "info",
-          title: t("registerTitle"),
+        // Close the auth sheet first so the centered confirmation dialog is not covered.
+        onRegisteredPendingConfirmation?.();
+        await new Promise<void>((resolve) => {
+          window.setTimeout(() => {
+            void modal
+              .alert(t("registerConfirmEmail"), {
+                variant: "success",
+                title: t("registerConfirmEmailTitle"),
+              })
+              .then(resolve);
+          }, 0);
         });
       } else {
         const parsed = loginSchema.safeParse(form);
@@ -265,9 +262,13 @@ export function AuthForm({ mode, next }: AuthFormProps) {
 
   const registerBlocked =
     mode === "register" &&
-    (usernameStatus !== "available" ||
-      trimmedUsername.length < LIMITS.usernameMin ||
-      !residenceSelection);
+    (usernameStatus !== "available" || trimmedUsername.length < LIMITS.usernameMin);
+
+  const passwordsMismatch =
+    mode === "register" &&
+    Boolean(form.password) &&
+    Boolean(form.passwordConfirm) &&
+    form.password !== form.passwordConfirm;
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -280,9 +281,7 @@ export function AuthForm({ mode, next }: AuthFormProps) {
             id="username"
             type="text"
             value={form.username ?? ""}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, username: e.target.value.toLowerCase() }))
-            }
+            onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
             className={`w-full rounded-lg border bg-white px-4 py-2.5 text-slate-900 outline-none focus:ring-1 ${
               usernameStatus === "taken" ||
               usernameStatus === "reserved" ||
@@ -322,20 +321,6 @@ export function AuthForm({ mode, next }: AuthFormProps) {
         />
       </div>
 
-      {mode === "register" ? (
-        <div>
-          <p className="mb-1 text-sm font-medium text-wbs-blue">{tSettings("residence")}</p>
-          <ResidenceCityPicker
-            value={residenceSelection}
-            onChange={setResidenceSelection}
-            disabled={loading}
-            searchPath="/api/public/cities/search"
-            allowClear={false}
-            tone="light"
-          />
-        </div>
-      ) : null}
-
       <PasswordInput
         id="password"
         label={t("password")}
@@ -346,20 +331,32 @@ export function AuthForm({ mode, next }: AuthFormProps) {
         showLabel={t("showPassword")}
         hideLabel={t("hidePassword")}
         tone="light"
+        {...(mode === "register"
+          ? { visible: passwordsVisible, onVisibleChange: setPasswordsVisible }
+          : {})}
       />
 
       {mode === "register" ? (
-        <PasswordInput
-          id="passwordConfirm"
-          label={t("passwordConfirm")}
-          value={form.passwordConfirm ?? ""}
-          onChange={(passwordConfirm) => setForm((f) => ({ ...f, passwordConfirm }))}
-          autoComplete="new-password"
-          minLength={LIMITS.passwordMin}
-          showLabel={t("showPassword")}
-          hideLabel={t("hidePassword")}
-          tone="light"
-        />
+        <div>
+          <PasswordInput
+            id="passwordConfirm"
+            label={t("passwordConfirm")}
+            value={form.passwordConfirm ?? ""}
+            onChange={(passwordConfirm) => setForm((f) => ({ ...f, passwordConfirm }))}
+            autoComplete="new-password"
+            minLength={LIMITS.passwordMin}
+            showLabel={t("showPassword")}
+            hideLabel={t("hidePassword")}
+            tone="light"
+            visible={passwordsVisible}
+            onVisibleChange={setPasswordsVisible}
+          />
+          {passwordsMismatch ? (
+            <p className="mt-1 text-xs text-red-500" role="alert">
+              {t("passwordMismatch")}
+            </p>
+          ) : null}
+        </div>
       ) : null}
 
       <button

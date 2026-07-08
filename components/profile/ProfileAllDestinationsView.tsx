@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { ProfileAllDestinationsListModal } from "@/components/profile/ProfileAllDestinationsListModal";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
 import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
 import { ProfileCountryDestinationCard } from "@/components/profile/ProfileCountryDestinationCard";
@@ -28,6 +29,7 @@ import {
   countryHasMappedPlaces,
   isCountryRemoveBlockedByPlacesError,
 } from "@/lib/utils/country-remove";
+import { findCountryBackingCity } from "@/lib/utils/country-pin";
 import type { ProfileAllDestinations } from "@/lib/utils/profile-all-destinations";
 import type { ProfileTrip } from "@/lib/utils/profile-page";
 import type { TravelStats, VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
@@ -59,26 +61,36 @@ const PROFILE_ALL_TABS: { id: ProfileAllTab; label: string; icon: string }[] = [
   { id: "wishlist", label: saveDestinationMessages.tabWishlist, icon: "⭐" },
 ];
 
+const MODAL_TITLES: Record<ProfileAllTab, string> = {
+  countries: profileMessages.allDestinationsCountries,
+  cities: profileMessages.allDestinationsCities,
+  parks: profileMessages.allDestinationsParks,
+  wishlist: profileMessages.wishlistCountries,
+};
+
 function sectionId(tab: ProfileAllTab): string {
   return `profile-all-${tab}`;
 }
+
+type OwnerActions = {
+  editLabel: string;
+  removeLabel: string;
+} | null;
 
 function DestinationSection({
   id,
   title,
   count,
-  expanded,
-  onToggleExpand,
+  onOpenAll,
   children,
 }: {
   id: string;
   title: string;
   count: number;
-  expanded: boolean;
-  onToggleExpand: () => void;
+  onOpenAll: () => void;
   children: ReactNode;
 }) {
-  const canExpand = count > PREVIEW_LIMIT;
+  const showAllButton = count > PREVIEW_LIMIT;
 
   return (
     <section id={id} className="profile-all-section profile-all-box">
@@ -87,14 +99,9 @@ function DestinationSection({
           <h2 className="profile-all-box__title">{title}</h2>
           <span className="profile-all-section__count">{count}</span>
         </div>
-        {canExpand ? (
-          <button
-            type="button"
-            className="profile-all-box__all"
-            onClick={onToggleExpand}
-            aria-expanded={expanded}
-          >
-            {expanded ? profileMessages.allDestinationsLess : profileMessages.allDestinationsAll}
+        {showAllButton ? (
+          <button type="button" className="profile-all-box__all" onClick={onOpenAll}>
+            {profileMessages.allDestinationsAll}
           </button>
         ) : null}
       </div>
@@ -165,13 +172,9 @@ export function ProfileAllDestinationsView({
   const toast = useToast();
   const [editingCityId, setEditingCityId] = useState<string | null>(null);
   const [editingParkId, setEditingParkId] = useState<string | null>(null);
+  const [editingCountryCode, setEditingCountryCode] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ProfileAllTab>("countries");
-  const [expanded, setExpanded] = useState<Record<ProfileAllTab, boolean>>({
-    countries: false,
-    cities: false,
-    parks: false,
-    wishlist: false,
-  });
+  const [openModalTab, setOpenModalTab] = useState<ProfileAllTab | null>(null);
 
   const title = formatMessage(profileMessages.allDestinationsTitle, { name: displayName });
 
@@ -195,18 +198,18 @@ export function ProfileAllDestinationsView({
 
   const editingCity = visitedCities.find((city) => city.id === editingCityId);
   const editingPark = visitedParks.find((park) => park.id === editingParkId);
-
-  function toggleExpanded(tab: ProfileAllTab) {
-    setExpanded((prev) => ({ ...prev, [tab]: !prev[tab] }));
-  }
+  const editingCountryBackingCity = editingCountryCode
+    ? findCountryBackingCity(editingCountryCode, visitedCities)
+    : null;
+  const isEditingDestination = Boolean(editingCityId || editingParkId || editingCountryCode);
 
   function handleTabChange(tab: ProfileAllTab) {
     setActiveTab(tab);
     document.getElementById(sectionId(tab))?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  function visibleItems<T>(items: T[], tab: ProfileAllTab): T[] {
-    return expanded[tab] ? items : items.slice(0, PREVIEW_LIMIT);
+  function previewItems<T>(items: T[]): T[] {
+    return items.slice(0, PREVIEW_LIMIT);
   }
 
   async function handleDeleteCity(id: string) {
@@ -291,17 +294,125 @@ export function ProfileAllDestinationsView({
 
   const hasNavContent = totalCount > 0;
 
-  const ownerActions = isOwnProfile
+  const ownerActions: OwnerActions = isOwnProfile
     ? {
         editLabel: commonMessages.edit,
         removeLabel: commonMessages.delete,
       }
     : null;
 
-  const countries = visibleItems(destinations.countries, "countries");
-  const cities = visibleItems(destinations.cities, "cities");
-  const parks = visibleItems(destinations.parks, "parks");
-  const wishlist = visibleItems(destinations.wishlist, "wishlist");
+  const countriesPreview = previewItems(destinations.countries);
+  const citiesPreview = previewItems(destinations.cities);
+  const parksPreview = previewItems(destinations.parks);
+  const wishlistPreview = previewItems(destinations.wishlist);
+
+  function renderCountryCards(items: ProfileAllDestinations["countries"]) {
+    return items.map((country) => (
+      <ProfileCountryDestinationCard
+        key={country.code}
+        country={country}
+        cityCountLabel={profileDestinationCityCountLabel}
+        parkCountLabel={profileDestinationParkCountLabel}
+        actions={
+          ownerActions ? (
+            <ProfileDestinationCardActions
+              editLabel={ownerActions.editLabel}
+              removeLabel={ownerActions.removeLabel}
+              onEdit={() => {
+                setEditingCityId(null);
+                setEditingParkId(null);
+                setEditingCountryCode(country.code);
+              }}
+              onRemove={() => handleRemoveCountry(country)}
+            />
+          ) : null
+        }
+      />
+    ));
+  }
+
+  function renderCityCards(items: ProfileAllDestinations["cities"]) {
+    return items.map((trip) => (
+      <ProfileTripCard
+        key={trip.id}
+        trip={trip}
+        badgeLabels={badgeLabels}
+        visitCountLabel={profileVisitCountLabel}
+        emptyNote={profileMessages.tripDefaultNote}
+        layout="grid"
+        actions={
+          ownerActions ? (
+            <ProfileDestinationCardActions
+              editLabel={ownerActions.editLabel}
+              removeLabel={ownerActions.removeLabel}
+              onEdit={() => {
+                setEditingParkId(null);
+                setEditingCountryCode(null);
+                setEditingCityId(trip.id);
+              }}
+              onRemove={() => handleDeleteCity(trip.id)}
+            />
+          ) : null
+        }
+      />
+    ));
+  }
+
+  function renderParkCards(items: ProfileAllDestinations["parks"]) {
+    return items.map((park) => (
+      <ProfileParkDestinationCard
+        key={park.id}
+        park={park}
+        emptyNote={profileMessages.tripDefaultNote}
+        actions={
+          ownerActions ? (
+            <ProfileDestinationCardActions
+              editLabel={ownerActions.editLabel}
+              removeLabel={ownerActions.removeLabel}
+              onEdit={() => {
+                setEditingCityId(null);
+                setEditingCountryCode(null);
+                setEditingParkId(park.id);
+              }}
+              onRemove={() => handleDeletePark(park.id)}
+            />
+          ) : null
+        }
+      />
+    ));
+  }
+
+  function renderWishlistCards(items: ProfileAllDestinations["wishlist"]) {
+    return items.map((country) => (
+      <ProfileWishlistDestinationCard
+        key={country.id}
+        country={country}
+        wantLabel={profileMessages.wantsToVisit}
+        actions={
+          ownerActions ? (
+            <ProfileDestinationCardActions
+              removeLabel={ownerActions.removeLabel}
+              editLabel={ownerActions.editLabel}
+              onRemove={() => handleRemoveWishlist(country.id)}
+            />
+          ) : null
+        }
+      />
+    ));
+  }
+
+  function renderModalItems(tab: ProfileAllTab) {
+    switch (tab) {
+      case "countries":
+        return renderCountryCards(destinations.countries);
+      case "cities":
+        return renderCityCards(destinations.cities);
+      case "parks":
+        return renderParkCards(destinations.parks);
+      case "wishlist":
+        return renderWishlistCards(destinations.wishlist);
+    }
+  }
 
   return (
     <div className="profile-page profile-all-page">
@@ -347,124 +458,60 @@ export function ProfileAllDestinationsView({
               id={sectionId("countries")}
               title={profileMessages.allDestinationsCountries}
               count={destinations.countries.length}
-              expanded={expanded.countries}
-              onToggleExpand={() => toggleExpanded("countries")}
+              onOpenAll={() => setOpenModalTab("countries")}
             >
-              {countries.map((country) => (
-                <ProfileCountryDestinationCard
-                  key={country.code}
-                  country={country}
-                  cityCountLabel={profileDestinationCityCountLabel}
-                  parkCountLabel={profileDestinationParkCountLabel}
-                  actions={
-                    ownerActions ? (
-                      <ProfileDestinationCardActions
-                        removeLabel={ownerActions.removeLabel}
-                        editLabel={ownerActions.editLabel}
-                        onRemove={() => handleRemoveCountry(country)}
-                      />
-                    ) : null
-                  }
-                />
-              ))}
+              {renderCountryCards(countriesPreview)}
             </DestinationSection>
 
             <DestinationSection
               id={sectionId("cities")}
               title={profileMessages.allDestinationsCities}
               count={destinations.cities.length}
-              expanded={expanded.cities}
-              onToggleExpand={() => toggleExpanded("cities")}
+              onOpenAll={() => setOpenModalTab("cities")}
             >
-              {cities.map((trip) => (
-                <ProfileTripCard
-                  key={trip.id}
-                  trip={trip}
-                  badgeLabels={badgeLabels}
-                  visitCountLabel={profileVisitCountLabel}
-                  emptyNote={profileMessages.tripDefaultNote}
-                  layout="grid"
-                  actions={
-                    ownerActions ? (
-                      <ProfileDestinationCardActions
-                        editLabel={ownerActions.editLabel}
-                        removeLabel={ownerActions.removeLabel}
-                        onEdit={() => {
-                          setEditingParkId(null);
-                          setEditingCityId(trip.id);
-                        }}
-                        onRemove={() => handleDeleteCity(trip.id)}
-                      />
-                    ) : null
-                  }
-                />
-              ))}
+              {renderCityCards(citiesPreview)}
             </DestinationSection>
 
             <DestinationSection
               id={sectionId("parks")}
               title={profileMessages.allDestinationsParks}
               count={destinations.parks.length}
-              expanded={expanded.parks}
-              onToggleExpand={() => toggleExpanded("parks")}
+              onOpenAll={() => setOpenModalTab("parks")}
             >
-              {parks.map((park) => (
-                <ProfileParkDestinationCard
-                  key={park.id}
-                  park={park}
-                  emptyNote={profileMessages.tripDefaultNote}
-                  actions={
-                    ownerActions ? (
-                      <ProfileDestinationCardActions
-                        editLabel={ownerActions.editLabel}
-                        removeLabel={ownerActions.removeLabel}
-                        onEdit={() => {
-                          setEditingCityId(null);
-                          setEditingParkId(park.id);
-                        }}
-                        onRemove={() => handleDeletePark(park.id)}
-                      />
-                    ) : null
-                  }
-                />
-              ))}
+              {renderParkCards(parksPreview)}
             </DestinationSection>
 
             <DestinationSection
               id={sectionId("wishlist")}
               title={profileMessages.wishlistCountries}
               count={destinations.wishlist.length}
-              expanded={expanded.wishlist}
-              onToggleExpand={() => toggleExpanded("wishlist")}
+              onOpenAll={() => setOpenModalTab("wishlist")}
             >
-              {wishlist.map((country) => (
-                <ProfileWishlistDestinationCard
-                  key={country.id}
-                  country={country}
-                  wantLabel={profileMessages.wantsToVisit}
-                  actions={
-                    ownerActions ? (
-                      <ProfileDestinationCardActions
-                        removeLabel={ownerActions.removeLabel}
-                        editLabel={ownerActions.editLabel}
-                        onRemove={() => handleRemoveWishlist(country.id)}
-                      />
-                    ) : null
-                  }
-                />
-              ))}
+              {renderWishlistCards(wishlistPreview)}
             </DestinationSection>
           </main>
         )}
       </div>
 
+      <ProfileAllDestinationsListModal
+        open={openModalTab !== null}
+        title={openModalTab ? MODAL_TITLES[openModalTab] : ""}
+        onClose={() => setOpenModalTab(null)}
+        closeOnEscape={!isEditingDestination}
+      >
+        {openModalTab ? renderModalItems(openModalTab) : null}
+      </ProfileAllDestinationsListModal>
+
       <ProfileDestinationEditModal
         city={editingCity ?? null}
         park={editingPark ?? null}
+        countryCode={editingCountryCode}
+        countryBackingCity={editingCountryBackingCity}
         visitedCountries={visitedCountries}
         onClose={() => {
           setEditingCityId(null);
           setEditingParkId(null);
+          setEditingCountryCode(null);
         }}
       />
     </div>

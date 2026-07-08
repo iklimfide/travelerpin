@@ -23,6 +23,7 @@
     "no": "No",
     "delete": "Delete",
     "edit": "Edit",
+    "addLink": "Add link",
     "loading": "Loading...",
     "photoUploadFailed": "Could not upload photo. Please try again.",
     "photoUploadNotConfigured": "Photo upload is not set up yet. Add Cloudflare R2 credentials to your environment.",
@@ -273,6 +274,7 @@
     "email": "Email",
     "password": "Password",
     "passwordConfirm": "Confirm password",
+    "passwordMismatch": "Passwords do not match. Please enter the same password in both fields.",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "username": "Username",
@@ -288,7 +290,8 @@
     "loginTitle": "Welcome back, traveler",
     "loginInvalidCredentials": "Incorrect email or password. If you just signed up, confirm your email first, then try again.",
     "loginEmailNotConfirmed": "Confirm your email before logging in. Check your inbox for the confirmation link.",
-    "registerConfirmEmail": "Account created. Open the confirmation link we sent to your email, then log in."
+    "registerConfirmEmail": "Account created. Please confirm the approval email we sent, then log in.",
+    "registerConfirmEmailTitle": "Confirm your email"
   },
   "profile": {
     "stats": "{countries} Countries | {cities} Cities",
@@ -464,6 +467,8 @@
   "country": {
     "title": "Countries",
     "add": "Add country",
+    "edit": "Edit country",
+    "countryOnlyHint": "Add photos, notes, and visit dates for this country — no city name needed.",
     "name": "Country",
     "columnVisited": "Visited",
     "columnWant": "Want",
@@ -537,6 +542,8 @@
     "visitMonthPlaceholder": "Select month",
     "visitYearLabel": "Year",
     "visitYearPlaceholder": "Select year",
+    "visitYearsDone": "Done",
+    "visitYearsSelected": "Visit dates: {count} years",
     "visitAgain": "I visited again",
     "visitCount": "{count} visits",
     "visitCountOne": "1 visit"
@@ -703,7 +710,6 @@
   },
   "settings": {
     "title": "Profile Settings",
-    "subtitle": "Customize how you appear on your public travel page.",
     "backToMap": "Back to my map",
     "photoTitle": "Profile photo",
     "changePhoto": "Change",
@@ -730,6 +736,7 @@
     "profession": "Profession",
     "maritalStatus": "Relationship status",
     "charCount": "{count} / {max}",
+    "moreSettings": "More settings",
     "save": "Save settings",
     "saveSuccess": "Profile updated.",
     "saveFailed": "Could not save profile.",

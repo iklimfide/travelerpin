@@ -8,6 +8,7 @@ import {
   type HubTravelerPin,
 } from "@/lib/supabase/hub-traveler-pin";
 import { profilePath } from "@/lib/seo/site";
+import { cityPlacePath, parkPlacePath } from "@/lib/utils/hub-place-path";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import type { VisitedCity, VisitedPark } from "@/types/database";
 
@@ -24,6 +25,7 @@ function cityToProfilePin(city: VisitedCity, profile: ProfileIdentity): HubTrave
   return createHubTravelerPin({
     id: `city:${city.id}`,
     placeLabel: city.city_name,
+    placePath: cityPlacePath(city.country_code, city.city_name),
     note: city.note,
     mediaRow: city,
     mediaPreviewUrl: city.media_preview_url,
@@ -43,6 +45,7 @@ function parkToProfilePin(park: VisitedPark, profile: ProfileIdentity): HubTrave
   return createHubTravelerPin({
     id: `park:${park.id}`,
     placeLabel: park.park_name,
+    placePath: parkPlacePath(park.park_name, park.country_code),
     note: park.note,
     mediaRow: park,
     visitDates: park.visit_dates ?? [],

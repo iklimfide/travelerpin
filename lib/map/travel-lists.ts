@@ -1,5 +1,6 @@
 import countriesLib from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
+import { getCountryName } from "@/lib/data/countries";
 import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
 
 countriesLib.registerLocale(enLocale);
@@ -26,20 +27,20 @@ export function buildVisitedCountryList(
 
   for (const country of countries) {
     const code = country.country_code.toUpperCase();
-    map.set(code, { code: country.country_code, name: country.country_name });
+    map.set(code, { code: country.country_code, name: getCountryName(country.country_code) });
   }
 
   for (const city of cities) {
     const code = city.country_code.toUpperCase();
     if (!map.has(code)) {
-      map.set(code, { code: city.country_code, name: city.country_name });
+      map.set(code, { code: city.country_code, name: getCountryName(city.country_code) });
     }
   }
 
   for (const park of parks) {
     const code = park.country_code.toUpperCase();
     if (!map.has(code)) {
-      map.set(code, { code: park.country_code, name: park.country_name });
+      map.set(code, { code: park.country_code, name: getCountryName(park.country_code) });
     }
   }
 
@@ -48,7 +49,7 @@ export function buildVisitedCountryList(
     if (!map.has(code)) {
       map.set(code, {
         code: raw,
-        name: countriesLib.getName(code, "en") ?? code,
+        name: getCountryName(raw),
       });
     }
   }

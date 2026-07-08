@@ -12,6 +12,7 @@ import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
 import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEditor";
 import { buildPinMediaPayload, PinMediaFields } from "@/components/dashboard/PinMediaFields";
+import { ProfilePinEditFields } from "@/components/profile/ProfilePinEditFields";
 import { readInstagramUrls, readPhotoUrl, withInstagramDraftField } from "@/lib/utils/pin-media";
 import type { VisitedCity, VisitedCountry } from "@/types/database";
 
@@ -38,6 +39,7 @@ type CityFormProps = {
   onCancel?: () => void;
   onEditExisting?: (cityId: string) => void;
   mediaFocus?: "photo" | "instagram";
+  hideHeader?: boolean;
 };
 
 function encodeCountries(countries: VisitedCountry[]): string {
@@ -54,6 +56,7 @@ export function CityForm({
   onCancel,
   onEditExisting,
   mediaFocus,
+  hideHeader = false,
 }: CityFormProps) {
   const isEdit = Boolean(city);
   const t = translateCity;
@@ -86,6 +89,7 @@ export function CityForm({
   const [removePhoto, setRemovePhoto] = useState(false);
   const [instagramUrls, setInstagramUrls] = useState(() => {
     const urls = readInstagramUrls(city);
+    if (hideHeader) return withInstagramDraftField(urls);
     return mediaFocus === "instagram" ? withInstagramDraftField(urls) : urls;
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -454,13 +458,41 @@ export function CityForm({
     }
   }
 
+  if (hideHeader && isEdit && city) {
+    return (
+      <form onSubmit={handleSubmit} className="dashboard-form-city profile-pin-edit-form">
+        <ProfilePinEditFields
+          visitDates={visitDates}
+          onVisitDatesChange={setVisitDates}
+          note={note}
+          onNoteChange={setNote}
+          savedPhotoUrl={savedPhotoUrl}
+          photoFile={photoFile}
+          onPhotoFileChange={(file) => {
+            setPhotoFile(file);
+            if (file) setRemovePhoto(false);
+          }}
+          removePhoto={removePhoto}
+          onRemovePhotoChange={setRemovePhoto}
+          instagramUrls={instagramUrls}
+          onInstagramUrlsChange={setInstagramUrls}
+          mediaFocus={mediaFocus}
+          loading={loading}
+          onCancel={onCancel}
+        />
+      </form>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="dashboard-form-city">
-      <div className="dashboard-form-city__header">
-        <h3 className="dashboard-form-city__title">
-          {isEdit ? t("edit") : t("add")}
-        </h3>
-      </div>
+      {!hideHeader ? (
+        <div className="dashboard-form-city__header">
+          <h3 className="dashboard-form-city__title">
+            {isEdit ? t("edit") : t("add")}
+          </h3>
+        </div>
+      ) : null}
 
       {!isEdit && (
         <>
@@ -577,7 +609,7 @@ export function CityForm({
         </>
       )}
 
-      {isEdit && (
+      {isEdit && !hideHeader && (
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="dashboard-form-city__label">{t("cityName")}</label>
@@ -605,9 +637,9 @@ export function CityForm({
         </div>
       )}
 
-      {isEdit && <p className="text-xs text-slate-500">{t("locationHint")}</p>}
+      {isEdit && !hideHeader && <p className="text-xs text-slate-500">{t("locationHint")}</p>}
 
-      {isEdit && (
+      {isEdit && !hideHeader && (
         <CityVisitDatesEditor
           key={city?.id}
           value={visitDates}
@@ -615,62 +647,66 @@ export function CityForm({
         />
       )}
 
-      <PinMediaFields
-        labels={{
-          mediaHint: t("mediaHint"),
-          photo: t("photo"),
-          photoSaved: t("photoSaved"),
-          instagram: t("instagram"),
-          instagramHint: t("instagramHint"),
-          addInstagram: t("addInstagram"),
-          removeInstagram: t("removeInstagram"),
-          removePhoto: t("removePhoto"),
-        }}
-        savedPhotoUrl={savedPhotoUrl}
-        photoFile={photoFile}
-        onPhotoFileChange={(file) => {
-          setPhotoFile(file);
-          if (file) setRemovePhoto(false);
-        }}
-        removePhoto={removePhoto}
-        onRemovePhotoChange={setRemovePhoto}
-        instagramUrls={instagramUrls}
-        onInstagramUrlsChange={setInstagramUrls}
-        autoFocusInstagram={mediaFocus === "instagram"}
-      />
+      {!hideHeader ? (
+        <>
+          <PinMediaFields
+            labels={{
+              mediaHint: t("mediaHint"),
+              photo: t("photo"),
+              photoSaved: t("photoSaved"),
+              instagram: t("instagram"),
+              instagramHint: t("instagramHint"),
+              addInstagram: t("addInstagram"),
+              removeInstagram: t("removeInstagram"),
+              removePhoto: t("removePhoto"),
+            }}
+            savedPhotoUrl={savedPhotoUrl}
+            photoFile={photoFile}
+            onPhotoFileChange={(file) => {
+              setPhotoFile(file);
+              if (file) setRemovePhoto(false);
+            }}
+            removePhoto={removePhoto}
+            onRemovePhotoChange={setRemovePhoto}
+            instagramUrls={instagramUrls}
+            onInstagramUrlsChange={setInstagramUrls}
+            autoFocusInstagram={mediaFocus === "instagram"}
+          />
 
-      <div>
-        <label className="dashboard-form-city__label">{t("note")}</label>
-        <textarea
-          value={note}
-          onChange={(e) => setNote(e.target.value.slice(0, LIMITS.noteMaxLength))}
-          rows={4}
-          placeholder={t("notePlaceholder")}
-          className="w-full resize-none rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-blue-500"
-        />
-        <p className="mt-1 text-right text-xs text-slate-500">
-          {t("noteCount", { count: note.length, max: LIMITS.noteMaxLength })}
-        </p>
-      </div>
+          <div>
+            <label className="dashboard-form-city__label">{t("note")}</label>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value.slice(0, LIMITS.noteMaxLength))}
+              rows={4}
+              placeholder={t("notePlaceholder")}
+              className="w-full resize-none rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-blue-500"
+            />
+            <p className="mt-1 text-right text-xs text-slate-500">
+              {t("noteCount", { count: note.length, max: LIMITS.noteMaxLength })}
+            </p>
+          </div>
 
-      <div className="dashboard-form-city__footer">
-        <button
-          type="submit"
-          disabled={loading || (!isEdit && !cityName.trim())}
-          className="dashboard-form-city__btn-primary"
-        >
-          {loading ? tCommon("loading") : tCommon("save")}
-        </button>
-        {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="dashboard-form-city__btn-secondary"
-          >
-            {tCommon("cancel")}
-          </button>
-        )}
-      </div>
+          <div className="dashboard-form-city__footer">
+            <button
+              type="submit"
+              disabled={loading || (!isEdit && !cityName.trim())}
+              className="dashboard-form-city__btn-primary"
+            >
+              {loading ? tCommon("loading") : tCommon("save")}
+            </button>
+            {onCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="dashboard-form-city__btn-secondary"
+              >
+                {tCommon("cancel")}
+              </button>
+            )}
+          </div>
+        </>
+      ) : null}
     </form>
   );
 }

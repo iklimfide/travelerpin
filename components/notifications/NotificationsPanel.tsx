@@ -251,7 +251,9 @@ export function NotificationsPanel({
 
   return (
     <div className={`notifications-page${isModal ? " notifications-page--modal" : ""}`}>
-      <div className="notifications-page__head">
+      <div
+        className={`notifications-page__head${isModal ? " notifications-page__head--modal" : ""}`}
+      >
         {detailGroup ? (
           <>
             <div className="notifications-page__detail-head">
@@ -272,8 +274,8 @@ export function NotificationsPanel({
                 })}
               </p>
             </div>
-            <div className="notifications-page__actions">
-              {isModal && onClose ? (
+            {isModal && onClose ? (
+              <div className="notifications-page__actions">
                 <button
                   type="button"
                   onClick={onClose}
@@ -284,8 +286,8 @@ export function NotificationsPanel({
                     <path d="M18 6 6 18M6 6l12 12" />
                   </svg>
                 </button>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
           </>
         ) : (
           <>
@@ -293,7 +295,7 @@ export function NotificationsPanel({
               {notificationMessages.title}
             </h1>
             <div className="notifications-page__actions">
-              {unreadCount > 0 ? (
+              {!isModal && unreadCount > 0 ? (
                 <button
                   type="button"
                   className="notifications-page__mark-all"
@@ -320,90 +322,109 @@ export function NotificationsPanel({
         )}
       </div>
 
-      {detailGroup ? (
-        <>
-          <ul className="notifications-list notifications-list--places">
-            {detailPlaces.map((place) => (
-              <li key={place.id}>
+      <div className={isModal ? "notifications-page__body" : undefined}>
+        {detailGroup ? (
+          <>
+            <ul className="notifications-list notifications-list--places">
+              {detailPlaces.map((place) => (
+                <li key={place.id}>
+                  <button
+                    type="button"
+                    className="notifications-item"
+                    onClick={() => handleOpenPlace(place.href)}
+                    disabled={!place.href}
+                  >
+                    <span className="notifications-item__body">
+                      <span className="notifications-item__copy">
+                        <span className="notifications-item__text">{place.placeName}</span>{" "}
+                        <span className="notifications-item__time">
+                          {place.countryName
+                            ? `${place.typeLabel} · ${place.countryName}`
+                            : place.typeLabel}
+                        </span>
+                      </span>
+                    </span>
+                    {place.href ? (
+                      <span className="notifications-item__chevron" aria-hidden>
+                        ›
+                      </span>
+                    ) : null}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {notificationActorProfileHref(detailGroup.representative) ? (
+              <div className="notifications-page__detail-footer">
                 <button
                   type="button"
-                  className="notifications-item"
-                  onClick={() => handleOpenPlace(place.href)}
-                  disabled={!place.href}
+                  className="notifications-page__profile-link"
+                  onClick={handleOpenProfile}
                 >
-                  <span className="notifications-item__body">
-                    <span className="notifications-item__text">{place.placeName}</span>
-                    <span className="notifications-item__time">
-                      {place.countryName
-                        ? `${place.typeLabel} · ${place.countryName}`
-                        : place.typeLabel}
-                    </span>
-                  </span>
-                  {place.href ? (
-                    <span className="notifications-item__chevron" aria-hidden>
-                      ›
-                    </span>
-                  ) : null}
+                  {notificationMessages.pin_batch_view_profile}
                 </button>
-              </li>
-            ))}
-          </ul>
-          {notificationActorProfileHref(detailGroup.representative) ? (
-            <div className="notifications-page__detail-footer">
-              <button
-                type="button"
-                className="notifications-page__profile-link"
-                onClick={handleOpenProfile}
-              >
-                {notificationMessages.pin_batch_view_profile}
-              </button>
-            </div>
-          ) : null}
-        </>
-      ) : loading ? (
-        <p className="notifications-page__empty">{notificationMessages.loading}</p>
-      ) : error ? (
-        <p className="notifications-page__empty notifications-page__status--error">{error}</p>
-      ) : groups.length === 0 ? (
-        <p className="notifications-page__empty">{notificationMessages.empty}</p>
-      ) : (
-        <ul className="notifications-list">
-          {groups.map((group) => {
-            const notification = group.representative;
-            const payload = notification.payload as NotificationPayload;
-            const unread = !group.read_at;
-            const href =
-              group.pinCount > 1
-                ? true
-                : Boolean(notificationTargetHref(notification));
-            const username = resolveActorUsername(notification, payload);
-            const displayName = resolveActorDisplayName(notification, payload);
+              </div>
+            ) : null}
+          </>
+        ) : loading ? (
+          <p className="notifications-page__empty">{notificationMessages.loading}</p>
+        ) : error ? (
+          <p className="notifications-page__empty notifications-page__status--error">{error}</p>
+        ) : groups.length === 0 ? (
+          <p className="notifications-page__empty">{notificationMessages.empty}</p>
+        ) : (
+          <ul className="notifications-list">
+            {groups.map((group) => {
+              const notification = group.representative;
+              const payload = notification.payload as NotificationPayload;
+              const unread = !group.read_at;
+              const href =
+                group.pinCount > 1
+                  ? true
+                  : Boolean(notificationTargetHref(notification));
+              const username = resolveActorUsername(notification, payload);
+              const displayName = resolveActorDisplayName(notification, payload);
 
-            return (
-              <li key={group.key}>
-                <button
-                  type="button"
-                  className={`notifications-item${unread ? " notifications-item--unread" : ""}`}
-                  onClick={() => void handleOpen(group)}
-                >
-                  <ProfileAvatar
-                    avatarUrl={resolveActorAvatar(notification, payload)}
-                    displayName={displayName}
-                    username={username}
-                    size="sm"
-                    className="notifications-item__avatar shrink-0"
-                  />
-                  <span className="notifications-item__body">
-                    <span className="notifications-item__text">{formatGroupBody(group)}</span>
-                    <span className="notifications-item__time">{formatWhen(group.created_at)}</span>
-                  </span>
-                  {href ? <span className="notifications-item__chevron" aria-hidden>›</span> : null}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+              return (
+                <li key={group.key}>
+                  <button
+                    type="button"
+                    className={`notifications-item${unread ? " notifications-item--unread" : ""}`}
+                    onClick={() => void handleOpen(group)}
+                  >
+                    <ProfileAvatar
+                      avatarUrl={resolveActorAvatar(notification, payload)}
+                      displayName={displayName}
+                      username={username}
+                      size="xs"
+                      className="notifications-item__avatar shrink-0 !ring-1 !ring-slate-200"
+                    />
+                    <span className="notifications-item__body">
+                      <span className="notifications-item__copy">
+                        <span className="notifications-item__text">{formatGroupBody(group)}</span>{" "}
+                        <span className="notifications-item__time">{formatWhen(group.created_at)}</span>
+                      </span>
+                    </span>
+                    {href ? <span className="notifications-item__chevron" aria-hidden>›</span> : null}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      {isModal && !detailGroup && unreadCount > 0 ? (
+        <div className="notifications-page__footer">
+          <button
+            type="button"
+            className="notifications-page__mark-all"
+            onClick={handleMarkAllRead}
+            disabled={pending}
+          >
+            {notificationMessages.markAllRead}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
