@@ -12,12 +12,10 @@ import {
 } from "@/lib/seo/og";
 import { getDemoPinsForParkHub, mergeDemoHubPins } from "@/lib/data/demo-hub-pins";
 import { getCachedRecentParkPins } from "@/lib/supabase/park-travelers-cache";
-import { fetchRecentParkPins } from "@/lib/supabase/park-travelers";
 import {
   mergeOwnerHubPin,
   pinsWithContent,
   countHubMediaItems,
-  pinHasGalleryMedia,
   uniqueHubTravelers,
 } from "@/lib/supabase/hub-traveler-pin";
 import {
@@ -98,13 +96,8 @@ export default async function ParkHubPage({ params }: PageProps) {
     hub
   );
 
-  let parkPins = cachedParkPins;
-  if (supabase) {
-    const freshPins = await fetchRecentParkPins(supabase, hub, 200);
-    if (freshPins.length > 0 || (ownerHubPin && pinHasGalleryMedia(ownerHubPin))) {
-      parkPins = freshPins;
-    }
-  }
+  // Trust unstable_cache pins; mergeOwnerHubPin overlays a fresh owner pin when needed.
+  const parkPins = cachedParkPins;
 
   const demoPins = getDemoPinsForParkHub(hub);
   const hubPins = mergeOwnerHubPin(mergeDemoHubPins(parkPins, demoPins), ownerHubPin);

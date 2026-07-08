@@ -37,9 +37,12 @@ export default async function ProfileSettingsPage() {
   }
 
   const [{ data: countries }, { data: cities }, { data: parks }] = await Promise.all([
-    supabase.from("visited_countries").select("*").eq("user_id", user.id),
-    supabase.from("visited_cities").select("*").eq("user_id", user.id),
-    supabase.from("visited_parks").select("*").eq("user_id", user.id),
+    supabase.from("visited_countries").select("country_code").eq("user_id", user.id),
+    supabase
+      .from("visited_cities")
+      .select("country_code, visit_dates")
+      .eq("user_id", user.id),
+    supabase.from("visited_parks").select("country_code, park_type").eq("user_id", user.id),
   ]);
 
   const stats = computeTravelStats(

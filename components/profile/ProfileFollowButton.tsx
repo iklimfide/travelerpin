@@ -64,6 +64,7 @@ export function ProfileFollowButton({
           <button
             type="button"
             className="profile-follow-btn profile-follow-btn--compact"
+            data-story-exclude=""
             onClick={requireLogin}
           >
             {profileMessages.follow}
@@ -116,6 +117,7 @@ export function ProfileFollowButton({
       <button
         type="button"
         className={btnClass}
+        data-story-exclude=""
         onClick={toggleFollow}
         disabled={pending}
         aria-pressed={isFollowing}

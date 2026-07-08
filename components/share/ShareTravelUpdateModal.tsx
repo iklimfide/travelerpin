@@ -4,7 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { finalizeTravelShare } from "@/lib/client/travel-share-snapshot";
 import { captureProfileStoryCard } from "@/lib/client/capture-profile-story-card";
-import { captureProfileSquareCard } from "@/lib/client/capture-profile-square-card";
+import {
+  captureProfileSquareCard,
+  profileSquareCaptureId,
+} from "@/lib/client/capture-profile-square-card";
+import { profileStoryCaptureId } from "@/lib/client/capture-profile-story-card";
 import { profileMessages, shareMessages } from "@/lib/i18n/client-messages";
 import type { TravelUpdateDelta } from "@/lib/utils/travel-update";
 
@@ -53,7 +57,18 @@ export function ShareTravelUpdateModal({
   }, [onClose, persistShareSnapshot, router, username]);
 
   async function downloadImage(format: "square" | "story") {
+    const captureId =
+      format === "story" ? profileStoryCaptureId(username) : profileSquareCaptureId(username);
+
+    if (!document.getElementById(captureId)) {
+      window.alert(profileMessages.storyCaptureMissing);
+      return;
+    }
+
     setDownloading(format);
+    onClose();
+    await new Promise((resolve) => window.setTimeout(resolve, 150));
+
     let success = false;
     try {
       const blob =

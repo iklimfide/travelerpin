@@ -21,16 +21,13 @@ import type {
   ProfileFollowState,
 } from "@/types/database";
 import { getAuthUser } from "@/lib/supabase/auth";
-import { profileCacheTag, revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
+import { profileCacheTag } from "@/lib/cache/revalidate-profile";
 import {
   DEMO_PUBLIC_PROFILE_BUNDLE,
   isDemoProfileUsername,
   loadDemoPublicProfilePage,
 } from "@/lib/data/jennifer-demo-page";
-import { createAdminSupabaseClient } from "@/lib/supabase/admin";
-import { ensureResidenceCityPinFromLabel } from "@/lib/supabase/ensure-residence-city-pin";
 import { loadProfileFollowState } from "@/lib/supabase/profile-follows";
-import { hasResidenceCityPinned } from "@/lib/utils/residence-city";
 
 export type PublicProfilePageData = {
   profile: PublicProfile;
@@ -212,44 +209,8 @@ export const loadPublicProfilePage = cache(
       );
     }
 
-    // Auto-pin home city when missing (e.g. residence "İstanbul").
-    // Prefer the owner's session (RLS). Fall back to service role when available.
-    if (
-      profile.residence?.trim() &&
-      !hasResidenceCityPinned(visitedCities, profile.residence)
-    ) {
-      const ownerClient =
-        isOwnProfile && authUser ? await createClient() : null;
-      const adminClient = createAdminSupabaseClient();
-      const writers = [ownerClient, adminClient].filter(
-        (client): client is NonNullable<typeof client> => Boolean(client)
-      );
-
-      for (const writer of writers) {
-        const residencePin = await ensureResidenceCityPinFromLabel(
-          writer,
-          profile.id,
-          profile.residence,
-          { notify: false }
-        );
-        if (!residencePin.ok) {
-          console.error(
-            "Residence auto-pin failed",
-            profile.username,
-            residencePin.error
-          );
-          continue;
-        }
-        if (residencePin.created) {
-          await revalidateProfileForPin(writer, profile.id);
-          const rows = await loadProfileRows(writer, profile);
-          visitedCountries = rows.visitedCountries;
-          visitedCities = rows.visitedCities;
-          visitedParks = rows.visitedParks;
-        }
-        break;
-      }
-    }
+    // Residence auto-pin runs client-side once per session via OwnProfileShellGate
+    // (POST /api/profile/ensure-residence) — keep SSR read-only.
 
     const stats = computeTravelStats(visitedCountries, visitedCities, visitedParks);
     const visitedCodes = getVisitedCountryCodes(

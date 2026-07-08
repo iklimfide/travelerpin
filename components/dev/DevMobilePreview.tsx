@@ -83,7 +83,7 @@ export function DevMobilePreview() {
         <button
           type="button"
           onClick={toggle}
-          className="fixed bottom-4 right-4 z-[10000] flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-lg ring-1 ring-white/10 transition hover:bg-slate-800"
+          className="fixed left-4 top-4 z-[10000] flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-lg ring-1 ring-white/10 transition hover:bg-slate-800"
           aria-expanded={open}
           aria-controls="tp-dev-mobile-preview-panel"
           title="Toggle mobile design preview"

@@ -10,15 +10,13 @@ import {
 } from "@/lib/data/demo-hub-pins";
 import { getCachedRecentCountryTravelers } from "@/lib/supabase/country-travelers-cache";
 import { getCachedRecentCountryPins } from "@/lib/supabase/country-memory-pins-cache";
-import { fetchRecentCountryPins } from "@/lib/supabase/country-memory-pins";
 import {
   countHubMediaItems,
   mergeOwnerHubPin,
-  pinHasGalleryMedia,
   pinsWithContent,
 } from "@/lib/supabase/hub-traveler-pin";
 import {
-  countCountryPinners,
+  getCachedCountryPinnerCount,
   countCountryWishlisters,
   fetchRecentCountryWishlisters,
 } from "@/lib/supabase/country-pin-count";
@@ -102,20 +100,15 @@ export default async function CountryHubPage({ params }: PageProps) {
   const publishedCityKeys = await loadPublishedCityKeys(supabase);
   const capitalCitySlug = publicCityHubSlug(hub.code, hub.capital, publishedCityKeys);
 
-  let countryPins = cachedCountryPins;
-  if (supabase) {
-    const freshPins = await fetchRecentCountryPins(supabase, hub.code, 200);
-    if (freshPins.length > 0 || (ownerHubPin && pinHasGalleryMedia(ownerHubPin))) {
-      countryPins = freshPins;
-    }
-  }
+  // Trust unstable_cache pins; mergeOwnerHubPin overlays a fresh owner pin when needed.
+  const countryPins = cachedCountryPins;
 
   const demoPins = getDemoPinsForCountry(hub.code);
   const travelers = mergeDemoCountryTravelers(cachedTravelers, hub.code);
   const hubPins = mergeOwnerHubPin(mergeDemoHubPins(countryPins, demoPins), ownerHubPin);
   const memoryPins = pinsWithContent(hubPins);
   const mediaCounts = countHubMediaItems(hubPins);
-  const pinCount = Math.max(await countCountryPinners(supabase, hub.code), travelers.length);
+  const pinCount = Math.max(await getCachedCountryPinnerCount(hub.code), travelers.length);
   const [wishlistCount, wishlistTravelers] = await Promise.all([
     countCountryWishlisters(supabase, hub.code),
     fetchRecentCountryWishlisters(supabase, hub.code),

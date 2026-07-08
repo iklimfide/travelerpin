@@ -52,7 +52,7 @@ export async function loadParkPageUserState(
         .limit(1),
       supabase
         .from("visited_countries")
-        .select("*")
+        .select("id, country_code, country_name")
         .eq("user_id", userId)
         .order("country_name", { ascending: true }),
       supabase

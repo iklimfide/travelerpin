@@ -1,11 +1,10 @@
+import { unstable_cache } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { countryPinsCacheTag } from "@/lib/cache/revalidate-country-hub";
+import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import type { CountryTraveler } from "@/lib/supabase/country-travelers";
 import { profilePath } from "@/lib/seo/site";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
-
-type UserIdRow = {
-  user_id: string;
-};
 
 type WishlistTravelerRow = {
   user_id: string;
@@ -17,30 +16,41 @@ type WishlistTravelerRow = {
   } | null;
 };
 
-export async function countCountryPinners(
-  supabase: SupabaseClient | null,
-  countryCode: string
-): Promise<number> {
+async function readCountryPinnerCount(countryCode: string): Promise<number> {
+  const supabase = createPublicSupabaseClient();
   if (!supabase) return 0;
 
   const code = countryCode.toUpperCase();
-  const userIds = new Set<string>();
+  const { data, error } = await supabase
+    .from("country_pinner_stats")
+    .select("pinner_count")
+    .eq("country_code", code)
+    .maybeSingle();
 
-  const [{ data: countryRows }, { data: cityRows }, { data: parkRows }] = await Promise.all([
-    supabase.from("visited_countries").select("user_id").eq("country_code", code),
-    supabase.from("visited_cities").select("user_id").eq("country_code", code),
-    supabase.from("visited_parks").select("user_id").eq("country_code", code),
-  ]);
-
-  for (const row of [
-    ...(countryRows as UserIdRow[] | null ?? []),
-    ...(cityRows as UserIdRow[] | null ?? []),
-    ...(parkRows as UserIdRow[] | null ?? []),
-  ]) {
-    userIds.add(row.user_id);
+  if (error) {
+    console.error("country_pinner_stats lookup failed:", error.message);
+    return 0;
   }
 
-  return userIds.size;
+  return data?.pinner_count ?? 0;
+}
+
+/** Cached country pinner total — invalidated when a pin changes in that country. */
+export function getCachedCountryPinnerCount(countryCode: string): Promise<number> {
+  const code = countryCode.toUpperCase();
+  return unstable_cache(
+    () => readCountryPinnerCount(code),
+    ["country-pinner-count", code],
+    { revalidate: false, tags: [countryPinsCacheTag(code)] }
+  )();
+}
+
+/** Read stored pinner count (no table scan). Prefer getCachedCountryPinnerCount on hub pages. */
+export async function countCountryPinners(
+  _supabase: SupabaseClient | null,
+  countryCode: string
+): Promise<number> {
+  return getCachedCountryPinnerCount(countryCode);
 }
 
 export async function countCountryWishlisters(

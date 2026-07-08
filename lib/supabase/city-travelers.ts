@@ -88,11 +88,29 @@ export async function fetchRecentCityPins(
   return sortHubTravelerPins(pins).slice(0, limit);
 }
 
-export async function countCityPinners(
-  supabase: SupabaseClient | null,
-  hub: CityHub
-): Promise<number> {
+import { unstable_cache } from "next/cache";
+import { cityPinsCacheTag } from "@/lib/cache/revalidate-city-hub";
+import { createPublicSupabaseClient } from "@/lib/supabase/public";
+
+async function readCityPinnerCount(hub: CityHub): Promise<number> {
+  const supabase = createPublicSupabaseClient();
   if (!supabase) return 0;
+
+  const { data, error } = await supabase
+    .from("published_hubs")
+    .select("pinner_count")
+    .eq("hub_kind", "city")
+    .eq("slug", hub.slug.toLowerCase())
+    .maybeSingle();
+
+  if (error) {
+    console.error("published_hubs pinner_count lookup failed:", error.message);
+    return 0;
+  }
+
+  if (data?.pinner_count != null) {
+    return data.pinner_count;
+  }
 
   const { count } = await supabase
     .from("visited_cities")
@@ -101,6 +119,22 @@ export async function countCityPinners(
     .ilike("city_name", hub.name.trim());
 
   return count ?? 0;
+}
+
+/** Cached city hub pinner total — invalidated when a pin changes in that city. */
+export function getCachedCityPinnerCount(hub: CityHub): Promise<number> {
+  return unstable_cache(
+    () => readCityPinnerCount(hub),
+    ["city-pinner-count", hub.slug],
+    { revalidate: false, tags: [cityPinsCacheTag(hub.countryCode, hub.name)] }
+  )();
+}
+
+export async function countCityPinners(
+  _supabase: SupabaseClient | null,
+  hub: CityHub
+): Promise<number> {
+  return getCachedCityPinnerCount(hub);
 }
 
 export { pinsWithContent as cityPinsWithContent, uniqueHubTravelers as uniqueCityTravelers };

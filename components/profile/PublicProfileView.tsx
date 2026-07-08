@@ -6,6 +6,7 @@ import { HomeFeatures } from "@/components/home/HomeFeatures";
 import { ProfileHeroCover } from "@/components/profile/ProfileHeroCover";
 import { ProfileIdentityCard } from "@/components/profile/ProfileIdentityCard";
 import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
+import { ProfileSquareCaptureHeader } from "@/components/profile/ProfileSquareCaptureHeader";
 import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections";
 import { ProfileSummaryGrid } from "@/components/profile/ProfileSummaryGrid";
 import { BRAND } from "@/lib/constants";
@@ -174,6 +175,23 @@ export async function PublicProfileView({
                 id={`profile-square-capture-${profile.username.toLowerCase()}`}
                 className="profile-square-capture"
               >
+                <ProfileSquareCaptureHeader
+                  avatarUrl={profile.avatar_url}
+                  displayName={displayName}
+                  username={profile.username}
+                  countryCount={stats.countries}
+                  instagramUrl={profile.instagram_url}
+                  instagramSampleNotice={
+                    isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
+                  }
+                  stats={stats}
+                  labels={{
+                    countries: t("statCountriesShort"),
+                    cities: t("statCitiesShort"),
+                    nationalParks: t("statNationalParksShort"),
+                    themeParks: t("statThemeParksShort"),
+                  }}
+                />
                 <ProfileMapPanel
                   visitedCountryCodes={visitedCodes}
                   wishlistCountryCodes={visibleWishlistCodes}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   POPULAR_DESTINATIONS,
   type PopularDestination,
@@ -49,7 +48,6 @@ export function MapPopularDestinations({
   onAdded,
   onRemoved,
 }: MapPopularDestinationsProps) {
-  const router = useRouter();
   const toast = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -139,7 +137,6 @@ export function MapPopularDestinations({
       }
       setQuery("");
       onAdded?.(destination);
-      router.refresh();
     } finally {
       setBusyId(null);
     }
@@ -172,7 +169,6 @@ export function MapPopularDestinations({
       setRecentlyRemoved((prev) => new Set(prev).add(id));
       toast.show(destinationMessages.removedToast, 1000);
       onRemoved?.(destination, result.countryRemoved);
-      router.refresh();
     } finally {
       setBusyId(null);
     }

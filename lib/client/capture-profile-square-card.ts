@@ -1,4 +1,5 @@
-import { formatMessage, profileMessages } from "@/lib/i18n/client-messages";
+import { captureElementToPng } from "@/lib/client/prepare-html-capture";
+import { drawShareCardDomainFooter } from "@/lib/client/share-card-canvas-footer";
 
 export const PROFILE_SQUARE_CAPTURE_ID = "profile-square-capture";
 
@@ -8,6 +9,7 @@ export function profileSquareCaptureId(username: string): string {
 
 const SQUARE_SIZE = 1080;
 const SQUARE_BACKGROUND = "#f4f7fb";
+const SQUARE_FOOTER_HEIGHT = 72;
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -41,26 +43,38 @@ async function fitCaptureToSquarePng(dataUrl: string): Promise<Blob> {
   context.fillStyle = SQUARE_BACKGROUND;
   context.fillRect(0, 0, SQUARE_SIZE, SQUARE_SIZE);
 
+  const contentHeight = SQUARE_SIZE - SQUARE_FOOTER_HEIGHT;
   const scale = SQUARE_SIZE / image.width;
   const scaledHeight = image.height * scale;
 
-  if (scaledHeight > SQUARE_SIZE) {
-    const sourceHeight = SQUARE_SIZE / scale;
+  if (scaledHeight > contentHeight) {
+    const fitScale = contentHeight / scaledHeight;
+    const drawWidth = SQUARE_SIZE * fitScale;
+    const drawHeight = contentHeight;
+    const offsetX = (SQUARE_SIZE - drawWidth) / 2;
     context.drawImage(
       image,
       0,
       0,
       image.width,
-      sourceHeight,
+      image.height,
+      offsetX,
       0,
-      0,
-      SQUARE_SIZE,
-      SQUARE_SIZE
+      drawWidth,
+      drawHeight
     );
   } else {
-    const offsetY = (SQUARE_SIZE - scaledHeight) / 2;
+    const offsetY = (contentHeight - scaledHeight) / 2;
     context.drawImage(image, 0, offsetY, SQUARE_SIZE, scaledHeight);
   }
+
+  drawShareCardDomainFooter(
+    context,
+    SQUARE_SIZE,
+    SQUARE_SIZE,
+    SQUARE_FOOTER_HEIGHT,
+    SQUARE_BACKGROUND
+  );
 
   return canvasToBlob(canvas);
 }
@@ -70,14 +84,9 @@ function isCaptureExcluded(node: Node): boolean {
   return node.dataset.storyExclude !== undefined || node.classList.contains("profile-see-all");
 }
 
-/** e.g. "Jennifer's Travel Map" */
-export function buildSquareCaptureTitle(displayName: string): string {
-  return formatMessage(profileMessages.travelDiaryTitle, { name: displayName });
-}
-
-/** Screenshot the world map panel with a personalized travel-map title. */
+/** Screenshot the profile summary + map for a 1:1 square PNG. */
 export async function captureProfileSquareCard(
-  displayName: string,
+  _displayName: string,
   username: string
 ): Promise<Blob> {
   const element = document.getElementById(profileSquareCaptureId(username));
@@ -85,30 +94,15 @@ export async function captureProfileSquareCard(
     throw new Error("missing-capture-region");
   }
 
-  const titleEl = element.querySelector<HTMLElement>(".profile-section-title");
-  const originalTitle = titleEl?.textContent ?? null;
-  const captureTitle = buildSquareCaptureTitle(displayName);
-
-  if (titleEl) {
-    titleEl.textContent = captureTitle;
-  }
-
-  element.scrollIntoView({ block: "center", behavior: "instant" });
-  await new Promise((resolve) => window.setTimeout(resolve, 200));
-
+  element.classList.add("profile-capture-active");
   try {
-    const { toPng } = await import("html-to-image");
-    const dataUrl = await toPng(element, {
-      pixelRatio: 2,
-      cacheBust: true,
+    const dataUrl = await captureElementToPng(element, {
       backgroundColor: SQUARE_BACKGROUND,
       filter: (node) => !isCaptureExcluded(node),
     });
 
     return fitCaptureToSquarePng(dataUrl);
   } finally {
-    if (titleEl && originalTitle !== null) {
-      titleEl.textContent = originalTitle;
-    }
+    element.classList.remove("profile-capture-active");
   }
 }

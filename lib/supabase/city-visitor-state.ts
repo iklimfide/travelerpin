@@ -55,7 +55,7 @@ export async function loadCityPageUserState(
         .maybeSingle(),
       supabase
         .from("visited_countries")
-        .select("*")
+        .select("id, country_code, country_name")
         .eq("user_id", userId)
         .order("country_name", { ascending: true }),
       supabase

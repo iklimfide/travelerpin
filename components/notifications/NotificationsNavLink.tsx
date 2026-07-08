@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   NotificationsContext,
 } from "@/components/notifications/NotificationsProvider";
-import { fetchNotifications } from "@/lib/client/notification-actions";
+import { fetchUnreadNotificationCount } from "@/lib/client/notification-actions";
 import { dashboardNavMessages } from "@/lib/i18n/client-messages";
 
 function BellIcon() {
@@ -32,8 +32,8 @@ export function NotificationsNavLink({ variant = "bottomBar" }: NotificationsNav
     let cancelled = false;
 
     async function load() {
-      const result = await fetchNotifications();
-      if (!cancelled && result.ok) setUnreadCount(result.unreadCount);
+      const count = await fetchUnreadNotificationCount();
+      if (!cancelled) setUnreadCount(count);
     }
 
     void load();

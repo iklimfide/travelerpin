@@ -53,7 +53,7 @@ export function NotificationsProvider({ username, children }: NotificationsProvi
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, []);
 
   const close = useCallback(() => {
     setOpen(false);

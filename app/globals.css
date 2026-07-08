@@ -1307,6 +1307,83 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   height: 16px;
 }
 
+.profile-instagram-spacer {
+  display: none;
+}
+
+.profile-capture-active .profile-instagram-spacer {
+  display: block;
+  margin-top: 10px;
+  height: 30px;
+}
+
+.profile-square-capture-header {
+  display: none;
+}
+
+.profile-square-capture.profile-capture-active {
+  background: #ffffff;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 14px 28px rgba(16, 32, 60, 0.08);
+}
+
+.profile-square-capture.profile-capture-active .profile-square-capture-header {
+  display: block;
+  padding: 16px 14px 10px;
+  text-align: center;
+}
+
+.profile-square-capture-header__avatar {
+  margin: 0 auto 10px;
+  border-radius: 24px !important;
+}
+
+.profile-square-capture-header__name {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--profile-text);
+}
+
+.profile-square-capture-header__badge {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.profile-square-capture.profile-capture-active .profile-square-capture-header .profile-instagram-link {
+  margin-top: 8px;
+}
+
+.profile-square-capture.profile-capture-active .profile-square-capture-header .profile-stats {
+  margin-top: 12px;
+  padding: 14px 8px;
+}
+
+.profile-square-capture.profile-capture-active .profile-section {
+  margin-top: 0 !important;
+  padding: 0 10px 10px !important;
+}
+
+.profile-square-capture.profile-capture-active .profile-map-panel,
+.profile-square-capture.profile-capture-active .profile-map-panel--link {
+  padding: 8px;
+  border-radius: 18px;
+  box-shadow: none;
+}
+
+.profile-square-capture.profile-capture-active .profile-mini-map #travel-map,
+.profile-square-capture.profile-capture-active .profile-mini-map #travel-map > div {
+  aspect-ratio: 800 / 340;
+}
+
+.profile-square-capture.profile-capture-active .profile-map-panel .border-t {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
 .traveler-badge--profile-card {
   gap: 6px;
   padding: 7px 12px;
@@ -1368,6 +1445,8 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 }
 
 .profile-world-progress {
+  display: flex;
+  flex-direction: column;
   background: #f5f7fb;
   border-radius: 24px;
   padding: 18px;
@@ -1375,9 +1454,9 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 }
 
 .profile-world-progress__top {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
   gap: 12px;
   margin-bottom: 10px;
 }
@@ -1398,6 +1477,9 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 }
 
 .profile-world-progress__bar {
+  display: block;
+  flex-shrink: 0;
+  width: 100%;
   height: 12px;
   background: #dfe7f1;
   border-radius: 999px;
@@ -1418,6 +1500,62 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   font-size: 14px;
   font-weight: 600;
   line-height: 1.35;
+}
+
+/* Share-card screenshot: tighter layout only while the PNG is being taken. */
+.profile-story-capture.profile-capture-active .profile-desc {
+  display: none;
+}
+
+.profile-story-capture.profile-capture-active .profile-actions {
+  justify-content: flex-end;
+}
+
+.profile-story-capture.profile-capture-active .profile-actions__end {
+  align-items: flex-end;
+  margin-left: auto;
+}
+
+.profile-story-capture.profile-capture-active .profile-follow-stats--solo {
+  align-items: flex-end;
+  margin-top: 0;
+}
+
+.profile-story-capture.profile-capture-active .profile-world-progress {
+  display: none;
+}
+
+.profile-story-capture.profile-capture-active .profile-main {
+  padding-bottom: 0;
+}
+
+.profile-story-capture.profile-capture-active .profile-card {
+  margin-bottom: 0;
+  padding-bottom: 10px;
+}
+
+.profile-story-capture.profile-capture-active .profile-section {
+  margin-top: 0 !important;
+  padding-top: 0;
+}
+
+.profile-story-capture.profile-capture-active .profile-metrics {
+  gap: 0;
+}
+
+.profile-story-capture.profile-capture-active .profile-map-panel,
+.profile-story-capture.profile-capture-active .profile-map-panel--link {
+  padding: 10px;
+}
+
+.profile-story-capture.profile-capture-active .profile-mini-map #travel-map,
+.profile-story-capture.profile-capture-active .profile-mini-map #travel-map > div {
+  aspect-ratio: 800 / 380;
+}
+
+.profile-story-capture.profile-capture-active .profile-map-panel .border-t {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
 }
 
 .profile-stats {
@@ -4444,8 +4582,10 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 
 .notifications-page__footer {
   flex-shrink: 0;
-  padding: 12px 16px 16px;
+  margin-top: auto;
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid #e2e8f0;
+  background: #fff;
 }
 
 .notifications-page--modal .notifications-page__mark-all {

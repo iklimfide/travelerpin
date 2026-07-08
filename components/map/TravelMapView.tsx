@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import { WorldMap } from "@/components/map/WorldMap";
 import { CountryPopup } from "@/components/map/CountryPopup";
 import { CityPopup } from "@/components/map/CityPopup";
@@ -75,11 +74,18 @@ export function TravelMapView({
   profileHeader,
   compactProfile = false,
 }: TravelMapViewProps) {
-  const router = useRouter();
   const editable = canEditMap ?? isLoggedIn;
   const modal = useModal();
   const toast = useToast();
   const mapFocus = useOptionalMapFocus();
+  const [localVisitedCountryCodes, setLocalVisitedCountryCodes] = useState(visitedCountryCodes);
+  const [localWishlistCountryCodes, setLocalWishlistCountryCodes] = useState(wishlistCountryCodes);
+  const [localVisitedCountries, setLocalVisitedCountries] = useState(visitedCountries);
+  const [localWishlistCountries, setLocalWishlistCountries] = useState(wishlistCountries);
+  const [localUserCities, setLocalUserCities] = useState(userCities);
+  const [localUserParks, setLocalUserParks] = useState(userParks);
+  const [localCitiesCountryCodes, setLocalCitiesCountryCodes] = useState(citiesCountryCodes);
+  const [localParksCountryCodes, setLocalParksCountryCodes] = useState(parksCountryCodes);
   const [selectedCountry, setSelectedCountry] = useState<CountrySelection | null>(null);
   const [selectedCity, setSelectedCity] = useState<VisitedCity | null>(null);
   const [continent, setContinent] = useState<ContinentId>(
@@ -94,44 +100,103 @@ export function TravelMapView({
   const [optimisticVisitedCodes, setOptimisticVisitedCodes] = useState<Set<string>>(
     () => new Set()
   );
-  const showWishlist = wishlistCountryCodes.length > 0;
+  const showWishlist = localWishlistCountryCodes.length > 0;
+
+  useEffect(() => {
+    setLocalVisitedCountryCodes(visitedCountryCodes);
+    setLocalWishlistCountryCodes(wishlistCountryCodes);
+    setLocalVisitedCountries(visitedCountries);
+    setLocalWishlistCountries(wishlistCountries);
+    setLocalUserCities(userCities);
+    setLocalUserParks(userParks);
+    setLocalCitiesCountryCodes(citiesCountryCodes);
+    setLocalParksCountryCodes(parksCountryCodes);
+  }, [
+    visitedCountryCodes,
+    wishlistCountryCodes,
+    visitedCountries,
+    wishlistCountries,
+    userCities,
+    userParks,
+    citiesCountryCodes,
+    parksCountryCodes,
+  ]);
+
+  const syncTravelState = useCallback(async () => {
+    if (!isLoggedIn || !editable) return;
+
+    try {
+      const res = await fetch("/api/me/travel-state");
+      if (!res.ok) return;
+
+      const data = (await res.json()) as {
+        visitedCountries?: VisitedCountry[];
+        visitedCities?: VisitedCity[];
+        visitedParks?: VisitedPark[];
+        wishlistCountries?: WishlistCountry[];
+        visitedCodes?: string[];
+      };
+
+      setLocalVisitedCountries(data.visitedCountries ?? []);
+      setLocalVisitedCountryCodes(data.visitedCodes ?? []);
+      setLocalUserCities(data.visitedCities ?? []);
+      setLocalUserParks(data.visitedParks ?? []);
+      setLocalWishlistCountries(data.wishlistCountries ?? []);
+      setLocalWishlistCountryCodes(
+        (data.wishlistCountries ?? []).map((country) => country.country_code.toUpperCase())
+      );
+      setLocalCitiesCountryCodes([
+        ...new Set(
+          (data.visitedCities ?? []).map((city) => city.country_code.toUpperCase())
+        ),
+      ]);
+      setLocalParksCountryCodes([
+        ...new Set(
+          (data.visitedParks ?? []).map((park) => park.country_code.toUpperCase())
+        ),
+      ]);
+      setOptimisticVisitedCodes(new Set());
+    } catch {
+      // Keep optimistic UI if refresh fails.
+    }
+  }, [editable, isLoggedIn]);
 
   const visitedCodeSet = useMemo(() => {
-    const codes = new Set(visitedCountryCodes.map((c) => c.toUpperCase()));
+    const codes = new Set(localVisitedCountryCodes.map((c) => c.toUpperCase()));
     for (const code of optimisticVisitedCodes) {
       codes.add(code);
     }
     return codes;
-  }, [visitedCountryCodes, optimisticVisitedCodes]);
+  }, [localVisitedCountryCodes, optimisticVisitedCodes]);
 
   const wishlistCodeSet = useMemo(
-    () => new Set(wishlistCountryCodes.map((c) => c.toUpperCase())),
-    [wishlistCountryCodes]
+    () => new Set(localWishlistCountryCodes.map((c) => c.toUpperCase())),
+    [localWishlistCountryCodes]
   );
 
   const placesCodeSet = useMemo(() => {
     const codes = new Set([
-      ...citiesCountryCodes.map((c) => c.toUpperCase()),
-      ...parksCountryCodes.map((c) => c.toUpperCase()),
+      ...localCitiesCountryCodes.map((c) => c.toUpperCase()),
+      ...localParksCountryCodes.map((c) => c.toUpperCase()),
     ]);
     return codes;
-  }, [citiesCountryCodes, parksCountryCodes]);
+  }, [localCitiesCountryCodes, localParksCountryCodes]);
 
   const visitedByCode = useMemo(() => {
     const map = new Map<string, VisitedCountry>();
-    for (const country of visitedCountries) {
+    for (const country of localVisitedCountries) {
       map.set(country.country_code.toUpperCase(), country);
     }
     return map;
-  }, [visitedCountries]);
+  }, [localVisitedCountries]);
 
   const wishlistByCode = useMemo(() => {
     const map = new Map<string, WishlistCountry>();
-    for (const country of wishlistCountries) {
+    for (const country of localWishlistCountries) {
       map.set(country.country_code.toUpperCase(), country);
     }
     return map;
-  }, [wishlistCountries]);
+  }, [localWishlistCountries]);
 
   const selectedStatus = useMemo(() => {
     if (!selectedCountry) return null;
@@ -170,17 +235,17 @@ export function TravelMapView({
 
   const existingCityNamesForSelected = useMemo(() => {
     if (!selectedStatus) return [];
-    return userCities
+    return localUserCities
       .filter((city) => city.country_code.toUpperCase() === selectedStatus.code)
       .map((city) => city.city_name);
-  }, [selectedStatus, userCities]);
+  }, [selectedStatus, localUserCities]);
 
   const existingParkKeysForSelected = useMemo(() => {
     if (!selectedStatus) return [];
-    return userParks
+    return localUserParks
       .filter((park) => park.country_code.toUpperCase() === selectedStatus.code)
       .map((park) => `${park.park_type}:${park.park_name}`);
-  }, [selectedStatus, userParks]);
+  }, [selectedStatus, localUserParks]);
 
   const requireLogin = () => {
     toast.show(mapMessages.loginToMark);
@@ -215,7 +280,7 @@ export function TravelMapView({
       } else {
         if (
           selectedStatus.visitedViaPlacesOnly ||
-          countryHasMappedPlaces(selectedStatus.code, userCities, userParks)
+          countryHasMappedPlaces(selectedStatus.code, localUserCities, localUserParks)
         ) {
           toast.show(countryMessages.removePlacesFirst);
           return;
@@ -238,7 +303,7 @@ export function TravelMapView({
         });
       }
 
-      router.refresh();
+      void syncTravelState();
     } finally {
       setBusyCode(null);
     }
@@ -272,21 +337,21 @@ export function TravelMapView({
         }
       }
 
-      router.refresh();
+      void syncTravelState();
     } finally {
       setBusyCode(null);
     }
   };
 
   const handleCitiesAdded = () => {
-    router.refresh();
+    void syncTravelState();
     setSelectedCountry(null);
     setPinnedCountryCode(null);
     setCityPickerFirst(false);
   };
 
   const handleParksAdded = () => {
-    router.refresh();
+    void syncTravelState();
     setSelectedCountry(null);
     setPinnedCountryCode(null);
     setCityPickerFirst(false);
@@ -323,8 +388,9 @@ export function TravelMapView({
         setContinent(countryContinent);
       }
       setFocusRequest({ code, nonce: Date.now() });
+      void syncTravelState();
     },
-    []
+    [syncTravelState]
   );
 
   const handleDestinationRemoved = useCallback(
@@ -338,32 +404,41 @@ export function TravelMapView({
         });
         setPinnedCountryCode(null);
       }
+      void syncTravelState();
     },
-    []
+    [syncTravelState]
   );
 
-  const handleParkAdded = useCallback((park: PopularPark) => {
-    const code = park.countryCode.toUpperCase();
-    const countryContinent = getCountryContinent(code);
-    setOptimisticVisitedCodes((prev) => new Set(prev).add(code));
-    setPinnedCountryCode(code);
-    if (countryContinent) {
-      setContinent(countryContinent);
-    }
-    setFocusRequest({ code, nonce: Date.now() });
-  }, []);
+  const handleParkAdded = useCallback(
+    (park: PopularPark) => {
+      const code = park.countryCode.toUpperCase();
+      const countryContinent = getCountryContinent(code);
+      setOptimisticVisitedCodes((prev) => new Set(prev).add(code));
+      setPinnedCountryCode(code);
+      if (countryContinent) {
+        setContinent(countryContinent);
+      }
+      setFocusRequest({ code, nonce: Date.now() });
+      void syncTravelState();
+    },
+    [syncTravelState]
+  );
 
-  const handleParkRemoved = useCallback((park: PopularPark, countryRemoved: boolean) => {
-    const code = park.countryCode.toUpperCase();
-    if (countryRemoved) {
-      setOptimisticVisitedCodes((prev) => {
-        const next = new Set(prev);
-        next.delete(code);
-        return next;
-      });
-      setPinnedCountryCode(null);
-    }
-  }, []);
+  const handleParkRemoved = useCallback(
+    (park: PopularPark, countryRemoved: boolean) => {
+      const code = park.countryCode.toUpperCase();
+      if (countryRemoved) {
+        setOptimisticVisitedCodes((prev) => {
+          const next = new Set(prev);
+          next.delete(code);
+          return next;
+        });
+        setPinnedCountryCode(null);
+      }
+      void syncTravelState();
+    },
+    [syncTravelState]
+  );
 
   useEffect(() => {
     if (!mapFocus) return;
@@ -395,8 +470,8 @@ export function TravelMapView({
         <MapPopularDestinations
           isLoggedIn={isLoggedIn}
           onRequireLogin={requireLogin}
-          visitedCities={userCities}
-          visitedCountries={visitedCountries}
+          visitedCities={localUserCities}
+          visitedCountries={localVisitedCountries}
           onAdded={handleDestinationAdded}
           onRemoved={handleDestinationRemoved}
         />
@@ -405,7 +480,7 @@ export function TravelMapView({
         <MapPopularParks
           isLoggedIn={isLoggedIn}
           onRequireLogin={requireLogin}
-          visitedParks={userParks}
+          visitedParks={localUserParks}
           onAdded={handleParkAdded}
           onRemoved={handleParkRemoved}
         />
@@ -425,10 +500,10 @@ export function TravelMapView({
       ) : null}
       <WorldMap
         visitedCountryCodes={[...visitedCodeSet]}
-        wishlistCountryCodes={wishlistCountryCodes}
-        userCities={userCities}
+        wishlistCountryCodes={localWishlistCountryCodes}
+        userCities={localUserCities}
         onCountryClick={explorable ? handleCountryClick : undefined}
-        onCityClick={interactive && userCities.length > 0 ? (city) => setSelectedCity(city) : undefined}
+        onCityClick={interactive && localUserCities.length > 0 ? (city) => setSelectedCity(city) : undefined}
         interactive={interactive}
         explorable={explorable}
         continent={continent}
@@ -442,10 +517,10 @@ export function TravelMapView({
 
   const flagsBlock = (
     <VisitedCountryFlags
-      visitedCountries={visitedCountries}
-      userCities={userCities}
-      userParks={userParks}
-      countryCodes={visitedCountryCodes}
+      visitedCountries={localVisitedCountries}
+      userCities={localUserCities}
+      userParks={localUserParks}
+      countryCodes={localVisitedCountryCodes}
       onCountryClick={explorable ? focusCountryOnMap : undefined}
       variant={homeLayout ? "landing" : "default"}
       className={

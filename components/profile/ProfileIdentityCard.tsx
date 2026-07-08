@@ -110,7 +110,9 @@ export async function ProfileIdentityCard({
 
       {instagramUrl ? (
         <ProfileInstagramLink url={instagramUrl} sampleNotice={instagramSampleNotice} />
-      ) : null}
+      ) : (
+        <span className="profile-instagram-spacer" aria-hidden="true" />
+      )}
 
       {bio?.trim() ? <p className="profile-desc">{bio.trim()}</p> : null}
 

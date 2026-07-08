@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { POPULAR_PARKS, type PopularPark } from "@/lib/data/popular-parks";
 import { quickAddPark, quickRemovePark } from "@/lib/client/park-destination-actions";
 import { parkTypeLabel } from "@/lib/utils/park-type";
@@ -39,7 +38,6 @@ export function MapPopularParks({
   onAdded,
   onRemoved,
 }: MapPopularParksProps) {
-  const router = useRouter();
   const toast = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -116,7 +114,6 @@ export function MapPopularParks({
       }
       setQuery("");
       onAdded?.(park);
-      router.refresh();
     } finally {
       setBusyId(null);
     }
@@ -149,7 +146,6 @@ export function MapPopularParks({
       setRecentlyRemoved((prev) => new Set(prev).add(id));
       toast.show(parkMessages.removedToast, 1000);
       onRemoved?.(park, result.countryRemoved);
-      router.refresh();
     } finally {
       setBusyId(null);
     }

@@ -33,7 +33,6 @@ export function ProfileInstagramLink({ url, sampleNotice }: ProfileInstagramLink
       <button
         type="button"
         className="profile-instagram-link"
-        data-story-exclude=""
         onClick={() => toast.show(sampleNotice, 2500)}
       >
         <InstagramProfileIcon />
@@ -48,7 +47,6 @@ export function ProfileInstagramLink({ url, sampleNotice }: ProfileInstagramLink
       target="_blank"
       rel="noopener noreferrer"
       className="profile-instagram-link"
-      data-story-exclude=""
     >
       <InstagramProfileIcon />
       <span>{label}</span>

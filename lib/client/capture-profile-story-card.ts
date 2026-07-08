@@ -1,3 +1,6 @@
+import { captureElementToPng } from "@/lib/client/prepare-html-capture";
+import { drawShareCardDomainFooter } from "@/lib/client/share-card-canvas-footer";
+
 export const PROFILE_STORY_CAPTURE_ID = "profile-story-capture";
 
 /** Username-scoped so homepage demo (Jennifer) never shadows another profile. */
@@ -8,6 +11,7 @@ export function profileStoryCaptureId(username: string): string {
 const STORY_WIDTH = 1080;
 const STORY_HEIGHT = 1920;
 const STORY_BACKGROUND = "#f4f7fb";
+const STORY_FOOTER_HEIGHT = 80;
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -41,25 +45,37 @@ async function fitCaptureToStoryPng(dataUrl: string): Promise<Blob> {
   context.fillStyle = STORY_BACKGROUND;
   context.fillRect(0, 0, STORY_WIDTH, STORY_HEIGHT);
 
+  const contentHeight = STORY_HEIGHT - STORY_FOOTER_HEIGHT;
   const scale = STORY_WIDTH / image.width;
   const scaledHeight = image.height * scale;
 
-  if (scaledHeight > STORY_HEIGHT) {
-    const sourceHeight = STORY_HEIGHT / scale;
+  if (scaledHeight > contentHeight) {
+    const fitScale = contentHeight / scaledHeight;
+    const drawWidth = STORY_WIDTH * fitScale;
+    const drawHeight = contentHeight;
+    const offsetX = (STORY_WIDTH - drawWidth) / 2;
     context.drawImage(
       image,
       0,
       0,
       image.width,
-      sourceHeight,
+      image.height,
+      offsetX,
       0,
-      0,
-      STORY_WIDTH,
-      STORY_HEIGHT
+      drawWidth,
+      drawHeight
     );
   } else {
     context.drawImage(image, 0, 0, STORY_WIDTH, scaledHeight);
   }
+
+  drawShareCardDomainFooter(
+    context,
+    STORY_WIDTH,
+    STORY_HEIGHT,
+    STORY_FOOTER_HEIGHT,
+    STORY_BACKGROUND
+  );
 
   return canvasToBlob(canvas);
 }
@@ -71,19 +87,18 @@ export async function captureProfileStoryCard(username: string): Promise<Blob> {
     throw new Error("missing-capture-region");
   }
 
-  element.scrollIntoView({ block: "start", behavior: "instant" });
-  await new Promise((resolve) => window.setTimeout(resolve, 200));
+  element.classList.add("profile-capture-active");
+  try {
+    const dataUrl = await captureElementToPng(element, {
+      backgroundColor: STORY_BACKGROUND,
+      filter: (node) => {
+        if (!(node instanceof HTMLElement)) return true;
+        return node.dataset.storyExclude === undefined;
+      },
+    });
 
-  const { toPng } = await import("html-to-image");
-  const dataUrl = await toPng(element, {
-    pixelRatio: 2,
-    cacheBust: true,
-    backgroundColor: STORY_BACKGROUND,
-    filter: (node) => {
-      if (!(node instanceof HTMLElement)) return true;
-      return node.dataset.storyExclude === undefined;
-    },
-  });
-
-  return fitCaptureToStoryPng(dataUrl);
+    return fitCaptureToStoryPng(dataUrl);
+  } finally {
+    element.classList.remove("profile-capture-active");
+  }
 }

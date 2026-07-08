@@ -20,6 +20,9 @@ function isRecoverableAuthError(message: string): boolean {
   );
 }
 
+/** Skip Supabase round-trip while the access token is still comfortably valid. */
+const SESSION_REFRESH_LEAD_SECONDS = 15 * 60;
+
 export async function updateSession(request: NextRequest) {
   const env = getSupabaseEnv();
   if (!env) {
@@ -52,6 +55,23 @@ export async function updateSession(request: NextRequest) {
   });
 
   try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      return supabaseResponse;
+    }
+
+    const expiresAt = session.expires_at;
+    const now = Math.floor(Date.now() / 1000);
+    const secondsLeft = expiresAt != null ? expiresAt - now : 0;
+
+    // Cookie can last weeks; only hit Supabase when the access token needs refresh.
+    if (secondsLeft > SESSION_REFRESH_LEAD_SECONDS) {
+      return supabaseResponse;
+    }
+
     const {
       data: { user },
       error,

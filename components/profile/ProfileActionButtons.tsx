@@ -57,11 +57,12 @@ export function ProfileActionButtons({
 
   return (
     <>
-      <div className="profile-actions" data-story-exclude="">
+      <div className="profile-actions">
         <button
           type="button"
           className="profile-small-action"
           aria-label={shareLabel}
+          data-story-exclude=""
           onClick={() => setOpen(true)}
         >
           <ProfileShareIcon />

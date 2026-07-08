@@ -36,10 +36,21 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
 
       if (!cancelled) setUsername(profile?.username ?? null);
 
-      // Backfill home-city pin for accounts with residence (e.g. "İstanbul").
+      // Backfill home-city pin once per browser session (e.g. residence "İstanbul").
       if (profile?.username) {
+        const flagKey = `tp:ensure-residence:${user.id}`;
+        try {
+          if (sessionStorage.getItem(flagKey) === "1") return;
+          sessionStorage.setItem(flagKey, "1");
+        } catch {
+          // Private mode / blocked storage — still attempt once this mount.
+        }
         void fetch("/api/profile/ensure-residence", { method: "POST" }).catch(() => {
-          // Non-blocking; profile page also attempts this.
+          try {
+            sessionStorage.removeItem(flagKey);
+          } catch {
+            // ignore
+          }
         });
       }
     }

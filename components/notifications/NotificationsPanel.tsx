@@ -295,7 +295,7 @@ export function NotificationsPanel({
               {notificationMessages.title}
             </h1>
             <div className="notifications-page__actions">
-              {!isModal && unreadCount > 0 ? (
+              {!isModal ? (
                 <button
                   type="button"
                   className="notifications-page__mark-all"
@@ -413,7 +413,7 @@ export function NotificationsPanel({
         )}
       </div>
 
-      {isModal && !detailGroup && unreadCount > 0 ? (
+      {isModal && !detailGroup ? (
         <div className="notifications-page__footer">
           <button
             type="button"

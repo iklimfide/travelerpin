@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import {
   POPULAR_DESTINATIONS,
   type PopularDestination,
@@ -336,7 +335,6 @@ export function SaveDestinationModal({
   initialTab = "popular",
   onClose,
 }: SaveDestinationModalProps) {
-  const router = useRouter();
   const toast = useToast();
 
   const [tab, setTab] = useState<SaveDestinationTab>("popular");
@@ -728,7 +726,6 @@ export function SaveDestinationModal({
       }
 
       toast.show(cityMessages.cityAdded, 1500);
-      router.refresh();
       void loadTravelState();
     } finally {
       setBusyId(null);
@@ -764,7 +761,6 @@ export function SaveDestinationModal({
       }
 
       toast.show(parkMessages.parkAdded, 1500);
-      router.refresh();
       void loadTravelState();
     } finally {
       setBusyId(null);
@@ -870,7 +866,6 @@ export function SaveDestinationModal({
         toast.show(countryHubMessages.wishlistAdded, 1500);
       }
 
-      router.refresh();
       void loadTravelState();
     } finally {
       setBusyId(null);
@@ -999,7 +994,6 @@ export function SaveDestinationModal({
         }
       }
 
-      router.refresh();
       void loadTravelState();
     } finally {
       setBusyId(null);
@@ -1116,7 +1110,6 @@ export function SaveDestinationModal({
                 visitedCountries={visitedCountries}
                 onSuccess={() => {
                   setEditingCityId(null);
-                  router.refresh();
                   void loadTravelState();
                 }}
                 onCancel={() => setEditingCityId(null)}
@@ -1128,7 +1121,6 @@ export function SaveDestinationModal({
                 existingParks={visitedParks}
                 onSuccess={() => {
                   setEditingParkId(null);
-                  router.refresh();
                   void loadTravelState();
                 }}
                 onCancel={() => setEditingParkId(null)}

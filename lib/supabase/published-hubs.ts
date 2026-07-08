@@ -1,4 +1,13 @@
+import { unstable_cache } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { revalidatePublishedHubKeys } from "@/lib/cache/revalidate-published-hubs";
+import {
+  PUBLISHED_CITY_KEYS_TAG,
+  PUBLISHED_CITY_SLUGS_TAG,
+  PUBLISHED_PARK_KEYS_TAG,
+  PUBLISHED_PARK_SLUGS_TAG,
+} from "@/lib/cache/revalidate-published-hubs";
+import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { buildCitySlug } from "@/lib/utils/city-slug";
 import { buildParkSlug } from "@/lib/utils/park-slug";
 import type { ParkType } from "@/types/database";
@@ -12,6 +21,7 @@ export type PublishedHubRow = {
   place_name: string;
   country_name: string | null;
   park_type: ParkType | null;
+  pinner_count: number;
 };
 
 export async function publishCityHubOnPin(
@@ -25,6 +35,7 @@ export async function publishCityHubOnPin(
     placeName: row.city_name,
     countryName: row.country_name,
   });
+  revalidatePublishedHubKeys();
 }
 
 export async function publishParkHubOnPin(
@@ -44,6 +55,7 @@ export async function publishParkHubOnPin(
     countryName: row.country_name,
     parkType: row.park_type,
   });
+  revalidatePublishedHubKeys();
 }
 
 async function publishHub(
@@ -98,7 +110,9 @@ export async function findPublishedHubBySlug(
 ): Promise<PublishedHubRow | null> {
   const { data, error } = await supabase
     .from("published_hubs")
-    .select("hub_kind, slug, country_code, place_name, country_name, park_type")
+    .select(
+      "hub_kind, slug, country_code, place_name, country_name, park_type, pinner_count"
+    )
     .eq("hub_kind", hubKind)
     .eq("slug", slug.toLowerCase())
     .maybeSingle();
@@ -108,66 +122,126 @@ export async function findPublishedHubBySlug(
     return null;
   }
 
-  return (data as PublishedHubRow | null) ?? null;
+  if (!data) return null;
+
+  return {
+    ...(data as Omit<PublishedHubRow, "pinner_count">),
+    pinner_count: (data as { pinner_count?: number }).pinner_count ?? 0,
+  };
 }
+
+function buildPublishedCityKeys(rows: { country_code: string; place_name: string }[]): Set<string> {
+  const keys = new Set<string>();
+  for (const row of rows) {
+    keys.add(`${row.country_code.toUpperCase()}:${row.place_name.trim().toLowerCase()}`);
+  }
+  return keys;
+}
+
+function buildPublishedParkKeys(rows: { country_code: string; place_name: string }[]): Set<string> {
+  const keys = new Set<string>();
+  for (const row of rows) {
+    keys.add(`${row.country_code.toUpperCase()}:${row.place_name.trim().toLowerCase()}`);
+  }
+  return keys;
+}
+
+const getCachedPublishedCityKeys = unstable_cache(
+  async (): Promise<Set<string>> => {
+    const supabase = createPublicSupabaseClient();
+    if (!supabase) return new Set();
+
+    const { data, error } = await supabase
+      .from("published_hubs")
+      .select("country_code, place_name")
+      .eq("hub_kind", "city");
+
+    if (error) {
+      console.error("published_hubs city keys failed:", error.message);
+      return new Set();
+    }
+
+    return buildPublishedCityKeys(data ?? []);
+  },
+  ["published-city-keys"],
+  { revalidate: false, tags: [PUBLISHED_CITY_KEYS_TAG] }
+);
+
+const getCachedPublishedParkKeys = unstable_cache(
+  async (): Promise<Set<string>> => {
+    const supabase = createPublicSupabaseClient();
+    if (!supabase) return new Set();
+
+    const { data, error } = await supabase
+      .from("published_hubs")
+      .select("country_code, place_name")
+      .eq("hub_kind", "park");
+
+    if (error) {
+      console.error("published_hubs park keys failed:", error.message);
+      return new Set();
+    }
+
+    return buildPublishedParkKeys(data ?? []);
+  },
+  ["published-park-keys"],
+  { revalidate: false, tags: [PUBLISHED_PARK_KEYS_TAG] }
+);
+
+const getCachedPublishedCitySlugs = unstable_cache(
+  async (): Promise<string[]> => {
+    const supabase = createPublicSupabaseClient();
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+      .from("published_hubs")
+      .select("slug")
+      .eq("hub_kind", "city");
+
+    if (error) {
+      console.error("published_hubs list failed:", error.message);
+      return [];
+    }
+
+    return (data ?? []).map((row) => row.slug);
+  },
+  ["published-city-slugs"],
+  { revalidate: false, tags: [PUBLISHED_CITY_SLUGS_TAG] }
+);
+
+const getCachedPublishedParkSlugs = unstable_cache(
+  async (): Promise<string[]> => {
+    const supabase = createPublicSupabaseClient();
+    if (!supabase) return [];
+
+    const { data, error } = await supabase
+      .from("published_hubs")
+      .select("slug")
+      .eq("hub_kind", "park");
+
+    if (error) {
+      console.error("published_hubs list failed:", error.message);
+      return [];
+    }
+
+    return (data ?? []).map((row) => row.slug);
+  },
+  ["published-park-slugs"],
+  { revalidate: false, tags: [PUBLISHED_PARK_SLUGS_TAG] }
+);
 
 export async function loadPublishedHubSlugs(
-  supabase: SupabaseClient | null,
+  _supabase: SupabaseClient | null,
   hubKind: HubKind
 ): Promise<string[]> {
-  if (!supabase) return [];
-
-  const { data, error } = await supabase
-    .from("published_hubs")
-    .select("slug")
-    .eq("hub_kind", hubKind);
-
-  if (error) {
-    console.error("published_hubs list failed:", error.message);
-    return [];
-  }
-
-  return (data ?? []).map((row) => row.slug);
+  if (hubKind === "city") return getCachedPublishedCitySlugs();
+  return getCachedPublishedParkSlugs();
 }
 
-export async function loadPublishedCityKeys(supabase: SupabaseClient | null): Promise<Set<string>> {
-  if (!supabase) return new Set();
-
-  const { data, error } = await supabase
-    .from("published_hubs")
-    .select("country_code, place_name")
-    .eq("hub_kind", "city");
-
-  if (error) {
-    console.error("published_hubs city keys failed:", error.message);
-    return new Set();
-  }
-
-  const keys = new Set<string>();
-  for (const row of data ?? []) {
-    keys.add(`${row.country_code.toUpperCase()}:${row.place_name.trim().toLowerCase()}`);
-  }
-
-  return keys;
+export async function loadPublishedCityKeys(_supabase: SupabaseClient | null): Promise<Set<string>> {
+  return getCachedPublishedCityKeys();
 }
 
-export async function loadPublishedParkKeys(supabase: SupabaseClient | null): Promise<Set<string>> {
-  if (!supabase) return new Set();
-
-  const { data, error } = await supabase
-    .from("published_hubs")
-    .select("country_code, place_name")
-    .eq("hub_kind", "park");
-
-  if (error) {
-    console.error("published_hubs park keys failed:", error.message);
-    return new Set();
-  }
-
-  const keys = new Set<string>();
-  for (const row of data ?? []) {
-    keys.add(`${row.country_code.toUpperCase()}:${row.place_name.trim().toLowerCase()}`);
-  }
-
-  return keys;
+export async function loadPublishedParkKeys(_supabase: SupabaseClient | null): Promise<Set<string>> {
+  return getCachedPublishedParkKeys();
 }
