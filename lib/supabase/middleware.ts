@@ -16,8 +16,24 @@ function isRecoverableAuthError(message: string): boolean {
     lower.includes("refresh token") ||
     lower.includes("invalid jwt") ||
     lower.includes("session") ||
-    lower.includes("token is expired")
+    lower.includes("token is expired") ||
+    lower.includes("auth session missing") ||
+    lower.includes("invalid claim") ||
+    lower.includes("user not found")
   );
+}
+
+/** Drop every Supabase auth cookie so the request continues as a guest. */
+function clearSupabaseAuthCookies(request: NextRequest, response: NextResponse) {
+  for (const cookie of request.cookies.getAll()) {
+    if (!cookie.name.includes("auth-token") && !cookie.name.startsWith("sb-")) continue;
+    request.cookies.delete(cookie.name);
+    response.cookies.set(cookie.name, "", {
+      path: "/",
+      maxAge: 0,
+      expires: new Date(0),
+    });
+  }
 }
 
 /** Skip Supabase round-trip while the access token is still comfortably valid. */
@@ -57,9 +73,22 @@ export async function updateSession(request: NextRequest) {
   try {
     const {
       data: { session },
+      error: sessionError,
     } = await supabase.auth.getSession();
 
+    if (sessionError && isRecoverableAuthError(sessionError.message)) {
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        // ignore
+      }
+      clearSupabaseAuthCookies(request, supabaseResponse);
+      return supabaseResponse;
+    }
+
     if (!session) {
+      // Stale auth cookie with no usable session — continue as guest.
+      clearSupabaseAuthCookies(request, supabaseResponse);
       return supabaseResponse;
     }
 
@@ -78,10 +107,16 @@ export async function updateSession(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user && error && isRecoverableAuthError(error.message)) {
-      await supabase.auth.signOut();
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        // ignore
+      }
+      clearSupabaseAuthCookies(request, supabaseResponse);
     }
   } catch {
-    // Supabase slow/unreachable — don't block the request.
+    // Supabase slow/unreachable or cookie chaos — clear auth and don't block the request.
+    clearSupabaseAuthCookies(request, supabaseResponse);
   }
 
   return supabaseResponse;

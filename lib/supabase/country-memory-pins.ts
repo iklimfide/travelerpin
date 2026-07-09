@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { fetchCityPinRowsByCountry } from "@/lib/supabase/city-pin-select";
 import { fetchParkPinRows } from "@/lib/supabase/park-pin-select";
 import { profilePath } from "@/lib/seo/site";
+import { cityPlacePath, parkPlacePath } from "@/lib/utils/hub-place-path";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import type { MediaType } from "@/types/database";
 import {
@@ -33,6 +34,7 @@ type CityPinRow = {
 type ParkPinRow = {
   id: string;
   park_name: string;
+  country_code: string;
   note: string | null;
   photo_url?: string | null;
   instagram_urls?: string[] | null;
@@ -48,7 +50,7 @@ type ParkPinRow = {
   } | null;
 };
 
-function cityRowToPin(row: CityPinRow): HubTravelerPin | null {
+function cityRowToPin(row: CityPinRow, countryCode: string): HubTravelerPin | null {
   const profile = row.profiles;
   if (!profile?.username || !row.city_name) return null;
 
@@ -57,6 +59,7 @@ function cityRowToPin(row: CityPinRow): HubTravelerPin | null {
   return createHubTravelerPin({
     id: `city:${row.id}`,
     placeLabel: row.city_name,
+    placePath: cityPlacePath(countryCode, row.city_name),
     note: row.note,
     mediaRow: row,
     mediaPreviewUrl: row.media_preview_url,
@@ -79,6 +82,7 @@ function parkRowToPin(row: ParkPinRow): HubTravelerPin | null {
   return createHubTravelerPin({
     id: `park:${row.id}`,
     placeLabel: row.park_name,
+    placePath: parkPlacePath(row.park_name, row.country_code),
     note: row.note,
     mediaRow: row,
     visitDates: row.visit_dates ?? [],
@@ -104,7 +108,12 @@ export async function fetchRecentCountryPins(
   ]);
 
   const cityPins = cityRows
-    .map((row) => cityRowToPin({ ...row, city_name: row.city_name ?? "", visit_dates: row.visit_dates ?? [] }))
+    .map((row) =>
+      cityRowToPin(
+        { ...row, city_name: row.city_name ?? "", visit_dates: row.visit_dates ?? [] },
+        code
+      )
+    )
     .filter((pin): pin is HubTravelerPin => pin !== null);
 
   const parkPins = parkRows
@@ -112,6 +121,7 @@ export async function fetchRecentCountryPins(
       parkRowToPin({
         id: row.id,
         park_name: row.park_name,
+        country_code: row.country_code,
         note: row.note,
         photo_url: row.photo_url,
         instagram_urls: row.instagram_urls,

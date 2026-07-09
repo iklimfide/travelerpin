@@ -292,29 +292,6 @@ export async function PublicProfileView({
                 />
               ) : null}
 
-              {!isOwnProfile && hasMapContent ? (
-                <section className="profile-section">
-                  <HomeFeatures />
-                </section>
-              ) : null}
-
-              {!isOwnProfile && isGuest ? (
-                <section className="profile-cta">
-                  <div>
-                    <p className="profile-cta-title">{tHome("ctaTitle")}</p>
-                    <p className="profile-cta-hint">{tHome("ctaHint")}</p>
-                  </div>
-                  <div className="profile-cta-actions">
-                    <Link href="/register" className="profile-cta-primary">
-                      {t("createYourMap")}
-                    </Link>
-                    <Link href="/login" className="profile-cta-secondary">
-                      {tHome("login")}
-                    </Link>
-                  </div>
-                </section>
-              ) : null}
-
               <ProfileSummaryGrid
                 summary={summary}
                 title={t("summaryTitle")}
@@ -332,6 +309,29 @@ export async function PublicProfileView({
                   favoritesBody: (count) => t("summaryFavoritesBody", { count }),
                 }}
               />
+
+              {isGuest && hasMapContent ? (
+                <section className="profile-section">
+                  <HomeFeatures />
+                </section>
+              ) : null}
+
+              {isGuest ? (
+                <section className="profile-cta">
+                  <div>
+                    <p className="profile-cta-title">{tHome("ctaTitle")}</p>
+                    <p className="profile-cta-hint">{tHome("ctaHint")}</p>
+                  </div>
+                  <div className="profile-cta-actions">
+                    <Link href="/register" className="profile-cta-primary">
+                      {t("createYourMap")}
+                    </Link>
+                    <Link href="/login" className="profile-cta-secondary">
+                      {tHome("login")}
+                    </Link>
+                  </div>
+                </section>
+              ) : null}
 
               {isOwnProfile ? <LogOutButton variant="profile" /> : null}
             </>
