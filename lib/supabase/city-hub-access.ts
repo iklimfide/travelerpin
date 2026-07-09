@@ -34,24 +34,20 @@ export function pinnedCityKey(countryCode: string, cityName: string): string {
   return `${countryCode.toUpperCase()}:${cityName.trim().toLowerCase()}`;
 }
 
-function asKeySet(keys: Set<string> | Iterable<string> | null | undefined): Set<string> {
-  return keys instanceof Set ? keys : new Set(keys ?? []);
-}
-
 export function cityIsPubliclyLinked(
   countryCode: string,
   cityName: string,
-  publishedCityKeys: Set<string> | Iterable<string> | null | undefined
+  publishedCityKeys: Set<string>
 ): boolean {
   const catalogSlug = findCityHubSlug(countryCode, cityName);
   if (catalogSlug && isFeaturedCityHub(catalogSlug)) return true;
-  return asKeySet(publishedCityKeys).has(pinnedCityKey(countryCode, cityName));
+  return publishedCityKeys.has(pinnedCityKey(countryCode, cityName));
 }
 
 export function publicCityHubSlug(
   countryCode: string,
   cityName: string,
-  publishedCityKeys: Set<string> | Iterable<string> | null | undefined
+  publishedCityKeys: Set<string>
 ): string | null {
   if (!cityIsPubliclyLinked(countryCode, cityName, publishedCityKeys)) return null;
   return findCityHubSlug(countryCode, cityName) ?? buildCitySlug(cityName);
@@ -117,9 +113,8 @@ export async function loadCityHubBySlug(
   const publishedCityKeys = await loadPublishedCityKeys(supabase);
 
   if (touristMatches.length > 0) {
-    const keys = asKeySet(publishedCityKeys);
     const publishedMatch = touristMatches.find((city) =>
-      keys.has(pinnedCityKey(city.countryCode, city.name))
+      publishedCityKeys.has(pinnedCityKey(city.countryCode, city.name))
     );
     const featuredMatch = touristMatches.find((city) => {
       const catalogSlug = findCityHubSlug(city.countryCode, city.name);

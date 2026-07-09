@@ -45,11 +45,10 @@ export function HubMemories({ hubName, pins, labels }: HubMemoriesProps) {
             return (
               <li key={pin.id} className="city-page__memory">
                 {hasMedia && pin.mediaType === "photo" && pin.mediaUrl ? (
-                  <button
-                    type="button"
+                  <Link
+                    href={pin.profilePath}
                     className="city-page__memory-thumb-btn"
-                    onClick={() => setExpandedPin(pin)}
-                    aria-label={`${labels.viewPin} — ${pin.displayName}`}
+                    aria-label={`${pin.displayName} — ${labels.viewMap}`}
                   >
                     <Image
                       src={pin.mediaUrl}
@@ -59,7 +58,7 @@ export function HubMemories({ hubName, pins, labels }: HubMemoriesProps) {
                       className="city-page__memory-thumb-image"
                       sizes="112px"
                     />
-                  </button>
+                  </Link>
                 ) : hasMedia ? (
                   <button
                     type="button"

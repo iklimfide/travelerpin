@@ -1790,12 +1790,6 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 
   .profile-section-head {
     margin-bottom: 4px;
-    padding-inline: 6px;
-  }
-
-  .profile-section-title {
-    font-size: 22px;
-    letter-spacing: -0.6px;
   }
 
   .profile-main {
@@ -2491,23 +2485,16 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
   justify-content: space-between;
   margin-bottom: 14px;
   gap: 12px;
-  min-width: 0;
 }
 
 .profile-section-title {
-  min-width: 0;
-  flex: 1 1 auto;
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -1px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .profile-see-all {
   display: inline-block;
-  flex-shrink: 0;
   color: var(--profile-primary);
   font-size: 14px;
   font-weight: 700;
@@ -4618,9 +4605,6 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 }
 
 .notifications-page__footer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   flex-shrink: 0;
   margin-top: auto;
   padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
@@ -4628,35 +4612,14 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
   background: #fff;
 }
 
-.notifications-page__footer-close {
-  flex: 1 1 0;
-  min-width: 0;
-  border: none;
-  border-radius: 12px;
-  background: #2563eb;
-  padding: 10px 14px;
-  color: #fff;
-  font-size: 0.92rem;
-  font-weight: 600;
-  text-align: center;
-  cursor: pointer;
-}
-
-.notifications-page__footer-close:hover {
-  background: #1d4ed8;
-  color: #fff;
-}
-
 .notifications-page--modal .notifications-page__mark-all {
   display: block;
-  flex: 1 1 0;
-  min-width: 0;
-  margin-left: 0;
-  border: none;
+  width: 100%;
+  border: 1px solid #2563eb;
   border-radius: 12px;
-  background: #2563eb;
+  background: #fff;
   padding: 10px 14px;
-  color: #fff;
+  color: #2563eb;
   font-size: 0.92rem;
   font-weight: 600;
   text-align: center;
@@ -4664,7 +4627,7 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 }
 
 .notifications-page--modal .notifications-page__mark-all:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: #eff6ff;
 }
 
 .notifications-page--modal .notifications-page__mark-all:disabled {

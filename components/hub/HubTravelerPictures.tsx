@@ -1,9 +1,7 @@
-"use client";
-
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
+import Link from "next/link";
 import { InstagramMemoryThumb } from "@/components/city/InstagramMemoryThumb";
 import { HubExternalPhoto } from "@/components/hub/HubExternalPhoto";
-import { HubMemoryLightbox } from "@/components/hub/HubMemoryLightbox";
 import { HubSectionHeading } from "@/components/hub/HubSectionHeading";
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
 import { hubGalleryPhotoSrc } from "@/lib/storage/hub-photo-url";
@@ -32,12 +30,10 @@ function GalleryGrid({
   items,
   hubName,
   labels,
-  onSelectPhoto,
 }: {
   items: HubGalleryItem[];
   hubName: string;
   labels: HubTravelerPicturesProps["labels"];
-  onSelectPhoto: (item: HubGalleryItem) => void;
 }) {
   return (
     <ul className="city-page__traveler-pictures-grid">
@@ -57,11 +53,10 @@ function GalleryGrid({
             (() => {
               const photoSrc = hubGalleryPhotoSrc(item);
               return photoSrc ? (
-                <button
-                  type="button"
+                <Link
+                  href={item.pin.profilePath}
                   className="city-page__traveler-picture-btn"
-                  onClick={() => onSelectPhoto(item)}
-                  aria-label={`${labels.viewPin} — ${item.pin.displayName}`}
+                  aria-label={`${item.pin.displayName} — ${labels.viewMap}`}
                 >
                   <HubExternalPhoto
                     src={photoSrc}
@@ -70,7 +65,7 @@ function GalleryGrid({
                     height={160}
                     className="city-page__traveler-picture-image"
                   />
-                </button>
+                </Link>
               ) : null;
             })()
           )}
@@ -90,7 +85,6 @@ export function HubTravelerPictures({
   headingCta,
   labels,
 }: HubTravelerPicturesProps) {
-  const [expandedItem, setExpandedItem] = useState<HubGalleryItem | null>(null);
   const galleryItems = expandHubPinGalleryItems(pins);
   const photoItems = galleryItems.filter((item) => item.mediaType === "photo");
   const instagramItems = galleryItems.filter((item) => item.mediaType === "instagram");
@@ -102,34 +96,15 @@ export function HubTravelerPictures({
   }
 
   return (
-    <>
-      <section className="city-page__section" aria-labelledby={headingId}>
-        <HubSectionHeading id={headingId} title={heading} cta={headingCta} />
-        {items.length > 0 ? (
-          <div className="city-page__hub-photo-gallery">
-            <GalleryGrid
-              items={items}
-              hubName={hubName}
-              labels={labels}
-              onSelectPhoto={setExpandedItem}
-            />
-          </div>
-        ) : emptyLabel ? (
-          <p className="city-page__empty">{emptyLabel}</p>
-        ) : null}
-      </section>
-
-      {expandedItem?.mediaType === "photo" ? (
-        <HubMemoryLightbox
-          pin={expandedItem.pin}
-          activeMediaType="photo"
-          activeMediaUrl={expandedItem.mediaUrl}
-          activeMediaDisplayUrl={expandedItem.mediaDisplayUrl}
-          hubName={hubName}
-          labels={{ viewMap: labels.viewMap, close: labels.close }}
-          onClose={() => setExpandedItem(null)}
-        />
+    <section className="city-page__section" aria-labelledby={headingId}>
+      <HubSectionHeading id={headingId} title={heading} cta={headingCta} />
+      {items.length > 0 ? (
+        <div className="city-page__hub-photo-gallery">
+          <GalleryGrid items={items} hubName={hubName} labels={labels} />
+        </div>
+      ) : emptyLabel ? (
+        <p className="city-page__empty">{emptyLabel}</p>
       ) : null}
-    </>
+    </section>
   );
 }
