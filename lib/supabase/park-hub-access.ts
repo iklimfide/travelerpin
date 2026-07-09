@@ -32,12 +32,19 @@ export function pinnedParkKey(countryCode: string, parkName: string): string {
   return `${countryCode.toUpperCase()}:${parkName.trim().toLowerCase()}`;
 }
 
+function asKeySet(keys: Set<string> | Iterable<string> | null | undefined): Set<string> {
+  return keys instanceof Set ? keys : new Set(keys ?? []);
+}
+
 export function touristParkIsPubliclyLinked(
   park: { name: string; countryCode: string },
-  publishedParkKeys: Set<string>
+  publishedParkKeys: Set<string> | Iterable<string> | null | undefined
 ): boolean {
   const slug = buildParkSlug(park.name);
-  return isPopularParkHub(slug) || publishedParkKeys.has(pinnedParkKey(park.countryCode, park.name));
+  return (
+    isPopularParkHub(slug) ||
+    asKeySet(publishedParkKeys).has(pinnedParkKey(park.countryCode, park.name))
+  );
 }
 
 export async function parkHubIsPublic(
@@ -113,8 +120,9 @@ export async function loadParkHubBySlug(
   const publishedParkKeys = await loadPublishedParkKeys(supabase);
 
   if (touristMatches.length > 0) {
+    const keys = asKeySet(publishedParkKeys);
     const publishedMatch = touristMatches.find((park) =>
-      publishedParkKeys.has(pinnedParkKey(park.countryCode, park.name))
+      keys.has(pinnedParkKey(park.countryCode, park.name))
     );
     const popularMatch = touristMatches.find((park) => isPopularParkHub(buildParkSlug(park.name)));
     const pick = publishedMatch ?? popularMatch ?? touristMatches[0];

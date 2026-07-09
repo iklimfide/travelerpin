@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ParkHub } from "@/lib/data/park-hubs";
-import { profilePath } from "@/lib/seo/site";
+import { parkPath, profilePath } from "@/lib/seo/site";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { parkPinMatchesHub } from "@/lib/utils/park-hub-match";
 import type { VisitedPark } from "@/types/database";
@@ -37,7 +37,8 @@ function rowToPin(row: ParkPinRow, hub: ParkHub): HubTravelerPin | null {
 
   return createHubTravelerPin({
     id: row.id,
-    placeLabel: null,
+    placeLabel: hub.name,
+    placePath: parkPath(hub.slug),
     note: row.note,
     mediaRow: row,
     visitDates: row.visit_dates ?? [],
@@ -69,7 +70,8 @@ export function visitedParkToHubPin(
 
   return createHubTravelerPin({
     id: park.id,
-    placeLabel: null,
+    placeLabel: hub.name,
+    placePath: parkPath(hub.slug),
     note: park.note,
     mediaRow: park,
     visitDates: park.visit_dates ?? [],

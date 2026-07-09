@@ -1,60 +1,20 @@
-# TravelerPin — MVP
+# 📍 TravelerPin - Personal Travel Map & Visited Countries Tracker
 
-Minimalist travel map platform at [travelerpin.com](https://travelerpin.com). Mark countries and cities, attach one photo or Instagram post per city, share your public profile. Legacy domain `seemycountries.com` redirects here.
+Answer *"Which countries have you visited?"* or *"How many countries have you been to?"* with a single, shareable link! 
 
-## Stack
+**[TravelerPin](https://travelerpin.com)** is a modern, interactive travel mapping and pinning platform that allows global travelers to mark their visited locations on a digital world map, track accurate travel statistics (total country counts, world exploration percentages), and showcase their entire travel history to the world via a personalized profile link.
 
-- **Next.js 16** (App Router, Turbopack)
-- **Supabase** (Auth, PostgreSQL, Storage)
-- **SVG world map** (world-atlas + d3-geo — no Google Maps)
-- **next-intl** (English first, i18n-ready)
-- **sharp** (WebP compression, max 1080px width)
+🔗 **Official Website:** [https://travelerpin.com](https://travelerpin.com)
 
-## Setup
+---
 
-1. Create a [Supabase](https://supabase.com) project.
+## 🚀 Key Features
 
-2. Copy env file and add credentials:
-   ```bash
-   cp .env.local.example .env.local
-   ```
+*   **Interactive Travel Map:** Pin and visualize all the countries and cities you have visited on a beautiful, custom [travel map](https://travelerpin.com).
+*   **Instant Travel Stats:** View your total visited countries count and instantly see what percentage of the world you have explored so far.
+*   **Share Your Journey with One Link:** Easily display your travel milestones and lifetime map on your social media profiles (X, Instagram, TikTok, etc.) using a clean, custom URL like `travelerpin.com/username`.
+*   **Personalized Traveler Profile:** Customize your public profile with a personal avatar, bio, age, occupation, and direct social media links to build your traveler brand.
 
-3. Run the SQL migration in Supabase SQL Editor:
-   `supabase/migrations/001_initial_schema.sql`
+---
 
-4. Create a **Cloudflare R2** bucket for city/park photos and add credentials to `.env.local` (see `.env.local.example`). Enable public access on the bucket (R2 dev subdomain or custom domain) and set `R2_PUBLIC_BASE_URL`.
-
-5. Install and run:
-   ```bash
-   npm install
-   npm run dev
-   ```
-
-## Routes
-
-| Route | Description |
-|-------|-------------|
-| `/` | Landing page |
-| `/register` | Sign up (username, email, password) |
-| `/login` | Log in |
-| `/dashboard` | Manage your map (authenticated) |
-| `/u/[username]` | Public travel profile |
-
-## SRS coverage (MVP)
-
-- [x] User registration with unique username → `/u/username`
-- [x] Countries \| Cities stats counter
-- [x] SVG vector map with country fill + city pins
-- [x] Hover labels on pins
-- [x] Popup: 1 media (photo OR Instagram), 1000-char note with scroll
-- [x] Instagram lazy embed on popup open
-- [x] Image upload → WebP, max 1080px
-- [x] English UI with `messages/en.json` for future locales
-- [x] Supabase RLS policies
-
-## Next steps
-
-- Geocoding autocomplete for city coordinates
-- OAuth (Google / Apple)
-- Turkish locale (`messages/tr.json`)
-- Open Graph meta for social sharing previews
+🗺️ Create your personal travel map, track your global footsteps, and share your journey today at **[travelerpin.com](https://travelerpin.com)**.

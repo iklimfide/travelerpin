@@ -146,10 +146,11 @@ function buildPublishedParkKeys(rows: { country_code: string; place_name: string
   return keys;
 }
 
+/** Cache stores arrays — `unstable_cache` JSON-serializes and strips Set methods. */
 const getCachedPublishedCityKeys = unstable_cache(
-  async (): Promise<Set<string>> => {
+  async (): Promise<string[]> => {
     const supabase = createPublicSupabaseClient();
-    if (!supabase) return new Set();
+    if (!supabase) return [];
 
     const { data, error } = await supabase
       .from("published_hubs")
@@ -158,19 +159,19 @@ const getCachedPublishedCityKeys = unstable_cache(
 
     if (error) {
       console.error("published_hubs city keys failed:", error.message);
-      return new Set();
+      return [];
     }
 
-    return buildPublishedCityKeys(data ?? []);
+    return [...buildPublishedCityKeys(data ?? [])];
   },
   ["published-city-keys"],
   { revalidate: false, tags: [PUBLISHED_CITY_KEYS_TAG] }
 );
 
 const getCachedPublishedParkKeys = unstable_cache(
-  async (): Promise<Set<string>> => {
+  async (): Promise<string[]> => {
     const supabase = createPublicSupabaseClient();
-    if (!supabase) return new Set();
+    if (!supabase) return [];
 
     const { data, error } = await supabase
       .from("published_hubs")
@@ -179,10 +180,10 @@ const getCachedPublishedParkKeys = unstable_cache(
 
     if (error) {
       console.error("published_hubs park keys failed:", error.message);
-      return new Set();
+      return [];
     }
 
-    return buildPublishedParkKeys(data ?? []);
+    return [...buildPublishedParkKeys(data ?? [])];
   },
   ["published-park-keys"],
   { revalidate: false, tags: [PUBLISHED_PARK_KEYS_TAG] }
@@ -239,9 +240,9 @@ export async function loadPublishedHubSlugs(
 }
 
 export async function loadPublishedCityKeys(_supabase: SupabaseClient | null): Promise<Set<string>> {
-  return getCachedPublishedCityKeys();
+  return new Set(await getCachedPublishedCityKeys());
 }
 
 export async function loadPublishedParkKeys(_supabase: SupabaseClient | null): Promise<Set<string>> {
-  return getCachedPublishedParkKeys();
+  return new Set(await getCachedPublishedParkKeys());
 }

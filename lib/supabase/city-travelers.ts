@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CityHub } from "@/lib/data/city-hubs";
 import { fetchCityPinRowsForHub, type CityPinQueryRow } from "@/lib/supabase/city-pin-select";
-import { profilePath } from "@/lib/seo/site";
+import { cityPath, profilePath } from "@/lib/seo/site";
 import { normalizeCityKey } from "@/lib/utils/city-name";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import type { MediaType, VisitedCity } from "@/types/database";
@@ -18,7 +18,7 @@ export type { CityTravelerPin, HubTravelerPin };
 
 type CityPinRow = CityPinQueryRow;
 
-function rowToPin(row: CityPinRow): HubTravelerPin | null {
+function rowToPin(row: CityPinRow, hub: CityHub): HubTravelerPin | null {
   const profile = row.profiles;
   if (!profile?.username) return null;
 
@@ -26,7 +26,8 @@ function rowToPin(row: CityPinRow): HubTravelerPin | null {
 
   return createHubTravelerPin({
     id: row.id,
-    placeLabel: null,
+    placeLabel: hub.name,
+    placePath: cityPath(hub.slug),
     note: row.note,
     mediaRow: row,
     mediaPreviewUrl: row.media_preview_url,
@@ -60,7 +61,8 @@ export function visitedCityToHubPin(
 
   return createHubTravelerPin({
     id: city.id,
-    placeLabel: null,
+    placeLabel: hub.name,
+    placePath: cityPath(hub.slug),
     note: city.note,
     mediaRow: city,
     mediaPreviewUrl: city.media_preview_url,
@@ -82,7 +84,7 @@ export async function fetchRecentCityPins(
   const rows = await fetchCityPinRowsForHub(supabase, hub, 40);
 
   const pins = rows
-    .map(rowToPin)
+    .map((row) => rowToPin(row, hub))
     .filter((pin): pin is HubTravelerPin => pin !== null);
 
   return sortHubTravelerPins(pins).slice(0, limit);
