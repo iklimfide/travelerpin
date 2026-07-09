@@ -8,6 +8,10 @@ export const RESERVED_USERNAMES = new Set([
   "og",
   "register",
   "settings",
+  "terms",
+  "privacy",
+  "imprint",
+  "contact",
   "u",
 ]);
 

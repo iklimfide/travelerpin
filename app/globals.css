@@ -4203,16 +4203,10 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
   background: transparent;
   padding: 12px 8px;
   text-align: left;
-  cursor: pointer;
 }
 
 .save-destination-modal__row:hover {
   background: #eaf1f8;
-}
-
-.save-destination-modal__row:disabled {
-  opacity: 0.6;
-  cursor: wait;
 }
 
 .save-destination-modal__flag {
@@ -4240,6 +4234,21 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
   gap: 2px;
 }
 
+.save-destination-modal__text--link {
+  text-decoration: none;
+  color: inherit;
+  border-radius: 10px;
+}
+
+.save-destination-modal__text--link:hover .save-destination-modal__name {
+  color: #2563eb;
+}
+
+.save-destination-modal__text--link:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
 .save-destination-modal__name {
   font-size: 16px;
   font-weight: 800;
@@ -4258,16 +4267,31 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
   flex-shrink: 0;
   display: grid;
   place-items: center;
+  border: none;
   border-radius: 999px;
   background: #e7edf5;
   color: #6d86a3;
   font-size: 16px;
   font-weight: 800;
+  cursor: pointer;
+}
+
+.save-destination-modal__check:hover {
+  background: #d7e2ef;
+}
+
+.save-destination-modal__check:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .save-destination-modal__check--on {
   background: #dcfce7;
   color: #16a34a;
+}
+
+.save-destination-modal__check--on:hover {
+  background: #bbf7d0;
 }
 
 .save-destination-modal__row--custom {

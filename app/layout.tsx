@@ -91,11 +91,11 @@ export default async function RootLayout({
             <ModalProvider>
               <ToastProvider>
                 <DashboardAddProvider>
-                  <OwnProfileShellGate>
-                    <SharePinPromptProvider>
-                      <AuthModalProvider>{children}</AuthModalProvider>
-                    </SharePinPromptProvider>
-                  </OwnProfileShellGate>
+                  <AuthModalProvider>
+                    <OwnProfileShellGate>
+                      <SharePinPromptProvider>{children}</SharePinPromptProvider>
+                    </OwnProfileShellGate>
+                  </AuthModalProvider>
                 </DashboardAddProvider>
               </ToastProvider>
             </ModalProvider>

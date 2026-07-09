@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { LIMITS } from "@/lib/constants";
 import { translateAuth, translateCommon } from "@/lib/i18n/client-messages";
 import { createClient } from "@/lib/supabase/client";
@@ -357,6 +358,30 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
             </p>
           ) : null}
         </div>
+      ) : null}
+
+      {mode === "register" ? (
+        <p className="text-center text-xs leading-relaxed text-slate-500">
+          {t("termsAgreePrefix")}{" "}
+          <Link
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-wbs-blue hover:underline"
+          >
+            {t("termsOfService")}
+          </Link>{" "}
+          {t("termsAgreeAnd")}{" "}
+          <Link
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-wbs-blue hover:underline"
+          >
+            {t("privacyPolicy")}
+          </Link>
+          .
+        </p>
       ) : null}
 
       <button

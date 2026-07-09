@@ -1,20 +1,28 @@
 import type { ReactNode } from "react";
 import { DashboardBottomBar } from "@/components/dashboard/DashboardBottomBar";
 import { NotificationsProvider } from "@/components/notifications/NotificationsProvider";
+import { OwnProfileDataProvider } from "@/components/profile/OwnProfileDataProvider";
 
 type OwnProfileShellProps = {
-  username: string;
+  /** Null for guests — bottom bar still shows; protected actions ask to sign in. */
+  username: string | null;
   children: ReactNode;
 };
 
-/** Bottom bar + notifications for signed-in users. Requires DashboardAddProvider above. */
+/** Bottom bar for everyone. Own-profile cache + notifications when signed in. */
 export function OwnProfileShell({ username, children }: OwnProfileShellProps) {
+  const shell = (
+    <div className="dashboard-shell">
+      {children}
+      <DashboardBottomBar username={username} />
+    </div>
+  );
+
+  if (!username) return shell;
+
   return (
-    <NotificationsProvider username={username}>
-      <div className="dashboard-shell">
-        {children}
-        <DashboardBottomBar username={username} />
-      </div>
-    </NotificationsProvider>
+    <OwnProfileDataProvider username={username}>
+      <NotificationsProvider username={username}>{shell}</NotificationsProvider>
+    </OwnProfileDataProvider>
   );
 }

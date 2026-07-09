@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   POPULAR_DESTINATIONS,
   type PopularDestination,
@@ -9,6 +10,7 @@ import {
 import { POPULAR_PARKS, type PopularPark } from "@/lib/data/popular-parks";
 import { COUNTRY_LIST, searchCountries } from "@/lib/data/countries";
 import { getPopularCountries } from "@/lib/data/popular-countries";
+import { getCountryHubByCode } from "@/lib/data/country-hubs";
 import {
   quickAddDestination,
   quickRemoveDestination,
@@ -30,10 +32,13 @@ import {
   parkMessages,
   saveDestinationMessages,
   destinationMessages,
+  mapMessages,
 } from "@/lib/i18n/client-messages";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
+import { cityPlacePath, parkPlacePath } from "@/lib/utils/hub-place-path";
 import { parkTypeLabel } from "@/lib/utils/park-type";
+import { countryPath } from "@/lib/seo/site";
 import { useToast } from "@/components/ui/ToastProvider";
 import type {
   ParkType,
@@ -132,6 +137,17 @@ function markLinkedCountry(ids: Set<string>, countryCode: string) {
 
 function unmarkLinkedCountry(ids: Set<string>, countryCode: string) {
   ids.delete(countryRowId(countryCode));
+}
+
+function destinationHubHref(row: DestinationRow): string | null {
+  if (row.kind === "country") {
+    const hub = getCountryHubByCode(row.countryCode);
+    return hub ? countryPath(hub.slug) : null;
+  }
+  if (row.kind === "city") {
+    return cityPlacePath(row.countryCode, row.cityName);
+  }
+  return parkPlacePath(row.parkName, row.countryCode);
 }
 
 function popularToRow(destination: PopularDestination): DestinationRow {
@@ -1143,15 +1159,11 @@ export function SaveDestinationModal({
                 !isWantMode && row.kind === "park" && marked
                   ? findVisitedParkForRow(row, visitedParks)
                   : undefined;
+              const hubHref = destinationHubHref(row);
 
               return (
                 <li key={row.id} className="save-destination-modal__item">
-                  <button
-                    type="button"
-                    className="save-destination-modal__row"
-                    disabled={busy}
-                    onClick={() => void handleToggle(row)}
-                  >
+                  <div className="save-destination-modal__row">
                     <span className="save-destination-modal__flag">
                       <Image
                         src={countryCodeToFlagUrl(row.countryCode)}
@@ -1161,17 +1173,34 @@ export function SaveDestinationModal({
                         className="rounded-full object-cover"
                       />
                     </span>
-                    <span className="save-destination-modal__text">
-                      <span className="save-destination-modal__name">{row.title}</span>
-                      <span className="save-destination-modal__meta">{row.subtitle}</span>
-                    </span>
-                    <span
+                    {hubHref ? (
+                      <Link
+                        href={hubHref}
+                        className="save-destination-modal__text save-destination-modal__text--link"
+                        onClick={onClose}
+                      >
+                        <span className="save-destination-modal__name">{row.title}</span>
+                        <span className="save-destination-modal__meta">{row.subtitle}</span>
+                      </Link>
+                    ) : (
+                      <span className="save-destination-modal__text">
+                        <span className="save-destination-modal__name">{row.title}</span>
+                        <span className="save-destination-modal__meta">{row.subtitle}</span>
+                      </span>
+                    )}
+                    <button
+                      type="button"
                       className={`save-destination-modal__check${marked ? " save-destination-modal__check--on" : ""}`}
-                      aria-hidden
+                      disabled={busy}
+                      aria-label={
+                        marked ? mapMessages.removeDestination : mapMessages.addDestination
+                      }
+                      aria-pressed={marked}
+                      onClick={() => void handleToggle(row)}
                     >
                       {marked ? "✓" : "+"}
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                   {visitedCity || visitedPark ? (
                     <button
                       type="button"

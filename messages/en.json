@@ -291,7 +291,11 @@
     "loginInvalidCredentials": "Incorrect email or password. If you just signed up, confirm your email first, then try again.",
     "loginEmailNotConfirmed": "Confirm your email before logging in. Check your inbox for the confirmation link.",
     "registerConfirmEmail": "Account created. Please confirm the approval email we sent, then log in.",
-    "registerConfirmEmailTitle": "Confirm your email"
+    "registerConfirmEmailTitle": "Confirm your email",
+    "termsAgreePrefix": "By creating an account, you agree to our",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "termsAgreeAnd": "and"
   },
   "profile": {
     "stats": "{countries} Countries | {cities} Cities",
@@ -741,7 +745,15 @@
     "saveSuccess": "Profile updated.",
     "saveFailed": "Could not save profile.",
     "accountTitle": "Account",
-    "logoutHint": "Sign out of TravelerPin on this device."
+    "logoutHint": "Sign out of TravelerPin on this device.",
+    "termsOfService": "Terms of Service",
+    "termsHint": "Read the rules for using TravelerPin.",
+    "privacyPolicy": "Privacy Policy",
+    "privacyHint": "How we collect and use your information.",
+    "imprint": "Imprint",
+    "imprintHint": "Who operates TravelerPin.",
+    "contact": "Contact",
+    "contactHint": "Email us about TravelerPin."
   },
   "wishlist": {
     "title": "Want to visit",

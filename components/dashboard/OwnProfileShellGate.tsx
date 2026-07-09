@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
  * Loads the signed-in username in the browser so the root layout does not
  * need a server-side auth/profile round-trip on every request.
  *
- * OwnProfileShell mounts the bottom bar once auth resolves. Must stay inside
+ * Always mounts OwnProfileShell (bottom bar for guests too). Must stay inside
  * DashboardAddProvider (layout) so the bottom bar can open SaveDestinationModal.
  */
 export function OwnProfileShellGate({ children }: { children: ReactNode }) {
@@ -69,5 +69,6 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return username ? <OwnProfileShell username={username}>{children}</OwnProfileShell> : children;
+  // Bottom bar always mounts (guests included); username fills in after auth.
+  return <OwnProfileShell username={username}>{children}</OwnProfileShell>;
 }

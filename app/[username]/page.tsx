@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ProfileOwnerTools } from "@/components/dashboard/ProfileOwnerTools";
+import { OwnProfileCacheSeed } from "@/components/profile/OwnProfileCacheSeed";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { BRAND } from "@/lib/constants";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
@@ -116,6 +117,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
   return (
     <>
+      {isOwnProfile ? <OwnProfileCacheSeed data={data} /> : null}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

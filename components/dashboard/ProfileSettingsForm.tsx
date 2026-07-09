@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { LogOutButtonInline } from "@/components/auth/LogOutButtonInline";
 import { useRouter } from "next/navigation";
 import { ProfileAvatarUpload } from "@/components/profile/ProfileAvatar";
@@ -342,6 +343,50 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
               stats={stats}
               isOwnProfile
             />
+
+            <section className={sectionClass}>
+              <h2 className="text-sm font-semibold text-white">{t("termsOfService")}</h2>
+              <p className="mt-1 text-xs text-slate-500">{t("termsHint")}</p>
+              <Link
+                href="/terms"
+                className="mt-3 inline-flex text-sm font-medium text-blue-400 hover:text-blue-300"
+              >
+                {t("termsOfService")}
+              </Link>
+            </section>
+
+            <section className={sectionClass}>
+              <h2 className="text-sm font-semibold text-white">{t("privacyPolicy")}</h2>
+              <p className="mt-1 text-xs text-slate-500">{t("privacyHint")}</p>
+              <Link
+                href="/privacy"
+                className="mt-3 inline-flex text-sm font-medium text-blue-400 hover:text-blue-300"
+              >
+                {t("privacyPolicy")}
+              </Link>
+            </section>
+
+            <section className={sectionClass}>
+              <h2 className="text-sm font-semibold text-white">{t("imprint")}</h2>
+              <p className="mt-1 text-xs text-slate-500">{t("imprintHint")}</p>
+              <Link
+                href="/imprint"
+                className="mt-3 inline-flex text-sm font-medium text-blue-400 hover:text-blue-300"
+              >
+                {t("imprint")}
+              </Link>
+            </section>
+
+            <section className={sectionClass}>
+              <h2 className="text-sm font-semibold text-white">{t("contact")}</h2>
+              <p className="mt-1 text-xs text-slate-500">{t("contactHint")}</p>
+              <Link
+                href="/contact"
+                className="mt-3 inline-flex text-sm font-medium text-blue-400 hover:text-blue-300"
+              >
+                {t("contact")}
+              </Link>
+            </section>
           </div>
         ) : null}
       </div>

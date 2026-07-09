@@ -3,13 +3,16 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuthGate } from "@/components/auth/useAuthGate";
 import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
 import { NotificationsNavLink } from "@/components/notifications/NotificationsNavLink";
+import { useOwnProfileData } from "@/components/profile/OwnProfileDataProvider";
 import { dashboardNavMessages } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
 
 type DashboardBottomBarProps = {
-  username: string;
+  /** Null for guests — protected items open the login modal. */
+  username: string | null;
 };
 
 function HomeIcon() {
@@ -54,6 +57,15 @@ function PlusIcon() {
   );
 }
 
+function BellIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={22} height={22} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path d="M12 3a5 5 0 0 0-5 5v2.2c0 .7-.2 1.4-.6 2L5 14.5h14l-1.4-2.3c-.4-.6-.6-1.3-.6-2V8a5 5 0 0 0-5-5Z" strokeLinejoin="round" />
+      <path d="M10 17.5a2 2 0 0 0 4 0" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 type NavItem = {
   href: string;
   label: string;
@@ -61,7 +73,15 @@ type NavItem = {
   icon: ReactNode;
 };
 
-function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
+function NavLink({
+  item,
+  pathname,
+  onWarm,
+}: {
+  item: NavItem;
+  pathname: string;
+  onWarm?: () => void;
+}) {
   const active = item.isActive(pathname);
 
   return (
@@ -69,6 +89,9 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
       href={item.href}
       className={`dashboard-bottom-bar__item${active ? " dashboard-bottom-bar__item--active" : ""}`}
       aria-current={active ? "page" : undefined}
+      onMouseEnter={onWarm}
+      onFocus={onWarm}
+      onTouchStart={onWarm}
     >
       <span className="dashboard-bottom-bar__icon">{item.icon}</span>
       <span className="dashboard-bottom-bar__label">{item.label}</span>
@@ -76,23 +99,41 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
   );
 }
 
+function GuestNavButton({
+  label,
+  icon,
+  active,
+  onClick,
+}: {
+  label: string;
+  icon: ReactNode;
+  active?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={`dashboard-bottom-bar__item${active ? " dashboard-bottom-bar__item--active" : ""}`}
+      onClick={onClick}
+    >
+      <span className="dashboard-bottom-bar__icon">{icon}</span>
+      <span className="dashboard-bottom-bar__label">{label}</span>
+    </button>
+  );
+}
+
 export function DashboardBottomBar({ username }: DashboardBottomBarProps) {
   const pathname = usePathname();
   const { openAddModal } = useDashboardAdd();
-  const profileHref = profilePath(username);
+  const { requireLogin } = useAuthGate();
+  const ownProfile = useOwnProfileData();
+  const isGuest = !username;
 
   const homeItem: NavItem = {
     href: "/",
     label: dashboardNavMessages.home,
     isActive: (path) => path === "/",
     icon: <HomeIcon />,
-  };
-
-  const profileItem: NavItem = {
-    href: profileHref,
-    label: dashboardNavMessages.profile,
-    isActive: (path) => path === profileHref,
-    icon: <ProfileIcon />,
   };
 
   const settingsItem: NavItem = {
@@ -102,25 +143,81 @@ export function DashboardBottomBar({ username }: DashboardBottomBarProps) {
     icon: <SettingsIcon />,
   };
 
+  const profileHref = username ? profilePath(username) : null;
+  const profileItem: NavItem | null = profileHref
+    ? {
+        href: profileHref,
+        label: dashboardNavMessages.profile,
+        isActive: (path) => path === profileHref,
+        icon: <ProfileIcon />,
+      }
+    : null;
+
+  function handleProtectedClick() {
+    requireLogin();
+  }
+
+  function warmOwnProfile() {
+    if (ownProfile?.data) {
+      ownProfile.revalidate();
+      return;
+    }
+    void ownProfile?.ensureLoaded();
+  }
+
   return (
     <nav className="dashboard-bottom-bar" aria-label="Dashboard navigation">
       <div className="dashboard-bottom-bar__inner">
         <NavLink item={homeItem} pathname={pathname} />
-        <NavLink item={settingsItem} pathname={pathname} />
+
+        {isGuest ? (
+          <GuestNavButton
+            label={dashboardNavMessages.settings}
+            icon={<SettingsIcon />}
+            active={pathname.startsWith("/settings")}
+            onClick={handleProtectedClick}
+          />
+        ) : (
+          <NavLink item={settingsItem} pathname={pathname} />
+        )}
 
         <div className="dashboard-bottom-bar__add-slot">
           <button
             type="button"
             className="dashboard-bottom-bar__add"
             aria-label={dashboardNavMessages.add}
-            onClick={() => openAddModal()}
+            onClick={() => {
+              if (isGuest) {
+                requireLogin();
+                return;
+              }
+              openAddModal();
+            }}
           >
             <PlusIcon />
           </button>
         </div>
 
-        <NavLink item={profileItem} pathname={pathname} />
-        <NotificationsNavLink variant="bottomBar" />
+        {isGuest || !profileItem ? (
+          <GuestNavButton
+            label={dashboardNavMessages.profile}
+            icon={<ProfileIcon />}
+            onClick={handleProtectedClick}
+          />
+        ) : (
+          <NavLink item={profileItem} pathname={pathname} onWarm={warmOwnProfile} />
+        )}
+
+        {isGuest ? (
+          <GuestNavButton
+            label={dashboardNavMessages.notifications}
+            icon={<BellIcon />}
+            active={pathname.startsWith("/notifications")}
+            onClick={handleProtectedClick}
+          />
+        ) : (
+          <NotificationsNavLink variant="bottomBar" />
+        )}
       </div>
     </nav>
   );
