@@ -1,6 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { formatMessage, homeMessages } from "@/lib/i18n/client-messages";
+import { formatMessage, homeMessages, translateHome } from "@/lib/i18n/client-messages";
 import { linkNameInMessage } from "@/lib/utils/link-name-in-message";
 
 type HomeExplainerProps = {
@@ -11,14 +12,14 @@ type HomeExplainerProps = {
   profileHref?: string;
 };
 
-export async function HomeExplainer({
+export function HomeExplainer({
   name,
   countries,
   cities,
   compact = false,
   profileHref,
 }: HomeExplainerProps) {
-  const t = await getTranslations("home");
+  const t = translateHome;
   const statValues = { countries, cities };
 
   return (

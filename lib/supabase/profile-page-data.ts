@@ -113,24 +113,29 @@ export function getCachedPublicProfileBundle(
 
   return unstable_cache(
     async () => {
-      const supabase = createPublicSupabaseClient();
-      if (!supabase) return null;
+      try {
+        const supabase = createPublicSupabaseClient();
+        if (!supabase) return null;
 
-      const profile = await fetchPublicProfile(supabase, key);
-      if (!profile) return null;
+        const profile = await fetchPublicProfile(supabase, key);
+        if (!profile) return null;
 
-      const rows = await loadProfileRows(supabase, profile);
-      const publicWishlistCountries = await loadWishlistCountries(
-        supabase,
-        profile,
-        false
-      );
+        const rows = await loadProfileRows(supabase, profile);
+        const publicWishlistCountries = await loadWishlistCountries(
+          supabase,
+          profile,
+          false
+        );
 
-      return {
-        profile,
-        ...rows,
-        publicWishlistCountries,
-      };
+        return {
+          profile,
+          ...rows,
+          publicWishlistCountries,
+        };
+      } catch (error) {
+        console.error("getCachedPublicProfileBundle failed:", error);
+        return null;
+      }
     },
     ["public-profile-bundle", key],
     // Indefinite until pin/profile write calls revalidateProfileForPin.
@@ -183,30 +188,34 @@ export const loadPublicProfilePage = cache(
     let isOwnProfile = false;
 
     if (authUser) {
-      const supabase = await createClient();
-      if (!supabase) return null;
+      try {
+        const supabase = await createClient();
+        if (supabase) {
+          const { data: currentProfile } = await supabase
+            .from("profiles")
+            .select("username")
+            .eq("id", authUser.id)
+            .maybeSingle();
+          currentUsername = currentProfile?.username ?? null;
+          isOwnProfile =
+            currentUsername != null &&
+            currentUsername.toLowerCase() === profile.username.toLowerCase();
 
-      const { data: currentProfile } = await supabase
-        .from("profiles")
-        .select("username")
-        .eq("id", authUser.id)
-        .maybeSingle();
-      currentUsername = currentProfile?.username ?? null;
-      isOwnProfile =
-        currentUsername != null &&
-        currentUsername.toLowerCase() === profile.username.toLowerCase();
+          // Private wishlist is owner-only and not in the public pin cache.
+          if (isOwnProfile && !profile.wishlist_public) {
+            wishlistCountries = await loadWishlistCountries(supabase, profile, true);
+          }
 
-      // Private wishlist is owner-only and not in the public pin cache.
-      if (isOwnProfile && !profile.wishlist_public) {
-        wishlistCountries = await loadWishlistCountries(supabase, profile, true);
+          // Follow state stays live — not part of the long-lived pin cache.
+          followState = await loadProfileFollowState(
+            supabase,
+            profile.id,
+            authUser.id
+          );
+        }
+      } catch (error) {
+        console.error("loadPublicProfilePage auth enrichment failed:", error);
       }
-
-      // Follow state stays live — not part of the long-lived pin cache.
-      followState = await loadProfileFollowState(
-        supabase,
-        profile.id,
-        authUser.id
-      );
     }
 
     // Residence auto-pin runs client-side once per session via OwnProfileShellGate

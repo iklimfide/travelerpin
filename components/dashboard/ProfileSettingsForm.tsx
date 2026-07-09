@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { LogOutButtonInline } from "@/components/auth/LogOutButtonInline";
-import { useRouter } from "next/navigation";
 import { ProfileAvatarUpload } from "@/components/profile/ProfileAvatar";
 import {
   ResidenceCityPicker,
@@ -18,6 +17,10 @@ import {
   translateWishlist,
 } from "@/lib/i18n/client-messages";
 import { clearSharePromptThrottle } from "@/lib/client/share-pin-prompt";
+import {
+  invalidateOwnProfileCache,
+  invalidateSettingsCache,
+} from "@/lib/client/session-page-cache";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import {
   buildInstagramProfileUrl,
@@ -58,7 +61,6 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
   const tCommon = translateCommon;
   const tWishlist = translateWishlist;
   const modal = useModal();
-  const router = useRouter();
 
   const username = profile.username;
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
@@ -122,7 +124,8 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
       }
 
       await modal.alert(t("saveSuccess"), { variant: "success" });
-      router.refresh();
+      invalidateSettingsCache();
+      invalidateOwnProfileCache();
     } finally {
       setLoading(false);
     }
@@ -152,7 +155,8 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
           trailingEnd={<LogOutButtonInline />}
           onChange={(url) => {
             setAvatarUrl(url);
-            router.refresh();
+            invalidateSettingsCache();
+            invalidateOwnProfileCache();
           }}
         />
       </section>

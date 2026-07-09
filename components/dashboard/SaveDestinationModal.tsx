@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   POPULAR_DESTINATIONS,
   type PopularDestination,
@@ -16,6 +17,7 @@ import {
 import { quickAddPark, quickRemovePark } from "@/lib/client/park-destination-actions";
 import { addCity } from "@/lib/client/city-actions";
 import { addWishlistCountry, removeWishlistCountry } from "@/lib/client/country-actions";
+import { invalidateOwnProfileCache } from "@/lib/client/session-page-cache";
 import { addPark } from "@/lib/client/park-actions";
 import { CityForm } from "@/components/dashboard/CityForm";
 import { ParkForm } from "@/components/dashboard/ParkForm";
@@ -43,6 +45,9 @@ import type {
   WishlistCountry,
 } from "@/types/database";
 import { PARK_TYPES } from "@/types/database";
+import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
+import { countryPath } from "@/lib/seo/site";
+import { cityPlacePath, parkPlacePath } from "@/lib/utils/hub-place-path";
 
 const WORLD_COUNTRY_TOTAL = 195;
 const SEARCH_DEBOUNCE_MS = 280;
@@ -132,6 +137,17 @@ function markLinkedCountry(ids: Set<string>, countryCode: string) {
 
 function unmarkLinkedCountry(ids: Set<string>, countryCode: string) {
   ids.delete(countryRowId(countryCode));
+}
+
+function destinationRowHref(row: DestinationRow): string | null {
+  if (row.kind === "country") {
+    const slug = resolveCountryHubSlug(row.countryCode, row.countryName);
+    return slug ? countryPath(slug) : null;
+  }
+  if (row.kind === "city") {
+    return cityPlacePath(row.countryCode, row.cityName);
+  }
+  return parkPlacePath(row.parkName, row.countryCode);
 }
 
 function popularToRow(destination: PopularDestination): DestinationRow {
@@ -354,9 +370,13 @@ export function SaveDestinationModal({
   const [recentlyWishlistRemoved, setRecentlyWishlistRemoved] = useState<Set<string>>(new Set());
   const [editingCityId, setEditingCityId] = useState<string | null>(null);
   const [editingParkId, setEditingParkId] = useState<string | null>(null);
+  const hasTravelStateRef = useRef(false);
 
-  const loadTravelState = useCallback(async () => {
-    setLoadingTravelState(true);
+  const loadTravelState = useCallback(async (options?: { background?: boolean }) => {
+    const background = options?.background ?? hasTravelStateRef.current;
+    if (!background) {
+      setLoadingTravelState(true);
+    }
     try {
       const res = await fetch("/api/me/travel-state");
       if (!res.ok) return;
@@ -365,10 +385,13 @@ export function SaveDestinationModal({
       setVisitedCities(data.visitedCities ?? []);
       setVisitedParks(data.visitedParks ?? []);
       setWishlistCountries(data.wishlistCountries ?? []);
+      hasTravelStateRef.current = true;
     } catch {
       // keep previous state
     } finally {
-      setLoadingTravelState(false);
+      if (!background) {
+        setLoadingTravelState(false);
+      }
     }
   }, []);
 
@@ -384,7 +407,7 @@ export function SaveDestinationModal({
     setRecentlyWishlistRemoved(new Set());
     setEditingCityId(null);
     setEditingParkId(null);
-    void loadTravelState();
+    void loadTravelState({ background: hasTravelStateRef.current });
   }, [open, initialTab, loadTravelState]);
 
   useEffect(() => {
@@ -726,7 +749,8 @@ export function SaveDestinationModal({
       }
 
       toast.show(cityMessages.cityAdded, 1500);
-      void loadTravelState();
+      void loadTravelState({ background: true });
+      invalidateOwnProfileCache();
     } finally {
       setBusyId(null);
     }
@@ -761,7 +785,8 @@ export function SaveDestinationModal({
       }
 
       toast.show(parkMessages.parkAdded, 1500);
-      void loadTravelState();
+      void loadTravelState({ background: true });
+      invalidateOwnProfileCache();
     } finally {
       setBusyId(null);
     }
@@ -866,7 +891,8 @@ export function SaveDestinationModal({
         toast.show(countryHubMessages.wishlistAdded, 1500);
       }
 
-      void loadTravelState();
+      void loadTravelState({ background: true });
+      invalidateOwnProfileCache();
     } finally {
       setBusyId(null);
     }
@@ -994,7 +1020,8 @@ export function SaveDestinationModal({
         }
       }
 
-      void loadTravelState();
+      void loadTravelState({ background: true });
+      invalidateOwnProfileCache();
     } finally {
       setBusyId(null);
     }
@@ -1013,7 +1040,8 @@ export function SaveDestinationModal({
   const showListSkeleton =
     !editingCity &&
     !editingPark &&
-    (loadingTravelState || (loadingSearch && trimmedQuery.length >= 2));
+    ((loadingTravelState && !hasTravelStateRef.current) ||
+      (loadingSearch && trimmedQuery.length >= 2));
 
   return (
     <div className="save-destination-modal" role="presentation">
@@ -1083,7 +1111,7 @@ export function SaveDestinationModal({
         ) : null}
 
         <div className="save-destination-modal__status">
-          {loadingTravelState ? (
+          {loadingTravelState && !hasTravelStateRef.current ? (
             <SaveDestinationModalStatusSkeleton />
           ) : (
             saveDestinationMessages.visitedCount
@@ -1110,7 +1138,8 @@ export function SaveDestinationModal({
                 visitedCountries={visitedCountries}
                 onSuccess={() => {
                   setEditingCityId(null);
-                  void loadTravelState();
+                  void loadTravelState({ background: true });
+      invalidateOwnProfileCache();
                 }}
                 onCancel={() => setEditingCityId(null)}
               />
@@ -1121,7 +1150,8 @@ export function SaveDestinationModal({
                 existingParks={visitedParks}
                 onSuccess={() => {
                   setEditingParkId(null);
-                  void loadTravelState();
+                  void loadTravelState({ background: true });
+      invalidateOwnProfileCache();
                 }}
                 onCancel={() => setEditingParkId(null)}
               />
@@ -1143,15 +1173,11 @@ export function SaveDestinationModal({
                 !isWantMode && row.kind === "park" && marked
                   ? findVisitedParkForRow(row, visitedParks)
                   : undefined;
+              const pageHref = destinationRowHref(row);
 
               return (
                 <li key={row.id} className="save-destination-modal__item">
-                  <button
-                    type="button"
-                    className="save-destination-modal__row"
-                    disabled={busy}
-                    onClick={() => void handleToggle(row)}
-                  >
+                  <div className="save-destination-modal__row">
                     <span className="save-destination-modal__flag">
                       <Image
                         src={countryCodeToFlagUrl(row.countryCode)}
@@ -1162,16 +1188,31 @@ export function SaveDestinationModal({
                       />
                     </span>
                     <span className="save-destination-modal__text">
-                      <span className="save-destination-modal__name">{row.title}</span>
+                      {pageHref ? (
+                        <Link
+                          href={pageHref}
+                          className="save-destination-modal__name save-destination-modal__name-link"
+                          onClick={onClose}
+                        >
+                          {row.title}
+                        </Link>
+                      ) : (
+                        <span className="save-destination-modal__name">{row.title}</span>
+                      )}
                       <span className="save-destination-modal__meta">{row.subtitle}</span>
                     </span>
-                    <span
+                    <button
+                      type="button"
                       className={`save-destination-modal__check${marked ? " save-destination-modal__check--on" : ""}`}
-                      aria-hidden
+                      disabled={busy}
+                      aria-label={
+                        marked ? saveDestinationMessages.unpinAction : saveDestinationMessages.pinAction
+                      }
+                      onClick={() => void handleToggle(row)}
                     >
                       {marked ? "✓" : "+"}
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                   {visitedCity || visitedPark ? (
                     <button
                       type="button"
@@ -1196,12 +1237,7 @@ export function SaveDestinationModal({
 
               {showCustomCity ? (
                 <li className="save-destination-modal__item">
-                  <button
-                    type="button"
-                    className="save-destination-modal__row save-destination-modal__row--custom"
-                    disabled={busyId === "custom:city"}
-                    onClick={() => promptCustomCity()}
-                  >
+                  <div className="save-destination-modal__row save-destination-modal__row--custom">
                     <span className="save-destination-modal__flag save-destination-modal__flag--custom" aria-hidden>
                       📍
                     </span>
@@ -1210,21 +1246,22 @@ export function SaveDestinationModal({
                         {saveDestinationMessages.addCustomCity.replace("{name}", formattedQueryName)}
                       </span>
                     </span>
-                    <span className="save-destination-modal__check" aria-hidden>
+                    <button
+                      type="button"
+                      className="save-destination-modal__check"
+                      disabled={busyId === "custom:city"}
+                      aria-label={saveDestinationMessages.pinAction}
+                      onClick={() => promptCustomCity()}
+                    >
                       +
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                 </li>
               ) : null}
 
               {showCustomPark ? (
                 <li className="save-destination-modal__item">
-                  <button
-                    type="button"
-                    className="save-destination-modal__row save-destination-modal__row--custom"
-                    disabled={busyId === "custom:park"}
-                    onClick={() => promptCustomPark()}
-                  >
+                  <div className="save-destination-modal__row save-destination-modal__row--custom">
                     <span className="save-destination-modal__flag save-destination-modal__flag--custom" aria-hidden>
                       🏞️
                     </span>
@@ -1233,10 +1270,16 @@ export function SaveDestinationModal({
                         {saveDestinationMessages.addCustomPark.replace("{name}", formattedQueryName)}
                       </span>
                     </span>
-                    <span className="save-destination-modal__check" aria-hidden>
+                    <button
+                      type="button"
+                      className="save-destination-modal__check"
+                      disabled={busyId === "custom:park"}
+                      aria-label={saveDestinationMessages.pinAction}
+                      onClick={() => promptCustomPark()}
+                    >
                       +
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                 </li>
               ) : null}
 

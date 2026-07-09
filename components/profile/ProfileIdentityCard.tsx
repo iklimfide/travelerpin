@@ -1,11 +1,13 @@
+"use client";
+
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileActionButtons } from "@/components/profile/ProfileActionButtons";
 import { ProfileInstagramLink } from "@/components/profile/ProfileInstagramLink";
 import { ProfileStatCounters } from "@/components/profile/ProfileStatCounters";
 import { ProfileWorldProgress } from "@/components/profile/ProfileWorldProgress";
 import { TravelerBadge } from "@/components/profile/TravelerBadge";
+import { translateProfile } from "@/lib/i18n/client-messages";
 import { profileAllPath } from "@/lib/seo/site";
 import type { TravelStats } from "@/types/database";
 
@@ -38,7 +40,7 @@ type ProfileIdentityCardProps = {
   isLoggedIn?: boolean;
 };
 
-export async function ProfileIdentityCard({
+export function ProfileIdentityCard({
   avatarUrl,
   displayName,
   username,
@@ -55,7 +57,7 @@ export async function ProfileIdentityCard({
   canFollow = false,
   isLoggedIn = false,
 }: ProfileIdentityCardProps) {
-  const t = await getTranslations("profile");
+  const t = translateProfile;
   const allHref = profileAllPath(username);
 
   return (

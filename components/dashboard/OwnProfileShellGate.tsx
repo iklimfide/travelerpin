@@ -2,17 +2,25 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { OwnProfileShell } from "@/components/dashboard/OwnProfileShell";
+import { setOwnUsername } from "@/lib/client/session-page-cache";
 import { createClient } from "@/lib/supabase/client";
 
+export type BottomBarOwnProfile = {
+  username: string;
+  avatarUrl: string | null;
+  displayName: string | null;
+};
 /**
  * Loads the signed-in username in the browser so the root layout does not
  * need a server-side auth/profile round-trip on every request.
  *
- * OwnProfileShell mounts the bottom bar once auth resolves. Must stay inside
- * DashboardAddProvider (layout) so the bottom bar can open SaveDestinationModal.
+ * OwnProfileShell mounts the bottom bar for guests and signed-in users once
+ * auth resolves. Must stay inside DashboardAddProvider (layout) so the bottom
+ * bar can open SaveDestinationModal.
  */
 export function OwnProfileShellGate({ children }: { children: ReactNode }) {
-  const [username, setUsername] = useState<string | null>(null);
+  const [ownProfile, setOwnProfile] = useState<BottomBarOwnProfile | null>(null);
+  const [authResolved, setAuthResolved] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -24,17 +32,33 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        if (!cancelled) setUsername(null);
+        if (!cancelled) {
+          setOwnProfile(null);
+          setOwnUsername(null);
+          setAuthResolved(true);
+        }
         return;
       }
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("username")
+        .select("username, avatar_url, display_name")
         .eq("id", user.id)
         .maybeSingle();
 
-      if (!cancelled) setUsername(profile?.username ?? null);
+      if (!cancelled) {
+        setOwnProfile(
+          profile?.username
+            ? {
+                username: profile.username,
+                avatarUrl: profile.avatar_url ?? null,
+                displayName: profile.display_name ?? null,
+              }
+            : null
+        );
+        setOwnUsername(profile?.username ?? null);
+        setAuthResolved(true);
+      }
 
       // Backfill home-city pin once per browser session (e.g. residence "İstanbul").
       if (profile?.username) {
@@ -69,5 +93,9 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return username ? <OwnProfileShell username={username}>{children}</OwnProfileShell> : children;
+  return authResolved ? (
+    <OwnProfileShell ownProfile={ownProfile}>{children}</OwnProfileShell>
+  ) : (
+    children
+  );
 }

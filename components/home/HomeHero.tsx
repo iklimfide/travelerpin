@@ -1,10 +1,12 @@
+"use client";
+
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
 import { DEMO_PERSONA } from "@/lib/data/demo-persona";
+import { translateHome } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
 
-export async function HomeHero() {
-  const t = await getTranslations("home");
+export function HomeHero() {
+  const t = translateHome;
 
   return (
     <div className="min-w-0 max-sm:flex max-sm:flex-col max-sm:items-center max-sm:text-center">

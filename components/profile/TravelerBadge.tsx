@@ -1,9 +1,11 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
 import {
   BADGE_TIER_THEMES,
   getTravelerBadgeTier,
   type TravelerBadgeTier,
 } from "@/lib/utils/traveler-badge";
+import { translateBadge } from "@/lib/i18n/client-messages";
 
 function BadgeIcon({ tier, className }: { tier: TravelerBadgeTier; className: string }) {
   const props = {
@@ -58,11 +60,11 @@ type TravelerBadgeProps = {
   className?: string;
 };
 
-export async function TravelerBadge({ countryCount, className = "" }: TravelerBadgeProps) {
+export function TravelerBadge({ countryCount, className = "" }: TravelerBadgeProps) {
   const tier = getTravelerBadgeTier(countryCount);
   if (!tier) return null;
 
-  const t = await getTranslations("badge");
+  const t = translateBadge;
   const theme = BADGE_TIER_THEMES[tier];
 
   return (

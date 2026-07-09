@@ -1,6 +1,8 @@
+"use client";
+
 import { HomeBestDestinations } from "@/components/home/HomeBestDestinations";
 import { HomeExplainer } from "@/components/home/HomeExplainer";
-import { HomeFeatures } from "@/components/home/HomeFeatures";
+import { HomeFeaturesClient } from "@/components/home/HomeFeaturesClient";
 import { HomeFinalCta } from "@/components/home/HomeFinalCta";
 
 type HomeBelowFoldSectionsProps = {
@@ -11,7 +13,7 @@ type HomeBelowFoldSectionsProps = {
   profileHref?: string;
 };
 
-export async function HomeBelowFoldSections({
+export function HomeBelowFoldSections({
   name,
   countries,
   cities,
@@ -27,7 +29,7 @@ export async function HomeBelowFoldSections({
         compact={compact}
         profileHref={profileHref}
       />
-      <HomeFeatures compact={compact} />
+      <HomeFeaturesClient compact={compact} />
       <HomeFinalCta compact={compact} />
       {!compact ? <HomeBestDestinations /> : null}
     </>

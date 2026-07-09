@@ -1,11 +1,13 @@
 "use client";
 
+import { clearAllSessionPageCaches } from "@/lib/client/session-page-cache";
 import { translateCommon } from "@/lib/i18n/client-messages";
 
 export function LogOutButtonInline() {
   const t = translateCommon;
 
   async function handleLogout() {
+    clearAllSessionPageCaches();
     await fetch("/auth/signout", { method: "POST" });
     window.location.assign("/");
   }

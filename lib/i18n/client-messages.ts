@@ -17,6 +17,7 @@ export const profileMessages = enMessages.profile;
 export const modalMessages = enMessages.modal;
 export const authMessages = enMessages.auth;
 export const settingsMessages = enMessages.settings;
+export const badgeMessages = enMessages.badge;
 export const dashboardNavMessages = enMessages.dashboardNav;
 export const notificationMessages = enMessages.notifications;
 export const saveDestinationMessages = enMessages.saveDestination;
@@ -50,6 +51,9 @@ export const translatePark = createMessageTranslator(parkMessages);
 export const translateWishlist = createMessageTranslator(wishlistMessages);
 export const translateAuth = createMessageTranslator(authMessages);
 export const translateSettings = createMessageTranslator(settingsMessages);
+export const translateProfile = createMessageTranslator(profileMessages);
+export const translateHome = createMessageTranslator(homeMessages);
+export const translateBadge = createMessageTranslator(badgeMessages);
 
 export function profileVisitCountLabel(count: number): string {
   return count === 1 ? "1 visit" : `${count} visits`;

@@ -21,7 +21,7 @@ type ProfileSquareCaptureHeaderProps = {
 };
 
 /** Compact identity strip — only visible while the square share PNG is captured. */
-export async function ProfileSquareCaptureHeader({
+export function ProfileSquareCaptureHeader({
   avatarUrl,
   displayName,
   username,

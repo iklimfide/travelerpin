@@ -1,8 +1,10 @@
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+"use client";
 
-export async function HomeFinalCta({ compact = false }: { compact?: boolean }) {
-  const t = await getTranslations("home");
+import Link from "next/link";
+import { translateHome } from "@/lib/i18n/client-messages";
+
+export function HomeFinalCta({ compact = false }: { compact?: boolean }) {
+  const t = translateHome;
 
   return (
     <section

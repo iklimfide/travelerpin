@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { homeMessages } from "@/lib/i18n/client-messages";
 import {
   HOME_BEST_CITIES_LINKED,
   HOME_BEST_COUNTRIES_LINKED,
@@ -57,14 +59,14 @@ function TopTenCard({
   );
 }
 
-export async function HomeBestDestinations({
+export function HomeBestDestinations({
   compact = false,
   desktop = false,
 }: {
   compact?: boolean;
   desktop?: boolean;
 }) {
-  const t = await getTranslations("home.bestDestinations");
+  const t = homeMessages.bestDestinations;
 
   if (desktop) {
     return (
@@ -74,22 +76,22 @@ export async function HomeBestDestinations({
       >
         <p className="mb-2 text-sm font-extrabold text-[#2563eb]">
           <span aria-hidden>✨ </span>
-          {t("eyebrow")}
+          {t.eyebrow}
         </p>
         <h2
           id="home-best-destinations-title"
           className="mb-3 text-[clamp(28px,3vw,40px)] font-extrabold tracking-tight text-[#071126]"
         >
-          {t("title")}
+          {t.title}
         </h2>
         <p className="mx-auto m-0 max-w-[720px] text-base leading-relaxed text-[#64748b]">
-          {t("subtitle")}
+          {t.subtitle}
         </p>
 
         <div className="mt-8 grid grid-cols-3 gap-5 text-left xl:gap-6">
-          <TopTenCard compact title={t("topCountries")} items={HOME_BEST_COUNTRIES_LINKED} />
-          <TopTenCard compact title={t("topCities")} items={HOME_BEST_CITIES_LINKED} />
-          <TopTenCard compact title={t("topPlaces")} items={HOME_BEST_PLACES_LINKED} />
+          <TopTenCard compact title={t.topCountries} items={HOME_BEST_COUNTRIES_LINKED} />
+          <TopTenCard compact title={t.topCities} items={HOME_BEST_CITIES_LINKED} />
+          <TopTenCard compact title={t.topPlaces} items={HOME_BEST_PLACES_LINKED} />
         </div>
       </section>
     );
@@ -114,7 +116,7 @@ export async function HomeBestDestinations({
         <div className={compact ? "text-left" : "text-left lg:pt-1"}>
           <p className={`font-extrabold text-[#2563eb] ${compact ? "mb-1 text-xs" : "mb-2 text-sm"}`}>
             <span aria-hidden>✨ </span>
-            {t("eyebrow")}
+            {t.eyebrow}
           </p>
           <h2
             id="home-best-destinations-title"
@@ -124,17 +126,17 @@ export async function HomeBestDestinations({
                 : "mb-3 text-[clamp(28px,4vw,40px)] font-extrabold tracking-tight text-[#071126]"
             }
           >
-            {t("title")}
+            {t.title}
           </h2>
           <p className={`m-0 leading-relaxed text-[#64748b] ${compact ? "text-[14px]" : "text-base"}`}>
-            {t("subtitle")}
+            {t.subtitle}
           </p>
         </div>
 
         <div className={compact ? "grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-3" : "grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5"}>
-          <TopTenCard compact={compact} title={t("topCountries")} items={HOME_BEST_COUNTRIES_LINKED} />
-          <TopTenCard compact={compact} title={t("topCities")} items={HOME_BEST_CITIES_LINKED} />
-          <TopTenCard compact={compact} title={t("topPlaces")} items={HOME_BEST_PLACES_LINKED} />
+          <TopTenCard compact={compact} title={t.topCountries} items={HOME_BEST_COUNTRIES_LINKED} />
+          <TopTenCard compact={compact} title={t.topCities} items={HOME_BEST_CITIES_LINKED} />
+          <TopTenCard compact={compact} title={t.topPlaces} items={HOME_BEST_PLACES_LINKED} />
         </div>
       </div>
     </section>

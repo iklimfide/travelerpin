@@ -71,6 +71,8 @@
     "backToSearch": "Back to search",
     "addCustomCity": "Add \"{name}\" as city",
     "addCustomPark": "Add \"{name}\" as park",
+    "pinAction": "Pin destination",
+    "unpinAction": "Remove pin",
     "customCityPrompt": "Add {name} to your map. Pick a country.",
     "customParkPrompt": "Add {name} to your map. Pick country and type.",
     "addCountryFirst": "Add a country to your map first, or include a country name in your search."

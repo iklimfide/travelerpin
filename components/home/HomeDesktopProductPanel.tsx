@@ -1,9 +1,11 @@
+"use client";
+
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
 import { HomeBelowFoldSections } from "@/components/home/HomeBelowFoldSections";
 import { BRAND } from "@/lib/constants";
 import { DEMO_PERSONA } from "@/lib/data/demo-persona";
 import { getDemoLatestPinned } from "@/lib/data/demo-latest-pinned";
+import { translateHome } from "@/lib/i18n/client-messages";
 import { profileAllPath, profilePath } from "@/lib/seo/site";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 
@@ -51,12 +53,12 @@ function DashboardStat({
   return <div className={className}>{content}</div>;
 }
 
-export async function HomeDesktopProductPanel({
+export function HomeDesktopProductPanel({
   countries,
   cities,
   worldPercent,
 }: HomeDesktopProductPanelProps) {
-  const t = await getTranslations("home");
+  const t = translateHome;
   const latestPinned = getDemoLatestPinned();
   const demoAllHref = profileAllPath(DEMO_PERSONA.username);
 

@@ -1,20 +1,23 @@
 import type { ReactNode } from "react";
 import { DashboardBottomBar } from "@/components/dashboard/DashboardBottomBar";
+import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
 import { NotificationsProvider } from "@/components/notifications/NotificationsProvider";
 
 type OwnProfileShellProps = {
-  username: string;
+  ownProfile: BottomBarOwnProfile | null;
   children: ReactNode;
 };
 
-/** Bottom bar + notifications for signed-in users. Requires DashboardAddProvider above. */
-export function OwnProfileShell({ username, children }: OwnProfileShellProps) {
-  return (
-    <NotificationsProvider username={username}>
-      <div className="dashboard-shell">
-        {children}
-        <DashboardBottomBar username={username} />
-      </div>
-    </NotificationsProvider>
+/** Bottom bar for all users; notifications when signed in. Requires DashboardAddProvider above. */
+export function OwnProfileShell({ ownProfile, children }: OwnProfileShellProps) {
+  const shell = (
+    <div className="dashboard-shell">
+      {children}
+      <DashboardBottomBar ownProfile={ownProfile} />
+    </div>
   );
+
+  if (!ownProfile) return shell;
+
+  return <NotificationsProvider username={ownProfile.username}>{shell}</NotificationsProvider>;
 }

@@ -413,15 +413,20 @@ export function NotificationsPanel({
         )}
       </div>
 
-      {isModal && !detailGroup ? (
+      {isModal && onClose ? (
         <div className="notifications-page__footer">
-          <button
-            type="button"
-            className="notifications-page__mark-all"
-            onClick={handleMarkAllRead}
-            disabled={pending}
-          >
-            {notificationMessages.markAllRead}
+          {!detailGroup ? (
+            <button
+              type="button"
+              className="notifications-page__mark-all"
+              onClick={handleMarkAllRead}
+              disabled={pending}
+            >
+              {notificationMessages.markAllRead}
+            </button>
+          ) : null}
+          <button type="button" className="notifications-page__modal-close" onClick={onClose}>
+            {shareMessages.close}
           </button>
         </div>
       ) : null}

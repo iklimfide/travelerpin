@@ -1,12 +1,14 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
 import { WORLD_COUNTRY_TOTAL, worldCoveragePercent } from "@/lib/utils/profile-page";
+import { translateProfile } from "@/lib/i18n/client-messages";
 
 type ProfileWorldProgressProps = {
   countryCount: number;
 };
 
-export async function ProfileWorldProgress({ countryCount }: ProfileWorldProgressProps) {
-  const t = await getTranslations("profile");
+export function ProfileWorldProgress({ countryCount }: ProfileWorldProgressProps) {
+  const t = translateProfile;
   const coverage = worldCoveragePercent(countryCount);
 
   return (
