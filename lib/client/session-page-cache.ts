@@ -90,9 +90,25 @@ export function invalidateProfileCache(username: string): void {
   }
 }
 
+export const PROFILE_DATA_STALE_EVENT = "tp:profile-data-stale";
+
+/** Bust profile session cache and ask mounted profile views to refetch. */
+export function notifyProfileDataChanged(username?: string | null): void {
+  const normalized = username?.trim().toLowerCase() ?? getOwnUsername();
+  if (!normalized) return;
+
+  invalidateProfileCache(normalized);
+
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent(PROFILE_DATA_STALE_EVENT, {
+      detail: { username: normalized },
+    })
+  );
+}
+
 export function invalidateOwnProfileCache(): void {
-  const username = getOwnUsername();
-  if (username) invalidateProfileCache(username);
+  notifyProfileDataChanged();
 }
 
 const SETTINGS_CACHE_KEY = `tp:v${CACHE_VERSION}:settings`;

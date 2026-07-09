@@ -407,7 +407,6 @@
     "tripBadgeFavorite": "Favorite",
     "tripBadgeDayTrip": "City",
     "tripVisitCount": "{count, plural, one {# visit} other {# visits}}",
-    "tripDefaultNote": "A pinned stop on the travel map.",
     "summaryTitle": "Summary",
     "summaryTopVisit": "Most visited",
     "summaryTopVisitEmpty": "Add cities to see your most active location.",

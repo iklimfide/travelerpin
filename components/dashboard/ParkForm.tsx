@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { LIMITS } from "@/lib/constants";
 import { translateCommon, translatePark } from "@/lib/i18n/client-messages";
 import { addPark } from "@/lib/client/park-actions";
+import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
 import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEditor";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
@@ -59,7 +59,6 @@ export function ParkForm({
   const isEdit = Boolean(park);
   const t = translatePark;
   const tCommon = translateCommon;
-  const router = useRouter();
   const modal = useModal();
   const toast = useToast();
   const abortRef = useRef<AbortController | null>(null);
@@ -200,7 +199,7 @@ export function ParkForm({
         setSearchQuery("");
         setParkName("");
         setSearchResults([]);
-        router.refresh();
+        notifyProfileDataChanged();
         onSuccess?.();
       } finally {
         setLoading(false);
@@ -214,7 +213,6 @@ export function ParkForm({
       needsCountryPicker,
       note,
       onSuccess,
-      router,
       t,
       toast,
       trimmedQuery,
@@ -423,14 +421,19 @@ export function ParkForm({
       if (!res.ok) {
         const data = await res.json();
         const message = (data.error as string) ?? "Failed to save park";
+        if (res.status === 404 && isEdit) {
+          notifyProfileDataChanged();
+          onSuccess?.();
+          return;
+        }
         toast.show(message);
         await modal.alert(message, { variant: "error" });
         return;
       }
 
       toast.show(isEdit ? t("saveSuccess") : t("parkAdded"));
+      notifyProfileDataChanged();
       onSuccess?.();
-      router.refresh();
     } finally {
       setLoading(false);
     }

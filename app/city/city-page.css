@@ -1319,6 +1319,11 @@ html.dark .city-page__memory-lightbox-note {
   color: var(--city-blue);
 }
 
+.hub-place-card__location > div {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .hub-place-card__place-name {
   display: block;
   font-size: 22px;
@@ -1326,6 +1331,9 @@ html.dark .city-page__memory-lightbox-note {
   letter-spacing: -0.03em;
   line-height: 1.15;
   color: #071126;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .hub-place-card__country-name {
@@ -1335,6 +1343,9 @@ html.dark .city-page__memory-lightbox-note {
   font-weight: 600;
   color: var(--city-muted);
   text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .hub-place-card__country-name:hover {

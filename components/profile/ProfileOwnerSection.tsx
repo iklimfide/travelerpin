@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { profileMessages } from "@/lib/i18n/client-messages";
 
-export type ProfileOwnerPanelMode = "closed" | "show" | "edit";
+export type ProfileOwnerPanelMode = "closed" | "edit";
 
 type ProfileOwnerSectionProps = {
   title: string;
@@ -11,12 +11,11 @@ type ProfileOwnerSectionProps = {
   panel: ProfileOwnerPanelMode;
   onPanelChange: (mode: ProfileOwnerPanelMode) => void;
   onAdd: () => void;
-  showContent: ReactNode;
   editContent: ReactNode;
 };
 
-function togglePanel(current: ProfileOwnerPanelMode, target: "show" | "edit"): ProfileOwnerPanelMode {
-  return current === target ? "closed" : target;
+function toggleEditPanel(current: ProfileOwnerPanelMode): ProfileOwnerPanelMode {
+  return current === "edit" ? "closed" : "edit";
 }
 
 export function ProfileOwnerSection({
@@ -25,7 +24,6 @@ export function ProfileOwnerSection({
   panel,
   onPanelChange,
   onAdd,
-  showContent,
   editContent,
 }: ProfileOwnerSectionProps) {
   return (
@@ -38,15 +36,8 @@ export function ProfileOwnerSection({
         <div className="profile-owner-section__actions">
           <button
             type="button"
-            className={`profile-owner-section__btn${panel === "show" ? " profile-owner-section__btn--active" : ""}`}
-            onClick={() => onPanelChange(togglePanel(panel, "show"))}
-          >
-            {profileMessages.ownerShow}
-          </button>
-          <button
-            type="button"
             className={`profile-owner-section__btn${panel === "edit" ? " profile-owner-section__btn--active" : ""}`}
-            onClick={() => onPanelChange(togglePanel(panel, "edit"))}
+            onClick={() => onPanelChange(toggleEditPanel(panel))}
           >
             {profileMessages.ownerEdit}
           </button>
@@ -55,10 +46,6 @@ export function ProfileOwnerSection({
           </button>
         </div>
       </div>
-
-      {panel === "show" ? (
-        <div className="profile-owner-section__body profile-owner-section__body--show">{showContent}</div>
-      ) : null}
 
       {panel === "edit" ? (
         <div className="profile-owner-section__body profile-owner-section__body--edit">{editContent}</div>

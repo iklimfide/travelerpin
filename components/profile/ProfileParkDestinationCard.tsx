@@ -7,14 +7,12 @@ import type { ProfileParkDestination } from "@/lib/utils/profile-all-destination
 
 type ProfileParkDestinationCardProps = {
   park: ProfileParkDestination;
-  emptyNote: string;
   layout?: "row" | "grid";
   actions?: ReactNode;
 };
 
 export function ProfileParkDestinationCard({
   park,
-  emptyNote,
   layout = "grid",
   actions,
 }: ProfileParkDestinationCardProps) {
@@ -32,7 +30,7 @@ export function ProfileParkDestinationCard({
             className="profile-trip-title-link"
           />
         </h3>
-        <p>{park.note?.trim() || emptyNote}</p>
+        {park.note?.trim() ? <p>{park.note.trim()}</p> : null}
         <div className="profile-trip-meta">
           <span className="profile-chip">
             {/* eslint-disable-next-line @next/next/no-img-element */}

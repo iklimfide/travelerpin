@@ -8,8 +8,6 @@ type ProfileTripsRowProps = {
   allLabel: string;
   allHref?: string;
   badgeLabels: Record<NonNullable<ProfileTrip["badge"]>, string>;
-  visitCountLabel: (count: number) => string;
-  emptyNote: string;
 };
 
 export function ProfileTripsRow({
@@ -18,13 +16,11 @@ export function ProfileTripsRow({
   allLabel,
   allHref,
   badgeLabels,
-  visitCountLabel,
-  emptyNote,
 }: ProfileTripsRowProps) {
   if (trips.length === 0 && !allHref) return null;
 
   return (
-    <section className="profile-section">
+    <section className="profile-section profile-trips-section">
       <div className="profile-section-head">
         <h2 className="profile-section-title">{title}</h2>
         {allHref ? (
@@ -37,19 +33,11 @@ export function ProfileTripsRow({
       </div>
 
       {trips.length > 0 ? (
-        <div className="profile-map-panel profile-trips-panel">
-          <div className="profile-panel-scroll scrollbar-thin">
-            <div className="profile-cards-row" role="list" aria-label={title}>
-              {trips.map((trip) => (
-                <ProfileTripCard
-                  key={trip.id}
-                  trip={trip}
-                  badgeLabels={badgeLabels}
-                  visitCountLabel={visitCountLabel}
-                  emptyNote={emptyNote}
-                />
-              ))}
-            </div>
+        <div className="profile-trips-scroll scrollbar-thin">
+          <div className="profile-trips-track" role="list" aria-label={title}>
+            {trips.map((trip) => (
+              <ProfileTripCard key={trip.id} trip={trip} badgeLabels={badgeLabels} />
+            ))}
           </div>
         </div>
       ) : null}

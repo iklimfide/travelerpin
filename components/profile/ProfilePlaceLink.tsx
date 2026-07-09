@@ -46,13 +46,15 @@ export function ProfileCountryLink({
   slug,
   name,
   className,
+  title,
 }: {
   slug: string | null;
   name: string;
   className?: string;
+  title?: string;
 }) {
   return (
-    <ProfilePlaceLink href={slug ? countryPath(slug) : null} className={className}>
+    <ProfilePlaceLink href={slug ? countryPath(slug) : null} className={className} title={title ?? name}>
       {name}
     </ProfilePlaceLink>
   );

@@ -37,7 +37,6 @@ export type ProfileTrip = {
   countrySlug: string | null;
   imageUrl: string;
   note: string | null;
-  visitCount: number;
   createdAt: string;
   badge: "recent" | "favorite" | "dayTrip" | null;
 };
@@ -116,7 +115,6 @@ export function buildProfileTrips(
     countrySlug: countryHubSlug(city.country_code),
     imageUrl: DEFAULT_CITY_HERO_IMAGE,
     note: city.note,
-    visitCount: cityVisitCount(city),
     createdAt: city.created_at,
     badge: tripBadge(city, city.created_at === recentThreshold),
   }));
@@ -133,7 +131,6 @@ export function buildProfileTrips(
     countrySlug: countryHubSlug(park.country_code),
     imageUrl: parkTripImage(park),
     note: park.note,
-    visitCount: 1,
     createdAt: park.created_at,
     badge: null,
   }));

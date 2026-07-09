@@ -65,8 +65,12 @@ export function CountryPopup({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
-          <div>
-            <h2 id="country-popup-title" className="text-xl font-semibold text-white">
+          <div className="min-w-0 flex-1">
+            <h2
+              id="country-popup-title"
+              className="truncate text-xl font-semibold text-white"
+              title={countryName}
+            >
               {countryName}
             </h2>
             <p className="mt-0.5 text-sm text-slate-500">{countryCode}</p>

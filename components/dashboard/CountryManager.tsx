@@ -6,7 +6,9 @@ import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
 import { countryMessages, wishlistMessages } from "@/lib/i18n/client-messages";
 import { CountryCityPickerSheet } from "@/components/map/CountryCityPickerSheet";
+import { ProfileCountryLink } from "@/components/profile/ProfilePlaceLink";
 import { COUNTRY_LIST, searchCountries, getCountryName } from "@/lib/data/countries";
+import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { addVisitedCountry } from "@/lib/client/country-actions";
 import {
   countryHasMappedPlaces,
@@ -262,7 +264,17 @@ export function CountryManager({
                   className={`grid grid-cols-[minmax(0,1fr)_3.25rem_3.25rem] items-center gap-2 border-b px-2 py-2.5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_5rem_5rem] sm:px-3${embedded ? " border-[#eef2f7]" : " border-slate-800/80"}`}
                 >
                   <div className="min-w-0">
-                    <p className={`truncate text-sm${embedded ? " text-[var(--profile-text)]" : " text-slate-200"}`}>{row.name}</p>
+                    <p
+                      className={`truncate text-sm${embedded ? " text-[var(--profile-text)]" : " text-slate-200"}`}
+                      title={row.name}
+                    >
+                      <ProfileCountryLink
+                        slug={resolveCountryHubSlug(row.code, row.name)}
+                        name={row.name}
+                        className={embedded ? "profile-owner-hub-link" : "profile-owner-hub-link text-slate-200"}
+                        title={row.name}
+                      />
+                    </p>
                     <p className={`text-xs${embedded ? " text-[#94a3b8]" : " text-slate-600"}`}>{row.code}</p>
                   </div>
 

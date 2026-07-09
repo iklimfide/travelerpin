@@ -42,11 +42,17 @@ export function CityPopup({ city, onClose }: CityPopupProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-slate-700 px-5 py-4">
-          <div>
-            <h2 id="city-popup-title" className="text-lg font-semibold text-white">
+          <div className="min-w-0 flex-1">
+            <h2
+              id="city-popup-title"
+              className="truncate text-lg font-semibold text-white"
+              title={city.city_name}
+            >
               {city.city_name}
             </h2>
-            <p className="text-sm text-slate-400">{city.country_name}</p>
+            <p className="truncate text-sm text-slate-400" title={city.country_name}>
+              {city.country_name}
+            </p>
             {visitDatesLabel ? (
               <p className="mt-1 text-sm text-blue-300/90">{visitDatesLabel}</p>
             ) : null}

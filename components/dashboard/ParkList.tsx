@@ -1,17 +1,29 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { ParkForm } from "@/components/dashboard/ParkForm";
 import { ProfileDestinationCardActions } from "@/components/profile/ProfileDestinationCardActions";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
+import { ProfileCountryLink, ProfileParkLink } from "@/components/profile/ProfilePlaceLink";
 import { useModal } from "@/components/ui/ModalProvider";
+import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
+import { findParkHubSlug } from "@/lib/data/park-hubs";
+import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
 import { commonMessages, modalMessages, parkMessages } from "@/lib/i18n/client-messages";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import type { ParkType, VisitedCountry, VisitedPark } from "@/types/database";
 
 const ALL_COUNTRIES = "ALL";
+
+const ownerHubLinkClass = (embedded: boolean, muted = false) =>
+  [
+    "profile-owner-hub-link",
+    embedded && muted ? "profile-owner-hub-link--muted" : "",
+    !embedded && muted ? "font-normal text-slate-400" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
 type ParkListProps = {
   parks: VisitedPark[];
@@ -34,7 +46,6 @@ function sortParks(parks: VisitedPark[], countryFilter: string): VisitedPark[] {
 }
 
 export function ParkList({ parks, countries, embedded = false }: ParkListProps) {
-  const router = useRouter();
   const modal = useModal();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
@@ -73,11 +84,15 @@ export function ParkList({ parks, countries, embedded = false }: ParkListProps) 
 
     const res = await fetch(`/api/parks/${id}`, { method: "DELETE" });
     if (!res.ok) {
+      if (res.status === 404) {
+        notifyProfileDataChanged();
+        return;
+      }
       const data = await res.json();
       await modal.alert(data.error ?? "Failed to delete park", { variant: "error" });
       return;
     }
-    router.refresh();
+    notifyProfileDataChanged();
   }
 
   if (adding) {
@@ -159,16 +174,43 @@ export function ParkList({ parks, countries, embedded = false }: ParkListProps) 
                   : "max-h-[min(28rem,60vh)] divide-y divide-slate-800 overflow-y-auto rounded-xl border border-slate-700 scrollbar-thin"
               }
             >
-              {filteredParks.map((park) => (
+              {filteredParks.map((park) => {
+                const parkDisplayName = formatCityDisplayName(park.park_name);
+                const parkSlug = findParkHubSlug(park.park_name, park.country_code);
+                const countrySlug = resolveCountryHubSlug(park.country_code, park.country_name);
+                const fullTitle =
+                  countryFilter === ALL_COUNTRIES
+                    ? `${parkDisplayName}, ${park.country_name}`
+                    : parkDisplayName;
+
+                return (
                 <li
                   key={park.id}
                   className={`flex items-center justify-between gap-3 px-4 py-3${embedded ? " profile-owner-table-row" : ""}`}
                 >
-                  <div className="min-w-0">
-                    <p className={`truncate font-medium ${embedded ? "profile-owner-show-primary" : "text-white"}`}>
-                      {formatCityDisplayName(park.park_name)}
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className={`truncate font-medium ${embedded ? "profile-owner-show-primary" : "text-white"}`}
+                      title={fullTitle}
+                    >
+                      <ProfileParkLink
+                        slug={parkSlug}
+                        name={parkDisplayName}
+                        className={ownerHubLinkClass(embedded)}
+                        title={parkDisplayName}
+                      />
                       {countryFilter === ALL_COUNTRIES ? (
-                        <span className="font-normal text-slate-400">, {park.country_name}</span>
+                        <>
+                          <span className={embedded ? "profile-owner-show-secondary" : "font-normal text-slate-400"}>
+                            ,{" "}
+                          </span>
+                          <ProfileCountryLink
+                            slug={countrySlug}
+                            name={park.country_name}
+                            className={ownerHubLinkClass(embedded, true)}
+                            title={park.country_name}
+                          />
+                        </>
                       ) : null}
                     </p>
                     <p className="text-xs text-slate-500">
@@ -203,7 +245,8 @@ export function ParkList({ parks, countries, embedded = false }: ParkListProps) 
                     )}
                   </div>
                 </li>
-              ))}
+              );
+              })}
             </ul>
           )}
         </>

@@ -229,8 +229,6 @@ export function PublicProfileViewClient({
                   favorite: t("tripBadgeFavorite"),
                   dayTrip: t("tripBadgeDayTrip"),
                 }}
-                visitCountLabel={(count) => t("tripVisitCount", { count })}
-                emptyNote={t("tripDefaultNote")}
               />
 
               {ownerTools ? (

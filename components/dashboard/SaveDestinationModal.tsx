@@ -1193,13 +1193,18 @@ export function SaveDestinationModal({
                           href={pageHref}
                           className="save-destination-modal__name save-destination-modal__name-link"
                           onClick={onClose}
+                          title={row.title}
                         >
                           {row.title}
                         </Link>
                       ) : (
-                        <span className="save-destination-modal__name">{row.title}</span>
+                        <span className="save-destination-modal__name" title={row.title}>
+                          {row.title}
+                        </span>
                       )}
-                      <span className="save-destination-modal__meta">{row.subtitle}</span>
+                      <span className="save-destination-modal__meta" title={row.subtitle}>
+                        {row.subtitle}
+                      </span>
                     </span>
                     <button
                       type="button"

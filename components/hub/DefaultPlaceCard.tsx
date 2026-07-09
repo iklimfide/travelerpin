@@ -47,9 +47,15 @@ export function DefaultPlaceCard({
                 <circle cx="12" cy="11" r="2.2" fill="currentColor" stroke="none" />
               </svg>
             </span>
-            <div>
-              <strong className="hub-place-card__place-name">{placeName}</strong>
-              <Link href={countryPath(countrySlug)} className="hub-place-card__country-name">
+            <div className="min-w-0">
+              <strong className="hub-place-card__place-name" title={placeName}>
+                {placeName}
+              </strong>
+              <Link
+                href={countryPath(countrySlug)}
+                className="hub-place-card__country-name"
+                title={countryName}
+              >
                 {countryName}
               </Link>
             </div>

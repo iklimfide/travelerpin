@@ -29,11 +29,17 @@ export function ProfileHeroCover({
         <div className="profile-hero-top">
           {residencePill ? (
             residenceHref ? (
-              <Link href={residenceHref} className="profile-city-pill profile-city-pill--link">
+              <Link
+                href={residenceHref}
+                className="profile-city-pill profile-city-pill--link"
+                title={residence ?? undefined}
+              >
                 {residencePill}
               </Link>
             ) : (
-              <div className="profile-city-pill">{residencePill}</div>
+              <div className="profile-city-pill" title={residence ?? undefined}>
+                {residencePill}
+              </div>
             )
           ) : null}
         </div>

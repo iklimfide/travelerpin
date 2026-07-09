@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { CityForm } from "@/components/dashboard/CityForm";
 import { ProfileDestinationCardActions } from "@/components/profile/ProfileDestinationCardActions";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
+import { ProfileCityLink, ProfileCountryLink } from "@/components/profile/ProfilePlaceLink";
 import { useModal } from "@/components/ui/ModalProvider";
+import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
+import { findCityHubSlug } from "@/lib/data/city-hubs";
+import { buildCitySlug } from "@/lib/utils/city-slug";
 import {
   cityMessages,
   commonMessages,
@@ -17,6 +21,15 @@ import { getIntlLocale } from "@/lib/i18n/config";
 import type { VisitedCity, VisitedCountry } from "@/types/database";
 
 const ALL_COUNTRIES = "ALL";
+
+const ownerHubLinkClass = (embedded: boolean, muted = false) =>
+  [
+    "profile-owner-hub-link",
+    embedded && muted ? "profile-owner-hub-link--muted" : "",
+    !embedded && muted ? "font-normal text-slate-400" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
 type CityListProps = {
   cities: VisitedCity[];
@@ -172,17 +185,42 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
                   (count) => translateCity("visitCount", { count }),
                   getIntlLocale()
                 );
+                const citySlug =
+                  findCityHubSlug(city.country_code, city.city_name) ?? buildCitySlug(city.city_name);
+                const countrySlug = resolveCountryHubSlug(city.country_code, city.country_name);
+                const fullTitle =
+                  countryFilter === ALL_COUNTRIES
+                    ? `${city.city_name}, ${city.country_name}`
+                    : city.city_name;
 
                 return (
                 <li
                   key={city.id}
                   className={`flex items-center justify-between gap-3 px-4 py-3${embedded ? " profile-owner-table-row" : ""}`}
                 >
-                  <div className="min-w-0">
-                    <p className={`truncate font-medium ${embedded ? "profile-owner-show-primary" : "text-white"}`}>
-                      {city.city_name}
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className={`truncate font-medium ${embedded ? "profile-owner-show-primary" : "text-white"}`}
+                      title={fullTitle}
+                    >
+                      <ProfileCityLink
+                        slug={citySlug}
+                        name={city.city_name}
+                        className={ownerHubLinkClass(embedded)}
+                        title={city.city_name}
+                      />
                       {countryFilter === ALL_COUNTRIES ? (
-                        <span className="font-normal text-slate-400">, {city.country_name}</span>
+                        <>
+                          <span className={embedded ? "profile-owner-show-secondary" : "font-normal text-slate-400"}>
+                            ,{" "}
+                          </span>
+                          <ProfileCountryLink
+                            slug={countrySlug}
+                            name={city.country_name}
+                            className={ownerHubLinkClass(embedded, true)}
+                            title={city.country_name}
+                          />
+                        </>
                       ) : null}
                     </p>
                     {visitSummary ? (

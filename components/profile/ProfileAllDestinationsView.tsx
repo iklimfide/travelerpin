@@ -21,7 +21,6 @@ import {
   profileDestinationCityCountLabel,
   profileDestinationParkCountLabel,
   profileMessages,
-  profileVisitCountLabel,
   saveDestinationMessages,
 } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
@@ -337,8 +336,6 @@ export function ProfileAllDestinationsView({
         key={trip.id}
         trip={trip}
         badgeLabels={badgeLabels}
-        visitCountLabel={profileVisitCountLabel}
-        emptyNote={profileMessages.tripDefaultNote}
         layout="grid"
         actions={
           ownerActions ? (
@@ -363,7 +360,6 @@ export function ProfileAllDestinationsView({
       <ProfileParkDestinationCard
         key={park.id}
         park={park}
-        emptyNote={profileMessages.tripDefaultNote}
         actions={
           ownerActions ? (
             <ProfileDestinationCardActions

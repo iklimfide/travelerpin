@@ -302,8 +302,10 @@ export function CountryCityPicker({
                     onChange={() => toggleCity(city)}
                     className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-600 bg-slate-900 text-blue-500 focus:ring-blue-500/40 disabled:opacity-60"
                   />
-                  <span className="min-w-0">
-                    <span className="block text-sm text-slate-100">{city.name}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm text-slate-100" title={city.name}>
+                      {city.name}
+                    </span>
                     {onMap && (
                       <span className="mt-0.5 block text-xs text-blue-400/80">
                         {mapMessages.cityOnMap}

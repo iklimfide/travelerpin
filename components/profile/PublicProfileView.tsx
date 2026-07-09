@@ -252,8 +252,6 @@ export async function PublicProfileView({
                   favorite: t("tripBadgeFavorite"),
                   dayTrip: t("tripBadgeDayTrip"),
                 }}
-                visitCountLabel={(count) => t("tripVisitCount", { count })}
-                emptyNote={t("tripDefaultNote")}
               />
 
               {ownerTools ? (

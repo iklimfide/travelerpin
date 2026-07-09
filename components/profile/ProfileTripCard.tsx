@@ -8,8 +8,6 @@ import type { ProfileTrip } from "@/lib/utils/profile-page";
 type ProfileTripCardProps = {
   trip: ProfileTrip;
   badgeLabels: Record<NonNullable<ProfileTrip["badge"]>, string>;
-  visitCountLabel: (count: number) => string;
-  emptyNote: string;
   layout?: "row" | "grid";
   actions?: ReactNode;
 };
@@ -17,8 +15,6 @@ type ProfileTripCardProps = {
 export function ProfileTripCard({
   trip,
   badgeLabels,
-  visitCountLabel,
-  emptyNote,
   layout = "row",
   actions,
 }: ProfileTripCardProps) {
@@ -27,7 +23,13 @@ export function ProfileTripCard({
       className={`profile-trip${layout === "grid" ? " profile-trip--grid" : ""}`}
     >
       <div className="profile-trip-image">
-        <Image src={trip.imageUrl} alt="" fill sizes="245px" className="object-cover" />
+        <Image
+          src={trip.imageUrl}
+          alt=""
+          fill
+          sizes="200px"
+          className="profile-trip-image__photo object-cover"
+        />
         {trip.badge ? (
           <span className="profile-trip-badge">{badgeLabels[trip.badge]}</span>
         ) : trip.kind === "park" && trip.parkType ? (
@@ -41,16 +43,18 @@ export function ProfileTripCard({
               slug={trip.citySlug}
               name={trip.placeName}
               className="profile-trip-title-link"
+              title={trip.placeName}
             />
           ) : (
             <ProfileParkLink
               slug={trip.parkSlug}
               name={trip.placeName}
               className="profile-trip-title-link"
+              title={trip.placeName}
             />
           )}
         </h3>
-        <p>{trip.note?.trim() || emptyNote}</p>
+        {trip.note?.trim() ? <p>{trip.note.trim()}</p> : null}
         <div className="profile-trip-meta">
           <span className="profile-chip">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -65,11 +69,9 @@ export function ProfileTripCard({
               slug={trip.countrySlug}
               name={trip.countryName}
               className="profile-chip-link"
+              title={trip.countryName}
             />
           </span>
-          {trip.kind === "city" ? (
-            <span className="profile-chip">{visitCountLabel(trip.visitCount)}</span>
-          ) : null}
         </div>
         {actions}
       </div>

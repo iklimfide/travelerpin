@@ -354,8 +354,10 @@ export function CountryParkPicker({
                     onChange={() => togglePark(park)}
                     className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-500/40 disabled:opacity-60"
                   />
-                  <span className="min-w-0">
-                    <span className="block text-sm text-slate-100">{park.name}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm text-slate-100" title={park.name}>
+                      {park.name}
+                    </span>
                     <span className="mt-0.5 block text-xs text-slate-500">{typeLabel}</span>
                     {onMap && (
                       <span className="mt-0.5 block text-xs text-emerald-400/80">
