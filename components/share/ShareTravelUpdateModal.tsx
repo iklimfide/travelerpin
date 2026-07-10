@@ -143,7 +143,7 @@ export function ShareTravelUpdateModal({
             type="button"
             disabled={downloading !== null}
             onClick={() => void downloadImage("square")}
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-100 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+            className="share-travel-update-btn rounded-2xl px-4 py-3 text-sm font-semibold transition-colors"
           >
             {downloading === "square"
               ? profileMessages.travelUpdateDownloading
@@ -153,7 +153,7 @@ export function ShareTravelUpdateModal({
             type="button"
             disabled={downloading !== null}
             onClick={() => void downloadImage("story")}
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-100 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+            className="share-travel-update-btn rounded-2xl px-4 py-3 text-sm font-semibold transition-colors"
           >
             {downloading === "story"
               ? profileMessages.travelUpdateDownloading

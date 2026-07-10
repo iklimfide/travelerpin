@@ -100,7 +100,7 @@
     "heroHeadline": "Traveler's Pin Map",
     "heroDescription": "Pin the countries you've visited and answer \"How many countries have you visited?\" with a single link.",
     "eyebrow": "Your personal travel map",
-    "heroCtaPrimary": "Create your free map",
+    "heroCtaPrimary": "Create your free travel map",
     "heroCtaSecondary": "Explore a sample map",
     "heroPointFree": "Free to start",
     "heroPointPlaces": "Countries & cities",
@@ -362,7 +362,8 @@
     "travelUpdateSubtitle": "Your travel map has grown since your last share.",
     "travelUpdateShareTitle": "Share your travel map",
     "travelUpdateShareSubtitle": "Download a share card with your current map and stats, and share it on your social media.",
-    "travelUpdateDownloadCard": "Download share card",
+    "travelUpdateDownloadCard": "Save an image to share",
+    "travelUpdateImageHint": "We've prepared images you can download with one tap to share your best on social media.",
     "travelUpdateCountries": "Countries",
     "travelUpdateCities": "Cities",
     "travelUpdateNationalParks": "Natura&Parks",
@@ -371,9 +372,8 @@
     "travelUpdateNewCountries": "New countries:",
     "shareTravelUpdate": "Share Travel Update",
     "shareCurrentMap": "Share your travel",
-    "travelUpdateImageHint": "Both cards are screenshots from your profile — story shows the header, square shows your map with your name.",
-    "travelUpdateDownloadSquare": "Square (map)",
-    "travelUpdateDownloadStory": "Story (profile)",
+    "travelUpdateDownloadSquare": "For feed posts",
+    "travelUpdateDownloadStory": "For Stories",
     "travelUpdateDownloading": "Preparing…",
     "storyCaptureMissing": "Open your profile page and try again.",
     "storyCaptureFailed": "Could not capture your profile. Refresh the page and try again.",
@@ -795,5 +795,20 @@
     "columnWant": "Want",
     "legendVisited": "Visited",
     "legendWishlist": "Want to visit"
+  },
+  "footer": {
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "imprint": "Imprint",
+    "contact": "Contact"
+  },
+  "legal": {
+    "termsTitle": "Terms of Service",
+    "policyTitle": "Privacy Policy",
+    "imprintTitle": "Imprint",
+    "contactTitle": "Contact",
+    "contactEmailLabel": "Email",
+    "contactIntro": "Questions, feedback, or support — we'd love to hear from you.",
+    "backToHome": "← Back to home"
   }
 }

@@ -32,8 +32,8 @@ export function HomeFinalCta({ compact = false }: { compact?: boolean }) {
         href="/register"
         className={
           compact
-            ? "inline-flex w-full max-w-[280px] items-center justify-center rounded-full border border-[#d8e1ef] bg-white px-4 py-2.5 text-[13px] font-bold text-[#2563eb]"
-            : "inline-flex w-full min-w-[190px] items-center justify-center rounded-full border border-[#d8e1ef] bg-white px-[22px] py-[13px] text-[15px] font-extrabold text-[#2563eb] transition hover:-translate-y-px hover:shadow-[0_10px_22px_rgba(15,23,42,0.08)] sm:w-auto"
+            ? "home-cta-primary inline-flex w-full max-w-[280px] items-center justify-center rounded-full px-4 py-2.5 text-[13px] font-bold shadow-[0_8px_18px_rgba(37,99,235,0.22)] transition"
+            : "home-cta-primary inline-flex w-full min-w-[190px] items-center justify-center rounded-full px-[22px] py-[13px] text-[15px] font-extrabold shadow-[0_12px_26px_rgba(37,99,235,0.28)] transition hover:-translate-y-px sm:w-auto"
         }
       >
         {t("heroCtaPrimary")}

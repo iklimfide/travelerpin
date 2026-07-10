@@ -52,8 +52,8 @@ export function HomeExplainer({
         href="/register"
         className={
           compact
-            ? "inline-flex w-full max-w-[280px] shrink-0 items-center justify-center rounded-full bg-[#2563eb] px-4 py-2.5 text-[13px] font-bold text-white shadow-[0_8px_18px_rgba(37,99,235,0.22)] transition hover:bg-[#1d4ed8]"
-            : "inline-flex w-full shrink-0 items-center justify-center rounded-full bg-[#2563eb] px-[22px] py-[13px] text-[15px] font-extrabold text-white shadow-[0_12px_26px_rgba(37,99,235,0.28)] transition hover:-translate-y-px hover:bg-[#1d4ed8] sm:w-auto"
+            ? "home-cta-primary inline-flex w-full max-w-[280px] shrink-0 items-center justify-center rounded-full px-4 py-2.5 text-[13px] font-bold shadow-[0_8px_18px_rgba(37,99,235,0.22)] transition"
+            : "home-cta-primary inline-flex w-full shrink-0 items-center justify-center rounded-full px-[22px] py-[13px] text-[15px] font-extrabold shadow-[0_12px_26px_rgba(37,99,235,0.28)] transition hover:-translate-y-px sm:w-auto"
         }
       >
         {t("cta")}

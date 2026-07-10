@@ -135,7 +135,7 @@ export function HomeDesktopProductPanel({
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center rounded-full bg-[#2563eb] px-[22px] py-[13px] text-[15px] font-extrabold text-white shadow-[0_12px_26px_rgba(37,99,235,0.28)] transition hover:-translate-y-px hover:bg-[#1d4ed8]"
+              className="home-cta-primary inline-flex items-center justify-center rounded-full px-[22px] py-[13px] text-[15px] font-extrabold shadow-[0_12px_26px_rgba(37,99,235,0.28)] transition hover:-translate-y-px"
             >
               {t("heroCtaPrimary")}
             </Link>

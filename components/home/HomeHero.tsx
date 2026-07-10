@@ -26,7 +26,7 @@ export function HomeHero() {
       <div className="mb-[22px] flex flex-wrap items-center gap-3.5 max-sm:w-full max-sm:max-w-sm max-sm:flex-col max-sm:justify-center">
         <Link
           href="/register"
-          className="inline-flex items-center justify-center rounded-full bg-[#2563eb] px-[22px] py-[13px] text-[15px] font-extrabold text-white shadow-[0_12px_26px_rgba(37,99,235,0.28)] transition hover:-translate-y-px hover:bg-[#1d4ed8] max-sm:w-full"
+          className="home-cta-primary inline-flex items-center justify-center rounded-full px-[22px] py-[13px] text-[15px] font-extrabold shadow-[0_12px_26px_rgba(37,99,235,0.28)] transition hover:-translate-y-px max-sm:w-full"
         >
           {t("heroCtaPrimary")}
         </Link>

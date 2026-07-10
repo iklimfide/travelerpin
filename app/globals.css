@@ -845,6 +845,37 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   color: #ffffff !important;
 }
 
+/* Share travel update modal — white label on blue (light theme overrides .text-white) */
+.share-travel-update-btn {
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #ffffff !important;
+}
+
+.share-travel-update-btn:hover:not(:disabled) {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #ffffff !important;
+}
+
+.share-travel-update-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Home primary CTA — white label on blue (light theme overrides .text-white) */
+.home-cta-primary {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff !important;
+}
+
+.home-cta-primary:hover {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #ffffff !important;
+}
+
 /* Guest auth links on marketing pages */
 .home-guest-auth {
   display: flex;
@@ -892,7 +923,7 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   justify-content: flex-end;
   max-width: 1120px;
   margin: 0 auto;
-  padding: 16px 20px 0;
+  padding: 16px var(--profile-inset) 0;
 }
 
 .profile-page {
@@ -904,6 +935,8 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   --profile-primary: #2563eb;
   --profile-primary-soft: #dbeafe;
   --profile-shadow: 0 16px 40px rgba(25, 43, 68, 0.1);
+  --profile-inset: 8px;
+  --profile-stack-gap: 12px;
   background: var(--profile-bg);
   color: var(--profile-text);
   flex: 1;
@@ -1002,7 +1035,7 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 }
 
 .profile-hero {
-  padding: 18px 18px 0;
+  padding: 18px var(--profile-inset) 0;
 }
 
 .profile-hero-card {
@@ -1010,7 +1043,7 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   /* Extra bottom space so title/subtitle stay above the overlapping avatar. */
   min-height: 268px;
   padding: 22px 20px 128px;
-  border-radius: 0 0 30px 30px;
+  border-radius: 22px 22px 30px 30px;
   overflow: hidden;
   box-shadow: var(--profile-shadow);
   background: linear-gradient(135deg, #729ac6 0%, #a9c4df 44%, #c7daf0 100%);
@@ -1186,12 +1219,12 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 }
 
 .profile-main {
-  padding-bottom: 28px;
+  padding-bottom: 0;
 }
 
 .profile-card {
   position: relative;
-  margin: -70px 22px 0;
+  margin: -70px var(--profile-inset) 0;
   background: var(--profile-card);
   border-radius: 30px;
   padding: 76px 22px 28px;
@@ -1768,14 +1801,19 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 }
 
 .profile-section {
-  padding: 0 22px;
-  margin-top: 28px;
+  padding: 0 var(--profile-inset);
+  margin-top: var(--profile-stack-gap);
   min-width: 0;
 }
 
 @media (max-width: 719px) {
+  .profile-page {
+    --profile-inset: 6px;
+    --profile-stack-gap: 12px;
+  }
+
   .profile-hero {
-    padding-inline: 6px;
+    padding-inline: var(--profile-inset);
   }
 
   .profile-hero-card {
@@ -1783,7 +1821,7 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   }
 
   .profile-card {
-    margin-inline: 6px;
+    margin-inline: var(--profile-inset);
     padding-inline: 10px;
   }
 
@@ -1793,47 +1831,31 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   }
 
   .profile-section {
-    margin-top: 7px;
-    padding-inline: 6px;
+    padding-inline: var(--profile-inset);
   }
 
   .profile-section-head {
     margin-bottom: 4px;
   }
 
-  .profile-main {
-    padding-bottom: 7px;
-  }
-
   .profile-page--embedded .profile-main {
-    padding-bottom: 5px;
-  }
-
-  .profile-media-sections {
-    margin-top: 7px;
+    padding-bottom: var(--profile-stack-gap);
   }
 
   .profile-media-sections .city-page__section + .city-page__section {
-    margin-top: 4px;
+    margin-top: var(--profile-stack-gap);
   }
 
   .profile-cta {
-    margin-top: 7px;
-    margin-inline: 6px;
+    margin-inline: var(--profile-inset);
   }
 
   .profile-dashboard-tools {
-    padding-inline: 6px;
+    padding-inline: var(--profile-inset);
   }
 
   .profile-section.profile-next-route {
-    padding-inline: 6px;
-    margin-top: 7px;
-  }
-
-  .profile-dashboard-tools + .profile-section,
-  .profile-cta + .profile-section {
-    margin-top: 3px;
+    padding-inline: var(--profile-inset);
   }
 
   .profile-world-progress,
@@ -1848,18 +1870,11 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   --city-shadow: 0 14px 28px rgba(16, 32, 60, 0.08);
   --city-text: #142033;
   --city-muted: #7a8798;
-  /* Full width of profile shell — minimal side inset */
-  padding: 0 8px;
-  margin-top: 28px;
+  padding: 0 var(--profile-inset);
+  margin-top: var(--profile-stack-gap);
   min-width: 0;
   width: 100%;
   box-sizing: border-box;
-}
-
-@media (max-width: 719px) {
-  .profile-media-sections {
-    padding-inline: 6px;
-  }
 }
 
 .profile-media-sections .city-page__section {
@@ -1867,7 +1882,7 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 }
 
 .profile-media-sections .city-page__section + .city-page__section {
-  margin-top: 16px;
+  margin-top: var(--profile-stack-gap);
 }
 
 .profile-media-sections .profile-media-box,
@@ -3687,8 +3702,8 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 }
 
 .profile-section.profile-next-route {
-  padding-inline: 18px;
-  margin-top: 14px;
+  padding-inline: var(--profile-inset);
+  margin-top: var(--profile-stack-gap);
 }
 
 .profile-next-route-box.profile-owner-section {
@@ -3702,17 +3717,10 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 .profile-dashboard-tools {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 8px 18px 0;
+  gap: var(--profile-stack-gap);
+  margin-top: var(--profile-stack-gap);
+  padding: 0 var(--profile-inset);
   min-width: 0;
-}
-
-.profile-dashboard-tools + .profile-section {
-  margin-top: 12px;
-}
-
-.profile-cta + .profile-section {
-  margin-top: 12px;
 }
 
 .profile-empty {
@@ -3722,7 +3730,7 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 }
 
 .profile-cta {
-  margin: 28px 18px 0;
+  margin: var(--profile-stack-gap) var(--profile-inset) 0;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -3762,12 +3770,15 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 }
 
 .profile-cta-primary {
+  border: 1px solid var(--profile-primary);
   background: var(--profile-primary);
-  color: white;
+  color: #ffffff !important;
 }
 
 .profile-cta-primary:hover {
+  border-color: #1d4ed8;
   background: #1d4ed8;
+  color: #ffffff !important;
 }
 
 .profile-cta-secondary {
@@ -3791,10 +3802,19 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 
 .dashboard-shell {
   --dashboard-bottom-bar-height: 84px;
+  --profile-stack-gap: 12px;
 }
 
 .dashboard-shell .profile-page {
-  padding-bottom: calc(var(--dashboard-bottom-bar-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: 0;
+}
+
+.site-footer {
+  margin-top: var(--profile-stack-gap);
+  padding-top: var(--profile-stack-gap);
+  padding-bottom: calc(
+    var(--dashboard-bottom-bar-height, 84px) + var(--profile-stack-gap) + env(safe-area-inset-bottom, 0px)
+  );
 }
 
 .dashboard-shell .city-page {
@@ -3962,7 +3982,7 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 .profile-owner-tools {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--profile-stack-gap);
 }
 
 .profile-owner-section {
