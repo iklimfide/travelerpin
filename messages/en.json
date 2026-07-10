@@ -311,7 +311,10 @@
     "loginInvalidCredentials": "Incorrect email or password. If you just signed up, confirm your email first, then try again.",
     "loginEmailNotConfirmed": "Confirm your email before logging in. Check your inbox for the confirmation link.",
     "registerConfirmEmail": "Account created. Please confirm the approval email we sent, then log in.",
-    "registerConfirmEmailTitle": "Confirm your email"
+    "registerConfirmEmailTitle": "Confirm your email",
+    "acceptTermsPrefix": "I agree to the",
+    "acceptTermsAnd": "and",
+    "acceptTermsRequired": "You must accept the Terms of Service and Privacy Policy to create an account."
   },
   "profile": {
     "stats": "{countries} Countries | {cities} Cities",

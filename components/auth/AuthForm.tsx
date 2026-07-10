@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { LIMITS } from "@/lib/constants";
-import { translateAuth, translateCommon } from "@/lib/i18n/client-messages";
+import { footerMessages, translateAuth, translateCommon } from "@/lib/i18n/client-messages";
 import { createClient } from "@/lib/supabase/client";
 import { formatDisplayName } from "@/lib/utils/display-name";
 import { formatAuthErrorMessage } from "@/lib/utils/auth-error-message";
@@ -49,6 +50,7 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
   const [loading, setLoading] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
   const [passwordsVisible, setPasswordsVisible] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(true);
 
   const trimmedUsername = (form.username ?? "").trim();
 
@@ -128,6 +130,14 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
 
     try {
       if (mode === "register") {
+        if (!acceptedTerms) {
+          await modal.alert(t("acceptTermsRequired"), {
+            variant: "error",
+            title: t("registerTitle"),
+          });
+          return;
+        }
+
         if (form.password !== (form.passwordConfirm ?? "")) {
           await modal.alert(t("passwordMismatch"), {
             variant: "error",
@@ -262,7 +272,9 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
 
   const registerBlocked =
     mode === "register" &&
-    (usernameStatus !== "available" || trimmedUsername.length < LIMITS.usernameMin);
+    (!acceptedTerms ||
+      usernameStatus !== "available" ||
+      trimmedUsername.length < LIMITS.usernameMin);
 
   const passwordsMismatch =
     mode === "register" &&
@@ -357,6 +369,38 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
             </p>
           ) : null}
         </div>
+      ) : null}
+
+      {mode === "register" ? (
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-wbs-blue focus:ring-wbs-blue/20"
+          />
+          <span className="text-sm leading-snug text-slate-600">
+            {t("acceptTermsPrefix")}{" "}
+            <Link
+              href="/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-wbs-blue hover:text-wbs-blue-hover"
+            >
+              {footerMessages.terms}
+            </Link>{" "}
+            {t("acceptTermsAnd")}{" "}
+            <Link
+              href="/policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-wbs-blue hover:text-wbs-blue-hover"
+            >
+              {footerMessages.privacy}
+            </Link>
+            .
+          </span>
+        </label>
       ) : null}
 
       <button
