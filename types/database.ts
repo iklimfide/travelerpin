@@ -6,6 +6,18 @@ export const PARK_TYPES = ["national_park", "theme_park", "botanical_garden"] as
 
 export type SharePromptMode = "every_pin" | "after_30m" | "never";
 
+export type NextRouteStopKind = "country" | "city";
+
+export type NextRouteStop = {
+  id: string;
+  kind: NextRouteStopKind;
+  name: string;
+  countryCode?: string;
+  countryName?: string;
+  slug?: string | null;
+  href?: string | null;
+};
+
 export interface Profile {
   id: string;
   username: string;
@@ -19,6 +31,7 @@ export interface Profile {
   marital_status: string | null;
   wishlist_public: boolean;
   share_prompt_mode: SharePromptMode;
+  next_route?: NextRouteStop[];
   created_at: string;
 }
 

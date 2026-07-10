@@ -130,26 +130,34 @@ export async function findPublishedHubBySlug(
   };
 }
 
-function buildPublishedCityKeys(rows: { country_code: string; place_name: string }[]): Set<string> {
-  const keys = new Set<string>();
-  for (const row of rows) {
-    keys.add(`${row.country_code.toUpperCase()}:${row.place_name.trim().toLowerCase()}`);
+function publishedKeysToSet(keys: unknown): Set<string> {
+  if (keys instanceof Set) return keys;
+  if (Array.isArray(keys)) {
+    return new Set(keys.filter((key): key is string => typeof key === "string"));
   }
-  return keys;
+  return new Set();
 }
 
-function buildPublishedParkKeys(rows: { country_code: string; place_name: string }[]): Set<string> {
+function buildPublishedCityKeys(rows: { country_code: string; place_name: string }[]): string[] {
   const keys = new Set<string>();
   for (const row of rows) {
     keys.add(`${row.country_code.toUpperCase()}:${row.place_name.trim().toLowerCase()}`);
   }
-  return keys;
+  return [...keys];
+}
+
+function buildPublishedParkKeys(rows: { country_code: string; place_name: string }[]): string[] {
+  const keys = new Set<string>();
+  for (const row of rows) {
+    keys.add(`${row.country_code.toUpperCase()}:${row.place_name.trim().toLowerCase()}`);
+  }
+  return [...keys];
 }
 
 const getCachedPublishedCityKeys = unstable_cache(
-  async (): Promise<Set<string>> => {
+  async (): Promise<string[]> => {
     const supabase = createPublicSupabaseClient();
-    if (!supabase) return new Set();
+    if (!supabase) return [];
 
     const { data, error } = await supabase
       .from("published_hubs")
@@ -158,19 +166,19 @@ const getCachedPublishedCityKeys = unstable_cache(
 
     if (error) {
       console.error("published_hubs city keys failed:", error.message);
-      return new Set();
+      return [];
     }
 
     return buildPublishedCityKeys(data ?? []);
   },
-  ["published-city-keys"],
+  ["published-city-keys", "v2"],
   { revalidate: false, tags: [PUBLISHED_CITY_KEYS_TAG] }
 );
 
 const getCachedPublishedParkKeys = unstable_cache(
-  async (): Promise<Set<string>> => {
+  async (): Promise<string[]> => {
     const supabase = createPublicSupabaseClient();
-    if (!supabase) return new Set();
+    if (!supabase) return [];
 
     const { data, error } = await supabase
       .from("published_hubs")
@@ -179,12 +187,12 @@ const getCachedPublishedParkKeys = unstable_cache(
 
     if (error) {
       console.error("published_hubs park keys failed:", error.message);
-      return new Set();
+      return [];
     }
 
     return buildPublishedParkKeys(data ?? []);
   },
-  ["published-park-keys"],
+  ["published-park-keys", "v2"],
   { revalidate: false, tags: [PUBLISHED_PARK_KEYS_TAG] }
 );
 
@@ -239,9 +247,9 @@ export async function loadPublishedHubSlugs(
 }
 
 export async function loadPublishedCityKeys(_supabase: SupabaseClient | null): Promise<Set<string>> {
-  return getCachedPublishedCityKeys();
+  return publishedKeysToSet(await getCachedPublishedCityKeys());
 }
 
 export async function loadPublishedParkKeys(_supabase: SupabaseClient | null): Promise<Set<string>> {
-  return getCachedPublishedParkKeys();
+  return publishedKeysToSet(await getCachedPublishedParkKeys());
 }

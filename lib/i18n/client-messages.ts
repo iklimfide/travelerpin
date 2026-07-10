@@ -21,6 +21,7 @@ export const badgeMessages = enMessages.badge;
 export const dashboardNavMessages = enMessages.dashboardNav;
 export const notificationMessages = enMessages.notifications;
 export const saveDestinationMessages = enMessages.saveDestination;
+export const nextRouteMessages = enMessages.nextRoute;
 
 export function formatMessage(
   template: string,

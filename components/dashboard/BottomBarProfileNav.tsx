@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
 import { commonMessages, dashboardNavMessages, shareMessages } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
 import { clearAllSessionPageCaches } from "@/lib/client/session-page-cache";
@@ -36,6 +37,17 @@ function SettingsIcon() {
   );
 }
 
+function RouteIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <circle cx="6" cy="18" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="18" cy="6" r="2" />
+      <path d="M7.6 16.8 10.4 13.2M13.6 10.8 16.4 7.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function LogOutIcon() {
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
@@ -50,6 +62,7 @@ export function BottomBarProfileNav({ ownProfile, loginHref }: BottomBarProfileN
   const pathname = usePathname();
   const menuId = useId();
   const [open, setOpen] = useState(false);
+  const { openNextRouteModal } = useDashboardAdd();
 
   const username = ownProfile?.username ?? null;
   const profileHref = username ? profilePath(username) : loginHref;
@@ -149,6 +162,25 @@ export function BottomBarProfileNav({ ownProfile, loginHref }: BottomBarProfileN
               </span>
               {dashboardNavMessages.profile}
             </Link>
+            <button
+              type="button"
+              role="menuitem"
+              className="dashboard-profile-menu__item"
+              onPointerDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                setOpen(false);
+                openNextRouteModal();
+              }}
+            >
+              <span className="dashboard-profile-menu__icon" aria-hidden>
+                <RouteIcon />
+              </span>
+              {dashboardNavMessages.nextRoute}
+            </button>
             <Link
               href="/settings"
               role="menuitem"

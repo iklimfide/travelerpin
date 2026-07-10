@@ -35,7 +35,8 @@
     "profile": "Profile",
     "settings": "Settings",
     "notifications": "Notifications",
-    "add": "Add place"
+    "add": "Add place",
+    "nextRoute": "Next Route"
   },
   "notifications": {
     "title": "Notifications",
@@ -76,6 +77,23 @@
     "customCityPrompt": "Add {name} to your map. Pick a country.",
     "customParkPrompt": "Add {name} to your map. Pick country and type.",
     "addCountryFirst": "Add a country to your map first, or include a country name in your search."
+  },
+  "nextRoute": {
+    "title": "Next Route",
+    "subtitle": "Build your upcoming route with countries and cities.",
+    "searchPlaceholder": "Search",
+    "tabRoute": "Route",
+    "emptyRoute": "No stops yet. Switch to Countries or Cities to add your first stop.",
+    "close": "Close",
+    "removeStop": "Remove stop",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "addStop": "Add to route",
+    "alreadyAdded": "Already on your route.",
+    "searchIdle": "Type at least 2 characters to search.",
+    "searchEmpty": "No destinations match your search.",
+    "searching": "Searching…",
+    "routeStopCount": "{count} stops on your route"
   },
   "home": {
     "hero": "Pin your travels. Share with friends.",
@@ -376,6 +394,8 @@
     "latestAdded": "Latest added: {country}",
     "latestAddedPrefix": "Latest added: ",
     "myTrips": "My trips",
+    "nextRouteTitle": "Next Route",
+    "nextRouteEmptyOnProfile": "No stops yet. Add countries and cities to build your upcoming route.",
     "visitorTrips": "{name}'s trips",
     "myPhotos": "My photos",
     "visitorPhotos": "{name}'s photos",

@@ -1,0 +1,95 @@
+import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
+import { countryPath } from "@/lib/seo/site";
+import { cityPlacePath } from "@/lib/utils/hub-place-path";
+import type { NextRouteStop, NextRouteStopKind } from "@/types/database";
+
+export const NEXT_ROUTE_MAX_STOPS = 24;
+
+const STOP_KINDS = new Set<NextRouteStopKind>(["country", "city"]);
+
+function isStopKind(value: unknown): value is NextRouteStopKind {
+  return typeof value === "string" && STOP_KINDS.has(value as NextRouteStopKind);
+}
+
+function normalizeStop(raw: unknown): NextRouteStop | null {
+  if (!raw || typeof raw !== "object") return null;
+
+  const row = raw as Record<string, unknown>;
+  const kind = row.kind;
+  const name = typeof row.name === "string" ? row.name.trim() : "";
+  const id = typeof row.id === "string" ? row.id.trim() : "";
+
+  if (!isStopKind(kind) || !name || !id) return null;
+
+  const countryCode =
+    typeof row.countryCode === "string" ? row.countryCode.toUpperCase() : undefined;
+  const countryName = typeof row.countryName === "string" ? row.countryName.trim() : undefined;
+  const slug = typeof row.slug === "string" ? row.slug.trim() || null : null;
+  const href = typeof row.href === "string" ? row.href.trim() || null : null;
+
+  return {
+    id,
+    kind,
+    name,
+    ...(countryCode ? { countryCode } : {}),
+    ...(countryName ? { countryName } : {}),
+    ...(slug !== null ? { slug } : {}),
+    ...(href !== null ? { href } : {}),
+  };
+}
+
+export function parseNextRoute(value: unknown): NextRouteStop[] {
+  if (!Array.isArray(value)) return [];
+
+  const stops: NextRouteStop[] = [];
+  for (const item of value) {
+    const stop = normalizeStop(item);
+    if (!stop) continue;
+    stops.push(stop);
+    if (stops.length >= NEXT_ROUTE_MAX_STOPS) break;
+  }
+  return stops;
+}
+
+export function createNextRouteStopId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `stop-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+export function buildCountryStop(code: string, name: string): NextRouteStop {
+  const slug = resolveCountryHubSlug(code, name);
+  return {
+    id: createNextRouteStopId(),
+    kind: "country",
+    name,
+    countryCode: code.toUpperCase(),
+    countryName: name,
+    slug,
+    href: slug ? countryPath(slug) : null,
+  };
+}
+
+export function buildCityStop(
+  cityName: string,
+  countryCode: string,
+  countryName: string
+): NextRouteStop {
+  const href = cityPlacePath(countryCode, cityName);
+  const slug = href.split("/").pop() ?? null;
+  return {
+    id: createNextRouteStopId(),
+    kind: "city",
+    name: cityName,
+    countryCode: countryCode.toUpperCase(),
+    countryName,
+    slug,
+    href,
+  };
+}
+
+export function stopDedupeKey(stop: Pick<NextRouteStop, "kind" | "name" | "countryCode">): string {
+  const code = stop.countryCode?.toUpperCase() ?? "";
+  return `${stop.kind}:${code}:${stop.name.trim().toLowerCase()}`;
+}

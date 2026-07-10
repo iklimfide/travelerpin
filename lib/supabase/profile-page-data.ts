@@ -28,6 +28,7 @@ import {
   loadDemoPublicProfilePage,
 } from "@/lib/data/jennifer-demo-page";
 import { loadProfileFollowState } from "@/lib/supabase/profile-follows";
+import { parseNextRoute } from "@/lib/utils/next-route";
 
 export type PublicProfilePageData = {
   profile: PublicProfile;
@@ -137,7 +138,7 @@ export function getCachedPublicProfileBundle(
         return null;
       }
     },
-    ["public-profile-bundle", key],
+    ["public-profile-bundle-v2", key],
     // Indefinite until pin/profile write calls revalidateProfileForPin.
     { revalidate: false, tags: [profileCacheTag(key)] }
   )();
@@ -180,7 +181,10 @@ export const loadPublicProfilePage = cache(
     ]);
     if (!bundle) return null;
 
-    const { profile } = bundle;
+    let profile = {
+      ...bundle.profile,
+      next_route: parseNextRoute(bundle.profile.next_route),
+    };
     let { visitedCountries, visitedCities, visitedParks } = bundle;
     let wishlistCountries = bundle.publicWishlistCountries;
     let currentUsername: string | null = null;
@@ -212,6 +216,21 @@ export const loadPublicProfilePage = cache(
             profile.id,
             authUser.id
           );
+
+          if (isOwnProfile) {
+            const { data: routeRow, error: routeError } = await supabase
+              .from("profiles")
+              .select("next_route")
+              .eq("id", profile.id)
+              .maybeSingle();
+
+            if (!routeError && routeRow) {
+              profile = {
+                ...profile,
+                next_route: parseNextRoute(routeRow.next_route),
+              };
+            }
+          }
         }
       } catch (error) {
         console.error("loadPublicProfilePage auth enrichment failed:", error);

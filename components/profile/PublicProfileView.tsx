@@ -8,7 +8,6 @@ import { ProfileIdentityCard } from "@/components/profile/ProfileIdentityCard";
 import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
 import { ProfileSquareCaptureHeader } from "@/components/profile/ProfileSquareCaptureHeader";
 import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections";
-import { ProfileSummaryGrid } from "@/components/profile/ProfileSummaryGrid";
 import { BRAND } from "@/lib/constants";
 import { isDemoProfileUsername } from "@/lib/data/jennifer-demo-page";
 import {
@@ -18,17 +17,17 @@ import {
 import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
 import { ProfileTravelUpdateCard } from "@/components/profile/ProfileTravelUpdateCard";
 import { ProfileTravelUpdateSection } from "@/components/profile/ProfileTravelUpdateSection";
+import { ProfileNextRouteSection } from "@/components/profile/ProfileNextRouteSection";
 import { ProfileTripsRow } from "@/components/profile/ProfileTripsRow";
 import { PublicGuestAuthLinks } from "@/components/nav/PublicGuestAuthLinks";
-import { LogOutButton } from "@/components/auth/LogOutButton";
 import {
-  buildProfileSummary,
   buildProfileTrips,
   WORLD_COUNTRY_TOTAL,
 } from "@/lib/utils/profile-page";
 import { buildProfileMediaPins } from "@/lib/utils/profile-media";
 import { resolveResidenceCityHref } from "@/lib/utils/residence-city";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
+import { parseNextRoute } from "@/lib/utils/next-route";
 import { profileAllPath, profilePath } from "@/lib/seo/site";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
 
@@ -88,12 +87,6 @@ export async function PublicProfileView({
 
   const trips = buildProfileTrips(visitedCities, visitedParks, profile.residence);
   const mediaPins = buildProfileMediaPins(visitedCities, visitedParks, profile);
-  const summary = buildProfileSummary(
-    visitedCountries,
-    visitedCities,
-    visitedParks,
-    visibleWishlistCountries
-  );
   const isDemoProfile = isDemoProfileUsername(profile.username);
   const showTravelUpdateCard =
     (isOwnProfile || isDemoProfile) && (!embedded || isDemoProfile);
@@ -290,7 +283,12 @@ export async function PublicProfileView({
                 />
               ) : null}
 
-              {!isOwnProfile && hasMapContent ? (
+              <ProfileNextRouteSection
+                initialStops={parseNextRoute(profile.next_route)}
+                isOwnProfile={isOwnProfile}
+              />
+
+              {!isOwnProfile && isGuest && hasMapContent ? (
                 <section className="profile-section">
                   <HomeFeatures />
                 </section>
@@ -313,25 +311,6 @@ export async function PublicProfileView({
                 </section>
               ) : null}
 
-              <ProfileSummaryGrid
-                summary={summary}
-                title={t("summaryTitle")}
-                labels={{
-                  topVisitTitle: t("summaryTopVisit"),
-                  topVisitEmpty: t("summaryTopVisitEmpty"),
-                  topVisitSuffix: t("summaryTopVisitSuffix"),
-                  nextRouteTitle: t("summaryNextRoute"),
-                  nextRouteEmpty: t("summaryNextRouteEmpty"),
-                  nextRouteSuffix: t("summaryNextRouteSuffix"),
-                  countriesTitle: t("summaryCountries"),
-                  countriesBody: (count) => t("summaryCountriesBody", { count }),
-                  favoritesTitle: t("summaryFavorites"),
-                  favoritesEmpty: t("summaryFavoritesEmpty"),
-                  favoritesBody: (count) => t("summaryFavoritesBody", { count }),
-                }}
-              />
-
-              {isOwnProfile ? <LogOutButton variant="profile" /> : null}
             </>
           ) : null}
         </main>

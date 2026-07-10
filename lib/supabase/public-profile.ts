@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { WishlistCountry } from "@/types/database";
+import type { WishlistCountry, NextRouteStop } from "@/types/database";
+import { parseNextRoute } from "@/lib/utils/next-route";
 import { normalizeUsernameInput } from "@/lib/utils/username";
 
 export type PublicProfile = {
@@ -14,10 +15,11 @@ export type PublicProfile = {
   profession: string | null;
   marital_status: string | null;
   wishlist_public: boolean;
+  next_route: NextRouteStop[];
 };
 
 const EXTENDED_SELECT =
-  "id, username, display_name, avatar_url, cover_url, bio, residence, instagram_url, profession, marital_status, wishlist_public";
+  "id, username, display_name, avatar_url, cover_url, bio, residence, instagram_url, profession, marital_status, wishlist_public, next_route";
 const LEGACY_EXTENDED_SELECT =
   "id, username, display_name, avatar_url, cover_url, bio, residence, profession, marital_status, wishlist_public";
 const BASE_SELECT = "id, username, display_name";
@@ -46,6 +48,7 @@ export async function fetchPublicProfile(
       profession: extended.profession ?? null,
       marital_status: extended.marital_status ?? null,
       wishlist_public: extended.wishlist_public === true,
+      next_route: parseNextRoute(extended.next_route),
     };
   }
 
@@ -66,6 +69,7 @@ export async function fetchPublicProfile(
       profession: legacyExtended.profession ?? null,
       marital_status: legacyExtended.marital_status ?? null,
       wishlist_public: legacyExtended.wishlist_public === true,
+      next_route: [],
     };
   }
 
@@ -98,6 +102,7 @@ export async function fetchPublicProfile(
     profession: null,
     marital_status: null,
     wishlist_public: wishlistPublic,
+    next_route: [],
   };
 }
 
