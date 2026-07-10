@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isDemoProfileUsername } from "@/lib/data/jennifer-demo-page";
+import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
 import {
   getProfileIdByUsername,
   loadProfileFollowing,

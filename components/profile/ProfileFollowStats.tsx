@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ProfileFollowListModal } from "@/components/profile/ProfileFollowListModal";
 import { fetchProfileFollowers, fetchProfileFollowing } from "@/lib/client/follow-actions";
+import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
 import { formatMessage, profileMessages } from "@/lib/i18n/client-messages";
 import type { ProfileFollowerSummary, ProfileFollowListType } from "@/types/database";
 
@@ -65,6 +66,16 @@ export function ProfileFollowStats({
 
   useEffect(() => {
     let cancelled = false;
+
+    if (isDemoProfileUsername(username)) {
+      if (followerCount > 0) {
+        setPrefetchedFollowers({ members: [], demo: true });
+      }
+      if (followingCount > 0) {
+        setPrefetchedFollowing({ members: [], demo: true });
+      }
+      return;
+    }
 
     if (followerCount > 0) {
       void fetchProfileFollowers(username).then((result) => {

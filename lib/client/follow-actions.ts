@@ -1,3 +1,4 @@
+import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
 import type { ProfileFollowerSummary } from "@/types/database";
 
 type FollowersResult =
@@ -53,6 +54,10 @@ export async function unfollowProfile(username: string): Promise<
 
 export function fetchProfileFollowers(username: string): Promise<FollowersResult> {
   const key = username.toLowerCase();
+  if (isDemoProfileUsername(key)) {
+    return Promise.resolve({ ok: true, followers: [], demo: true });
+  }
+
   const cached = followersCache.get(key);
   if (cached) return cached;
 
@@ -76,6 +81,10 @@ export function fetchProfileFollowers(username: string): Promise<FollowersResult
 
 export function fetchProfileFollowing(username: string): Promise<FollowingResult> {
   const key = username.toLowerCase();
+  if (isDemoProfileUsername(key)) {
+    return Promise.resolve({ ok: true, following: [], demo: true });
+  }
+
   const cached = followingCache.get(key);
   if (cached) return cached;
 

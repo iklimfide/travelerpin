@@ -6,7 +6,7 @@ import {
   loadProfileFollowState,
   unfollowProfile,
 } from "@/lib/supabase/profile-follows";
-import { isDemoProfileUsername } from "@/lib/data/jennifer-demo-page";
+import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
 
 type RouteProps = {
   params: Promise<{ username: string }>;
@@ -17,6 +17,17 @@ export async function GET(_request: Request, { params }: RouteProps) {
   const username = rawUsername.trim().toLowerCase();
   if (!username) {
     return NextResponse.json({ error: "Invalid username" }, { status: 400 });
+  }
+
+  if (isDemoProfileUsername(username)) {
+    return NextResponse.json({
+      username,
+      canFollow: false,
+      isFollowing: false,
+      followerCount: 0,
+      followingCount: 0,
+      demo: true,
+    });
   }
 
   const supabase = await createClient();

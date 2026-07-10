@@ -1,7 +1,14 @@
+import { getCountryName } from "@/lib/data/countries";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { countryPath } from "@/lib/seo/site";
 import { cityPlacePath } from "@/lib/utils/hub-place-path";
 import type { NextRouteStop, NextRouteStopKind } from "@/types/database";
+
+export type NextRouteStopDisplay = {
+  title: string;
+  subtitle: string | null;
+  countryCode: string;
+};
 
 export const NEXT_ROUTE_MAX_STOPS = 24;
 
@@ -92,4 +99,43 @@ export function buildCityStop(
 export function stopDedupeKey(stop: Pick<NextRouteStop, "kind" | "name" | "countryCode">): string {
   const code = stop.countryCode?.toUpperCase() ?? "";
   return `${stop.kind}:${code}:${stop.name.trim().toLowerCase()}`;
+}
+
+export function areNextRouteStopsEqual(a: NextRouteStop[], b: NextRouteStop[]): boolean {
+  if (a.length !== b.length) return false;
+
+  for (let index = 0; index < a.length; index += 1) {
+    const left = a[index];
+    const right = b[index];
+    if (
+      left.id !== right.id ||
+      left.kind !== right.kind ||
+      left.name !== right.name ||
+      (left.countryCode ?? "") !== (right.countryCode ?? "")
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export function getNextRouteStopDisplay(stop: NextRouteStop): NextRouteStopDisplay {
+  const countryCode = stop.countryCode?.toUpperCase() ?? "";
+  const countryName = stop.countryName ?? (countryCode ? getCountryName(countryCode) : stop.name);
+
+  if (stop.kind === "city") {
+    return {
+      title: stop.name,
+      subtitle: countryName,
+      countryCode,
+    };
+  }
+
+  const title = stop.name || countryName;
+  return {
+    title,
+    subtitle: title !== countryName ? countryName : null,
+    countryCode,
+  };
 }

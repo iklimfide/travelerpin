@@ -1,6 +1,7 @@
 import type { ProfileSettingsRow } from "@/lib/supabase/profile-settings";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
-import type { TravelStats } from "@/types/database";
+import type { NextRouteStop, TravelStats } from "@/types/database";
+import { parseNextRoute } from "@/lib/utils/next-route";
 
 const CACHE_VERSION = 1;
 const OWN_USERNAME_KEY = "tp:own-username";
@@ -91,6 +92,47 @@ export function invalidateProfileCache(username: string): void {
 }
 
 export const PROFILE_DATA_STALE_EVENT = "tp:profile-data-stale";
+export const NEXT_ROUTE_CHANGED_EVENT = "tp:next-route-changed";
+
+const OWN_NEXT_ROUTE_CACHE_KEY = `tp:v${CACHE_VERSION}:own-next-route`;
+
+export function readOwnNextRouteCache(): NextRouteStop[] | null {
+  const payload = readJson<{ stops: unknown }>(OWN_NEXT_ROUTE_CACHE_KEY);
+  if (!payload) return null;
+  return parseNextRoute(payload.stops);
+}
+
+export function writeOwnNextRouteCache(stops: NextRouteStop[]): void {
+  writeJson(OWN_NEXT_ROUTE_CACHE_KEY, { stops });
+}
+
+export function patchOwnProfileNextRoute(stops: NextRouteStop[]): void {
+  const username = getOwnUsername();
+  if (!username) return;
+
+  const cached = readProfileCache(username);
+  if (!cached) return;
+
+  writeProfileCache(username, {
+    ...cached,
+    profile: {
+      ...cached.profile,
+      next_route: stops,
+    },
+  });
+}
+
+export function notifyNextRouteChanged(stops: NextRouteStop[]): void {
+  writeOwnNextRouteCache(stops);
+  patchOwnProfileNextRoute(stops);
+
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent(NEXT_ROUTE_CHANGED_EVENT, {
+      detail: { stops },
+    })
+  );
+}
 
 /** Bust profile session cache and ask mounted profile views to refetch. */
 export function notifyProfileDataChanged(username?: string | null): void {
@@ -148,6 +190,7 @@ export function clearAllSessionPageCaches(): void {
   if (typeof window === "undefined") return;
   try {
     sessionStorage.removeItem(HOME_CACHE_KEY);
+    sessionStorage.removeItem(OWN_NEXT_ROUTE_CACHE_KEY);
   } catch {
     // ignore
   }

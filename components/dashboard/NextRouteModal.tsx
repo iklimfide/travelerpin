@@ -8,7 +8,7 @@ import { COUNTRY_LIST, searchCountries } from "@/lib/data/countries";
 import { getPopularCountries } from "@/lib/data/popular-countries";
 import { POPULAR_DESTINATIONS } from "@/lib/data/popular-destinations";
 import { nextRouteMessages, saveDestinationMessages } from "@/lib/i18n/client-messages";
-import { invalidateOwnProfileCache } from "@/lib/client/session-page-cache";
+import { notifyNextRouteChanged } from "@/lib/client/session-page-cache";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { buildCountryStop, buildCityStop, parseNextRoute, stopDedupeKey } from "@/lib/utils/next-route";
 import type { NextRouteStop } from "@/types/database";
@@ -248,12 +248,16 @@ export function NextRouteModal({ open, onClose }: NextRouteModalProps) {
     persistRef.current = nextStops;
     const snapshot = nextStops;
     try {
-      await fetch("/api/me/next-route", {
+      const res = await fetch("/api/me/next-route", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stops: snapshot }),
       });
-      invalidateOwnProfileCache();
+      if (!res.ok) return;
+
+      const data = (await res.json()) as { stops?: unknown };
+      const saved = parseNextRoute(data.stops);
+      notifyNextRouteChanged(saved);
     } catch {
       // Keep optimistic UI; user can retry by toggling a stop.
     }

@@ -18,6 +18,7 @@ import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
 import { ProfileTravelUpdateCard } from "@/components/profile/ProfileTravelUpdateCard";
 import { ProfileTravelUpdateSection } from "@/components/profile/ProfileTravelUpdateSection";
 import { ProfileNextRouteSection } from "@/components/profile/ProfileNextRouteSection";
+import { ProfileVisitorDestinations } from "@/components/profile/ProfileVisitorDestinations";
 import { ProfileTripsRow } from "@/components/profile/ProfileTripsRow";
 import { PublicGuestAuthLinks } from "@/components/nav/PublicGuestAuthLinks";
 import {
@@ -247,8 +248,41 @@ export async function PublicProfileView({
                 }}
               />
 
-              {ownerTools ? (
-                <div className="profile-dashboard-tools">{ownerTools}</div>
+              {(isOwnProfile && ownerTools) ||
+              (!isOwnProfile &&
+                (visitedCodes.length > 0 ||
+                  visitedCities.length > 0 ||
+                  visitedParks.length > 0)) ? (
+                <div className="profile-dashboard-tools">
+                  {isOwnProfile ? (
+                    ownerTools
+                  ) : (
+                    <ProfileVisitorDestinations
+                      username={profile.username}
+                      residence={profile.residence}
+                      visitedCountries={visitedCountries}
+                      visitedCities={visitedCities}
+                      visitedParks={visitedParks}
+                      visitedCodes={visitedCodes}
+                      labels={{
+                        countriesTitle: t("visitorVisitedCountries", { name: displayName }),
+                        citiesTitle: t("visitorVisitedCities", { name: displayName }),
+                        parksTitle: t("visitorVisitedParks", { name: displayName }),
+                        countriesCount: t("visitorCountCountries", {
+                          count: visitedCodes.length,
+                        }),
+                        citiesCount: t("visitorCountCities", {
+                          count: visitedCities.length,
+                        }),
+                        parksCount: t("visitorCountParks", {
+                          count: visitedParks.length,
+                        }),
+                        show: t("ownerShow"),
+                        viewAll: t("allDestinationsAll"),
+                      }}
+                    />
+                  )}
+                </div>
               ) : null}
 
               {mediaPins.length > 0 ? (

@@ -42,7 +42,7 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("username, avatar_url, display_name")
+        .select("username, avatar_url, display_name, residence")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -61,7 +61,7 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
       }
 
       // Backfill home-city pin once per browser session (e.g. residence "İstanbul").
-      if (profile?.username) {
+      if (profile?.username && profile.residence?.trim()) {
         const flagKey = `tp:ensure-residence:${user.id}`;
         try {
           if (sessionStorage.getItem(flagKey) === "1") return;
@@ -69,13 +69,22 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
         } catch {
           // Private mode / blocked storage — still attempt once this mount.
         }
-        void fetch("/api/profile/ensure-residence", { method: "POST" }).catch(() => {
-          try {
-            sessionStorage.removeItem(flagKey);
-          } catch {
-            // ignore
-          }
-        });
+        void fetch("/api/profile/ensure-residence", { method: "POST" })
+          .then((res) => {
+            if (res.ok) return;
+            try {
+              sessionStorage.removeItem(flagKey);
+            } catch {
+              // ignore
+            }
+          })
+          .catch(() => {
+            try {
+              sessionStorage.removeItem(flagKey);
+            } catch {
+              // ignore
+            }
+          });
       }
     }
 
