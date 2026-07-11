@@ -1226,7 +1226,7 @@ export function SaveDestinationModal({
                 onClick={() => setTab(item.id)}
               >
                 <span aria-hidden>{item.icon}</span>
-                {item.label}
+                <span className="save-destination-modal__tab-label">{item.label}</span>
               </button>
             ))}
           </div>

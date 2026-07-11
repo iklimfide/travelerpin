@@ -13,6 +13,11 @@ import { clearAllSessionPageCaches } from "@/lib/client/session-page-cache";
 type BottomBarProfileNavProps = {
   ownProfile: BottomBarOwnProfile | null;
   loginHref: string;
+  menuPlacement?: "above" | "below";
+  showBarDestinationsInMenu?: boolean;
+  mapHref?: string;
+  mapActive?: boolean;
+  onNextRouteClick?: () => void;
 };
 
 function ProfileIcon() {
@@ -37,6 +42,34 @@ function SettingsIcon() {
   );
 }
 
+function RouteIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <circle cx="6" cy="18" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="18" cy="6" r="2" />
+      <path d="M7.6 16.8 10.4 13.2M13.6 10.8 16.4 7.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function MapPinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path
+        d="M8.5 4.2 4 6v13.8l4.5-2.2L13 19.8l4.5-2.2L22 19.8V6l-4.5-1.8L13 6.2 8.5 4.2Z"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13 8.8a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2Z"
+        fill="currentColor"
+        stroke="none"
+      />
+      <path d="M13 13.2v2.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function LogOutIcon() {
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
@@ -55,17 +88,25 @@ type MenuPosition = {
 const MENU_GAP_PX = 8;
 const MENU_MIN_INSET_PX = 12;
 
-function getMenuPosition(button: HTMLElement): MenuPosition {
+function getMenuPosition(button: HTMLElement, placement: "above" | "below"): MenuPosition {
   const rect = button.getBoundingClientRect();
   const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
 
   return {
-    top: rect.top - MENU_GAP_PX,
+    top: placement === "below" ? rect.bottom + MENU_GAP_PX : rect.top - MENU_GAP_PX,
     right: Math.max(MENU_MIN_INSET_PX, viewportWidth - rect.right),
   };
 }
 
-export function BottomBarProfileNav({ ownProfile, loginHref }: BottomBarProfileNavProps) {
+export function BottomBarProfileNav({
+  ownProfile,
+  loginHref,
+  menuPlacement = "above",
+  showBarDestinationsInMenu = false,
+  mapHref,
+  mapActive = false,
+  onNextRouteClick,
+}: BottomBarProfileNavProps) {
   const pathname = usePathname();
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -77,6 +118,8 @@ export function BottomBarProfileNav({ ownProfile, loginHref }: BottomBarProfileN
   const profileHref = username ? profilePath(username) : loginHref;
   const profileDisplayName = ownProfile?.displayName?.trim() || username || "";
   const active = Boolean(username) && pathname === profileHref;
+  const profileSharesMapHref = showBarDestinationsInMenu && mapHref === profileHref;
+  const profileMenuActive = active && !profileSharesMapHref;
 
   useEffect(() => {
     setMounted(true);
@@ -103,7 +146,7 @@ export function BottomBarProfileNav({ ownProfile, loginHref }: BottomBarProfileN
     if (!button) return;
 
     const syncPosition = () => {
-      setMenuPosition(getMenuPosition(button));
+      setMenuPosition(getMenuPosition(button, menuPlacement));
     };
 
     syncPosition();
@@ -120,7 +163,7 @@ export function BottomBarProfileNav({ ownProfile, loginHref }: BottomBarProfileN
       viewport?.removeEventListener("resize", syncPosition);
       viewport?.removeEventListener("scroll", syncPosition);
     };
-  }, [open]);
+  }, [open, menuPlacement]);
 
   useEffect(() => {
     setOpen(false);
@@ -168,45 +211,121 @@ export function BottomBarProfileNav({ ownProfile, loginHref }: BottomBarProfileN
             <div
               id={menuId}
               role="menu"
-              className="dashboard-profile-menu"
+              className={`dashboard-profile-menu${
+                menuPlacement === "below" ? " dashboard-profile-menu--below" : ""
+              }`}
               style={menuStyle}
             >
-              <button
-                type="button"
-                role="menuitem"
-                className="dashboard-profile-menu__item dashboard-profile-menu__item--logout"
-                onClick={() => void handleLogout()}
-              >
-                <span className="dashboard-profile-menu__icon" aria-hidden>
-                  <LogOutIcon />
-                </span>
-                {commonMessages.logout}
-              </button>
-              <div className="dashboard-profile-menu__divider" role="presentation" />
-              <Link
-                href={profileHref}
-                role="menuitem"
-                className="dashboard-profile-menu__item"
-                onClick={() => setOpen(false)}
-              >
-                <span className="dashboard-profile-menu__icon" aria-hidden>
-                  <ProfileIcon />
-                </span>
-              {dashboardNavMessages.profile}
-            </Link>
-            <Link
-              href="/settings"
-                role="menuitem"
-                className={`dashboard-profile-menu__item${
-                  pathname.startsWith("/settings") ? " dashboard-profile-menu__item--active" : ""
-                }`}
-                onClick={() => setOpen(false)}
-              >
-                <span className="dashboard-profile-menu__icon" aria-hidden>
-                  <SettingsIcon />
-                </span>
-                {dashboardNavMessages.settings}
-              </Link>
+              {menuPlacement === "below" ? (
+                <>
+                  <Link
+                    href={profileHref}
+                    role="menuitem"
+                    className={`dashboard-profile-menu__item${profileMenuActive ? " dashboard-profile-menu__item--active" : ""}`}
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className="dashboard-profile-menu__icon" aria-hidden>
+                      <ProfileIcon />
+                    </span>
+                    {dashboardNavMessages.profile}
+                  </Link>
+                  {showBarDestinationsInMenu && mapHref ? (
+                    <Link
+                      href={mapHref}
+                      role="menuitem"
+                      className={`dashboard-profile-menu__item${
+                        mapActive ? " dashboard-profile-menu__item--active" : ""
+                      }`}
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="dashboard-profile-menu__icon" aria-hidden>
+                        <MapPinIcon />
+                      </span>
+                      {dashboardNavMessages.map}
+                    </Link>
+                  ) : null}
+                  {showBarDestinationsInMenu && onNextRouteClick ? (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="dashboard-profile-menu__item"
+                      onClick={() => {
+                        setOpen(false);
+                        onNextRouteClick();
+                      }}
+                    >
+                      <span className="dashboard-profile-menu__icon" aria-hidden>
+                        <RouteIcon />
+                      </span>
+                      {dashboardNavMessages.nextRoute}
+                    </button>
+                  ) : null}
+                  <Link
+                    href="/settings"
+                    role="menuitem"
+                    className={`dashboard-profile-menu__item${
+                      pathname.startsWith("/settings") ? " dashboard-profile-menu__item--active" : ""
+                    }`}
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className="dashboard-profile-menu__icon" aria-hidden>
+                      <SettingsIcon />
+                    </span>
+                    {dashboardNavMessages.settings}
+                  </Link>
+                  <div className="dashboard-profile-menu__divider" role="presentation" />
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="dashboard-profile-menu__item dashboard-profile-menu__item--logout"
+                    onClick={() => void handleLogout()}
+                  >
+                    <span className="dashboard-profile-menu__icon" aria-hidden>
+                      <LogOutIcon />
+                    </span>
+                    {commonMessages.logout}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="dashboard-profile-menu__item dashboard-profile-menu__item--logout"
+                    onClick={() => void handleLogout()}
+                  >
+                    <span className="dashboard-profile-menu__icon" aria-hidden>
+                      <LogOutIcon />
+                    </span>
+                    {commonMessages.logout}
+                  </button>
+                  <div className="dashboard-profile-menu__divider" role="presentation" />
+                  <Link
+                    href={profileHref}
+                    role="menuitem"
+                    className={`dashboard-profile-menu__item${profileMenuActive ? " dashboard-profile-menu__item--active" : ""}`}
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className="dashboard-profile-menu__icon" aria-hidden>
+                      <ProfileIcon />
+                    </span>
+                    {dashboardNavMessages.profile}
+                  </Link>
+                  <Link
+                    href="/settings"
+                    role="menuitem"
+                    className={`dashboard-profile-menu__item${
+                      pathname.startsWith("/settings") ? " dashboard-profile-menu__item--active" : ""
+                    }`}
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className="dashboard-profile-menu__icon" aria-hidden>
+                      <SettingsIcon />
+                    </span>
+                    {dashboardNavMessages.settings}
+                  </Link>
+                </>
+              )}
             </div>
           </>,
           document.body

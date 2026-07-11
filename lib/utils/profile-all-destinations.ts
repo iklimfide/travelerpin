@@ -5,7 +5,6 @@ import { findParkHubSlug } from "@/lib/data/park-hubs";
 import type { ParkType, VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
-import { profilePinImageUrl } from "@/lib/storage/hub-photo-url";
 import { buildProfileTrips, deprioritizeResidenceCountry, type ProfileTrip } from "@/lib/utils/profile-page";
 import { resolveResidenceCountryCode } from "@/lib/utils/residence-city";
 
@@ -13,21 +12,10 @@ function countryHubSlug(countryCode: string, countryName?: string): string | nul
   return resolveCountryHubSlug(countryCode, countryName);
 }
 
-function mediaImageUrl(item: {
-  media_type: string | null;
-  media_url: string | null;
-  media_preview_url?: string | null;
-  photo_url?: string | null;
-  instagram_urls?: string[] | null;
-}): string | null {
-  return profilePinImageUrl(item);
-}
-
 export type ProfileCountryDestination = {
   code: string;
   name: string;
   countrySlug: string | null;
-  imageUrl: string | null;
   cityCount: number;
   parkCount: number;
   visitedId?: string;
@@ -105,23 +93,10 @@ export function buildProfileAllDestinations(
       const cities = citiesByCountry.get(code) ?? [];
       const parks = parksByCountry.get(code) ?? [];
 
-      let imageUrl: string | null = null;
-      for (const city of cities) {
-        imageUrl = mediaImageUrl(city);
-        if (imageUrl) break;
-      }
-      if (!imageUrl) {
-        for (const park of parks) {
-          imageUrl = mediaImageUrl(park);
-          if (imageUrl) break;
-        }
-      }
-
       return {
         code: country.code,
         name: country.name,
         countrySlug: countryHubSlug(country.code),
-        imageUrl,
         cityCount: cities.length,
         parkCount: parks.length,
         visitedId: visitedByCode.get(code)?.id,

@@ -84,6 +84,7 @@ export function NotificationsNavLink({ variant = "bottomBar" }: NotificationsNav
 
   return (
     <button
+      ref={notifications.triggerRef}
       type="button"
       className={buttonClass}
       aria-current={active ? "page" : undefined}

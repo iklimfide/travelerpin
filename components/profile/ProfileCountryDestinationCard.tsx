@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { ProfileCountryLink } from "@/components/profile/ProfilePlaceLink";
 import { profileCardGradient } from "@/components/profile/profile-card-gradient";
@@ -28,24 +27,18 @@ export function ProfileCountryDestinationCard({
     <article className={`profile-trip${layout === "grid" ? " profile-trip--grid" : ""}`}>
       <div
         className="profile-trip-image profile-trip-image--country"
-        style={
-          country.imageUrl ? undefined : { background: profileCardGradient(country.code) }
-        }
+        style={{ background: profileCardGradient(country.code) }}
       >
-        {country.imageUrl ? (
-          <Image src={country.imageUrl} alt="" fill sizes="245px" className="object-cover" />
-        ) : (
-          <div className="profile-trip-flag">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={countryCodeToFlagUrl(country.code)}
-              alt=""
-              width={80}
-              height={80}
-              className="rounded-full object-cover shadow-md"
-            />
-          </div>
-        )}
+        <div className="profile-trip-flag">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={countryCodeToFlagUrl(country.code)}
+            alt=""
+            width={80}
+            height={80}
+            className="rounded-full object-cover shadow-md"
+          />
+        </div>
       </div>
       <div className="profile-trip-body">
         <h3>

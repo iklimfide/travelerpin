@@ -1,6 +1,15 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { NotificationsModal } from "@/components/notifications/NotificationsModal";
 import { fetchNotifications } from "@/lib/client/notification-actions";
@@ -10,6 +19,7 @@ import type { EnrichedNotificationRow } from "@/types/database";
 type NotificationsContextValue = {
   openNotifications: () => void;
   isOpen: boolean;
+  triggerRef: RefObject<HTMLButtonElement | null>;
 };
 
 export const NotificationsContext = createContext<NotificationsContextValue | null>(null);
@@ -30,6 +40,7 @@ type NotificationsProviderProps = {
 export function NotificationsProvider({ username, children }: NotificationsProviderProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const routeOpen = pathname === "/notifications" || pathname.startsWith("/notifications/");
   const [open, setOpen] = useState(routeOpen);
   const [prefetchedNotifications, setPrefetchedNotifications] = useState<
@@ -71,7 +82,7 @@ export function NotificationsProvider({ username, children }: NotificationsProvi
   }, []);
 
   return (
-    <NotificationsContext.Provider value={{ openNotifications, isOpen: open }}>
+    <NotificationsContext.Provider value={{ openNotifications, isOpen: open, triggerRef }}>
       {children}
       <NotificationsModal
         open={open}

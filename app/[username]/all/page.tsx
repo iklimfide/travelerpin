@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ProfileAllDestinationsView } from "@/components/profile/ProfileAllDestinationsView";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { buildProfileAllDestinations } from "@/lib/utils/profile-all-destinations";
+import { parseNextRoute } from "@/lib/utils/next-route";
 import { DEFAULT_DESCRIPTION, profileAllPath, travelMapTitle } from "@/lib/seo/site";
 import { loadPublicProfilePage } from "@/lib/supabase/profile-page-data";
 
@@ -74,6 +75,7 @@ export default async function ProfileAllDestinationsPage({ params }: PageProps) 
       wishlistCountries={visibleWishlistCountries}
       isLoggedIn={data.isLoggedIn}
       stats={data.stats}
+      initialNextRouteStops={parseNextRoute(profile.next_route)}
     />
   );
 

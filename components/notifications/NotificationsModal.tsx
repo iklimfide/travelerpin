@@ -1,8 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useContext, useEffect, useLayoutEffect, useState, type CSSProperties } from "react";
 import { NotificationsPanel } from "@/components/notifications/NotificationsPanel";
+import { NotificationsContext } from "@/components/notifications/NotificationsProvider";
+import { useIsDesktopDashboardNav } from "@/lib/hooks/useIsDesktopDashboardNav";
 import { shareMessages } from "@/lib/i18n/client-messages";
+import {
+  getFixedMenuBelowPosition,
+  type FixedMenuPosition,
+} from "@/lib/utils/fixed-menu-position";
 import type { EnrichedNotificationRow } from "@/types/database";
 
 type NotificationsModalProps = {
@@ -18,6 +24,11 @@ export function NotificationsModal({
   initialNotifications,
   initialUnreadCount = 0,
 }: NotificationsModalProps) {
+  const notifications = useContext(NotificationsContext);
+  const isDesktopNav = useIsDesktopDashboardNav();
+  const [sheetPosition, setSheetPosition] = useState<FixedMenuPosition | null>(null);
+  const useAnchoredDesktopSheet = isDesktopNav && Boolean(notifications?.triggerRef);
+
   useEffect(() => {
     if (!open) return;
 
@@ -29,10 +40,62 @@ export function NotificationsModal({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
+  useLayoutEffect(() => {
+    if (!open || !useAnchoredDesktopSheet) {
+      setSheetPosition(null);
+      return;
+    }
+
+    const anchor = notifications?.triggerRef.current;
+    if (!anchor) return;
+
+    setSheetPosition(getFixedMenuBelowPosition(anchor));
+  }, [notifications?.triggerRef, open, useAnchoredDesktopSheet]);
+
+  useEffect(() => {
+    if (!open || !useAnchoredDesktopSheet) return;
+
+    const anchor = notifications?.triggerRef.current;
+    if (!anchor) return;
+
+    const syncPosition = () => {
+      setSheetPosition(getFixedMenuBelowPosition(anchor));
+    };
+
+    const viewport = window.visualViewport;
+    window.addEventListener("resize", syncPosition);
+    window.addEventListener("scroll", syncPosition, true);
+    viewport?.addEventListener("resize", syncPosition);
+    viewport?.addEventListener("scroll", syncPosition);
+
+    return () => {
+      window.removeEventListener("resize", syncPosition);
+      window.removeEventListener("scroll", syncPosition, true);
+      viewport?.removeEventListener("resize", syncPosition);
+      viewport?.removeEventListener("scroll", syncPosition);
+    };
+  }, [notifications?.triggerRef, open, useAnchoredDesktopSheet]);
+
   if (!open) return null;
 
+  const isAnchoredReady = !useAnchoredDesktopSheet || sheetPosition !== null;
+  if (!isAnchoredReady) return null;
+
+  const sheetStyle: CSSProperties | undefined =
+    useAnchoredDesktopSheet && sheetPosition
+      ? {
+          top: sheetPosition.top,
+          right: sheetPosition.right,
+        }
+      : undefined;
+
   return (
-    <div className="notifications-modal" role="presentation">
+    <div
+      className={`notifications-modal${
+        useAnchoredDesktopSheet ? " notifications-modal--anchored" : ""
+      }`}
+      role="presentation"
+    >
       <button
         type="button"
         aria-label={shareMessages.close}
@@ -43,7 +106,10 @@ export function NotificationsModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="notifications-modal-title"
-        className="notifications-modal__sheet"
+        className={`notifications-modal__sheet${
+          useAnchoredDesktopSheet ? " notifications-modal__sheet--anchored" : ""
+        }`}
+        style={sheetStyle}
       >
         <NotificationsPanel
           variant="modal"

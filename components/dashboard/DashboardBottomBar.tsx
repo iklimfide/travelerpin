@@ -8,6 +8,7 @@ import { BottomBarProfileNav } from "@/components/dashboard/BottomBarProfileNav"
 import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
 import { NotificationsNavLink } from "@/components/notifications/NotificationsNavLink";
+import { useIsDesktopDashboardNav } from "@/lib/hooks/useIsDesktopDashboardNav";
 import { useVisualViewportFixed } from "@/lib/hooks/useVisualViewportFixed";
 import { dashboardNavMessages } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
@@ -75,13 +76,21 @@ type NavItem = {
   icon: ReactNode;
 };
 
-function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
+function NavLink({
+  item,
+  pathname,
+  className = "",
+}: {
+  item: NavItem;
+  pathname: string;
+  className?: string;
+}) {
   const active = item.isActive(pathname);
 
   return (
     <Link
       href={item.href}
-      className={`dashboard-bottom-bar__item${active ? " dashboard-bottom-bar__item--active" : ""}`}
+      className={`dashboard-bottom-bar__item${active ? " dashboard-bottom-bar__item--active" : ""}${className ? ` ${className}` : ""}`}
       aria-current={active ? "page" : undefined}
     >
       <span className="dashboard-bottom-bar__icon">{item.icon}</span>
@@ -96,15 +105,17 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
   const { openAddModal, openNextRouteModal } = useDashboardAdd();
   const barRef = useRef<HTMLElement>(null);
   const [mounted, setMounted] = useState(false);
+  const isDesktopNav = useIsDesktopDashboardNav();
   const currentPath = pathname ?? "/";
   const username = ownProfile?.username ?? null;
   const mapHref = username ? profilePath(username) : loginHrefFor(currentPath);
+  const brandHref = username ? profilePath(username) : "/";
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useVisualViewportFixed(barRef);
+  useVisualViewportFixed(barRef, { enabled: !isDesktopNav });
 
   const homeItem: NavItem = {
     href: "/",
@@ -136,44 +147,94 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
     openNextRouteModal();
   }
 
+  const profileNav = (
+    <BottomBarProfileNav
+      ownProfile={ownProfile}
+      loginHref={loginHrefFor(currentPath)}
+      menuPlacement={isDesktopNav ? "below" : "above"}
+      showBarDestinationsInMenu={isDesktopNav && Boolean(username)}
+      mapHref={mapHref}
+      mapActive={mapItem.isActive(pathname)}
+      onNextRouteClick={handleNextRouteClick}
+    />
+  );
+
+  const notificationsNav = <NotificationsNavLink variant="bottomBar" />;
+
   const bar = (
     <nav ref={barRef} className="dashboard-bottom-bar" aria-label="Dashboard navigation">
       <div className="dashboard-bottom-bar__inner">
-        {username ? (
-          <button
-            type="button"
-            className="dashboard-bottom-bar__item"
-            aria-label={dashboardNavMessages.nextRoute}
-            onClick={handleNextRouteClick}
-          >
-            <span className="dashboard-bottom-bar__icon">
-              <RouteIcon />
-            </span>
-            <span className="dashboard-bottom-bar__label">{dashboardNavMessages.nextRoute}</span>
-          </button>
+        {isDesktopNav ? (
+          <>
+            <Link href={brandHref} className="dashboard-top-bar__brand">
+              <img
+                src="/apple-touch-icon.png"
+                alt=""
+                width={32}
+                height={32}
+                className="dashboard-top-bar__brand-logo"
+              />
+              <span className="dashboard-top-bar__brand-label">TravelerPin.com</span>
+            </Link>
+            <div className="dashboard-top-bar__actions">
+              {notificationsNav}
+              {profileNav}
+            </div>
+          </>
         ) : (
-          <NavLink item={homeItem} pathname={pathname} />
+          <>
+            {username ? (
+              <button
+                type="button"
+                className="dashboard-bottom-bar__item"
+                aria-label={dashboardNavMessages.nextRoute}
+                onClick={handleNextRouteClick}
+              >
+                <span className="dashboard-bottom-bar__icon">
+                  <RouteIcon />
+                </span>
+                <span className="dashboard-bottom-bar__label">{dashboardNavMessages.nextRoute}</span>
+              </button>
+            ) : (
+              <NavLink item={homeItem} pathname={pathname} />
+            )}
+            <NavLink item={mapItem} pathname={pathname} />
+            <div className="dashboard-bottom-bar__add-slot">
+              <button
+                type="button"
+                className="dashboard-bottom-bar__add"
+                aria-label={dashboardNavMessages.add}
+                onClick={handleAddClick}
+              >
+                <PlusIcon />
+              </button>
+            </div>
+            {notificationsNav}
+            {profileNav}
+          </>
         )}
-        <NavLink item={mapItem} pathname={pathname} />
-
-        <div className="dashboard-bottom-bar__add-slot">
-          <button
-            type="button"
-            className="dashboard-bottom-bar__add"
-            aria-label={dashboardNavMessages.add}
-            onClick={handleAddClick}
-          >
-            <PlusIcon />
-          </button>
-        </div>
-
-        <NotificationsNavLink variant="bottomBar" />
-        <BottomBarProfileNav ownProfile={ownProfile} loginHref={loginHrefFor(currentPath)} />
       </div>
     </nav>
   );
 
   if (!mounted) return null;
 
-  return createPortal(bar, document.body);
+  const desktopAddFab = isDesktopNav ? (
+    <button
+      type="button"
+      className="dashboard-desktop-add-fab"
+      aria-label={dashboardNavMessages.add}
+      onClick={handleAddClick}
+    >
+      <PlusIcon />
+    </button>
+  ) : null;
+
+  return createPortal(
+    <>
+      {bar}
+      {desktopAddFab}
+    </>,
+    document.body,
+  );
 }

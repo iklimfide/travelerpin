@@ -21,31 +21,42 @@ import {
 import type { NextRouteStop } from "@/types/database";
 
 type ProfileNextRouteSectionProps = {
-  initialStops: NextRouteStop[];
+  initialStops?: NextRouteStop[];
   isOwnProfile: boolean;
 };
 
-function resolveInitialStops(initialStops: NextRouteStop[], isOwnProfile: boolean): NextRouteStop[] {
-  if (!isOwnProfile) return initialStops;
+function resolveInitialStops(
+  initialStops: NextRouteStop[] | undefined,
+  isOwnProfile: boolean
+): NextRouteStop[] {
+  const safeInitialStops = initialStops ?? [];
+
+  if (!isOwnProfile) return safeInitialStops;
 
   const cached = readOwnNextRouteCache();
   if (cached && cached.length > 0) return cached;
-  if (initialStops.length > 0) return initialStops;
+  if (safeInitialStops.length > 0) return safeInitialStops;
   return [];
 }
 
-function mergeIncomingStops(current: NextRouteStop[], incoming: NextRouteStop[]): NextRouteStop[] {
-  if (incoming.length === 0) {
-    return current.length > 0 ? current : incoming;
+function mergeIncomingStops(
+  current: NextRouteStop[] | undefined,
+  incoming: NextRouteStop[] | undefined
+): NextRouteStop[] {
+  const safeCurrent = current ?? [];
+  const safeIncoming = incoming ?? [];
+
+  if (safeIncoming.length === 0) {
+    return safeCurrent.length > 0 ? safeCurrent : safeIncoming;
   }
-  if (areNextRouteStopsEqual(current, incoming)) {
-    return current;
+  if (areNextRouteStopsEqual(safeCurrent, safeIncoming)) {
+    return safeCurrent;
   }
-  return incoming;
+  return safeIncoming;
 }
 
 export function ProfileNextRouteSection({
-  initialStops,
+  initialStops = [],
   isOwnProfile,
 }: ProfileNextRouteSectionProps) {
   const { openNextRouteModal } = useDashboardAdd();

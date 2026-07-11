@@ -8,6 +8,7 @@ import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestina
 import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
 import { ProfileCountryDestinationCard } from "@/components/profile/ProfileCountryDestinationCard";
 import { ProfileDestinationCardActions } from "@/components/profile/ProfileDestinationCardActions";
+import { ProfileNextRouteSection } from "@/components/profile/ProfileNextRouteSection";
 import { ProfileParkDestinationCard } from "@/components/profile/ProfileParkDestinationCard";
 import { ProfileTripCard } from "@/components/profile/ProfileTripCard";
 import { ProfileWishlistDestinationCard } from "@/components/profile/ProfileWishlistDestinationCard";
@@ -31,7 +32,14 @@ import {
 import { findCountryBackingCity } from "@/lib/utils/country-pin";
 import type { ProfileAllDestinations } from "@/lib/utils/profile-all-destinations";
 import type { ProfileTrip } from "@/lib/utils/profile-page";
-import type { TravelStats, VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
+import type {
+  NextRouteStop,
+  TravelStats,
+  VisitedCity,
+  VisitedCountry,
+  VisitedPark,
+  WishlistCountry,
+} from "@/types/database";
 
 /** Preview grid: 2 columns × 3 rows. */
 const PREVIEW_LIMIT = 6;
@@ -49,6 +57,7 @@ type ProfileAllDestinationsViewProps = {
   wishlistCountries: WishlistCountry[];
   isLoggedIn: boolean;
   stats: TravelStats;
+  initialNextRouteStops: NextRouteStop[];
 };
 
 type ProfileAllTab = "countries" | "cities" | "parks" | "wishlist";
@@ -165,6 +174,7 @@ export function ProfileAllDestinationsView({
   wishlistCountries,
   isLoggedIn,
   stats,
+  initialNextRouteStops,
 }: ProfileAllDestinationsViewProps) {
   const router = useRouter();
   const modal = useModal();
@@ -420,73 +430,84 @@ export function ProfileAllDestinationsView({
           <h1 className="profile-all-title">{title}</h1>
         </div>
 
-        {hasMapContent ? (
-          <div className="profile-all-map">
-            <ProfileMapPanel
-              visitedCountryCodes={visitedCodes}
-              wishlistCountryCodes={wishlistCodes}
-              visitedCountries={visitedCountries}
-              wishlistCountries={wishlistCountries}
-              visitedCities={visitedCities}
-              visitedParks={visitedParks}
-              isLoggedIn={isLoggedIn}
-              canEditMap={isOwnProfile}
-              countryCount={stats.countries}
-              exploredBadgeLabel={profileMessages.mapExploredBadge}
-            />
-          </div>
-        ) : null}
-
-        {totalCount === 0 ? (
+        {totalCount === 0 && !hasMapContent ? (
           <p className="profile-empty">{profileMessages.allDestinationsEmpty}</p>
         ) : (
-          <main className="profile-all-main">
-            {hasNavContent ? (
-              <ProfileAllDestinationsNav
-                displayName={displayName}
-                isOwnProfile={isOwnProfile}
-                activeTab={activeTab}
-                onTabChange={handleTabChange}
-              />
+          <>
+            {hasMapContent ? (
+              <div className="profile-all-map">
+                <ProfileMapPanel
+                  visitedCountryCodes={visitedCodes}
+                  wishlistCountryCodes={wishlistCodes}
+                  visitedCountries={visitedCountries}
+                  wishlistCountries={wishlistCountries}
+                  visitedCities={visitedCities}
+                  visitedParks={visitedParks}
+                  isLoggedIn={isLoggedIn}
+                  canEditMap={isOwnProfile}
+                  countryCount={stats.countries}
+                  exploredBadgeLabel={profileMessages.mapExploredBadge}
+                />
+              </div>
             ) : null}
 
-            <DestinationSection
-              id={sectionId("countries")}
-              title={profileMessages.allDestinationsCountries}
-              count={destinations.countries.length}
-              onOpenAll={() => setOpenModalTab("countries")}
-            >
-              {renderCountryCards(countriesPreview)}
-            </DestinationSection>
+            {totalCount === 0 ? (
+              <p className="profile-empty">{profileMessages.allDestinationsEmpty}</p>
+            ) : (
+              <main className="profile-all-main">
+                {hasNavContent ? (
+                  <ProfileAllDestinationsNav
+                    displayName={displayName}
+                    isOwnProfile={isOwnProfile}
+                    activeTab={activeTab}
+                    onTabChange={handleTabChange}
+                  />
+                ) : null}
 
-            <DestinationSection
-              id={sectionId("cities")}
-              title={profileMessages.allDestinationsCities}
-              count={destinations.cities.length}
-              onOpenAll={() => setOpenModalTab("cities")}
-            >
-              {renderCityCards(citiesPreview)}
-            </DestinationSection>
+                <DestinationSection
+                  id={sectionId("countries")}
+                  title={profileMessages.allDestinationsCountries}
+                  count={destinations.countries.length}
+                  onOpenAll={() => setOpenModalTab("countries")}
+                >
+                  {renderCountryCards(countriesPreview)}
+                </DestinationSection>
 
-            <DestinationSection
-              id={sectionId("parks")}
-              title={profileMessages.allDestinationsParks}
-              count={destinations.parks.length}
-              onOpenAll={() => setOpenModalTab("parks")}
-            >
-              {renderParkCards(parksPreview)}
-            </DestinationSection>
+                <DestinationSection
+                  id={sectionId("cities")}
+                  title={profileMessages.allDestinationsCities}
+                  count={destinations.cities.length}
+                  onOpenAll={() => setOpenModalTab("cities")}
+                >
+                  {renderCityCards(citiesPreview)}
+                </DestinationSection>
 
-            <DestinationSection
-              id={sectionId("wishlist")}
-              title={profileMessages.wishlistCountries}
-              count={destinations.wishlist.length}
-              onOpenAll={() => setOpenModalTab("wishlist")}
-            >
-              {renderWishlistCards(wishlistPreview)}
-            </DestinationSection>
-          </main>
+                <DestinationSection
+                  id={sectionId("parks")}
+                  title={profileMessages.allDestinationsParks}
+                  count={destinations.parks.length}
+                  onOpenAll={() => setOpenModalTab("parks")}
+                >
+                  {renderParkCards(parksPreview)}
+                </DestinationSection>
+
+                <DestinationSection
+                  id={sectionId("wishlist")}
+                  title={profileMessages.wishlistCountries}
+                  count={destinations.wishlist.length}
+                  onOpenAll={() => setOpenModalTab("wishlist")}
+                >
+                  {renderWishlistCards(wishlistPreview)}
+                </DestinationSection>
+              </main>
+            )}
+          </>
         )}
+
+        <ProfileNextRouteSection
+          initialStops={initialNextRouteStops}
+          isOwnProfile={isOwnProfile}
+        />
       </div>
 
       <ProfileAllDestinationsListModal

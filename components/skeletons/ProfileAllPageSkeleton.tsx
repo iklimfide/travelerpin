@@ -12,7 +12,7 @@ export function ProfileAllPageSkeleton() {
 
           <div className="profile-all-map">
             <div className="profile-map-panel">
-              <Skeleton className="h-[220px] w-full rounded-[20px]" />
+              <Skeleton className="h-[220px] w-full rounded-[20px] lg:min-h-[360px]" />
             </div>
           </div>
 
@@ -26,7 +26,7 @@ export function ProfileAllPageSkeleton() {
             {Array.from({ length: 2 }).map((_, sectionIndex) => (
               <section key={sectionIndex} className="space-y-3">
                 <Skeleton className="h-7 w-40" />
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {Array.from({ length: 4 }).map((_, cardIndex) => (
                     <Skeleton key={cardIndex} className="h-[132px] w-full rounded-[24px]" />
                   ))}
