@@ -3894,8 +3894,6 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 
 .dashboard-profile-menu {
   position: fixed;
-  right: 12px;
-  bottom: calc(var(--dashboard-bottom-bar-height) + env(safe-area-inset-bottom, 0px) + 8px);
   z-index: 47;
   min-width: 188px;
   padding: 6px;
@@ -3903,6 +3901,7 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
   border-radius: 16px;
   background: #ffffff;
   box-shadow: 0 16px 40px rgba(25, 43, 68, 0.16);
+  transform: translateY(-100%);
 }
 
 .dashboard-profile-menu__item {
@@ -4505,11 +4504,26 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 
 .save-destination-modal__status {
   padding: 10px 20px 8px;
-  text-align: right;
+  text-align: center;
   font-size: 12px;
   font-weight: 700;
   color: #6d86a3;
   flex-shrink: 0;
+}
+
+.save-destination-modal__status-action {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.save-destination-modal__status-action:hover {
+  color: #2563eb;
+  text-decoration: underline;
 }
 
 .save-destination-modal__row--skeleton {

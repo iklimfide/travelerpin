@@ -145,6 +145,23 @@ export function ProfileNextRouteSection({
     [persistStops, reorderBusy]
   );
 
+  useEffect(() => {
+    function scrollToSection() {
+      if (window.location.hash !== "#profile-next-route") return;
+      document.getElementById("profile-next-route")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+
+    const timer = window.setTimeout(scrollToSection, 100);
+    window.addEventListener("hashchange", scrollToSection);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("hashchange", scrollToSection);
+    };
+  }, []);
+
   if (stops.length === 0 && !isOwnProfile) return null;
 
   const stopCountLabel =
@@ -153,7 +170,7 @@ export function ProfileNextRouteSection({
       : null;
 
   return (
-    <section className="profile-section profile-next-route">
+    <section id="profile-next-route" className="profile-section profile-next-route">
       <div className="profile-owner-section profile-next-route-box">
         <div className="profile-owner-section__header">
           <div className="profile-owner-section__intro">

@@ -339,6 +339,13 @@ export function NextRouteModal({ open, onClose }: NextRouteModalProps) {
     return nextRouteMessages.routeStopCount.replace("{count}", String(stops.length));
   }, [isSearching, loadingSearch, stops.length]);
 
+  const showRouteTabAction = !(isSearching && loadingSearch);
+
+  function goToMyRouteTab() {
+    setQuery("");
+    setTab("route");
+  }
+
   const listEmptyMessage = useMemo(() => {
     if (loadingRoute && tab === "route") return null;
     if (isSearching) {
@@ -427,7 +434,17 @@ export function NextRouteModal({ open, onClose }: NextRouteModalProps) {
           </div>
         ) : null}
 
-        <div className="save-destination-modal__status">{statusLabel}</div>
+        {showRouteTabAction ? (
+          <button
+            type="button"
+            className="save-destination-modal__status save-destination-modal__status-action"
+            onClick={goToMyRouteTab}
+          >
+            {statusLabel}
+          </button>
+        ) : (
+          <div className="save-destination-modal__status">{statusLabel}</div>
+        )}
 
         {showRouteSkeleton ? (
           <SaveDestinationModalListSkeleton rows={8} />

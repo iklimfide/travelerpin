@@ -48,11 +48,16 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
     passwordConfirm: "",
   });
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
   const [passwordsVisible, setPasswordsVisible] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(true);
 
   const trimmedUsername = (form.username ?? "").trim();
+
+  useEffect(() => {
+    setSubmitError(null);
+  }, [mode]);
 
   useEffect(() => {
     if (mode !== "register") return;
@@ -126,23 +131,18 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitError(null);
     setLoading(true);
 
     try {
       if (mode === "register") {
         if (!acceptedTerms) {
-          await modal.alert(t("acceptTermsRequired"), {
-            variant: "error",
-            title: t("registerTitle"),
-          });
+          setSubmitError(t("acceptTermsRequired"));
           return;
         }
 
         if (form.password !== (form.passwordConfirm ?? "")) {
-          await modal.alert(t("passwordMismatch"), {
-            variant: "error",
-            title: t("registerTitle"),
-          });
+          setSubmitError(t("passwordMismatch"));
           return;
         }
 
@@ -153,22 +153,18 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
             issue?.path.includes("passwordConfirm") && issue.message.toLowerCase().includes("match")
               ? t("passwordMismatch")
               : (issue?.message ?? "Invalid input");
-          await modal.alert(message, {
-            variant: "error",
-            title: t("registerTitle"),
-          });
+          setSubmitError(message);
           return;
         }
 
         const available = await ensureUsernameAvailable(parsed.data.username);
         if (!available) {
-          await modal.alert(
+          setSubmitError(
             usernameStatus === "taken"
               ? t("usernameTaken")
               : usernameStatus === "reserved"
                 ? t("usernameReserved")
-                : t("usernameInvalid"),
-            { variant: "error" }
+                : t("usernameInvalid")
           );
           return;
         }
@@ -187,11 +183,15 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
         if (signUpError) {
           const message = signUpError.message.toLowerCase().includes("duplicate")
             ? t("usernameTaken")
-            : formatAuthErrorMessage(signUpError.message, {
-                loginInvalidCredentials: t("loginInvalidCredentials"),
-                loginEmailNotConfirmed: t("loginEmailNotConfirmed"),
-              });
-          await modal.alert(message, { variant: "error", title: t("registerTitle") });
+            : formatAuthErrorMessage(
+                signUpError.message,
+                {
+                  loginInvalidCredentials: t("loginInvalidCredentials"),
+                  loginEmailNotConfirmed: t("loginEmailNotConfirmed"),
+                },
+                signUpError.code
+              );
+          setSubmitError(message);
           return;
         }
 
@@ -218,9 +218,7 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
       } else {
         const parsed = loginSchema.safeParse(form);
         if (!parsed.success) {
-          await modal.alert(parsed.error.issues[0]?.message ?? "Invalid input", {
-            variant: "error",
-          });
+          setSubmitError(parsed.error.issues[0]?.message ?? "Invalid input");
           return;
         }
 
@@ -230,12 +228,15 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
         });
 
         if (signInError) {
-          await modal.alert(
-            formatAuthErrorMessage(signInError.message, {
-              loginInvalidCredentials: t("loginInvalidCredentials"),
-              loginEmailNotConfirmed: t("loginEmailNotConfirmed"),
-            }),
-            { variant: "error", title: t("loginTitle") }
+          setSubmitError(
+            formatAuthErrorMessage(
+              signInError.message,
+              {
+                loginInvalidCredentials: t("loginInvalidCredentials"),
+                loginEmailNotConfirmed: t("loginEmailNotConfirmed"),
+              },
+              signInError.code
+            )
           );
           return;
         }
@@ -293,7 +294,10 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
             id="username"
             type="text"
             value={form.username ?? ""}
-            onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
+            onChange={(e) => {
+              setSubmitError(null);
+              setForm((f) => ({ ...f, username: e.target.value }));
+            }}
             className={`w-full rounded-lg border bg-white px-4 py-2.5 text-slate-900 outline-none focus:ring-1 ${
               usernameStatus === "taken" ||
               usernameStatus === "reserved" ||
@@ -326,7 +330,10 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
           id="email"
           type="email"
           value={form.email}
-          onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+          onChange={(e) => {
+            setSubmitError(null);
+            setForm((f) => ({ ...f, email: e.target.value }));
+          }}
           className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-slate-900 outline-none focus:border-wbs-blue focus:ring-1 focus:ring-wbs-blue/20"
           required
           autoComplete="email"
@@ -337,7 +344,10 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
         id="password"
         label={t("password")}
         value={form.password}
-        onChange={(password) => setForm((f) => ({ ...f, password }))}
+        onChange={(password) => {
+          setSubmitError(null);
+          setForm((f) => ({ ...f, password }));
+        }}
         autoComplete={mode === "register" ? "new-password" : "current-password"}
         minLength={LIMITS.passwordMin}
         showLabel={t("showPassword")}
@@ -354,7 +364,10 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
             id="passwordConfirm"
             label={t("passwordConfirm")}
             value={form.passwordConfirm ?? ""}
-            onChange={(passwordConfirm) => setForm((f) => ({ ...f, passwordConfirm }))}
+            onChange={(passwordConfirm) => {
+              setSubmitError(null);
+              setForm((f) => ({ ...f, passwordConfirm }));
+            }}
             autoComplete="new-password"
             minLength={LIMITS.passwordMin}
             showLabel={t("showPassword")}
@@ -401,6 +414,12 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
             .
           </span>
         </label>
+      ) : null}
+
+      {submitError ? (
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+          {submitError}
+        </p>
       ) : null}
 
       <button

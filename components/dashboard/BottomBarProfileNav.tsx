@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
-import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
 import { commonMessages, dashboardNavMessages, shareMessages } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
 import { clearAllSessionPageCaches } from "@/lib/client/session-page-cache";
@@ -37,17 +37,6 @@ function SettingsIcon() {
   );
 }
 
-function RouteIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
-      <circle cx="6" cy="18" r="2" />
-      <circle cx="12" cy="12" r="2" />
-      <circle cx="18" cy="6" r="2" />
-      <path d="M7.6 16.8 10.4 13.2M13.6 10.8 16.4 7.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function LogOutIcon() {
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
@@ -58,16 +47,40 @@ function LogOutIcon() {
   );
 }
 
+type MenuPosition = {
+  top: number;
+  right: number;
+};
+
+const MENU_GAP_PX = 8;
+const MENU_MIN_INSET_PX = 12;
+
+function getMenuPosition(button: HTMLElement): MenuPosition {
+  const rect = button.getBoundingClientRect();
+  const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
+
+  return {
+    top: rect.top - MENU_GAP_PX,
+    right: Math.max(MENU_MIN_INSET_PX, viewportWidth - rect.right),
+  };
+}
+
 export function BottomBarProfileNav({ ownProfile, loginHref }: BottomBarProfileNavProps) {
   const pathname = usePathname();
   const menuId = useId();
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  const { openNextRouteModal } = useDashboardAdd();
+  const [mounted, setMounted] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null);
 
   const username = ownProfile?.username ?? null;
   const profileHref = username ? profilePath(username) : loginHref;
   const profileDisplayName = ownProfile?.displayName?.trim() || username || "";
   const active = Boolean(username) && pathname === profileHref;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -78,6 +91,35 @@ export function BottomBarProfileNav({ ownProfile, loginHref }: BottomBarProfileN
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) {
+      setMenuPosition(null);
+      return;
+    }
+
+    const button = triggerRef.current;
+    if (!button) return;
+
+    const syncPosition = () => {
+      setMenuPosition(getMenuPosition(button));
+    };
+
+    syncPosition();
+
+    const viewport = window.visualViewport;
+    window.addEventListener("resize", syncPosition);
+    window.addEventListener("scroll", syncPosition, true);
+    viewport?.addEventListener("resize", syncPosition);
+    viewport?.addEventListener("scroll", syncPosition);
+
+    return () => {
+      window.removeEventListener("resize", syncPosition);
+      window.removeEventListener("scroll", syncPosition, true);
+      viewport?.removeEventListener("resize", syncPosition);
+      viewport?.removeEventListener("scroll", syncPosition);
+    };
   }, [open]);
 
   useEffect(() => {
@@ -106,9 +148,75 @@ export function BottomBarProfileNav({ ownProfile, loginHref }: BottomBarProfileN
     );
   }
 
+  const menuStyle: CSSProperties | undefined = menuPosition
+    ? {
+        top: menuPosition.top,
+        right: menuPosition.right,
+      }
+    : undefined;
+
+  const menuLayer =
+    open && menuPosition && mounted
+      ? createPortal(
+          <>
+            <button
+              type="button"
+              className="dashboard-profile-menu__backdrop"
+              aria-label={shareMessages.close}
+              onClick={() => setOpen(false)}
+            />
+            <div
+              id={menuId}
+              role="menu"
+              className="dashboard-profile-menu"
+              style={menuStyle}
+            >
+              <button
+                type="button"
+                role="menuitem"
+                className="dashboard-profile-menu__item dashboard-profile-menu__item--logout"
+                onClick={() => void handleLogout()}
+              >
+                <span className="dashboard-profile-menu__icon" aria-hidden>
+                  <LogOutIcon />
+                </span>
+                {commonMessages.logout}
+              </button>
+              <div className="dashboard-profile-menu__divider" role="presentation" />
+              <Link
+                href={profileHref}
+                role="menuitem"
+                className="dashboard-profile-menu__item"
+                onClick={() => setOpen(false)}
+              >
+                <span className="dashboard-profile-menu__icon" aria-hidden>
+                  <ProfileIcon />
+                </span>
+              {dashboardNavMessages.profile}
+            </Link>
+            <Link
+              href="/settings"
+                role="menuitem"
+                className={`dashboard-profile-menu__item${
+                  pathname.startsWith("/settings") ? " dashboard-profile-menu__item--active" : ""
+                }`}
+                onClick={() => setOpen(false)}
+              >
+                <span className="dashboard-profile-menu__icon" aria-hidden>
+                  <SettingsIcon />
+                </span>
+                {dashboardNavMessages.settings}
+              </Link>
+            </div>
+          </>,
+          document.body
+        )
+      : null;
+
   return (
     <div className="dashboard-bottom-bar__profile-slot">
       <button
+        ref={triggerRef}
         type="button"
         className={`dashboard-bottom-bar__item dashboard-bottom-bar__item--profile-avatar dashboard-bottom-bar__item--icon-only${
           active ? " dashboard-bottom-bar__item--active" : ""
@@ -130,73 +238,7 @@ export function BottomBarProfileNav({ ownProfile, loginHref }: BottomBarProfileN
         </span>
       </button>
 
-      {open ? (
-        <>
-          <button
-            type="button"
-            className="dashboard-profile-menu__backdrop"
-            aria-label={shareMessages.close}
-            onClick={() => setOpen(false)}
-          />
-          <div id={menuId} role="menu" className="dashboard-profile-menu">
-            <button
-              type="button"
-              role="menuitem"
-              className="dashboard-profile-menu__item dashboard-profile-menu__item--logout"
-              onClick={() => void handleLogout()}
-            >
-              <span className="dashboard-profile-menu__icon" aria-hidden>
-                <LogOutIcon />
-              </span>
-              {commonMessages.logout}
-            </button>
-            <div className="dashboard-profile-menu__divider" role="presentation" />
-            <Link
-              href={profileHref}
-              role="menuitem"
-              className="dashboard-profile-menu__item"
-              onClick={() => setOpen(false)}
-            >
-              <span className="dashboard-profile-menu__icon" aria-hidden>
-                <ProfileIcon />
-              </span>
-              {dashboardNavMessages.profile}
-            </Link>
-            <button
-              type="button"
-              role="menuitem"
-              className="dashboard-profile-menu__item"
-              onPointerDown={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-              onClick={(event) => {
-                event.stopPropagation();
-                setOpen(false);
-                openNextRouteModal();
-              }}
-            >
-              <span className="dashboard-profile-menu__icon" aria-hidden>
-                <RouteIcon />
-              </span>
-              {dashboardNavMessages.nextRoute}
-            </button>
-            <Link
-              href="/settings"
-              role="menuitem"
-              className={`dashboard-profile-menu__item${
-                pathname.startsWith("/settings") ? " dashboard-profile-menu__item--active" : ""
-              }`}
-              onClick={() => setOpen(false)}
-            >
-              <span className="dashboard-profile-menu__icon" aria-hidden>
-                <SettingsIcon />
-              </span>
-              {dashboardNavMessages.settings}
-            </Link>
-          </div>
-        </>
-      ) : null}
+      {menuLayer}
     </div>
   );
 }

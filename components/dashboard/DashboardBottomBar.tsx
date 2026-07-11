@@ -32,6 +32,17 @@ function HomeIcon() {
   );
 }
 
+function RouteIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={22} height={22} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <circle cx="6" cy="18" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="18" cy="6" r="2" />
+      <path d="M7.6 16.8 10.4 13.2M13.6 10.8 16.4 7.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function MapPinIcon() {
   return (
     <svg viewBox="0 0 24 24" width={22} height={22} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
@@ -82,7 +93,7 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
 export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { openAddModal } = useDashboardAdd();
+  const { openAddModal, openNextRouteModal } = useDashboardAdd();
   const barRef = useRef<HTMLElement>(null);
   const [mounted, setMounted] = useState(false);
   const currentPath = pathname ?? "/";
@@ -117,10 +128,32 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
     openAddModal();
   }
 
+  function handleNextRouteClick() {
+    if (!username) {
+      router.push(loginHrefFor(currentPath));
+      return;
+    }
+    openNextRouteModal();
+  }
+
   const bar = (
     <nav ref={barRef} className="dashboard-bottom-bar" aria-label="Dashboard navigation">
       <div className="dashboard-bottom-bar__inner">
-        <NavLink item={homeItem} pathname={pathname} />
+        {username ? (
+          <button
+            type="button"
+            className="dashboard-bottom-bar__item"
+            aria-label={dashboardNavMessages.nextRoute}
+            onClick={handleNextRouteClick}
+          >
+            <span className="dashboard-bottom-bar__icon">
+              <RouteIcon />
+            </span>
+            <span className="dashboard-bottom-bar__label">{dashboardNavMessages.nextRoute}</span>
+          </button>
+        ) : (
+          <NavLink item={homeItem} pathname={pathname} />
+        )}
         <NavLink item={mapItem} pathname={pathname} />
 
         <div className="dashboard-bottom-bar__add-slot">
