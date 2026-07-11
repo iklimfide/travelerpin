@@ -7,12 +7,9 @@ import { buildVisitedCountryList } from "@/lib/map/travel-lists";
 import { buildCitySlug } from "@/lib/utils/city-slug";
 import type { ParkType } from "@/lib/data/tourist-park-search";
 import { cityVisitCount } from "@/lib/utils/visit-date";
-import { formatCityDisplayName, normalizeCityKey } from "@/lib/utils/city-name";
+import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
-import {
-  resolveResidenceCityPinInput,
-  resolveResidenceCountryCode,
-} from "@/lib/utils/residence-city";
+import { resolveResidenceCountryCode } from "@/lib/utils/residence-city";
 import type { VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 
 export const WORLD_COUNTRY_TOTAL = 195;
@@ -27,7 +24,7 @@ function cityHubSlug(countryCode: string, cityName: string): string | null {
 
 export type ProfileTrip = {
   id: string;
-  kind: "city" | "park";
+  kind: "country" | "city" | "park";
   placeName: string;
   citySlug: string | null;
   parkSlug: string | null;
@@ -35,7 +32,7 @@ export type ProfileTrip = {
   countryCode: string;
   countryName: string;
   countrySlug: string | null;
-  imageUrl: string;
+  imageUrl: string | null;
   note: string | null;
   createdAt: string;
   badge: "recent" | "favorite" | "dayTrip" | null;
@@ -93,11 +90,106 @@ export function deprioritizeResidenceCountry<T>(
   });
 }
 
-export function buildProfileTrips(
-  cities: VisitedCity[],
-  parks: VisitedPark[] = [],
+function countryTripCreatedAt(
+  code: string,
+  visitedByCode: Map<string, VisitedCountry>,
+  citiesByCountry: Map<string, VisitedCity[]>,
+  parksByCountry: Map<string, VisitedPark[]>
+): string {
+  const visited = visitedByCode.get(code.toUpperCase());
+  if (visited) return visited.created_at;
+
+  const dates: number[] = [];
+  for (const city of citiesByCountry.get(code.toUpperCase()) ?? []) {
+    dates.push(new Date(city.created_at).getTime());
+  }
+  for (const park of parksByCountry.get(code.toUpperCase()) ?? []) {
+    dates.push(new Date(park.created_at).getTime());
+  }
+  if (dates.length === 0) return new Date(0).toISOString();
+  return new Date(Math.max(...dates)).toISOString();
+}
+
+function sortProfileTripsByKindAndDate(
+  trips: ProfileTrip[],
   residence?: string | null
 ): ProfileTrip[] {
+  const residenceCountryCode = resolveResidenceCountryCode(residence);
+
+  const countries = trips
+    .filter((trip) => trip.kind === "country")
+    .sort(sortTripsByDateDesc);
+  const cities = deprioritizeResidenceCountry(
+    trips.filter((trip) => trip.kind === "city"),
+    residenceCountryCode,
+    (trip) => trip.countryCode,
+    sortTripsByDateDesc
+  );
+  const parks = deprioritizeResidenceCountry(
+    trips.filter((trip) => trip.kind === "park"),
+    residenceCountryCode,
+    (trip) => trip.countryCode,
+    sortTripsByDateDesc
+  );
+
+  return [...countries, ...cities, ...parks];
+}
+
+export function buildProfileTrips(
+  visitedCountries: VisitedCountry[],
+  cities: VisitedCity[],
+  parks: VisitedPark[] = [],
+  residence?: string | null,
+  visitedCodes: string[] = []
+): ProfileTrip[] {
+  const countryList = buildVisitedCountryList(
+    visitedCountries,
+    cities,
+    visitedCodes,
+    parks
+  );
+
+  const visitedByCode = new Map<string, VisitedCountry>();
+  for (const country of visitedCountries) {
+    visitedByCode.set(country.country_code.toUpperCase(), country);
+  }
+
+  const citiesByCountry = new Map<string, VisitedCity[]>();
+  for (const city of cities) {
+    const code = city.country_code.toUpperCase();
+    const list = citiesByCountry.get(code) ?? [];
+    list.push(city);
+    citiesByCountry.set(code, list);
+  }
+
+  const parksByCountry = new Map<string, VisitedPark[]>();
+  for (const park of parks) {
+    const code = park.country_code.toUpperCase();
+    const list = parksByCountry.get(code) ?? [];
+    list.push(park);
+    parksByCountry.set(code, list);
+  }
+
+  const countryTrips: ProfileTrip[] = countryList.map((country) => {
+    const code = country.code.toUpperCase();
+    const visited = visitedByCode.get(code);
+    return {
+      id: visited?.id ?? `country:${code}`,
+      kind: "country",
+      placeName: country.name,
+      citySlug: null,
+      parkSlug: null,
+      parkType: null,
+      countryCode: country.code,
+      countryName: country.name,
+      countrySlug: countryHubSlug(country.code, country.name),
+      imageUrl: null,
+      note: null,
+      createdAt: countryTripCreatedAt(code, visitedByCode, citiesByCountry, parksByCountry),
+      badge: null,
+    };
+  });
+
   const sortedCities = [...cities].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
@@ -135,30 +227,10 @@ export function buildProfileTrips(
     badge: null,
   }));
 
-  const residencePin = resolveResidenceCityPinInput(residence);
-  const residenceKey = residencePin
-    ? `${residencePin.country_code.toUpperCase()}:${normalizeCityKey(residencePin.city_name)}`
-    : null;
-
-  const sorted = deprioritizeResidenceCountry(
-    [...cityTrips, ...parkTrips],
-    resolveResidenceCountryCode(residence),
-    (trip) => trip.countryCode,
-    sortTripsByDateDesc
+  return sortProfileTripsByKindAndDate(
+    [...countryTrips, ...cityTrips, ...parkTrips],
+    residence
   );
-
-  // Home city always leads the list (it is a pin, and must stay visible in previews).
-  if (!residenceKey) return sorted;
-
-  const homeIndex = sorted.findIndex(
-    (trip) =>
-      trip.kind === "city" &&
-      `${trip.countryCode.toUpperCase()}:${normalizeCityKey(trip.placeName)}` === residenceKey
-  );
-  if (homeIndex <= 0) return sorted;
-
-  const homeTrip = sorted[homeIndex];
-  return [homeTrip, ...sorted.slice(0, homeIndex), ...sorted.slice(homeIndex + 1)];
 }
 
 export function buildProfileSummary(

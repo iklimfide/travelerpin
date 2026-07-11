@@ -169,7 +169,9 @@ export function buildProfileAllDestinations(
 
   return {
     countries,
-    cities: buildProfileTrips(visitedCities, [], residence),
+    cities: buildProfileTrips(visitedCountries, visitedCities, [], residence, visitedCodes).filter(
+      (trip) => trip.kind === "city"
+    ),
     parks,
     wishlist,
   };

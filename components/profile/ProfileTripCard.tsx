@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { ProfileCityLink, ProfileCountryLink, ProfileParkLink } from "@/components/profile/ProfilePlaceLink";
+import { profileCardGradient } from "@/components/profile/profile-card-gradient";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import type { ProfileTrip } from "@/lib/utils/profile-page";
@@ -22,14 +23,34 @@ export function ProfileTripCard({
     <article
       className={`profile-trip${layout === "grid" ? " profile-trip--grid" : ""}`}
     >
-      <div className="profile-trip-image">
-        <Image
-          src={trip.imageUrl}
-          alt=""
-          fill
-          sizes="200px"
-          className="profile-trip-image__photo object-cover"
-        />
+      <div
+        className={`profile-trip-image${trip.kind === "country" ? " profile-trip-image--country" : ""}`}
+        style={
+          trip.kind === "country" && !trip.imageUrl
+            ? { background: profileCardGradient(trip.countryCode) }
+            : undefined
+        }
+      >
+        {trip.imageUrl ? (
+          <Image
+            src={trip.imageUrl}
+            alt=""
+            fill
+            sizes="200px"
+            className="profile-trip-image__photo object-cover"
+          />
+        ) : trip.kind === "country" ? (
+          <div className="profile-trip-flag">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={countryCodeToFlagUrl(trip.countryCode)}
+              alt=""
+              width={80}
+              height={80}
+              className="rounded-full object-cover shadow-md"
+            />
+          </div>
+        ) : null}
         {trip.badge ? (
           <span className="profile-trip-badge">{badgeLabels[trip.badge]}</span>
         ) : trip.kind === "park" && trip.parkType ? (
@@ -38,7 +59,14 @@ export function ProfileTripCard({
       </div>
       <div className="profile-trip-body">
         <h3>
-          {trip.kind === "city" ? (
+          {trip.kind === "country" ? (
+            <ProfileCountryLink
+              slug={trip.countrySlug}
+              name={trip.placeName}
+              className="profile-trip-title-link"
+              title={trip.placeName}
+            />
+          ) : trip.kind === "city" ? (
             <ProfileCityLink
               slug={trip.citySlug}
               name={trip.placeName}
@@ -55,24 +83,26 @@ export function ProfileTripCard({
           )}
         </h3>
         {trip.note?.trim() ? <p>{trip.note.trim()}</p> : null}
-        <div className="profile-trip-meta">
-          <span className="profile-chip">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={countryCodeToFlagUrl(trip.countryCode)}
-              alt=""
-              width={16}
-              height={12}
-              className="mr-1 inline-block rounded-sm"
-            />
-            <ProfileCountryLink
-              slug={trip.countrySlug}
-              name={trip.countryName}
-              className="profile-chip-link"
-              title={trip.countryName}
-            />
-          </span>
-        </div>
+        {trip.kind !== "country" ? (
+          <div className="profile-trip-meta">
+            <span className="profile-chip">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={countryCodeToFlagUrl(trip.countryCode)}
+                alt=""
+                width={16}
+                height={12}
+                className="mr-1 inline-block rounded-sm"
+              />
+              <ProfileCountryLink
+                slug={trip.countrySlug}
+                name={trip.countryName}
+                className="profile-chip-link"
+                title={trip.countryName}
+              />
+            </span>
+          </div>
+        ) : null}
         {actions}
       </div>
     </article>

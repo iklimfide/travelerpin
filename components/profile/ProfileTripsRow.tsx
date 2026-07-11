@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { ProfileTripCard } from "@/components/profile/ProfileTripCard";
+import { useClampTripsToPrimaryColumn } from "@/lib/hooks/useClampTripsToPrimaryColumn";
 import type { ProfileTrip } from "@/lib/utils/profile-page";
 
 type ProfileTripsRowProps = {
@@ -8,6 +11,7 @@ type ProfileTripsRowProps = {
   allLabel: string;
   allHref?: string;
   badgeLabels: Record<NonNullable<ProfileTrip["badge"]>, string>;
+  clampToPrimaryColumn?: boolean;
 };
 
 export function ProfileTripsRow({
@@ -16,7 +20,10 @@ export function ProfileTripsRow({
   allLabel,
   allHref,
   badgeLabels,
+  clampToPrimaryColumn = false,
 }: ProfileTripsRowProps) {
+  const scrollRef = useClampTripsToPrimaryColumn(clampToPrimaryColumn);
+
   if (trips.length === 0 && !allHref) return null;
 
   return (
@@ -33,7 +40,10 @@ export function ProfileTripsRow({
       </div>
 
       {trips.length > 0 ? (
-        <div className="profile-trips-scroll scrollbar-thin">
+        <div
+          ref={clampToPrimaryColumn ? scrollRef : undefined}
+          className={`profile-trips-scroll scrollbar-thin${clampToPrimaryColumn ? " profile-trips-scroll--clamped" : ""}`}
+        >
           <div className="profile-trips-track" role="list" aria-label={title}>
             {trips.map((trip) => (
               <ProfileTripCard key={trip.id} trip={trip} badgeLabels={badgeLabels} />
