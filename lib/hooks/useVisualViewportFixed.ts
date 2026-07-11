@@ -7,9 +7,8 @@ type UseVisualViewportFixedOptions = {
 };
 
 /**
- * Keeps the bottom bar pinned during mobile pinch-zoom only.
- * Offset-only visual viewport shifts (URL bar, iframe scroll) are ignored so
- * the bar does not float or scale with the page.
+ * Pins fixed bottom chrome to the visual viewport (like a top bar), so it stays
+ * aligned on mobile scroll, URL-bar resize, and pinch-zoom.
  */
 export function useVisualViewportFixed(
   ref: RefObject<HTMLElement | null>,
@@ -23,8 +22,9 @@ export function useVisualViewportFixed(
     if (!el || !viewport) return;
 
     const anchoredClass = "is-visual-viewport-anchored";
+    let frame = 0;
 
-    const reset = () => {
+    const clearInlineStyles = () => {
       el.classList.remove(anchoredClass);
       el.style.removeProperty("top");
       el.style.removeProperty("left");
@@ -36,34 +36,43 @@ export function useVisualViewportFixed(
     };
 
     const sync = () => {
-      const { scale, offsetLeft, width } = viewport;
-      const zoomed = scale > 1.01;
-
-      if (!zoomed) {
-        reset();
-        return;
-      }
+      const { offsetTop, offsetLeft, width, height, scale } = viewport;
 
       el.classList.add(anchoredClass);
       el.style.left = `${offsetLeft}px`;
-      el.style.width = `${width}px`;
       el.style.right = "auto";
-      el.style.bottom = "0px";
       el.style.top = "auto";
-      el.style.transform = `scale(${1 / scale})`;
-      el.style.transformOrigin = "bottom left";
+      el.style.bottom = `${window.innerHeight - offsetTop - height}px`;
+
+      if (scale > 1.001) {
+        el.style.width = `${width * scale}px`;
+        el.style.transform = `scale(${1 / scale})`;
+        el.style.transformOrigin = "bottom left";
+      } else {
+        el.style.width = `${width}px`;
+        el.style.removeProperty("transform");
+        el.style.removeProperty("transform-origin");
+      }
     };
 
-    viewport.addEventListener("resize", sync);
-    viewport.addEventListener("scroll", sync);
-    window.addEventListener("orientationchange", sync);
-    sync();
+    const scheduleSync = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(sync);
+    };
+
+    viewport.addEventListener("resize", scheduleSync);
+    viewport.addEventListener("scroll", scheduleSync);
+    window.addEventListener("resize", scheduleSync);
+    window.addEventListener("orientationchange", scheduleSync);
+    scheduleSync();
 
     return () => {
-      viewport.removeEventListener("resize", sync);
-      viewport.removeEventListener("scroll", sync);
-      window.removeEventListener("orientationchange", sync);
-      reset();
+      cancelAnimationFrame(frame);
+      viewport.removeEventListener("resize", scheduleSync);
+      viewport.removeEventListener("scroll", scheduleSync);
+      window.removeEventListener("resize", scheduleSync);
+      window.removeEventListener("orientationchange", scheduleSync);
+      clearInlineStyles();
     };
   }, [enabled, ref]);
 }

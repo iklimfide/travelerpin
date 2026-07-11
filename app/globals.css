@@ -3853,11 +3853,14 @@ html[data-tp-mobile-preview-embed] body {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   touch-action: manipulation;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .dashboard-bottom-bar.is-visual-viewport-anchored {
   inset-inline: auto;
-  bottom: 0;
+  right: auto;
 }
 
 .dashboard-bottom-bar__inner {
