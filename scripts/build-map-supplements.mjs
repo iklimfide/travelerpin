@@ -49,6 +49,30 @@ const supplemental = f50
     geometry: row.geometry,
   }));
 
+/** world-atlas omits numeric ids for some territories (Kosovo uses XK / 983). */
+const NAME_ONLY_SUPPLEMENTS = [{ name: "Kosovo", code: "XK" }];
+for (const entry of NAME_ONLY_SUPPLEMENTS) {
+  const numericId = countriesLib.alpha2ToNumeric(entry.code);
+  if (!numericId) continue;
+
+  const id = String(numericId).padStart(3, "0");
+  if (ids110.has(id) || supplemental.some((row) => String(row.id).padStart(3, "0") === id)) {
+    continue;
+  }
+
+  const source =
+    f50.find((row) => row.properties?.name === entry.name) ??
+    f110.find((row) => row.properties?.name === entry.name);
+  if (!source) continue;
+
+  supplemental.push({
+    type: "Feature",
+    id: numericId,
+    properties: { name: entry.name },
+    geometry: source.geometry,
+  });
+}
+
 const outDir = path.join(root, "lib/data/map");
 fs.mkdirSync(outDir, { recursive: true });
 

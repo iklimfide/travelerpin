@@ -355,7 +355,7 @@ export function SaveDestinationModal({
 
   const [tab, setTab] = useState<SaveDestinationTab>("popular");
   const [query, setQuery] = useState("");
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [pendingIds, setPendingIds] = useState<Set<string>>(() => new Set());
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [loadingTravelState, setLoadingTravelState] = useState(false);
   const [visitedCountries, setVisitedCountries] = useState<VisitedCountry[]>([]);
@@ -405,6 +405,7 @@ export function SaveDestinationModal({
     setRecentlyRemoved(new Set());
     setRecentlyWishlistAdded(new Set());
     setRecentlyWishlistRemoved(new Set());
+    setPendingIds(new Set());
     setEditingCityId(null);
     setEditingParkId(null);
     void loadTravelState({ background: hasTravelStateRef.current });
@@ -693,9 +694,108 @@ export function SaveDestinationModal({
     [addedIds]
   );
 
+  const markPending = useCallback((id: string) => {
+    setPendingIds((prev) => new Set(prev).add(id));
+  }, []);
+
+  const clearPending = useCallback((id: string) => {
+    setPendingIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  }, []);
+
+  const applyOptimisticAdd = useCallback((row: DestinationRow, id: string) => {
+    setRecentlyRemoved((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      if (row.kind === "city" || row.kind === "park") {
+        unmarkLinkedCountry(next, row.countryCode);
+      }
+      return next;
+    });
+    setRecentlyAdded((prev) => {
+      const next = new Set(prev).add(id);
+      if (row.kind === "city" || row.kind === "park") {
+        markLinkedCountry(next, row.countryCode);
+      }
+      return next;
+    });
+  }, []);
+
+  const applyOptimisticRemove = useCallback((row: DestinationRow, id: string) => {
+    setRecentlyAdded((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      if (row.kind === "country") {
+        unmarkLinkedCountry(next, row.countryCode);
+      }
+      return next;
+    });
+    setRecentlyRemoved((prev) => new Set(prev).add(id));
+  }, []);
+
+  const revertOptimisticAdd = useCallback((row: DestinationRow, id: string) => {
+    setRecentlyAdded((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      if (row.kind === "city" || row.kind === "park") {
+        unmarkLinkedCountry(next, row.countryCode);
+      }
+      return next;
+    });
+    setRecentlyRemoved((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  }, []);
+
+  const revertOptimisticRemove = useCallback((row: DestinationRow, id: string) => {
+    setRecentlyRemoved((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    setRecentlyAdded((prev) => {
+      const next = new Set(prev).add(id);
+      if (row.kind === "country") {
+        markLinkedCountry(next, row.countryCode);
+      }
+      return next;
+    });
+  }, []);
+
+  const syncRemoveCountryLink = useCallback((row: DestinationRow, id: string, countryRemoved: boolean) => {
+    if (!countryRemoved || (row.kind !== "city" && row.kind !== "park")) return;
+
+    setRecentlyAdded((prev) => {
+      const next = new Set(prev);
+      unmarkLinkedCountry(next, row.countryCode);
+      return next;
+    });
+    setRecentlyRemoved((prev) => {
+      const next = new Set(prev);
+      markLinkedCountry(next, row.countryCode);
+      return next;
+    });
+  }, []);
+
   async function ensureCountryOnMap(countryCode: string, countryName: string): Promise<boolean> {
     const code = countryCode.toUpperCase();
     if (addedIds.has(countryRowId(code))) return true;
+
+    setRecentlyRemoved((prev) => {
+      const next = new Set(prev);
+      unmarkLinkedCountry(next, code);
+      return next;
+    });
+    setRecentlyAdded((prev) => {
+      const next = new Set(prev);
+      markLinkedCountry(next, code);
+      return next;
+    });
 
     const result = await quickAddDestination({
       kind: "country",
@@ -707,89 +807,125 @@ export function SaveDestinationModal({
     });
 
     if (!result.ok) {
+      setRecentlyAdded((prev) => {
+        const next = new Set(prev);
+        unmarkLinkedCountry(next, code);
+        return next;
+      });
+      setRecentlyRemoved((prev) => {
+        const next = new Set(prev);
+        unmarkLinkedCountry(next, code);
+        return next;
+      });
       toast.show(result.error, 2500);
       return false;
     }
 
-    setRecentlyAdded((prev) => {
-      const next = new Set(prev);
-      markLinkedCountry(next, code);
-      return next;
-    });
-    setRecentlyRemoved((prev) => {
-      const next = new Set(prev);
-      unmarkLinkedCountry(next, code);
-      return next;
-    });
-
     return true;
   }
 
-  async function submitCustomCity(countryCode: string, countryName: string) {
+  function submitCustomCity(countryCode: string, countryName: string) {
     const cityName = trimmedQuery;
+    const id = destinationId("city", countryCode, cityName);
     if (isCityAlreadyOnMap(cityName, countryCode)) {
       toast.show(cityMessages.alreadyOnMap, 2000);
       return;
     }
+    if (pendingIds.has("custom:city")) return;
 
-    setBusyId("custom:city");
-    try {
-      const ready = await ensureCountryOnMap(countryCode, countryName);
-      if (!ready) return;
+    const row = cityToRow({
+      cityName,
+      countryCode,
+      countryName,
+      latitude: 0,
+      longitude: 0,
+    });
 
-      const result = await addCity({
-        city_name: cityName,
-        country_code: countryCode,
-        country_name: countryName,
-      });
+    markPending("custom:city");
+    applyOptimisticAdd(row, id);
+    toast.show(cityMessages.cityAdded, 1500);
 
-      if (!result.ok) {
-        toast.show(result.error, 2500);
-        return;
+    void (async () => {
+      try {
+        const ready = await ensureCountryOnMap(countryCode, countryName);
+        if (!ready) {
+          revertOptimisticAdd(row, id);
+          return;
+        }
+
+        const result = await addCity({
+          city_name: cityName,
+          country_code: countryCode,
+          country_name: countryName,
+        });
+
+        if (!result.ok) {
+          revertOptimisticAdd(row, id);
+          toast.show(result.error, 2500);
+          return;
+        }
+
+        void loadTravelState({ background: true });
+        invalidateOwnProfileCache();
+      } finally {
+        clearPending("custom:city");
       }
-
-      toast.show(cityMessages.cityAdded, 1500);
-      void loadTravelState({ background: true });
-      invalidateOwnProfileCache();
-    } finally {
-      setBusyId(null);
-    }
+    })();
   }
 
-  async function submitCustomPark(
+  function submitCustomPark(
     countryCode: string,
     countryName: string,
     parkType: ParkType
   ) {
     const parkName = trimmedQuery;
+    const id = destinationId("park", countryCode, parkName, parkType);
     if (isParkAlreadyOnMap(parkName, countryCode, parkType)) {
       toast.show(parkMessages.alreadyOnMap, 2000);
       return;
     }
+    if (pendingIds.has("custom:park")) return;
 
-    setBusyId("custom:park");
-    try {
-      const ready = await ensureCountryOnMap(countryCode, countryName);
-      if (!ready) return;
+    const row = parkToRow({
+      parkName,
+      parkType,
+      countryCode,
+      countryName,
+      latitude: 0,
+      longitude: 0,
+    });
 
-      const result = await addPark({
-        park_name: parkName,
-        park_type: parkType,
-        country_code: countryCode,
-        country_name: countryName,
-      });
+    markPending("custom:park");
+    applyOptimisticAdd(row, id);
+    toast.show(parkMessages.parkAdded, 1500);
 
-      if (!result.ok) {
-        toast.show(result.error, 2500);
-        return;
+    void (async () => {
+      try {
+        const ready = await ensureCountryOnMap(countryCode, countryName);
+        if (!ready) {
+          revertOptimisticAdd(row, id);
+          return;
+        }
+
+        const result = await addPark({
+          park_name: parkName,
+          park_type: parkType,
+          country_code: countryCode,
+          country_name: countryName,
+        });
+
+        if (!result.ok) {
+          revertOptimisticAdd(row, id);
+          toast.show(result.error, 2500);
+          return;
+        }
+
+        void loadTravelState({ background: true });
+        invalidateOwnProfileCache();
+      } finally {
+        clearPending("custom:park");
       }
-
-      toast.show(parkMessages.parkAdded, 1500);
-      void loadTravelState({ background: true });
-      invalidateOwnProfileCache();
-    } finally {
-      setBusyId(null);
-    }
+    })();
   }
 
   function promptCustomCity() {
@@ -845,186 +981,172 @@ export function SaveDestinationModal({
     });
   }
 
-  async function handleWishlistToggle(row: DestinationRow) {
+  function handleWishlistToggle(row: DestinationRow) {
     if (row.kind !== "country") return;
 
     const code = row.countryCode.toUpperCase();
     if (visitedCountryCodes.has(code)) return;
 
     const id = row.id;
-    if (busyId) return;
-    setBusyId(id);
+    if (pendingIds.has(id)) return;
 
-    try {
-      const wanted = wantedIds.has(id);
+    const wanted = wantedIds.has(id);
+    markPending(id);
 
-      if (wanted) {
-        const wishlist = wishlistByCode.get(code);
-        if (!wishlist) return;
-
-        const result = await removeWishlistCountry(wishlist.id);
-        if (!result.ok) {
-          toast.show(result.error, 2500);
-          return;
-        }
-
-        setRecentlyWishlistAdded((prev) => {
-          const next = new Set(prev);
-          next.delete(code);
-          return next;
-        });
-        setRecentlyWishlistRemoved((prev) => new Set(prev).add(code));
-        toast.show(countryHubMessages.wishlistRemoved, 1500);
-      } else {
-        const result = await addWishlistCountry(code);
-        if (!result.ok) {
-          toast.show(result.error, 2500);
-          return;
-        }
-
-        setRecentlyWishlistRemoved((prev) => {
-          const next = new Set(prev);
-          next.delete(code);
-          return next;
-        });
-        setRecentlyWishlistAdded((prev) => new Set(prev).add(code));
-        toast.show(countryHubMessages.wishlistAdded, 1500);
-      }
-
-      void loadTravelState({ background: true });
-      invalidateOwnProfileCache();
-    } finally {
-      setBusyId(null);
+    if (wanted) {
+      setRecentlyWishlistAdded((prev) => {
+        const next = new Set(prev);
+        next.delete(code);
+        return next;
+      });
+      setRecentlyWishlistRemoved((prev) => new Set(prev).add(code));
+      toast.show(countryHubMessages.wishlistRemoved, 1500);
+    } else {
+      setRecentlyWishlistRemoved((prev) => {
+        const next = new Set(prev);
+        next.delete(code);
+        return next;
+      });
+      setRecentlyWishlistAdded((prev) => new Set(prev).add(code));
+      toast.show(countryHubMessages.wishlistAdded, 1500);
     }
+
+    void (async () => {
+      try {
+        if (wanted) {
+          const wishlist = wishlistByCode.get(code);
+          if (!wishlist) {
+            setRecentlyWishlistRemoved((prev) => {
+              const next = new Set(prev);
+              next.delete(code);
+              return next;
+            });
+            setRecentlyWishlistAdded((prev) => new Set(prev).add(code));
+            return;
+          }
+
+          const result = await removeWishlistCountry(wishlist.id);
+          if (!result.ok) {
+            setRecentlyWishlistRemoved((prev) => {
+              const next = new Set(prev);
+              next.delete(code);
+              return next;
+            });
+            setRecentlyWishlistAdded((prev) => new Set(prev).add(code));
+            toast.show(result.error, 2500);
+            return;
+          }
+        } else {
+          const result = await addWishlistCountry(code);
+          if (!result.ok) {
+            setRecentlyWishlistAdded((prev) => {
+              const next = new Set(prev);
+              next.delete(code);
+              return next;
+            });
+            setRecentlyWishlistRemoved((prev) => new Set(prev).add(code));
+            toast.show(result.error, 2500);
+            return;
+          }
+        }
+
+        void loadTravelState({ background: true });
+        invalidateOwnProfileCache();
+      } finally {
+        clearPending(id);
+      }
+    })();
   }
 
-  async function handleToggle(row: DestinationRow) {
+  function handleToggle(row: DestinationRow) {
     if (isWantMode) {
-      await handleWishlistToggle(row);
+      handleWishlistToggle(row);
       return;
     }
 
     const id = row.id;
-    if (busyId) return;
+    if (pendingIds.has(id)) return;
 
     const added = addedIds.has(id);
-    setBusyId(id);
+    markPending(id);
 
-    try {
+    if (added) {
+      applyOptimisticRemove(row, id);
       if (row.kind === "park") {
-        const parkPayload = {
-          park_name: row.parkName,
-          park_type: row.parkType,
-          country_code: row.countryCode,
-          country_name: row.countryName,
-          latitude: row.latitude,
-          longitude: row.longitude,
-        };
-
-        if (added) {
-          const result = await quickRemovePark(parkPayload);
-          if (!result.ok) {
-            toast.show(result.error, 2500);
-            return;
-          }
-          if (!result.removed) return;
-          setRecentlyAdded((prev) => {
-            const next = new Set(prev);
-            next.delete(id);
-            if (result.countryRemoved) {
-              unmarkLinkedCountry(next, row.countryCode);
-            }
-            return next;
-          });
-          setRecentlyRemoved((prev) => {
-            const next = new Set(prev).add(id);
-            if (result.countryRemoved) {
-              markLinkedCountry(next, row.countryCode);
-            }
-            return next;
-          });
-          toast.show(parkMessages.removedToast, 1000);
-        } else {
-          const result = await quickAddPark(parkPayload);
-          if (!result.ok) {
-            toast.show(result.error, 2500);
-            return;
-          }
-          setRecentlyRemoved((prev) => {
-            const next = new Set(prev);
-            next.delete(id);
-            unmarkLinkedCountry(next, row.countryCode);
-            return next;
-          });
-          setRecentlyAdded((prev) => {
-            const next = new Set(prev).add(id);
-            markLinkedCountry(next, row.countryCode);
-            return next;
-          });
-          if (result.added) {
-            toast.show(parkMessages.addedToast, 1000);
-          }
-        }
-      } else if (added) {
-        const result = await quickRemoveDestination(rowPayload(row));
-        if (!result.ok) {
-          toast.show(result.error, 2500);
-          return;
-        }
-        if (!result.removed) return;
-        setRecentlyAdded((prev) => {
-          const next = new Set(prev);
-          next.delete(id);
-          if (row.kind === "city" && result.countryRemoved) {
-            unmarkLinkedCountry(next, row.countryCode);
-          }
-          if (row.kind === "country") {
-            unmarkLinkedCountry(next, row.countryCode);
-          }
-          return next;
-        });
-        setRecentlyRemoved((prev) => {
-          const next = new Set(prev).add(id);
-          if (row.kind === "city" && result.countryRemoved) {
-            markLinkedCountry(next, row.countryCode);
-          }
-          if (row.kind === "country") {
-            markLinkedCountry(next, row.countryCode);
-          }
-          return next;
-        });
-        toast.show(destinationMessages.removedToast, 1000);
+        toast.show(parkMessages.removedToast, 1000);
       } else {
-        const result = await quickAddDestination(rowPayload(row));
-        if (!result.ok) {
-          toast.show(result.error, 2500);
-          return;
-        }
-        setRecentlyRemoved((prev) => {
-          const next = new Set(prev);
-          next.delete(id);
-          if (row.kind === "city") {
-            unmarkLinkedCountry(next, row.countryCode);
-          }
-          return next;
-        });
-        setRecentlyAdded((prev) => {
-          const next = new Set(prev).add(id);
-          if (row.kind === "city") {
-            markLinkedCountry(next, row.countryCode);
-          }
-          return next;
-        });
-        if (result.added) {
-          toast.show(destinationMessages.addedToast, 1000);
-        }
+        toast.show(destinationMessages.removedToast, 1000);
       }
-
-      void loadTravelState({ background: true });
-      invalidateOwnProfileCache();
-    } finally {
-      setBusyId(null);
+    } else {
+      applyOptimisticAdd(row, id);
+      if (row.kind === "park") {
+        toast.show(parkMessages.addedToast, 1000);
+      } else {
+        toast.show(destinationMessages.addedToast, 1000);
+      }
     }
+
+    void (async () => {
+      try {
+        if (row.kind === "park") {
+          const parkPayload = {
+            park_name: row.parkName,
+            park_type: row.parkType,
+            country_code: row.countryCode,
+            country_name: row.countryName,
+            latitude: row.latitude,
+            longitude: row.longitude,
+          };
+
+          if (added) {
+            const result = await quickRemovePark(parkPayload);
+            if (!result.ok) {
+              revertOptimisticRemove(row, id);
+              toast.show(result.error, 2500);
+              return;
+            }
+            if (!result.removed) {
+              revertOptimisticRemove(row, id);
+              return;
+            }
+            syncRemoveCountryLink(row, id, result.countryRemoved);
+          } else {
+            const result = await quickAddPark(parkPayload);
+            if (!result.ok) {
+              revertOptimisticAdd(row, id);
+              toast.show(result.error, 2500);
+              return;
+            }
+          }
+        } else if (added) {
+          const result = await quickRemoveDestination(rowPayload(row));
+          if (!result.ok) {
+            revertOptimisticRemove(row, id);
+            toast.show(result.error, 2500);
+            return;
+          }
+          if (!result.removed) {
+            revertOptimisticRemove(row, id);
+            return;
+          }
+          if (row.kind === "city" && result.countryRemoved) {
+            syncRemoveCountryLink(row, id, true);
+          }
+        } else {
+          const result = await quickAddDestination(rowPayload(row));
+          if (!result.ok) {
+            revertOptimisticAdd(row, id);
+            toast.show(result.error, 2500);
+            return;
+          }
+        }
+
+        void loadTravelState({ background: true });
+        invalidateOwnProfileCache();
+      } finally {
+        clearPending(id);
+      }
+    })();
   }
 
   if (!open) return null;
@@ -1164,7 +1286,6 @@ export function SaveDestinationModal({
             <>
               {rows.map((row) => {
               const marked = isWantMode ? wantedIds.has(row.id) : addedIds.has(row.id);
-              const busy = busyId === row.id;
               const visitedCity =
                 !isWantMode && row.kind === "city" && marked
                   ? findVisitedCityForRow(row, visitedCities)
@@ -1209,11 +1330,10 @@ export function SaveDestinationModal({
                     <button
                       type="button"
                       className={`save-destination-modal__check${marked ? " save-destination-modal__check--on" : ""}`}
-                      disabled={busy}
                       aria-label={
                         marked ? saveDestinationMessages.unpinAction : saveDestinationMessages.pinAction
                       }
-                      onClick={() => void handleToggle(row)}
+                      onClick={() => handleToggle(row)}
                     >
                       {marked ? "✓" : "+"}
                     </button>
@@ -1222,7 +1342,6 @@ export function SaveDestinationModal({
                     <button
                       type="button"
                       className="save-destination-modal__edit"
-                      disabled={busy}
                       onClick={() => {
                         setEditingCityId(visitedCity?.id ?? null);
                         setEditingParkId(visitedPark?.id ?? null);
@@ -1254,7 +1373,6 @@ export function SaveDestinationModal({
                     <button
                       type="button"
                       className="save-destination-modal__check"
-                      disabled={busyId === "custom:city"}
                       aria-label={saveDestinationMessages.pinAction}
                       onClick={() => promptCustomCity()}
                     >
@@ -1278,7 +1396,6 @@ export function SaveDestinationModal({
                     <button
                       type="button"
                       className="save-destination-modal__check"
-                      disabled={busyId === "custom:park"}
                       aria-label={saveDestinationMessages.pinAction}
                       onClick={() => promptCustomPark()}
                     >

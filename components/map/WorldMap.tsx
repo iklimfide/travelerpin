@@ -4,16 +4,13 @@ import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { geoCentroid, geoNaturalEarth1, geoPath } from "d3-geo";
 import { select } from "d3-selection";
 import { zoom, zoomIdentity, type ZoomBehavior, type ZoomTransform } from "d3-zoom";
-import { feature } from "topojson-client";
-import type { Topology, GeometryCollection } from "topojson-specification";
 import type { Feature, Geometry, FeatureCollection } from "geojson";
-import countries from "world-atlas/countries-110m.json";
-import supplementalCountries from "@/lib/data/map/supplemental-countries.json";
 import countriesLib from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
 import { BRAND } from "@/lib/constants";
 import { MAP_CSS } from "@/lib/theme/map-css-vars";
 import {
+  buildCountryFeatures,
   countryMetaFromFeature,
   countryCodesToNumericIds,
   findCountryFeatureByCode,
@@ -110,22 +107,7 @@ export function WorldMap({
     setMapReady(true);
   }, []);
 
-  const countryFeatures = useMemo(() => {
-    const topology = countries as unknown as Topology<{ countries: GeometryCollection }>;
-    const base = feature(topology, topology.objects.countries).features;
-    const baseIds = new Set(
-      base
-        .filter((row) => row.id != null && row.id !== "")
-        .map((row) => normalizeCountryNumericId(row.id!))
-    );
-
-    const extras = (supplementalCountries.features as Feature<Geometry>[]).filter((row) => {
-      if (row.id == null || row.id === "") return false;
-      return !baseIds.has(normalizeCountryNumericId(row.id));
-    });
-
-    return [...base, ...extras];
-  }, []);
+  const countryFeatures = useMemo(() => buildCountryFeatures(), []);
 
   const mainlandFeatures = useMemo(() => {
     const clipped: Feature<Geometry>[] = [];

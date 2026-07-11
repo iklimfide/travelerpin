@@ -1,12 +1,14 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { BottomBarProfileNav } from "@/components/dashboard/BottomBarProfileNav";
 import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
 import { NotificationsNavLink } from "@/components/notifications/NotificationsNavLink";
+import { useVisualViewportFixed } from "@/lib/hooks/useVisualViewportFixed";
 import { dashboardNavMessages } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
 
@@ -81,9 +83,17 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { openAddModal } = useDashboardAdd();
+  const barRef = useRef<HTMLElement>(null);
+  const [mounted, setMounted] = useState(false);
   const currentPath = pathname ?? "/";
   const username = ownProfile?.username ?? null;
   const mapHref = username ? profilePath(username) : loginHrefFor(currentPath);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useVisualViewportFixed(barRef);
 
   const homeItem: NavItem = {
     href: "/",
@@ -107,8 +117,8 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
     openAddModal();
   }
 
-  return (
-    <nav className="dashboard-bottom-bar" aria-label="Dashboard navigation">
+  const bar = (
+    <nav ref={barRef} className="dashboard-bottom-bar" aria-label="Dashboard navigation">
       <div className="dashboard-bottom-bar__inner">
         <NavLink item={homeItem} pathname={pathname} />
         <NavLink item={mapItem} pathname={pathname} />
@@ -129,4 +139,8 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
       </div>
     </nav>
   );
+
+  if (!mounted) return null;
+
+  return createPortal(bar, document.body);
 }

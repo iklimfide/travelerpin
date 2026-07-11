@@ -5,6 +5,10 @@ import countries from "world-atlas/countries-110m.json";
 import countriesLib from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
 import { BRAND } from "@/lib/constants";
+import {
+  buildCountryFeatures,
+  normalizeCountryNumericId,
+} from "@/lib/map/country";
 import type { VisitedCity } from "@/types/database";
 
 countriesLib.registerLocale(enLocale);
@@ -38,7 +42,7 @@ export function buildOgMapSvg(
   variant: "dark" | "share-card" = "dark"
 ): string {
   const topology = countries as unknown as Topology<{ countries: GeometryCollection }>;
-  const countryFeatures = feature(topology, topology.objects.countries).features;
+  const countryFeatures = buildCountryFeatures();
   const land = feature(topology, topology.objects.countries);
   const projection = geoNaturalEarth1().fitSize([MAP_WIDTH, MAP_HEIGHT], land);
   const pathGenerator = geoPath(projection);
@@ -64,11 +68,12 @@ export function buildOgMapSvg(
           ? String(country.id)
           : `country-${index}`;
       const isVisited =
-        country.id != null && visitedNumericIds.has(String(country.id));
+        country.id != null &&
+        visitedNumericIds.has(normalizeCountryNumericId(country.id));
       const isWishlist =
         !isVisited &&
         country.id != null &&
-        wishlistNumericIds.has(String(country.id));
+        wishlistNumericIds.has(normalizeCountryNumericId(country.id));
       const d = pathGenerator(country);
       if (!d) return "";
 
