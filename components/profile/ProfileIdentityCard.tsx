@@ -96,7 +96,7 @@ export function ProfileIdentityCard({
             type="button"
             className="profile-avatar-button"
             aria-label={t("viewProfilePhoto")}
-            onClick={() => setAvatarLightboxOpen(true)}
+            onClick={() => setAvatarLightboxOpen((open) => !open)}
           >
             {avatarNode}
           </button>

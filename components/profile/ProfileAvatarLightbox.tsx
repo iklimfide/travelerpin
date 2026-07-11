@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 type ProfileAvatarLightboxProps = {
   src: string;
@@ -15,6 +16,12 @@ export function ProfileAvatarLightbox({
   closeLabel,
   onClose,
 }: ProfileAvatarLightboxProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -30,7 +37,9 @@ export function ProfileAvatarLightbox({
     };
   }, [onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       className="profile-avatar-lightbox"
       onClick={onClose}
@@ -42,14 +51,23 @@ export function ProfileAvatarLightbox({
         type="button"
         className="profile-avatar-lightbox__close"
         aria-label={closeLabel}
-        onClick={onClose}
+        onClick={(event) => {
+          event.stopPropagation();
+          onClose();
+        }}
       >
-        ×
+        ✕
       </button>
       <div className="profile-avatar-lightbox__panel" onClick={(event) => event.stopPropagation()}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt={alt} className="profile-avatar-lightbox__photo" />
+        <img
+          src={src}
+          alt={alt}
+          className="profile-avatar-lightbox__photo"
+          onClick={onClose}
+        />
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
