@@ -45,6 +45,11 @@ export function DevMobilePreview() {
   const isEmbed = searchParams.get(EMBED_PARAM) === "1";
 
   useEffect(() => {
+    if (isEmbed) return;
+    document.documentElement.classList.remove("tp-dev-mobile-preview-parent");
+  }, [isEmbed]);
+
+  useEffect(() => {
     const stored = readStoredState();
     setOpen(stored.open);
     setDeviceId(stored.deviceId);
@@ -129,16 +134,16 @@ export function DevMobilePreview() {
             </select>
           </label>
 
-          <div className="flex min-h-0 flex-1 items-start justify-center overflow-hidden rounded-[1.5rem] border border-slate-300 bg-white p-2">
+          <div className="flex min-h-0 flex-1 items-stretch justify-center overflow-hidden rounded-[1.5rem] border border-slate-300 bg-white p-2">
             <div
-              className="h-full overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white shadow-inner"
+              className="h-full min-h-0 overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white shadow-inner"
               style={{ width: device.width, maxWidth: "100%" }}
             >
               <iframe
                 key={`${iframeSrc}-${device.width}`}
                 title={`Mobile preview - ${device.label}`}
                 src={iframeSrc}
-                className="h-full w-full border-0 bg-white"
+                className="block h-full w-full border-0 bg-white"
                 style={{ width: device.width, maxWidth: "100%" }}
               />
             </div>

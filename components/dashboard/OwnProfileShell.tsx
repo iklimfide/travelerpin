@@ -12,11 +12,13 @@ type OwnProfileShellProps = {
 /** Bottom bar for all users; notifications when signed in. Requires DashboardAddProvider above. */
 export function OwnProfileShell({ ownProfile, children }: OwnProfileShellProps) {
   const shell = (
-    <div className="dashboard-shell">
-      {children}
-      <SiteFooter />
+    <>
+      <div className="dashboard-shell">
+        {children}
+        <SiteFooter />
+      </div>
       <DashboardBottomBar ownProfile={ownProfile} />
-    </div>
+    </>
   );
 
   if (!ownProfile) return shell;

@@ -13,6 +13,7 @@
     "build:popular-parks": "node scripts/build-popular-parks.mjs",
     "build:city-hubs": "node scripts/build-city-hubs.mjs",
     "build:map-supplements": "node scripts/build-map-supplements.mjs",
+    "preview:map-balkans": "node scripts/render-balkans-zoom.mjs",
     "build:flags": "node scripts/copy-country-flags.mjs",
     "generate:favicons": "node scripts/generate-favicons.mjs",
     "postinstall": "node scripts/copy-country-flags.mjs",
@@ -49,6 +50,7 @@
     "@types/topojson-client": "^3.1.5",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "polygon-clipping": "^0.15.7",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

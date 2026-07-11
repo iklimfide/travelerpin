@@ -21,6 +21,7 @@ import { DashboardAddProvider } from "@/components/dashboard/DashboardAddProvide
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { ClearPwaArtifacts } from "@/components/dev/ClearPwaArtifacts";
 import { DevMobilePreview } from "@/components/dev/DevMobilePreview";
+import { MobilePreviewEmbedRoot } from "@/components/dev/MobilePreviewEmbedRoot";
 import { OwnProfileShellGate } from "@/components/dashboard/OwnProfileShellGate";
 import "./globals.css";
 
@@ -103,6 +104,7 @@ export default async function RootLayout({
         </NextIntlClientProvider>
         {process.env.NODE_ENV === "development" ? (
           <Suspense fallback={null}>
+            <MobilePreviewEmbedRoot />
             <DevMobilePreview />
           </Suspense>
         ) : null}

@@ -69,27 +69,27 @@ export function normalizeAtlasCountryFeature(
   return { ...country, id: numericId };
 }
 
+/**
+ * Merges world-atlas 110m countries with supplemental overrides.
+ * Supplemental entries replace same-id atlas polygons (Balkans, micro-states, Kosovo).
+ */
 export function buildCountryFeatures(): Feature<Geometry>[] {
-  const topology = countries as unknown as Topology<{ countries: GeometryCollection }>;
-  const supplementalIds = new Set(
-    (supplementalCountries as FeatureCollection).features
-      .filter((row) => row.id != null && row.id !== "")
-      .map((row) => normalizeCountryNumericId(row.id!))
+  const supplemental = (supplementalCountries as FeatureCollection).features.filter(
+    (row) => row.id != null && row.id !== ""
   );
+
+  const overrideIds = new Set(
+    supplemental.map((row) => normalizeCountryNumericId(row.id!))
+  );
+
+  const topology = countries as unknown as Topology<{ countries: GeometryCollection }>;
 
   const base = feature(topology, topology.objects.countries).features
     .map(normalizeAtlasCountryFeature)
     .filter((row) => {
       if (row.id == null || row.id === "") return false;
-      return !supplementalIds.has(normalizeCountryNumericId(row.id));
+      return !overrideIds.has(normalizeCountryNumericId(row.id));
     });
 
-  const baseIds = new Set(base.map((row) => normalizeCountryNumericId(row.id!)));
-
-  const extras = (supplementalCountries as FeatureCollection).features.filter((row) => {
-    if (row.id == null || row.id === "") return false;
-    return !baseIds.has(normalizeCountryNumericId(row.id));
-  });
-
-  return [...base, ...extras];
+  return [...base, ...supplemental];
 }

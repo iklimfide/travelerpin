@@ -1,5 +1,6 @@
 import { getCountryName } from "@/lib/data/countries";
 import { offerShareAfterPin } from "@/lib/client/share-pin-prompt";
+import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
 
 export async function addVisitedCountry(
   code: string
@@ -21,6 +22,7 @@ export async function addVisitedCountry(
 
   const data = (await res.json()) as { id: string };
   offerShareAfterPin({ kind: "country", name: countryName });
+  notifyProfileDataChanged();
   return { ok: true, id: data.id };
 }
 
@@ -34,6 +36,7 @@ export async function removeVisitedCountry(
     return { ok: false, error: (data.error as string) ?? "Failed to remove country" };
   }
 
+  notifyProfileDataChanged();
   return { ok: true };
 }
 
@@ -55,6 +58,7 @@ export async function addWishlistCountry(
   }
 
   const data = (await res.json()) as { id: string };
+  notifyProfileDataChanged();
   return { ok: true, id: data.id };
 }
 
@@ -68,5 +72,6 @@ export async function removeWishlistCountry(
     return { ok: false, error: (data.error as string) ?? "Failed to remove from wishlist" };
   }
 
+  notifyProfileDataChanged();
   return { ok: true };
 }

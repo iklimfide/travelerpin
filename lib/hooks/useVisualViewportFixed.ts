@@ -7,8 +7,9 @@ type UseVisualViewportFixedOptions = {
 };
 
 /**
- * Pins a position:fixed footer to the visual viewport while the page is pinch-zoomed.
- * Without this, mobile browsers scale fixed chrome with the page and it can cover content.
+ * Keeps the bottom bar pinned during mobile pinch-zoom only.
+ * Offset-only visual viewport shifts (URL bar, iframe scroll) are ignored so
+ * the bar does not float or scale with the page.
  */
 export function useVisualViewportFixed(
   ref: RefObject<HTMLElement | null>,
@@ -30,24 +31,27 @@ export function useVisualViewportFixed(
       el.style.removeProperty("width");
       el.style.removeProperty("right");
       el.style.removeProperty("bottom");
+      el.style.removeProperty("transform");
+      el.style.removeProperty("transform-origin");
     };
 
     const sync = () => {
-      const { scale, offsetTop, offsetLeft, height, width } = viewport;
-      const needsAnchor = scale > 1 || offsetTop !== 0 || offsetLeft !== 0;
+      const { scale, offsetLeft, width } = viewport;
+      const zoomed = scale > 1.01;
 
-      if (!needsAnchor) {
+      if (!zoomed) {
         reset();
         return;
       }
 
-      const rect = el.getBoundingClientRect();
       el.classList.add(anchoredClass);
       el.style.left = `${offsetLeft}px`;
       el.style.width = `${width}px`;
       el.style.right = "auto";
-      el.style.bottom = "auto";
-      el.style.top = `${offsetTop + height - rect.height}px`;
+      el.style.bottom = "0px";
+      el.style.top = "auto";
+      el.style.transform = `scale(${1 / scale})`;
+      el.style.transformOrigin = "bottom left";
     };
 
     viewport.addEventListener("resize", sync);

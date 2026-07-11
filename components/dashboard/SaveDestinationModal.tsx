@@ -17,7 +17,10 @@ import {
 import { quickAddPark, quickRemovePark } from "@/lib/client/park-destination-actions";
 import { addCity } from "@/lib/client/city-actions";
 import { addWishlistCountry, removeWishlistCountry } from "@/lib/client/country-actions";
-import { invalidateOwnProfileCache } from "@/lib/client/session-page-cache";
+import {
+  invalidateOwnProfileCache,
+  PROFILE_DATA_STALE_EVENT,
+} from "@/lib/client/session-page-cache";
 import { addPark } from "@/lib/client/park-actions";
 import { CityForm } from "@/components/dashboard/CityForm";
 import { ParkForm } from "@/components/dashboard/ParkForm";
@@ -361,6 +364,7 @@ export function SaveDestinationModal({
   const [visitedCountries, setVisitedCountries] = useState<VisitedCountry[]>([]);
   const [visitedCities, setVisitedCities] = useState<VisitedCity[]>([]);
   const [visitedParks, setVisitedParks] = useState<VisitedPark[]>([]);
+  const [visitedCodes, setVisitedCodes] = useState<string[]>([]);
   const [wishlistCountries, setWishlistCountries] = useState<WishlistCountry[]>([]);
   const [searchCities, setSearchCities] = useState<SearchCityResult[]>([]);
   const [searchParks, setSearchParks] = useState<SearchParkResult[]>([]);
@@ -384,6 +388,9 @@ export function SaveDestinationModal({
       setVisitedCountries(data.visitedCountries ?? []);
       setVisitedCities(data.visitedCities ?? []);
       setVisitedParks(data.visitedParks ?? []);
+      setVisitedCodes(
+        (data.visitedCodes ?? []).map((code: string) => code.toUpperCase())
+      );
       setWishlistCountries(data.wishlistCountries ?? []);
       hasTravelStateRef.current = true;
     } catch {
@@ -396,7 +403,10 @@ export function SaveDestinationModal({
   }, []);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      hasTravelStateRef.current = false;
+      return;
+    }
     setQuery("");
     setTab(initialTab);
     setSearchCities([]);
@@ -408,8 +418,19 @@ export function SaveDestinationModal({
     setPendingIds(new Set());
     setEditingCityId(null);
     setEditingParkId(null);
-    void loadTravelState({ background: hasTravelStateRef.current });
+    void loadTravelState({ background: false });
   }, [open, initialTab, loadTravelState]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function onProfileStale() {
+      void loadTravelState({ background: true });
+    }
+
+    window.addEventListener(PROFILE_DATA_STALE_EVENT, onProfileStale);
+    return () => window.removeEventListener(PROFILE_DATA_STALE_EVENT, onProfileStale);
+  }, [open, loadTravelState]);
 
   useEffect(() => {
     if (!open) return;
@@ -477,18 +498,8 @@ export function SaveDestinationModal({
   }, [wishlistCountries]);
 
   const visitedCountryCodes = useMemo(() => {
-    const codes = new Set<string>();
-    for (const country of visitedCountries) {
-      codes.add(country.country_code.toUpperCase());
-    }
-    for (const city of visitedCities) {
-      codes.add(city.country_code.toUpperCase());
-    }
-    for (const park of visitedParks) {
-      codes.add(park.country_code.toUpperCase());
-    }
-    return codes;
-  }, [visitedCountries, visitedCities, visitedParks]);
+    return new Set(visitedCodes);
+  }, [visitedCodes]);
 
   const wantedIds = useMemo(() => {
     const ids = new Set<string>();
@@ -511,38 +522,27 @@ export function SaveDestinationModal({
   const addedIds = useMemo(() => {
     const ids = new Set<string>();
 
-    for (const country of visitedCountries) {
-      ids.add(countryRowId(country.country_code));
+    for (const code of visitedCountryCodes) {
+      markLinkedCountry(ids, code);
     }
 
     for (const city of visitedCities) {
       ids.add(destinationId("city", city.country_code, city.city_name));
-      markLinkedCountry(ids, city.country_code);
     }
 
     for (const park of visitedParks) {
       ids.add(
         destinationId("park", park.country_code, park.park_name, park.park_type as ParkType)
       );
-      markLinkedCountry(ids, park.country_code);
     }
 
     for (const id of recentlyAdded) ids.add(id);
     for (const id of recentlyRemoved) ids.delete(id);
 
     return ids;
-  }, [visitedCountries, visitedCities, visitedParks, recentlyAdded, recentlyRemoved]);
+  }, [visitedCountryCodes, visitedCities, visitedParks, recentlyAdded, recentlyRemoved]);
 
-  const visitedCountryCount = useMemo(() => {
-    const codes = new Set<string>();
-    for (const country of visitedCountries) {
-      codes.add(country.country_code.toUpperCase());
-    }
-    for (const city of visitedCities) {
-      codes.add(city.country_code.toUpperCase());
-    }
-    return codes.size;
-  }, [visitedCountries, visitedCities]);
+  const visitedCountryCount = visitedCountryCodes.size;
 
   const rows = useMemo((): DestinationRow[] => {
     if (trimmedQuery.length >= 2) {

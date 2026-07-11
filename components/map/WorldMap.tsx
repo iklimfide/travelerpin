@@ -54,6 +54,9 @@ const HEIGHT = 450;
 const MAP_PADDING = 16;
 const MAINLAND_WORLD_PADDING = 0;
 
+/** Drawn on the static profile map even when below the tiny-country pixel threshold. */
+const PROFILE_MAP_ALWAYS_RENDER_CODES = new Set(["XK", "ME"]);
+
 function buildProjection(
   continent: ContinentId,
   worldLand: FeatureCollection,
@@ -424,12 +427,19 @@ export function WorldMap({
             const d = pathGenerator(country);
             const tiny = isTinyCountryOnMap(pathGenerator, country);
             const canClickCountry = interactive && !!onCountryClick;
+            const meta = countryMetaFromFeature(country);
+            const keepTinyOnProfile =
+              mainlandWorld &&
+              tiny &&
+              (isVisited ||
+                isWishlist ||
+                (meta != null && PROFILE_MAP_ALWAYS_RENDER_CODES.has(meta.code)));
 
-            if (mainlandWorld && tiny) {
+            if (mainlandWorld && tiny && !keepTinyOnProfile) {
               return null;
             }
 
-            if (tiny) {
+            if (tiny && !keepTinyOnProfile) {
               const [lng, lat] = geoCentroid(country);
               const point = projection([lng, lat]);
               if (!point) return null;

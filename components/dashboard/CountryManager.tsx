@@ -7,9 +7,9 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { countryMessages, wishlistMessages } from "@/lib/i18n/client-messages";
 import { CountryCityPickerSheet } from "@/components/map/CountryCityPickerSheet";
 import { ProfileCountryLink } from "@/components/profile/ProfilePlaceLink";
-import { COUNTRY_LIST, searchCountries, getCountryName } from "@/lib/data/countries";
+import { COUNTRY_LIST, searchCountries } from "@/lib/data/countries";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
-import { addVisitedCountry } from "@/lib/client/country-actions";
+import { addVisitedCountry, addWishlistCountry, removeVisitedCountry, removeWishlistCountry } from "@/lib/client/country-actions";
 import {
   countryHasMappedPlaces,
   isCountryRemoveBlockedByPlacesError,
@@ -128,32 +128,22 @@ export function CountryManager({
     }
     if (!row.visitedId) return false;
 
-    const res = await fetch(`/api/countries/${row.visitedId}`, { method: "DELETE" });
-    if (!res.ok) {
-      const data = await res.json();
-      if (isCountryRemoveBlockedByPlacesError(data.error)) {
+    const result = await removeVisitedCountry(row.visitedId);
+    if (!result.ok) {
+      if (isCountryRemoveBlockedByPlacesError(result.error)) {
         toast.show(countryMessages.removePlacesFirst);
         return false;
       }
-      await modal.alert(data.error ?? "Failed to remove country", { variant: "error" });
+      await modal.alert(result.error, { variant: "error" });
       return false;
     }
     return true;
   }
 
   async function addWishlist(code: string) {
-    const res = await fetch("/api/wishlist/countries", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        country_code: code,
-        country_name: getCountryName(code),
-      }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      await modal.alert(data.error ?? "Failed to add to wishlist", { variant: "error" });
+    const result = await addWishlistCountry(code);
+    if (!result.ok) {
+      await modal.alert(result.error, { variant: "error" });
       return false;
     }
     return true;
@@ -162,12 +152,9 @@ export function CountryManager({
   async function removeWishlist(row: CountryRow) {
     if (!row.wishlistId) return false;
 
-    const res = await fetch(`/api/wishlist/countries/${row.wishlistId}`, {
-      method: "DELETE",
-    });
-    if (!res.ok) {
-      const data = await res.json();
-      await modal.alert(data.error ?? "Failed to remove from wishlist", { variant: "error" });
+    const result = await removeWishlistCountry(row.wishlistId);
+    if (!result.ok) {
+      await modal.alert(result.error, { variant: "error" });
       return false;
     }
     return true;
