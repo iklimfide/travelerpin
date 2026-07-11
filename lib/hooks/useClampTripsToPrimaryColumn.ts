@@ -4,6 +4,12 @@ import { useEffect, useRef } from "react";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
 
+const LEFT_COLUMN_SELECTORS = [
+  ".profile-story-capture",
+  ".profile-dashboard-tools",
+  ".profile-section.profile-next-route",
+];
+
 export function useClampTripsToPrimaryColumn(enabled: boolean) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -13,10 +19,8 @@ export function useClampTripsToPrimaryColumn(enabled: boolean) {
     const scrollEl = scrollRef.current;
     if (!scrollEl) return;
 
-    const primaryCol = scrollEl
-      .closest(".profile-shell")
-      ?.querySelector("[data-profile-desktop-primary]") as HTMLElement | null;
-    if (!primaryCol) return;
+    const shell = scrollEl.closest(".profile-shell");
+    if (!shell) return;
 
     const media = window.matchMedia(DESKTOP_QUERY);
 
@@ -26,7 +30,12 @@ export function useClampTripsToPrimaryColumn(enabled: boolean) {
         return;
       }
 
-      const primaryBottom = primaryCol.getBoundingClientRect().bottom;
+      const primaryBottom = LEFT_COLUMN_SELECTORS.reduce((maxBottom, selector) => {
+        const element = shell.querySelector(selector);
+        if (!(element instanceof HTMLElement)) return maxBottom;
+        return Math.max(maxBottom, element.getBoundingClientRect().bottom);
+      }, 0);
+
       const scrollTop = scrollEl.getBoundingClientRect().top;
       const maxHeight = Math.floor(primaryBottom - scrollTop);
       scrollEl.style.maxHeight = maxHeight > 0 ? `${maxHeight}px` : "";
@@ -35,11 +44,13 @@ export function useClampTripsToPrimaryColumn(enabled: boolean) {
     update();
 
     const observer = new ResizeObserver(update);
-    observer.observe(primaryCol);
+    observer.observe(shell);
 
-    const secondaryCol = scrollEl.closest(".profile-desktop-column--secondary");
-    if (secondaryCol) {
-      observer.observe(secondaryCol);
+    for (const selector of LEFT_COLUMN_SELECTORS) {
+      const element = shell.querySelector(selector);
+      if (element instanceof HTMLElement) {
+        observer.observe(element);
+      }
     }
 
     window.addEventListener("resize", update);

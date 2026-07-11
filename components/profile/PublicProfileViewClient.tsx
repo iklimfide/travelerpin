@@ -103,7 +103,7 @@ export function PublicProfileViewClient({
   const heroTitle = t("travelDiaryTitle", { name: displayName });
 
   const profileBody = (
-    <div className={`profile-page${embedded ? " profile-page--embedded" : " profile-page--route"}`}>
+    <div className={`profile-page${embedded ? " profile-page--embedded" : ""}`}>
       {isGuest && !embedded ? (
         <div className="profile-guest-auth-bar">
           <PublicGuestAuthLinks
@@ -118,272 +118,157 @@ export function PublicProfileViewClient({
         </div>
       ) : null}
       <div className="profile-shell">
-        {embedded ? (
-          <>
-            <div
-              id={`profile-story-capture-${profile.username.toLowerCase()}`}
-              className="profile-story-capture"
-            >
-              <ProfileHeroCover
-                residence={profile.residence}
-                residenceHref={residenceHref}
-                heroTitle={heroTitle}
-                heroSubtitle={
-                  isOwnProfile
-                    ? t("travelDiarySubtitle")
-                    : t("travelDiarySubtitleVisitor", { name: displayName })
-                }
-              />
+        <div
+          id={`profile-story-capture-${profile.username.toLowerCase()}`}
+          className="profile-story-capture"
+        >
+          <ProfileHeroCover
+            residence={profile.residence}
+            residenceHref={residenceHref}
+            heroTitle={heroTitle}
+            heroSubtitle={
+              isOwnProfile
+                ? t("travelDiarySubtitle")
+                : t("travelDiarySubtitleVisitor", { name: displayName })
+            }
+          />
 
-              <div className="profile-main">
-                <ProfileIdentityCard
+          <div className="profile-main">
+            <ProfileIdentityCard
+              avatarUrl={profile.avatar_url}
+              displayName={displayName}
+              username={profile.username}
+              bio={profile.bio}
+              instagramUrl={profile.instagram_url}
+              instagramSampleNotice={
+                isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
+              }
+              stats={stats}
+              isOwnProfile={isOwnProfile}
+              countryCount={stats.countries}
+              profileHref={demoProfileHref}
+              labels={{
+                countries: t("statCountriesShort"),
+                cities: t("statCitiesShort"),
+                nationalParks: t("statNationalParksShort"),
+                themeParks: t("statThemeParksShort"),
+                share: t("shareProfile"),
+              }}
+              followUsername={!isOwnProfile ? profile.username : undefined}
+              followState={followState}
+              canFollow={canFollow}
+              isLoggedIn={isLoggedIn}
+            />
+
+            {hasMapContent ? (
+              <div
+                id={`profile-square-capture-${profile.username.toLowerCase()}`}
+                className="profile-square-capture"
+              >
+                <ProfileSquareCaptureHeader
                   avatarUrl={profile.avatar_url}
                   displayName={displayName}
                   username={profile.username}
-                  bio={profile.bio}
+                  countryCount={stats.countries}
                   instagramUrl={profile.instagram_url}
                   instagramSampleNotice={
                     isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
                   }
                   stats={stats}
-                  isOwnProfile={isOwnProfile}
-                  countryCount={stats.countries}
-                  profileHref={demoProfileHref}
                   labels={{
                     countries: t("statCountriesShort"),
                     cities: t("statCitiesShort"),
                     nationalParks: t("statNationalParksShort"),
                     themeParks: t("statThemeParksShort"),
-                    share: t("shareProfile"),
                   }}
-                  followUsername={!isOwnProfile ? profile.username : undefined}
-                  followState={followState}
-                  canFollow={canFollow}
-                  isLoggedIn={isLoggedIn}
                 />
+                <ProfileMapPanel
+                  visitedCountryCodes={visitedCodes}
+                  wishlistCountryCodes={visibleWishlistCodes}
+                  visitedCountries={visitedCountries}
+                  wishlistCountries={visibleWishlistCountries}
+                  visitedCities={visitedCities}
+                  visitedParks={visitedParks}
+                  isLoggedIn={isLoggedIn}
+                  canEditMap={isOwnProfile}
+                  countryCount={stats.countries}
+                  exploredBadgeLabel={t("mapExploredBadge")}
+                  allHref={profileAllPath(profile.username)}
+                  allAriaLabel={t("mapViewAll")}
+                />
+              </div>
+            ) : (
+              <section className="profile-section">
+                <p className="profile-empty">{t("noCountries")}</p>
+              </section>
+            )}
+          </div>
+        </div>
 
-                {hasMapContent ? (
-                  <div
-                    id={`profile-square-capture-${profile.username.toLowerCase()}`}
-                    className="profile-square-capture"
-                  >
-                    <ProfileSquareCaptureHeader
-                      avatarUrl={profile.avatar_url}
-                      displayName={displayName}
+        <main className="profile-main">
+          {showTravelUpdateCard ? (
+            <ProfileTravelUpdateCard
+              username={profile.username}
+              displayName={displayName}
+              stats={stats}
+              delta={travelDelta}
+              isOwnProfile={isOwnProfile}
+              persistShareSnapshot={isOwnProfile}
+            />
+          ) : null}
+
+          {!embedded ? (
+            <>
+              <ProfileTripsRow
+                trips={trips}
+                title={isOwnProfile ? t("myTrips") : t("visitorTrips", { name: displayName })}
+                allLabel={t("tripsAll")}
+                allHref={hasMapContent ? profileAllPath(profile.username) : undefined}
+                clampToPrimaryColumn={!isOwnProfile}
+                badgeLabels={{
+                  recent: t("tripBadgeRecent"),
+                  favorite: t("tripBadgeFavorite"),
+                  dayTrip: t("tripBadgeDayTrip"),
+                }}
+              />
+
+              {(isOwnProfile && ownerTools) ||
+              (!isOwnProfile &&
+                (visitedCodes.length > 0 ||
+                  visitedCities.length > 0 ||
+                  visitedParks.length > 0)) ? (
+                <div className="profile-dashboard-tools">
+                  {isOwnProfile ? (
+                    ownerTools
+                  ) : (
+                    <ProfileVisitorDestinations
                       username={profile.username}
-                      countryCount={stats.countries}
-                      instagramUrl={profile.instagram_url}
-                      instagramSampleNotice={
-                        isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
-                      }
-                      stats={stats}
-                      labels={{
-                        countries: t("statCountriesShort"),
-                        cities: t("statCitiesShort"),
-                        nationalParks: t("statNationalParksShort"),
-                        themeParks: t("statThemeParksShort"),
-                      }}
-                    />
-                    <ProfileMapPanel
-                      visitedCountryCodes={visitedCodes}
-                      wishlistCountryCodes={visibleWishlistCodes}
+                      residence={profile.residence}
                       visitedCountries={visitedCountries}
-                      wishlistCountries={visibleWishlistCountries}
                       visitedCities={visitedCities}
                       visitedParks={visitedParks}
-                      isLoggedIn={isLoggedIn}
-                      canEditMap={isOwnProfile}
-                      countryCount={stats.countries}
-                      exploredBadgeLabel={t("mapExploredBadge")}
-                      allHref={profileAllPath(profile.username)}
-                      allAriaLabel={t("mapViewAll")}
-                    />
-                  </div>
-                ) : (
-                  <section className="profile-section">
-                    <p className="profile-empty">{t("noCountries")}</p>
-                  </section>
-                )}
-              </div>
-            </div>
-
-            <main className="profile-main">
-              {showTravelUpdateCard ? (
-                <ProfileTravelUpdateCard
-                  username={profile.username}
-                  displayName={displayName}
-                  stats={stats}
-                  delta={travelDelta}
-                  isOwnProfile={isOwnProfile}
-                  persistShareSnapshot={isOwnProfile}
-                />
-              ) : null}
-            </main>
-          </>
-        ) : (
-          <>
-            <div className="profile-desktop-layout">
-              <div className="profile-desktop-column profile-desktop-column--primary" data-profile-desktop-primary>
-                <div
-                  id={`profile-story-capture-${profile.username.toLowerCase()}`}
-                  className="profile-story-capture"
-                >
-                  <ProfileHeroCover
-                    residence={profile.residence}
-                    residenceHref={residenceHref}
-                    heroTitle={heroTitle}
-                    heroSubtitle={
-                      isOwnProfile
-                        ? t("travelDiarySubtitle")
-                        : t("travelDiarySubtitleVisitor", { name: displayName })
-                    }
-                  />
-
-                  <div className="profile-main">
-                    <ProfileIdentityCard
-                      avatarUrl={profile.avatar_url}
-                      displayName={displayName}
-                      username={profile.username}
-                      bio={profile.bio}
-                      instagramUrl={profile.instagram_url}
-                      instagramSampleNotice={
-                        isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
-                      }
-                      stats={stats}
-                      isOwnProfile={isOwnProfile}
-                      countryCount={stats.countries}
-                      profileHref={demoProfileHref}
+                      visitedCodes={visitedCodes}
                       labels={{
-                        countries: t("statCountriesShort"),
-                        cities: t("statCitiesShort"),
-                        nationalParks: t("statNationalParksShort"),
-                        themeParks: t("statThemeParksShort"),
-                        share: t("shareProfile"),
+                        countriesTitle: t("visitorVisitedCountries", { name: displayName }),
+                        citiesTitle: t("visitorVisitedCities", { name: displayName }),
+                        parksTitle: t("visitorVisitedParks", { name: displayName }),
+                        countriesCount: t("visitorCountCountries", {
+                          count: visitedCodes.length,
+                        }),
+                        citiesCount: t("visitorCountCities", {
+                          count: visitedCities.length,
+                        }),
+                        parksCount: t("visitorCountParks", {
+                          count: visitedParks.length,
+                        }),
+                        show: t("ownerShow"),
+                        viewAll: t("allDestinationsAll"),
                       }}
-                      followUsername={!isOwnProfile ? profile.username : undefined}
-                      followState={followState}
-                      canFollow={canFollow}
-                      isLoggedIn={isLoggedIn}
                     />
-
-                    {hasMapContent ? (
-                      <div
-                        id={`profile-square-capture-${profile.username.toLowerCase()}`}
-                        className="profile-square-capture"
-                      >
-                        <ProfileSquareCaptureHeader
-                          avatarUrl={profile.avatar_url}
-                          displayName={displayName}
-                          username={profile.username}
-                          countryCount={stats.countries}
-                          instagramUrl={profile.instagram_url}
-                          instagramSampleNotice={
-                            isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
-                          }
-                          stats={stats}
-                          labels={{
-                            countries: t("statCountriesShort"),
-                            cities: t("statCitiesShort"),
-                            nationalParks: t("statNationalParksShort"),
-                            themeParks: t("statThemeParksShort"),
-                          }}
-                        />
-                        <ProfileMapPanel
-                          visitedCountryCodes={visitedCodes}
-                          wishlistCountryCodes={visibleWishlistCodes}
-                          visitedCountries={visitedCountries}
-                          wishlistCountries={visibleWishlistCountries}
-                          visitedCities={visitedCities}
-                          visitedParks={visitedParks}
-                          isLoggedIn={isLoggedIn}
-                          canEditMap={isOwnProfile}
-                          countryCount={stats.countries}
-                          exploredBadgeLabel={t("mapExploredBadge")}
-                          allHref={profileAllPath(profile.username)}
-                          allAriaLabel={t("mapViewAll")}
-                        />
-                      </div>
-                    ) : (
-                      <section className="profile-section">
-                        <p className="profile-empty">{t("noCountries")}</p>
-                      </section>
-                    )}
-                  </div>
+                  )}
                 </div>
+              ) : null}
 
-                {(isOwnProfile && ownerTools) ||
-                (!isOwnProfile &&
-                  (visitedCodes.length > 0 ||
-                    visitedCities.length > 0 ||
-                    visitedParks.length > 0)) ? (
-                  <div className="profile-dashboard-tools">
-                    {isOwnProfile ? (
-                      ownerTools
-                    ) : (
-                      <ProfileVisitorDestinations
-                        username={profile.username}
-                        residence={profile.residence}
-                        visitedCountries={visitedCountries}
-                        visitedCities={visitedCities}
-                        visitedParks={visitedParks}
-                        visitedCodes={visitedCodes}
-                        labels={{
-                          countriesTitle: t("visitorVisitedCountries", { name: displayName }),
-                          citiesTitle: t("visitorVisitedCities", { name: displayName }),
-                          parksTitle: t("visitorVisitedParks", { name: displayName }),
-                          countriesCount: t("visitorCountCountries", {
-                            count: visitedCodes.length,
-                          }),
-                          citiesCount: t("visitorCountCities", {
-                            count: visitedCities.length,
-                          }),
-                          parksCount: t("visitorCountParks", {
-                            count: visitedParks.length,
-                          }),
-                          show: t("ownerShow"),
-                          viewAll: t("allDestinationsAll"),
-                        }}
-                      />
-                    )}
-                  </div>
-                ) : null}
-
-                <ProfileNextRouteSection
-                  initialStops={parseNextRoute(profile.next_route)}
-                  isOwnProfile={isOwnProfile}
-                />
-              </div>
-
-              <div className="profile-desktop-column profile-desktop-column--secondary">
-                <main className="profile-main">
-                  {showTravelUpdateCard ? (
-                    <ProfileTravelUpdateCard
-                      username={profile.username}
-                      displayName={displayName}
-                      stats={stats}
-                      delta={travelDelta}
-                      isOwnProfile={isOwnProfile}
-                      persistShareSnapshot={isOwnProfile}
-                    />
-                  ) : null}
-
-                  <ProfileTripsRow
-                    trips={trips}
-                    title={isOwnProfile ? t("myTrips") : t("visitorTrips", { name: displayName })}
-                    allLabel={t("tripsAll")}
-                    allHref={hasMapContent ? profileAllPath(profile.username) : undefined}
-                    clampToPrimaryColumn={!isOwnProfile}
-                    badgeLabels={{
-                      recent: t("tripBadgeRecent"),
-                      favorite: t("tripBadgeFavorite"),
-                      dayTrip: t("tripBadgeDayTrip"),
-                    }}
-                  />
-                </main>
-              </div>
-            </div>
-
-            <div className="profile-desktop-full">
               {mediaPins.length > 0 ? (
                 <ProfileMediaSections
                   username={profile.username}
@@ -416,6 +301,11 @@ export function PublicProfileViewClient({
                 />
               ) : null}
 
+              <ProfileNextRouteSection
+                initialStops={parseNextRoute(profile.next_route)}
+                isOwnProfile={isOwnProfile}
+              />
+
               {!isOwnProfile && isGuest && hasMapContent ? (
                 <section className="profile-section">
                   <HomeFeaturesClient />
@@ -438,9 +328,10 @@ export function PublicProfileViewClient({
                   </div>
                 </section>
               ) : null}
-            </div>
-          </>
-        )}
+
+            </>
+          ) : null}
+        </main>
       </div>
     </div>
   );

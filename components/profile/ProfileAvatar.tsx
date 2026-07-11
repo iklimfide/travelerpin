@@ -3,6 +3,7 @@
 import { useRef, type ReactNode } from "react";
 import Image from "next/image";
 import { LIMITS } from "@/lib/constants";
+import { resolvePublicMediaImageUrl } from "@/lib/storage/hub-photo-url";
 
 type ProfileAvatarProps = {
   avatarUrl: string | null;
@@ -37,11 +38,12 @@ export function ProfileAvatar({
 }: ProfileAvatarProps) {
   const dims = SIZES[size];
   const label = displayName || username;
+  const imageSrc = resolvePublicMediaImageUrl(avatarUrl) ?? avatarUrl;
 
-  if (avatarUrl) {
+  if (imageSrc) {
     return (
       <Image
-        src={avatarUrl}
+        src={imageSrc}
         alt={label}
         width={dims.px}
         height={dims.px}
