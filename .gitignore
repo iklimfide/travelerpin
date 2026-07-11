@@ -44,5 +44,12 @@ next-env.d.ts
 # generated country flag SVGs (scripts/copy-country-flags.mjs)
 /public/flags/
 
+# cursor (local IDE rules)
+.cursor/
+
+# local debug / scratch
+tmp-*
+scripts/debug-*.mjs
+scripts/test-r2.mjs
 
 .vercel
