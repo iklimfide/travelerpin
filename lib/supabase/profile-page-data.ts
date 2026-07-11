@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import {
   fetchPublicProfile,
+  fetchFreshProfilePresentation,
   type PublicProfile,
 } from "@/lib/supabase/public-profile";
 import {
@@ -138,7 +139,7 @@ export function getCachedPublicProfileBundle(
         return null;
       }
     },
-    ["public-profile-bundle-v2", key],
+    ["public-profile-bundle-v3", key],
     // Indefinite until pin/profile write calls revalidateProfileForPin.
     { revalidate: false, tags: [profileCacheTag(key)] }
   )();
@@ -156,8 +157,17 @@ export async function loadPublicProfileMetadata(
   const bundle = await getCachedPublicProfileBundle(username);
   if (!bundle) return null;
 
+  let profile = bundle.profile;
+  const publicSupabase = createPublicSupabaseClient();
+  if (publicSupabase) {
+    const freshPresentation = await fetchFreshProfilePresentation(publicSupabase, profile.id);
+    if (freshPresentation) {
+      profile = { ...profile, ...freshPresentation };
+    }
+  }
+
   return {
-    profile: bundle.profile,
+    profile,
     stats: computeTravelStats(
       bundle.visitedCountries,
       bundle.visitedCities,
@@ -181,12 +191,33 @@ export const loadPublicProfilePage = cache(
     ]);
     if (!bundle) return null;
 
+    const publicSupabase = createPublicSupabaseClient();
     let profile = {
       ...bundle.profile,
       next_route: parseNextRoute(bundle.profile.next_route),
     };
     let { visitedCountries, visitedCities, visitedParks } = bundle;
     let wishlistCountries = bundle.publicWishlistCountries;
+
+    if (publicSupabase) {
+      const freshPresentation = await fetchFreshProfilePresentation(publicSupabase, profile.id);
+      if (freshPresentation) {
+        profile = {
+          ...profile,
+          ...freshPresentation,
+          next_route: freshPresentation.next_route ?? profile.next_route,
+        };
+
+        if (
+          freshPresentation.wishlist_public &&
+          !bundle.profile.wishlist_public &&
+          wishlistCountries.length === 0
+        ) {
+          wishlistCountries = await loadWishlistCountries(publicSupabase, profile, false);
+        }
+      }
+    }
+
     let currentUsername: string | null = null;
     let followState: ProfileFollowState | null = null;
     let isOwnProfile = false;

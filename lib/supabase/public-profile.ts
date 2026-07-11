@@ -24,6 +24,36 @@ const LEGACY_EXTENDED_SELECT =
   "id, username, display_name, avatar_url, cover_url, bio, residence, profession, marital_status, wishlist_public";
 const BASE_SELECT = "id, username, display_name";
 
+const PROFILE_PRESENTATION_SELECT =
+  "avatar_url, display_name, cover_url, bio, residence, instagram_url, profession, marital_status, wishlist_public, next_route";
+
+/** Profile presentation fields change independently of pin rows — keep them out of stale pin cache. */
+export async function fetchFreshProfilePresentation(
+  supabase: SupabaseClient,
+  profileId: string
+): Promise<Partial<PublicProfile> | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(PROFILE_PRESENTATION_SELECT)
+    .eq("id", profileId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return {
+    avatar_url: data.avatar_url ?? null,
+    display_name: data.display_name ?? null,
+    cover_url: data.cover_url ?? null,
+    bio: data.bio ?? null,
+    residence: data.residence ?? null,
+    instagram_url: data.instagram_url ?? null,
+    profession: data.profession ?? null,
+    marital_status: data.marital_status ?? null,
+    wishlist_public: data.wishlist_public === true,
+    next_route: parseNextRoute(data.next_route),
+  };
+}
+
 /** Load profile for public pages; tolerates missing profile-detail migration. */
 export async function fetchPublicProfile(
   supabase: SupabaseClient,

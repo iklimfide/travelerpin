@@ -1,13 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { ProfileAvatarLightbox } from "@/components/profile/ProfileAvatarLightbox";
 import { ProfileActionButtons } from "@/components/profile/ProfileActionButtons";
 import { ProfileInstagramLink } from "@/components/profile/ProfileInstagramLink";
 import { ProfileStatCounters } from "@/components/profile/ProfileStatCounters";
 import { ProfileWorldProgress } from "@/components/profile/ProfileWorldProgress";
 import { TravelerBadge } from "@/components/profile/TravelerBadge";
 import { translateProfile } from "@/lib/i18n/client-messages";
+import { resolvePublicMediaImageUrl } from "@/lib/storage/hub-photo-url";
 import { profileAllPath } from "@/lib/seo/site";
 import type { TravelStats } from "@/types/database";
 
@@ -59,6 +62,19 @@ export function ProfileIdentityCard({
 }: ProfileIdentityCardProps) {
   const t = translateProfile;
   const allHref = profileAllPath(username);
+  const [avatarLightboxOpen, setAvatarLightboxOpen] = useState(false);
+  const avatarImageSrc = resolvePublicMediaImageUrl(avatarUrl) ?? avatarUrl;
+  const canExpandAvatar = Boolean(avatarImageSrc);
+
+  const avatarNode = (
+    <ProfileAvatar
+      avatarUrl={avatarUrl}
+      displayName={displayName}
+      username={username}
+      size="lg"
+      className="profile-avatar !h-28 !w-28 !rounded-[32px] !text-[38px] !ring-8 !ring-[#eef3f9]"
+    />
+  );
 
   return (
     <section className="profile-card">
@@ -75,26 +91,32 @@ export function ProfileIdentityCard({
       />
 
       <div className="profile-avatar-shell">
-        {profileHref ? (
+        {canExpandAvatar ? (
+          <button
+            type="button"
+            className="profile-avatar-button"
+            aria-label={t("viewProfilePhoto")}
+            onClick={() => setAvatarLightboxOpen(true)}
+          >
+            {avatarNode}
+          </button>
+        ) : profileHref ? (
           <Link href={profileHref} className="profile-avatar-link" aria-label={`${displayName}'s profile`}>
-            <ProfileAvatar
-              avatarUrl={avatarUrl}
-              displayName={displayName}
-              username={username}
-              size="lg"
-              className="profile-avatar !h-28 !w-28 !rounded-[32px] !text-[38px] !ring-8 !ring-[#eef3f9]"
-            />
+            {avatarNode}
           </Link>
         ) : (
-          <ProfileAvatar
-            avatarUrl={avatarUrl}
-            displayName={displayName}
-            username={username}
-            size="lg"
-            className="profile-avatar !h-28 !w-28 !rounded-[32px] !text-[38px] !ring-8 !ring-[#eef3f9]"
-          />
+          avatarNode
         )}
       </div>
+
+      {avatarLightboxOpen && avatarImageSrc ? (
+        <ProfileAvatarLightbox
+          src={avatarImageSrc}
+          alt={displayName}
+          closeLabel={t("closePin")}
+          onClose={() => setAvatarLightboxOpen(false)}
+        />
+      ) : null}
 
       {profileHref ? (
         <h2 className="profile-name">

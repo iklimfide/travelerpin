@@ -1317,6 +1317,69 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   outline-offset: 3px;
 }
 
+.profile-avatar-button {
+  display: inline-block;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 32px;
+  cursor: zoom-in;
+}
+
+.profile-avatar-button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 4px;
+}
+
+.profile-avatar-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(2, 6, 23, 0.82);
+}
+
+.profile-avatar-lightbox__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.profile-avatar-lightbox__close:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.profile-avatar-lightbox__panel {
+  max-width: min(92vw, 520px);
+  max-height: min(92vh, 520px);
+}
+
+.profile-avatar-lightbox__photo {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(92vw, 520px);
+  max-height: min(92vh, 520px);
+  border-radius: 28px;
+  object-fit: contain;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+}
+
 .profile-instagram-link {
   display: inline-flex;
   align-items: center;
