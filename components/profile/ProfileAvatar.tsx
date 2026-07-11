@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, type ReactNode } from "react";
-import Image from "next/image";
 import { LIMITS } from "@/lib/constants";
 import { resolvePublicMediaImageUrl } from "@/lib/storage/hub-photo-url";
 
@@ -42,7 +41,9 @@ export function ProfileAvatar({
 
   if (imageSrc) {
     return (
-      <Image
+      // Plain img — proxy URLs use /api/hub-photo?key=… which next/image rejects on production.
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
         src={imageSrc}
         alt={label}
         width={dims.px}

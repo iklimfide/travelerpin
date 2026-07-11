@@ -163,6 +163,17 @@ export async function deleteR2Objects(keys: string[]): Promise<void> {
 
 /** Parse object key from a public R2 URL (works on client for pub-*.r2.dev links). */
 export function parseR2ObjectKey(publicUrl: string): string | null {
+  try {
+    if (!publicUrl.startsWith("/")) {
+      const key = decodeURIComponent(new URL(publicUrl).pathname.replace(/^\//, ""));
+      if (key.startsWith("avatars/") && isSafeR2ObjectKey(key)) {
+        return key;
+      }
+    }
+  } catch {
+    // fall through to hostname-based parsing
+  }
+
   if (!isR2PublicMediaUrl(publicUrl)) return null;
 
   try {
