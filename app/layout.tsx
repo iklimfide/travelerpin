@@ -18,6 +18,9 @@ import { ToastProvider } from "@/components/ui/ToastProvider";
 import { AuthModalProvider } from "@/components/auth/AuthModalProvider";
 import { SharePinPromptProvider } from "@/components/share/SharePinPromptProvider";
 import { DashboardAddProvider } from "@/components/dashboard/DashboardAddProvider";
+import { AddDestinationProvider } from "@/components/add/AddDestinationProvider";
+import { NextRouteDestinationProvider } from "@/components/add/NextRouteDestinationProvider";
+import { WishlistDestinationProvider } from "@/components/add/WishlistDestinationProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { ClearPwaArtifacts } from "@/components/dev/ClearPwaArtifacts";
 import { DevMobilePreview } from "@/components/dev/DevMobilePreview";
@@ -92,11 +95,17 @@ export default async function RootLayout({
             <ModalProvider>
               <ToastProvider>
                 <DashboardAddProvider>
-                  <OwnProfileShellGate>
-                    <SharePinPromptProvider>
-                      <AuthModalProvider>{children}</AuthModalProvider>
-                    </SharePinPromptProvider>
-                  </OwnProfileShellGate>
+                  <AddDestinationProvider>
+                    <NextRouteDestinationProvider>
+                      <WishlistDestinationProvider>
+                        <OwnProfileShellGate>
+                          <SharePinPromptProvider>
+                            <AuthModalProvider>{children}</AuthModalProvider>
+                          </SharePinPromptProvider>
+                        </OwnProfileShellGate>
+                      </WishlistDestinationProvider>
+                    </NextRouteDestinationProvider>
+                  </AddDestinationProvider>
                 </DashboardAddProvider>
               </ToastProvider>
             </ModalProvider>

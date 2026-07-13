@@ -36,7 +36,9 @@
     "settings": "Settings",
     "notifications": "Notifications",
     "add": "Add place",
-    "nextRoute": "Next Route"
+    "addVisited": "Visited",
+    "nextRoute": "Next Route",
+    "wishlist": "Wishlist"
   },
   "notifications": {
     "title": "Notifications",
@@ -94,6 +96,24 @@
     "searchEmpty": "No destinations match your search.",
     "searching": "Searching…",
     "routeStopCount": "{count} stops on your route"
+  },
+  "nextRouteDestination": {
+    "selectCountryTitle": "Add countries and cities to your next route",
+    "back": "Back",
+    "close": "Close",
+    "loading": "Loading...",
+    "saveHint": "Selections are added to your route when you tap Save.",
+    "saveFailed": "Could not save your route. Please try again.",
+    "loginRequired": "Sign in to build your next route.",
+    "cityOnRoute": "Already on your route"
+  },
+  "wishlistDestination": {
+    "selectCountryTitle": "Manage countries on your wishlist",
+    "close": "Close",
+    "loading": "Loading...",
+    "saveHint": "Check or uncheck countries, then tap Save to update your wishlist.",
+    "saveFailed": "Could not save your wishlist. Please try again.",
+    "loginRequired": "Sign in to manage your wishlist."
   },
   "home": {
     "hero": "Pin your travels. Share with friends.",
@@ -799,6 +819,35 @@
     "columnWant": "Want",
     "legendVisited": "Visited",
     "legendWishlist": "Want to visit"
+  },
+  "addDestination": {
+    "selectCountryTitle": "Select the country you've visited",
+    "searchCountries": "Start typing country name",
+    "noCountryResults": "No countries match your search.",
+    "cityTickHint": "Tick visited places. Search by name to find smaller towns or add a missing city.",
+    "popular": "Popular",
+    "capitalLabel": "Capital",
+    "cityTierMajor": "Major cities & highlights",
+    "cityTierMedium": "Medium cities",
+    "cityTierMore": "More cities & towns",
+    "moreCities": "More cities",
+    "back": "Back",
+    "close": "Close",
+    "loading": "Loading...",
+    "saveHint": "Selections are saved to your map only when you tap Save.",
+    "saveFailed": "Could not save your selections. Please try again.",
+    "loginRequired": "Sign in to save places to your map.",
+    "missingPlacePrompt": "Can't find your city or park in the list? Email us at",
+    "missingPlacePromptSuffix": "and we'll add it.",
+    "regions": {
+      "africa": "Africa",
+      "asia": "Asia",
+      "oceania": "Australia and Oceania",
+      "europe": "Europe",
+      "north-america": "North America",
+      "south-america": "South America",
+      "special": "Special regions"
+    }
   },
   "footer": {
     "terms": "Terms of Service",

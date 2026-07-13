@@ -22,6 +22,9 @@ export const dashboardNavMessages = enMessages.dashboardNav;
 export const notificationMessages = enMessages.notifications;
 export const saveDestinationMessages = enMessages.saveDestination;
 export const nextRouteMessages = enMessages.nextRoute;
+export const nextRouteDestinationMessages = enMessages.nextRouteDestination;
+export const addDestinationMessages = enMessages.addDestination;
+export const wishlistDestinationMessages = enMessages.wishlistDestination;
 export const footerMessages = enMessages.footer;
 
 export function formatMessage(

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { searchTouristCities } from "@/lib/data/tourist-cities";
+import { getCityCatalog } from "@/lib/add/city-catalog";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,6 +10,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Country is required" }, { status: 400 });
   }
 
-  const cities = searchTouristCities(country, q, 100);
-  return NextResponse.json({ cities });
+  const catalog = getCityCatalog(country, q);
+  return NextResponse.json({ cities: catalog.allCities, tiers: catalog.tiers });
 }

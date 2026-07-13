@@ -19,6 +19,11 @@ import {
   removeVisitedCountry,
   removeWishlistCountry,
 } from "@/lib/client/country-actions";
+import {
+  TRAVEL_STATE_UPDATED_EVENT,
+  type TravelStateData,
+} from "@/lib/client/session-page-cache";
+import { fetchTravelState } from "@/lib/client/travel-state";
 import { countryMessages, mapMessages } from "@/lib/i18n/client-messages";
 import {
   countryHasMappedPlaces,
@@ -122,43 +127,62 @@ export function TravelMapView({
     parksCountryCodes,
   ]);
 
-  const syncTravelState = useCallback(async () => {
+  const syncTravelState = useCallback(async (options?: { force?: boolean }) => {
     if (!isLoggedIn || !editable) return;
 
     try {
-      const res = await fetch("/api/me/travel-state");
-      if (!res.ok) return;
+      const result = await fetchTravelState({
+        preferCache: !options?.force,
+        force: options?.force,
+      });
+      if (!result.ok) return;
 
-      const data = (await res.json()) as {
-        visitedCountries?: VisitedCountry[];
-        visitedCities?: VisitedCity[];
-        visitedParks?: VisitedPark[];
-        wishlistCountries?: WishlistCountry[];
-        visitedCodes?: string[];
-      };
-
-      setLocalVisitedCountries(data.visitedCountries ?? []);
-      setLocalVisitedCountryCodes(data.visitedCodes ?? []);
-      setLocalUserCities(data.visitedCities ?? []);
-      setLocalUserParks(data.visitedParks ?? []);
-      setLocalWishlistCountries(data.wishlistCountries ?? []);
+      const data = result.data;
+      setLocalVisitedCountries(data.visitedCountries);
+      setLocalVisitedCountryCodes(data.visitedCodes);
+      setLocalUserCities(data.visitedCities);
+      setLocalUserParks(data.visitedParks);
+      setLocalWishlistCountries(data.wishlistCountries);
       setLocalWishlistCountryCodes(
-        (data.wishlistCountries ?? []).map((country) => country.country_code.toUpperCase())
+        data.wishlistCountries.map((country) => country.country_code.toUpperCase())
       );
       setLocalCitiesCountryCodes([
-        ...new Set(
-          (data.visitedCities ?? []).map((city) => city.country_code.toUpperCase())
-        ),
+        ...new Set(data.visitedCities.map((city) => city.country_code.toUpperCase())),
       ]);
       setLocalParksCountryCodes([
-        ...new Set(
-          (data.visitedParks ?? []).map((park) => park.country_code.toUpperCase())
-        ),
+        ...new Set(data.visitedParks.map((park) => park.country_code.toUpperCase())),
       ]);
       setOptimisticVisitedCodes(new Set());
     } catch {
       // Keep optimistic UI if refresh fails.
     }
+  }, [editable, isLoggedIn]);
+
+  useEffect(() => {
+    function onTravelStateUpdated(event: Event) {
+      const detail = (event as CustomEvent<{ data: TravelStateData }>).detail;
+      if (!detail?.data || !isLoggedIn || !editable) return;
+
+      const data = detail.data;
+      setLocalVisitedCountries(data.visitedCountries);
+      setLocalVisitedCountryCodes(data.visitedCodes);
+      setLocalUserCities(data.visitedCities);
+      setLocalUserParks(data.visitedParks);
+      setLocalWishlistCountries(data.wishlistCountries);
+      setLocalWishlistCountryCodes(
+        data.wishlistCountries.map((country) => country.country_code.toUpperCase())
+      );
+      setLocalCitiesCountryCodes([
+        ...new Set(data.visitedCities.map((city) => city.country_code.toUpperCase())),
+      ]);
+      setLocalParksCountryCodes([
+        ...new Set(data.visitedParks.map((park) => park.country_code.toUpperCase())),
+      ]);
+      setOptimisticVisitedCodes(new Set());
+    }
+
+    window.addEventListener(TRAVEL_STATE_UPDATED_EVENT, onTravelStateUpdated);
+    return () => window.removeEventListener(TRAVEL_STATE_UPDATED_EVENT, onTravelStateUpdated);
   }, [editable, isLoggedIn]);
 
   const visitedCodeSet = useMemo(() => {

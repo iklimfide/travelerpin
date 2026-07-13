@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addCitiesBatch, addCity } from "@/lib/client/city-actions";
 import { cityMessages, commonMessages, formatMessage, mapMessages } from "@/lib/i18n/client-messages";
+import { canonicalCityKey, citiesAreSame } from "@/lib/utils/city-aliases";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -25,7 +26,7 @@ const MIN_FILTER_LENGTH = 2;
 const CUSTOM_CITY_TOAST_DELAY_MS = 500;
 
 function cityId(city: TouristCity): string {
-  return `${city.countryCode}:${city.name}`;
+  return canonicalCityKey(city.countryCode, city.name);
 }
 
 export function CountryCityPicker({
@@ -45,9 +46,13 @@ export function CountryCityPicker({
   const lastPromptKeyRef = useRef<string | null>(null);
 
   const existingNames = useMemo(
-    () => new Set(existingCityNames.map((name) => name.toLowerCase())),
+    () => existingCityNames,
     [existingCityNames]
   );
+
+  function isExistingCity(cityName: string): boolean {
+    return existingNames.some((name) => citiesAreSame(countryCode, name, cityName));
+  }
 
   useEffect(() => {
     setSelectedIds(new Set());
@@ -84,8 +89,8 @@ export function CountryCityPicker({
   }, [allCities, filter]);
 
   const selectableCities = useMemo(() => {
-    return displayCities.filter((city) => !existingNames.has(city.name.toLowerCase()));
-  }, [displayCities, existingNames]);
+    return displayCities.filter((city) => !isExistingCity(city.name));
+  }, [displayCities, existingNames, countryCode]);
 
   const selectedCount = useMemo(() => {
     return selectableCities.filter((city) => selectedIds.has(cityId(city))).length;
@@ -95,7 +100,7 @@ export function CountryCityPicker({
 
   const canAddCustomCity = useMemo(() => {
     if (trimmedFilter.length < MIN_FILTER_LENGTH) return false;
-    if (existingNames.has(trimmedFilter.toLowerCase())) return false;
+    if (isExistingCity(trimmedFilter)) return false;
     if (displayCities.length > 0) return false;
 
     const normalized = trimmedFilter.toLocaleLowerCase("tr");
@@ -108,7 +113,7 @@ export function CountryCityPicker({
 
   const handleAddCustomCity = useCallback(async () => {
     if (trimmedFilter.length < MIN_FILTER_LENGTH) return;
-    if (existingNames.has(trimmedFilter.toLowerCase())) return;
+    if (isExistingCity(trimmedFilter)) return;
 
     setSaving(true);
 
@@ -285,7 +290,7 @@ export function CountryCityPicker({
         ) : (
           displayCities.map((city) => {
             const id = cityId(city);
-            const onMap = existingNames.has(city.name.toLowerCase());
+            const onMap = isExistingCity(city.name);
             const checked = onMap || selectedIds.has(id);
 
             return (

@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
 import {
   NEXT_ROUTE_CHANGED_EVENT,
   PROFILE_DATA_STALE_EVENT,
@@ -59,7 +59,8 @@ export function ProfileNextRouteSection({
   initialStops = [],
   isOwnProfile,
 }: ProfileNextRouteSectionProps) {
-  const { openNextRouteModal } = useDashboardAdd();
+  const router = useRouter();
+  const pathname = usePathname() ?? "/";
   const [stops, setStops] = useState(() => resolveInitialStops(initialStops, isOwnProfile));
   const [reorderBusy, setReorderBusy] = useState(false);
 
@@ -195,7 +196,7 @@ export function ProfileNextRouteSection({
               <button
                 type="button"
                 className="profile-owner-section__btn profile-owner-section__btn--add"
-                onClick={openNextRouteModal}
+                onClick={() => router.push(`/c/next?next=${encodeURIComponent(pathname)}`)}
               >
                 {profileMessages.ownerAdd}
               </button>

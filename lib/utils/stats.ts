@@ -1,3 +1,4 @@
+import { withUkMapCountryCodes } from "@/lib/data/uk-nations";
 import type {
   TravelStats,
   VisitedCity,
@@ -70,7 +71,7 @@ export function getVisitedCountryCodes(
     ...cities.map((c) => c.country_code.toUpperCase()),
     ...parks.map((p) => p.country_code.toUpperCase()),
   ]);
-  return [...codes];
+  return withUkMapCountryCodes(codes);
 }
 
 export function getWishlistCountryCodes(wishlist: WishlistCountry[]): string[] {

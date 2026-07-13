@@ -36,9 +36,9 @@ const ASIA = [
 
 const EUROPE = [
   "AL", "AD", "AT", "BY", "BE", "BA", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
-  "DE", "GR", "HU", "IS", "IE", "IT", "XK", "LV", "LI", "LT", "LU", "MT", "MD", "MC",
+  "DE", "GR", "HU", "IS", "IE", "IT", "XK", "KT", "LV", "LI", "LT", "LU", "MT", "MD", "MC",
   "ME", "NL", "MK", "NO", "PL", "PT", "RO", "SM", "RS", "SK", "SI", "ES", "SE", "CH",
-  "UA", "GB", "VA", "TR", "FO", "GI", "GG", "JE", "IM", "AX",
+  "UA", "GB", "EN", "SF", "WL", "VA", "TR", "FO", "GI", "GG", "JE", "IM", "AX",
 ] as const;
 
 const NORTH_AMERICA = [

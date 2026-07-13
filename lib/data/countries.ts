@@ -1,5 +1,6 @@
 import countriesLib from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
+import { getUkNationName } from "@/lib/data/uk-nations";
 
 countriesLib.registerLocale(enLocale);
 
@@ -11,6 +12,12 @@ const COUNTRY_ALIAS_OVERRIDES: Partial<Record<string, string>> = {
 /** Full display name overrides when the ISO label is not what travelers use day to day. */
 const COUNTRY_NAME_OVERRIDES: Partial<Record<string, string>> = {
   VA: "Vatican",
+  KT: "Northern Cyprus",
+  MK: "Macedonia",
+  CD: "DR Congo",
+  FM: "Micronesia",
+  KR: "South Korea",
+  KP: "North Korea",
 };
 
 /** Extra tokens for search — common abbreviations and alternate names. */
@@ -23,7 +30,7 @@ const COUNTRY_SEARCH_EXTRA: Partial<Record<string, readonly string[]>> = {
   CZ: ["czech republic"],
   CD: ["drc", "dr congo"],
   CG: ["congo brazzaville"],
-  MK: ["macedonia"],
+  MK: ["macedonia", "north macedonia"],
   CI: ["ivory coast"],
   MM: ["burma"],
   LA: ["laos"],
@@ -43,6 +50,7 @@ const COUNTRY_SEARCH_EXTRA: Partial<Record<string, readonly string[]>> = {
   TZ: ["tanzania"],
   PS: ["palestine"],
   TW: ["taiwan"],
+  KT: ["kktc", "trnc", "kuzey kibris", "kuzey kıbrıs", "north cyprus"],
 };
 
 /** All ISO countries — never filtered by population. */
@@ -52,11 +60,44 @@ export type CountryOption = {
   searchText: string;
 };
 
-function formatCountryLabel(alias: string, official: string): string {
-  if (alias.toLowerCase() === official.toLowerCase()) {
-    return alias;
+function formatCountryLabel(alias: string, _official: string): string {
+  return alias;
+}
+
+/** Strip official prefixes/suffixes travelers rarely use in everyday speech. */
+function simplifyCountryDisplayName(name: string): string {
+  let result = name.trim();
+
+  const replacements: Array<[RegExp, string]> = [
+    [/^the /i, ""],
+    [/^the republic of /i, ""],
+    [/^republic of the /i, ""],
+    [/^republic of /i, ""],
+    [/^islamic republic of /i, ""],
+    [/^democratic republic of the /i, ""],
+    [/^democratic republic of /i, ""],
+    [/^people's democratic republic of /i, ""],
+    [/^syrian arab republic$/i, "Syria"],
+    [/^lao people's democratic republic$/i, "Laos"],
+    [/^korea, republic of$/i, "South Korea"],
+    [/, republic of$/i, ""],
+    [/, federated states of$/i, ""],
+    [/\s*\([^)]*\)\s*$/u, ""],
+  ];
+
+  for (const [pattern, replacement] of replacements) {
+    result = result.replace(pattern, replacement).trim();
   }
-  return `${alias} (${official})`;
+
+  return result || name;
+}
+
+function resolveCountryDisplayName(code: string, official: string): string {
+  const override = COUNTRY_NAME_OVERRIDES[code];
+  if (override) return override;
+
+  const alias = countryAlias(code, official);
+  return simplifyCountryDisplayName(formatCountryLabel(alias, official));
 }
 
 function countryAlias(code: string, official: string): string {
@@ -70,40 +111,54 @@ function countrySearchText(code: string, alias: string, official: string, name: 
 
 function buildCountryOption(code: string): CountryOption {
   const override = COUNTRY_NAME_OVERRIDES[code];
-  if (override) {
-    const official =
-      countriesLib.getName(code, "en", { select: "official" }) ?? code;
-    const searchText = countrySearchText(code, override, official, override);
-    return { code, name: override, searchText };
-  }
-
   const official =
     countriesLib.getName(code, "en", { select: "official" }) ?? code;
+  const name = resolveCountryDisplayName(code, official);
   const alias = countryAlias(code, official);
-  const name = formatCountryLabel(alias, official);
-  const searchText = countrySearchText(code, alias, official, name);
+  const searchText = countrySearchText(
+    code,
+    override ?? alias,
+    official,
+    name
+  );
 
   return { code, name, searchText };
 }
 
-export const COUNTRY_LIST: CountryOption[] = Object.keys(
-  countriesLib.getNames("en", { select: "official" })
-)
-  .map(buildCountryOption)
-  .sort((a, b) => a.name.localeCompare(b.name));
+/** Non-ISO destinations we still list for travelers (internal alpha-2 codes). */
+const SUPPLEMENTAL_COUNTRIES: CountryOption[] = [
+  {
+    code: "KT",
+    name: "Northern Cyprus",
+    searchText: countrySearchText(
+      "KT",
+      "Northern Cyprus",
+      "Turkish Republic of Northern Cyprus",
+      "Northern Cyprus"
+    ),
+  },
+];
 
-/** English display label, e.g. Turkey (Türkiye). */
+export const COUNTRY_LIST: CountryOption[] = [
+  ...Object.keys(countriesLib.getNames("en", { select: "official" })).map(buildCountryOption),
+  ...SUPPLEMENTAL_COUNTRIES,
+].sort((a, b) => a.name.localeCompare(b.name));
+
+/** English display label — common short name (e.g. Iran, Turkey, USA). */
 export function getCountryName(code: string): string {
   const normalized = code.toUpperCase();
-  const override = COUNTRY_NAME_OVERRIDES[normalized];
-  if (override) return override;
+  const ukName = getUkNationName(normalized);
+  if (ukName) return ukName;
+
+  const supplemental = SUPPLEMENTAL_COUNTRIES.find((country) => country.code === normalized);
+  if (supplemental) return supplemental.name;
 
   const official =
     countriesLib.getName(code, "en", { select: "official" }) ??
     countriesLib.getName(code, "en") ??
     code;
-  const alias = countryAlias(code, official);
-  return formatCountryLabel(alias, official);
+
+  return resolveCountryDisplayName(normalized, official);
 }
 
 function countrySearchScore(country: CountryOption, query: string): number {

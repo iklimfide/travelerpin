@@ -31,3 +31,9 @@ export function formatCityDisplayName(name: string): string {
     })
     .join(" ");
 }
+
+/** Known public name without trailing official qualifiers in parentheses. */
+export function formatKnownPlaceName(name: string): string {
+  const stripped = name.replace(/\s*\([^)]*\)\s*$/u, "").trim();
+  return formatCityDisplayName(stripped || name);
+}

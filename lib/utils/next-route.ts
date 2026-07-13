@@ -1,6 +1,7 @@
 import { getCountryName } from "@/lib/data/countries";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { countryPath } from "@/lib/seo/site";
+import { canonicalCityKey } from "@/lib/utils/city-aliases";
 import { cityPlacePath } from "@/lib/utils/hub-place-path";
 import type { NextRouteStop, NextRouteStopKind } from "@/types/database";
 
@@ -98,6 +99,9 @@ export function buildCityStop(
 
 export function stopDedupeKey(stop: Pick<NextRouteStop, "kind" | "name" | "countryCode">): string {
   const code = stop.countryCode?.toUpperCase() ?? "";
+  if (stop.kind === "city" && code) {
+    return `city:${canonicalCityKey(code, stop.name)}`;
+  }
   return `${stop.kind}:${code}:${stop.name.trim().toLowerCase()}`;
 }
 

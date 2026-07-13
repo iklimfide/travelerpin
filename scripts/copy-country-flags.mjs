@@ -26,3 +26,13 @@ for (const file of fs.readdirSync(src)) {
 }
 
 console.log(`Copied ${copied} country flags to public/flags`);
+
+const supplementalSrc = path.join(root, "assets/country-flags");
+if (fs.existsSync(supplementalSrc)) {
+  for (const file of fs.readdirSync(supplementalSrc)) {
+    if (!file.endsWith(".svg")) continue;
+    fs.copyFileSync(path.join(supplementalSrc, file), path.join(dest, file));
+    copied++;
+  }
+  console.log(`Included supplemental flags from assets/country-flags`);
+}

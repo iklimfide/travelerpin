@@ -1,7 +1,21 @@
 import type { ProfileSettingsRow } from "@/lib/supabase/profile-settings";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
-import type { NextRouteStop, TravelStats } from "@/types/database";
+import type { NextRouteStop, TravelStats, VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 import { parseNextRoute } from "@/lib/utils/next-route";
+
+export type TravelStateData = {
+  visitedCountries: VisitedCountry[];
+  visitedCities: VisitedCity[];
+  visitedParks: VisitedPark[];
+  wishlistCountries: WishlistCountry[];
+  stats: TravelStats;
+  visitedCodes: string[];
+};
+
+type CachedTravelStatePayload = {
+  v: number;
+  data: TravelStateData;
+};
 
 const CACHE_VERSION = 1;
 const OWN_USERNAME_KEY = "tp:own-username";
@@ -93,6 +107,9 @@ export function invalidateProfileCache(username: string): void {
 
 export const PROFILE_DATA_STALE_EVENT = "tp:profile-data-stale";
 export const NEXT_ROUTE_CHANGED_EVENT = "tp:next-route-changed";
+export const TRAVEL_STATE_UPDATED_EVENT = "tp:travel-state-updated";
+
+const OWN_TRAVEL_STATE_CACHE_KEY = `tp:v${CACHE_VERSION}:own-travel-state`;
 
 const OWN_NEXT_ROUTE_CACHE_KEY = `tp:v${CACHE_VERSION}:own-next-route`;
 
@@ -140,11 +157,41 @@ export function notifyProfileDataChanged(username?: string | null): void {
   if (!normalized) return;
 
   invalidateProfileCache(normalized);
+  invalidateTravelStateCache();
 
   if (typeof window === "undefined") return;
   window.dispatchEvent(
     new CustomEvent(PROFILE_DATA_STALE_EVENT, {
       detail: { username: normalized },
+    })
+  );
+}
+
+export function readTravelStateCache(): TravelStateData | null {
+  const payload = readJson<CachedTravelStatePayload>(OWN_TRAVEL_STATE_CACHE_KEY);
+  return payload?.data ?? null;
+}
+
+export function writeTravelStateCache(data: TravelStateData): void {
+  writeJson(OWN_TRAVEL_STATE_CACHE_KEY, { data });
+}
+
+export function invalidateTravelStateCache(): void {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(OWN_TRAVEL_STATE_CACHE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+export function notifyTravelStateUpdated(data: TravelStateData): void {
+  writeTravelStateCache(data);
+
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent(TRAVEL_STATE_UPDATED_EVENT, {
+      detail: { data },
     })
   );
 }
@@ -187,6 +234,7 @@ export function writeHomeCache(data: PublicProfilePageData): void {
 
 export function clearAllSessionPageCaches(): void {
   invalidateSettingsCache();
+  invalidateTravelStateCache();
   if (typeof window === "undefined") return;
   try {
     sessionStorage.removeItem(HOME_CACHE_KEY);

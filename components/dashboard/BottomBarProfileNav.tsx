@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
-import { commonMessages, dashboardNavMessages, shareMessages } from "@/lib/i18n/client-messages";
+import { commonMessages, dashboardNavMessages, shareMessages, wishlistMessages } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
 import { clearAllSessionPageCaches } from "@/lib/client/session-page-cache";
 
@@ -18,6 +18,7 @@ type BottomBarProfileNavProps = {
   mapHref?: string;
   mapActive?: boolean;
   onNextRouteClick?: () => void;
+  onWishlistClick?: () => void;
 };
 
 function ProfileIcon() {
@@ -49,6 +50,17 @@ function RouteIcon() {
       <circle cx="12" cy="12" r="2" />
       <circle cx="18" cy="6" r="2" />
       <path d="M7.6 16.8 10.4 13.2M13.6 10.8 16.4 7.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function WishlistIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path
+        d="M12 20.5s-7.2-4.6-9.4-8.8C1.1 8.2 3.2 5 6.6 5c1.9 0 3.4 1 4.4 2.4C12 6 13.5 5 15.4 5c3.4 0 5.5 3.2 3.9 6.7C19.2 15.9 12 20.5 12 20.5Z"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -106,6 +118,7 @@ export function BottomBarProfileNav({
   mapHref,
   mapActive = false,
   onNextRouteClick,
+  onWishlistClick,
 }: BottomBarProfileNavProps) {
   const pathname = usePathname();
   const menuId = useId();
@@ -260,6 +273,22 @@ export function BottomBarProfileNav({
                       {dashboardNavMessages.nextRoute}
                     </button>
                   ) : null}
+                  {showBarDestinationsInMenu && onWishlistClick ? (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="dashboard-profile-menu__item"
+                      onClick={() => {
+                        setOpen(false);
+                        onWishlistClick();
+                      }}
+                    >
+                      <span className="dashboard-profile-menu__icon" aria-hidden>
+                        <WishlistIcon />
+                      </span>
+                      {dashboardNavMessages.wishlist}
+                    </button>
+                  ) : null}
                   <Link
                     href="/settings"
                     role="menuitem"
@@ -311,6 +340,38 @@ export function BottomBarProfileNav({
                     </span>
                     {dashboardNavMessages.profile}
                   </Link>
+                  {onNextRouteClick ? (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="dashboard-profile-menu__item"
+                      onClick={() => {
+                        setOpen(false);
+                        onNextRouteClick();
+                      }}
+                    >
+                      <span className="dashboard-profile-menu__icon" aria-hidden>
+                        <RouteIcon />
+                      </span>
+                      {dashboardNavMessages.nextRoute}
+                    </button>
+                  ) : null}
+                  {onWishlistClick ? (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="dashboard-profile-menu__item"
+                      onClick={() => {
+                        setOpen(false);
+                        onWishlistClick();
+                      }}
+                    >
+                      <span className="dashboard-profile-menu__icon" aria-hidden>
+                        <WishlistIcon />
+                      </span>
+                      {dashboardNavMessages.wishlist}
+                    </button>
+                  ) : null}
                   <Link
                     href="/settings"
                     role="menuitem"
