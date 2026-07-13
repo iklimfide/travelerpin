@@ -3817,6 +3817,74 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
   justify-content: flex-end;
 }
 
+.profile-next-route-box__header-spacer {
+  display: block;
+  width: 88px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.profile-next-route-list--skeleton {
+  margin-top: 4px;
+}
+
+.profile-next-route-item--skeleton {
+  pointer-events: none;
+}
+
+.profile-next-route-skeleton-btn {
+  height: 32px;
+  width: 88px;
+  border-radius: 999px;
+}
+
+.profile-next-route-skeleton-btn--add {
+  width: 64px;
+}
+
+.profile-next-route-skeleton-title {
+  height: 22px;
+  width: 120px;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
+.profile-next-route-skeleton-count {
+  height: 14px;
+  width: 96px;
+  margin: 8px auto 0;
+  border-radius: 8px;
+}
+
+.profile-next-route-skeleton-index {
+  width: 1.5rem;
+  height: 14px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.profile-next-route-skeleton-flag {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.profile-next-route-skeleton-line {
+  border-radius: 8px;
+}
+
+.profile-next-route-skeleton-line--title {
+  height: 16px;
+  width: min(70%, 220px);
+}
+
+.profile-next-route-skeleton-line--meta {
+  margin-top: 6px;
+  height: 12px;
+  width: min(45%, 140px);
+}
+
 .profile-dashboard-tools {
   display: flex;
   flex-direction: column;
@@ -4660,6 +4728,61 @@ html[data-tp-mobile-preview-embed] body {
 
 .save-destination-modal__row--skeleton:hover {
   background: transparent;
+}
+
+.save-destination-modal__list--skeleton {
+  min-height: 360px;
+}
+
+.save-destination-skeleton-flag {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.save-destination-skeleton-line {
+  border-radius: 8px;
+}
+
+.save-destination-skeleton-line--title {
+  height: 16px;
+  width: min(58%, 220px);
+}
+
+.save-destination-skeleton-line--meta {
+  margin-top: 6px;
+  height: 12px;
+  width: min(38%, 140px);
+}
+
+.save-destination-skeleton-check {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.save-destination-skeleton-mini-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.save-destination-modal__row-actions--skeleton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.save-destination-skeleton-status {
+  margin-left: auto;
+  height: 14px;
+  width: 176px;
+  max-width: 100%;
+  border-radius: 8px;
 }
 
 .save-destination-modal__list {

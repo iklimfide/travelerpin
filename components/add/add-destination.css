@@ -709,3 +709,42 @@ button.add-destination-save:disabled {
 button.add-destination-save:not(:disabled):hover {
   background: #1a87db;
 }
+
+.add-destination-step--skeleton,
+.add-destination-city-list--skeleton {
+  pointer-events: none;
+}
+
+.add-destination-skeleton-search {
+  height: 44px;
+  width: 100%;
+  margin-bottom: 14px;
+  border-radius: 10px;
+}
+
+.add-destination-region-list--skeleton .add-destination-region--skeleton + .add-destination-region--skeleton {
+  border-top: 1px solid #d8e2ee;
+}
+
+.add-destination-skeleton-region-header {
+  height: 46px;
+  width: 100%;
+  border-radius: 0;
+}
+
+.add-destination-city-row--skeleton {
+  pointer-events: none;
+}
+
+.add-destination-skeleton-checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  flex-shrink: 0;
+}
+
+.add-destination-skeleton-city-name {
+  height: 16px;
+  width: min(58%, 220px);
+  border-radius: 8px;
+}

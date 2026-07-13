@@ -20,6 +20,7 @@ import { isUkNationCode, isUkNationVisited, matchesUkCityCountry } from "@/lib/d
 import { citiesAreSame } from "@/lib/utils/city-aliases";
 import { formatKnownPlaceName } from "@/lib/utils/city-name";
 import type { NextRouteStop } from "@/types/database";
+import { AddDestinationCountryPickerSkeleton } from "@/components/skeletons/AddDestinationModalSkeleton";
 import "./add-destination.css";
 
 type NextRouteDestinationModalProps = {
@@ -263,7 +264,7 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
 
         <div className="add-destination-modal__body">
           {loadingState && step.kind === "countries" ? (
-            <p className="add-destination-empty">{nextRouteDestinationMessages.loading}</p>
+            <AddDestinationCountryPickerSkeleton />
           ) : step.kind === "countries" ? (
             <CountryPickerStep
               visitedCodes={routeCountryCodeSet}

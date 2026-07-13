@@ -9,6 +9,7 @@ import { CONTACT_EMAIL } from "@/lib/legal/contact";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { canonicalCityKey, citiesAreSame } from "@/lib/utils/city-aliases";
 import { formatKnownPlaceName } from "@/lib/utils/city-name";
+import { AddDestinationCityListSkeleton } from "@/components/skeletons/AddDestinationModalSkeleton";
 
 type CatalogCity = {
   countryCode: string;
@@ -199,7 +200,7 @@ export function CityPickerStep({
 
       <div className="add-destination-city-list">
         {loading ? (
-          <p className="add-destination-empty">{mapMessages.citiesLoading}</p>
+          <AddDestinationCityListSkeleton rows={8} />
         ) : totalCityCount === 0 && isFiltering ? (
           <MissingPlaceContactNotice />
         ) : totalCityCount === 0 ? (

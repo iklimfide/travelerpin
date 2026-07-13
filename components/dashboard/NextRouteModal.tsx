@@ -376,8 +376,13 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
     setTab("route");
   }
 
+  const showListSkeleton =
+    (loadingRoute && tab === "route" && !isSearching) || (isSearching && loadingSearch);
+
+  const listSkeletonVariant = tab === "route" && !isSearching ? "route" : "browse";
+
   const listEmptyMessage = useMemo(() => {
-    if (loadingRoute && tab === "route") return null;
+    if (showListSkeleton) return null;
     if (isSearching) {
       if (loadingSearch) return null;
       if (trimmedQuery.length < 2) return nextRouteMessages.searchIdle;
@@ -385,9 +390,7 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
     }
     if (tab === "route" && stops.length === 0) return nextRouteMessages.emptyRoute;
     return null;
-  }, [isSearching, listRows.length, loadingRoute, loadingSearch, stops.length, tab, trimmedQuery.length]);
-
-  const showRouteSkeleton = loadingRoute && tab === "route" && !isSearching;
+  }, [isSearching, listRows.length, loadingSearch, showListSkeleton, stops.length, tab, trimmedQuery.length]);
 
   if (!open) return null;
 
@@ -478,8 +481,8 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
           <div className="save-destination-modal__status">{statusLabel}</div>
         )}
 
-        {showRouteSkeleton ? (
-          <SaveDestinationModalListSkeleton rows={8} />
+        {showListSkeleton ? (
+          <SaveDestinationModalListSkeleton rows={8} variant={listSkeletonVariant} />
         ) : (
         <ul className="save-destination-modal__list scrollbar-thin">
           {listEmptyMessage ? (
@@ -588,7 +591,7 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
         </ul>
         )}
 
-        {!showRouteSkeleton ? (
+        {!showListSkeleton ? (
           <div className="save-destination-modal__footer">
             <p
               className={`save-destination-modal__footer-hint${
@@ -600,13 +603,20 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
             <button
               type="button"
               className="save-destination-modal__save-btn"
-              disabled={!hasUnsavedChanges || saving}
+              disabled={loadingRoute || !hasUnsavedChanges || saving}
               onClick={() => void handleSave()}
             >
               {saving ? commonMessages.loading : commonMessages.save}
             </button>
           </div>
-        ) : null}
+        ) : (
+          <div className="save-destination-modal__footer save-destination-modal__footer--skeleton">
+            <p className="save-destination-modal__footer-hint">{nextRouteMessages.saveHint}</p>
+            <button type="button" className="save-destination-modal__save-btn" disabled>
+              {commonMessages.save}
+            </button>
+          </div>
+        )}
       </div>
     </div>,
     document.body

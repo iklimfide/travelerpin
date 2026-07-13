@@ -1,37 +1,53 @@
 import { Skeleton } from "@/components/ui/Skeleton";
 import { saveDestinationMessages } from "@/lib/i18n/client-messages";
 
-function SaveDestinationModalRowSkeleton() {
+type SaveDestinationModalListSkeletonProps = {
+  rows?: number;
+  variant?: "browse" | "route";
+};
+
+function SaveDestinationModalRowSkeleton({ variant = "browse" }: { variant?: "browse" | "route" }) {
   return (
     <li className="save-destination-modal__item">
       <div className="save-destination-modal__row save-destination-modal__row--skeleton">
-        <Skeleton className="!h-8 !w-8 shrink-0 !rounded-full" />
+        <Skeleton className="save-destination-skeleton-flag" />
         <div className="save-destination-modal__text">
-          <Skeleton className="h-4 w-[58%] max-w-[220px]" />
-          <Skeleton className="mt-1.5 h-3 w-[38%] max-w-[140px]" />
+          <Skeleton className="save-destination-skeleton-line save-destination-skeleton-line--title" />
+          <Skeleton className="save-destination-skeleton-line save-destination-skeleton-line--meta" />
         </div>
-        <Skeleton className="!h-7 !w-7 shrink-0 !rounded-full" />
+        {variant === "route" ? (
+          <div className="save-destination-modal__row-actions save-destination-modal__row-actions--skeleton">
+            <Skeleton className="save-destination-skeleton-mini-btn" />
+            <Skeleton className="save-destination-skeleton-mini-btn" />
+            <Skeleton className="save-destination-skeleton-check" />
+          </div>
+        ) : (
+          <Skeleton className="save-destination-skeleton-check" />
+        )}
       </div>
     </li>
   );
 }
 
-export function SaveDestinationModalListSkeleton({ rows = 8 }: { rows?: number }) {
+export function SaveDestinationModalListSkeleton({
+  rows = 8,
+  variant = "browse",
+}: SaveDestinationModalListSkeletonProps) {
   return (
     <ul
-      className="save-destination-modal__list scrollbar-thin"
+      className="save-destination-modal__list save-destination-modal__list--skeleton scrollbar-thin"
       role="status"
       aria-live="polite"
       aria-busy="true"
       aria-label={saveDestinationMessages.loading}
     >
       {Array.from({ length: rows }).map((_, index) => (
-        <SaveDestinationModalRowSkeleton key={index} />
+        <SaveDestinationModalRowSkeleton key={index} variant={variant} />
       ))}
     </ul>
   );
 }
 
 export function SaveDestinationModalStatusSkeleton() {
-  return <Skeleton className="ml-auto h-3.5 w-44 max-w-full" />;
+  return <Skeleton className="save-destination-skeleton-status" />;
 }

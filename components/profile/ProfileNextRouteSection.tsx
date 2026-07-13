@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
+import { ProfileNextRouteSectionSkeleton } from "@/components/skeletons/ProfileNextRouteSectionSkeleton";
 import {
   NEXT_ROUTE_CHANGED_EVENT,
   PROFILE_DATA_STALE_EVENT,
@@ -61,8 +62,15 @@ export function ProfileNextRouteSection({
 }: ProfileNextRouteSectionProps) {
   const router = useRouter();
   const pathname = usePathname() ?? "/";
+  const initialResolved = useMemo(
+    () => resolveInitialStops(initialStops, isOwnProfile),
+    [initialStops, isOwnProfile]
+  );
   const { openNextRouteModal } = useDashboardAdd();
-  const [stops, setStops] = useState(() => resolveInitialStops(initialStops, isOwnProfile));
+  const [stops, setStops] = useState(() => initialResolved);
+  const [loadingOwnRoute, setLoadingOwnRoute] = useState(
+    () => isOwnProfile && initialResolved.length === 0
+  );
 
   const applyStops = useCallback((incoming: NextRouteStop[], options?: { replace?: boolean }) => {
     const parsed = parseNextRoute(incoming);
@@ -77,6 +85,7 @@ export function ProfileNextRouteSection({
 
   const loadOwnRoute = useCallback(async () => {
     if (!isOwnProfile) return;
+    setLoadingOwnRoute((current) => current || stops.length === 0);
     try {
       const res = await fetch("/api/me/next-route");
       if (!res.ok) return;
@@ -84,11 +93,16 @@ export function ProfileNextRouteSection({
       applyStops(parseNextRoute(data.stops));
     } catch {
       // Keep the last known route on transient failures.
+    } finally {
+      setLoadingOwnRoute(false);
     }
-  }, [applyStops, isOwnProfile]);
+  }, [applyStops, isOwnProfile, stops.length]);
 
   useEffect(() => {
     setStops((current) => mergeIncomingStops(current, initialStops));
+    if (initialStops.length > 0) {
+      setLoadingOwnRoute(false);
+    }
   }, [initialStops]);
 
   useEffect(() => {
@@ -135,6 +149,10 @@ export function ProfileNextRouteSection({
 
   if (stops.length === 0 && !isOwnProfile) return null;
 
+  if (isOwnProfile && loadingOwnRoute && stops.length === 0) {
+    return <ProfileNextRouteSectionSkeleton rows={3} />;
+  }
+
   const stopCountLabel =
     stops.length > 0
       ? nextRouteMessages.routeStopCount.replace("{count}", String(stops.length))
@@ -145,14 +163,18 @@ export function ProfileNextRouteSection({
       <div className="profile-owner-section profile-next-route-box">
         <div className="profile-owner-section__header profile-next-route-box__header">
           <div className="profile-next-route-box__header-side">
-            {isOwnProfile && stops.length > 0 ? (
-              <button
-                type="button"
-                className="profile-owner-section__btn"
-                onClick={() => openNextRouteModal("route")}
-              >
-                {profileMessages.sortRoute}
-              </button>
+            {isOwnProfile ? (
+              stops.length > 0 ? (
+                <button
+                  type="button"
+                  className="profile-owner-section__btn"
+                  onClick={() => openNextRouteModal("route")}
+                >
+                  {profileMessages.sortRoute}
+                </button>
+              ) : (
+                <span className="profile-next-route-box__header-spacer" aria-hidden />
+              )
             ) : null}
           </div>
           <div className="profile-owner-section__intro profile-next-route-box__intro">

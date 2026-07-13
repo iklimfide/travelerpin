@@ -14,6 +14,7 @@ import { commonMessages, wishlistDestinationMessages, wishlistMessages } from "@
 import type { CountryOption } from "@/lib/data/countries";
 import { isUkNationCode, isUkNationVisited } from "@/lib/data/uk-nations";
 import type { WishlistCountry } from "@/types/database";
+import { AddDestinationCountryPickerSkeleton } from "@/components/skeletons/AddDestinationModalSkeleton";
 import "./add-destination.css";
 
 type WishlistDestinationModalProps = {
@@ -231,7 +232,7 @@ export function WishlistDestinationModal({ onClose }: WishlistDestinationModalPr
 
         <div className="add-destination-modal__body">
           {loadingState ? (
-            <p className="add-destination-empty">{wishlistDestinationMessages.loading}</p>
+            <AddDestinationCountryPickerSkeleton />
           ) : (
             <CountryPickerStep
               visitedCodes={visitedCodes}
