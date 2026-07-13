@@ -30,6 +30,7 @@ import {
 } from "@/lib/data/jennifer-demo-page";
 import { loadProfileFollowState } from "@/lib/supabase/profile-follows";
 import { parseNextRoute } from "@/lib/utils/next-route";
+import { dedupeVisitedCitiesForDisplay } from "@/lib/utils/visited-city-normalize";
 
 export type PublicProfilePageData = {
   profile: PublicProfile;
@@ -97,7 +98,7 @@ async function loadProfileRows(
 
   return {
     visitedCountries: (countries ?? []) as VisitedCountry[],
-    visitedCities: (cities ?? []) as VisitedCity[],
+    visitedCities: dedupeVisitedCitiesForDisplay((cities ?? []) as VisitedCity[]),
     visitedParks: (parks ?? []) as VisitedPark[],
   };
 }

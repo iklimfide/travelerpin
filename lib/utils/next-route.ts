@@ -1,7 +1,7 @@
 import { getCountryName } from "@/lib/data/countries";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { countryPath } from "@/lib/seo/site";
-import { canonicalCityKey } from "@/lib/utils/city-aliases";
+import { canonicalCityKey, canonicalCityName } from "@/lib/utils/city-aliases";
 import { cityPlacePath } from "@/lib/utils/hub-place-path";
 import type { NextRouteStop, NextRouteStopKind } from "@/types/database";
 
@@ -50,12 +50,36 @@ export function parseNextRoute(value: unknown): NextRouteStop[] {
   if (!Array.isArray(value)) return [];
 
   const stops: NextRouteStop[] = [];
+  const seen = new Set<string>();
+
   for (const item of value) {
-    const stop = normalizeStop(item);
+    let stop = normalizeStop(item);
     if (!stop) continue;
+
+    if (stop.kind === "city" && stop.countryCode) {
+      const code = stop.countryCode.toUpperCase();
+      const name = canonicalCityName(code, stop.name);
+      if (name !== stop.name) {
+        const href = cityPlacePath(code, name);
+        stop = {
+          ...stop,
+          name,
+          countryCode: code,
+          countryName: stop.countryName ?? getCountryName(code),
+          slug: href.split("/").pop() ?? null,
+          href,
+        };
+      }
+    }
+
+    const key = stopDedupeKey(stop);
+    if (seen.has(key)) continue;
+    seen.add(key);
+
     stops.push(stop);
     if (stops.length >= NEXT_ROUTE_MAX_STOPS) break;
   }
+
   return stops;
 }
 
@@ -130,7 +154,7 @@ export function getNextRouteStopDisplay(stop: NextRouteStop): NextRouteStopDispl
 
   if (stop.kind === "city") {
     return {
-      title: stop.name,
+      title: canonicalCityName(countryCode, stop.name),
       subtitle: countryName,
       countryCode,
     };

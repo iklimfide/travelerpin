@@ -8,6 +8,7 @@ import { buildCitySlug } from "@/lib/utils/city-slug";
 import type { ParkType } from "@/lib/data/tourist-park-search";
 import { cityVisitCount } from "@/lib/utils/visit-date";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
+import { canonicalCityName } from "@/lib/utils/city-aliases";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
 import { resolveResidenceCountryCode } from "@/lib/utils/residence-city";
 import type { VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
@@ -195,21 +196,24 @@ export function buildProfileTrips(
   );
   const recentThreshold = sortedCities[0]?.created_at;
 
-  const cityTrips: ProfileTrip[] = sortedCities.map((city) => ({
-    id: city.id,
-    kind: "city",
-    placeName: city.city_name,
-    citySlug: cityHubSlug(city.country_code, city.city_name),
-    parkSlug: null,
-    parkType: null,
-    countryCode: city.country_code,
-    countryName: getCountryName(city.country_code),
-    countrySlug: countryHubSlug(city.country_code),
-    imageUrl: DEFAULT_CITY_HERO_IMAGE,
-    note: city.note,
-    createdAt: city.created_at,
-    badge: tripBadge(city, city.created_at === recentThreshold),
-  }));
+  const cityTrips: ProfileTrip[] = sortedCities.map((city) => {
+    const placeName = canonicalCityName(city.country_code, city.city_name);
+    return {
+      id: city.id,
+      kind: "city",
+      placeName,
+      citySlug: cityHubSlug(city.country_code, placeName),
+      parkSlug: null,
+      parkType: null,
+      countryCode: city.country_code,
+      countryName: getCountryName(city.country_code),
+      countrySlug: countryHubSlug(city.country_code),
+      imageUrl: DEFAULT_CITY_HERO_IMAGE,
+      note: city.note,
+      createdAt: city.created_at,
+      badge: tripBadge(city, city.created_at === recentThreshold),
+    };
+  });
 
   const parkTrips: ProfileTrip[] = parks.map((park) => ({
     id: park.id,

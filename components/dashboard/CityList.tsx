@@ -9,6 +9,7 @@ import { ProfileCityLink, ProfileCountryLink } from "@/components/profile/Profil
 import { useModal } from "@/components/ui/ModalProvider";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findCityHubSlug } from "@/lib/data/city-hubs";
+import { canonicalCityName } from "@/lib/utils/city-aliases";
 import { buildCitySlug } from "@/lib/utils/city-slug";
 import {
   cityMessages,
@@ -180,18 +181,19 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
               }
             >
               {filteredCities.map((city) => {
+                const displayName = canonicalCityName(city.country_code, city.city_name);
                 const visitSummary = formatVisitDatesSummary(
                   city.visit_dates ?? [],
                   (count) => translateCity("visitCount", { count }),
                   getIntlLocale()
                 );
                 const citySlug =
-                  findCityHubSlug(city.country_code, city.city_name) ?? buildCitySlug(city.city_name);
+                  findCityHubSlug(city.country_code, displayName) ?? buildCitySlug(displayName);
                 const countrySlug = resolveCountryHubSlug(city.country_code, city.country_name);
                 const fullTitle =
                   countryFilter === ALL_COUNTRIES
-                    ? `${city.city_name}, ${city.country_name}`
-                    : city.city_name;
+                    ? `${displayName}, ${city.country_name}`
+                    : displayName;
 
                 return (
                 <li
@@ -205,9 +207,9 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
                     >
                       <ProfileCityLink
                         slug={citySlug}
-                        name={city.city_name}
+                        name={displayName}
                         className={ownerHubLinkClass(embedded)}
-                        title={city.city_name}
+                        title={displayName}
                       />
                       {countryFilter === ALL_COUNTRIES ? (
                         <>

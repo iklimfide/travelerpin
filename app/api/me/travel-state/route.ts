@@ -6,6 +6,7 @@ import {
   getVisitedCountryCodes,
 } from "@/lib/utils/stats";
 import type { VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
+import { dedupeVisitedCitiesForDisplay } from "@/lib/utils/visited-city-normalize";
 
 export async function GET() {
   try {
@@ -41,7 +42,7 @@ export async function GET() {
       ]);
 
     const visitedCountries = (countries ?? []) as VisitedCountry[];
-    const visitedCities = (cities ?? []) as VisitedCity[];
+    const visitedCities = dedupeVisitedCitiesForDisplay((cities ?? []) as VisitedCity[]);
     const visitedParks = (parks ?? []) as VisitedPark[];
     const wishlistCountries = (wishlist ?? []) as WishlistCountry[];
     const stats = computeTravelStats(visitedCountries, visitedCities, visitedParks);
