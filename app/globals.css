@@ -3716,6 +3716,17 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
   flex: 1;
 }
 
+.profile-next-route-index {
+  flex-shrink: 0;
+  width: 1.5rem;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  color: #94a3b8;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 .profile-next-route-flag {
   width: 32px;
   height: 32px;
@@ -3782,6 +3793,28 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 
 .profile-next-route-box .profile-owner-empty {
   margin-top: 4px;
+}
+
+.profile-next-route-box__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+}
+
+.profile-next-route-box__intro {
+  text-align: center;
+  justify-self: center;
+}
+
+.profile-next-route-box__header-side {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.profile-next-route-box__header-side--end {
+  justify-content: flex-end;
 }
 
 .profile-dashboard-tools {
@@ -4818,6 +4851,17 @@ a.save-destination-modal__name-link:hover {
   padding: 12px 18px 20px;
   border-top: 1px solid #dbe5f0;
   flex-shrink: 0;
+}
+
+.save-destination-modal__footer-hint {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: 13px;
+  color: #6d86a3;
+}
+
+.save-destination-modal__footer-hint--error {
+  color: #dc2626;
 }
 
 .save-destination-modal__save-btn {

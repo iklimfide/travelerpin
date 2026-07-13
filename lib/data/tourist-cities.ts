@@ -6153,18 +6153,6 @@ export const TOURIST_CITIES: TouristCity[] = [
     "longitude": 15.7398
   },
   {
-    "countryCode": "CZ",
-    "name": "Prague 1",
-    "latitude": 50.0911,
-    "longitude": 14.4016
-  },
-  {
-    "countryCode": "CZ",
-    "name": "Praha 1",
-    "latitude": 50.0872,
-    "longitude": 14.4243
-  },
-  {
     "countryCode": "DE",
     "name": "Berlin",
     "latitude": 52.52,

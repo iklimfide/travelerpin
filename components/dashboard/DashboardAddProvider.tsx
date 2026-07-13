@@ -8,13 +8,13 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { NextRouteModal } from "@/components/dashboard/NextRouteModal";
+import { NextRouteModal, type NextRouteModalTab } from "@/components/dashboard/NextRouteModal";
 import { SaveDestinationModal, type SaveDestinationInitialTab } from "@/components/dashboard/SaveDestinationModal";
 
 type DashboardAddContextValue = {
   openAddModal: (tab?: SaveDestinationInitialTab) => void;
   closeAddModal: () => void;
-  openNextRouteModal: () => void;
+  openNextRouteModal: (initialTab?: NextRouteModalTab) => void;
   closeNextRouteModal: () => void;
 };
 
@@ -34,6 +34,7 @@ export function DashboardAddProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [initialTab, setInitialTab] = useState<SaveDestinationInitialTab>("popular");
   const [nextRouteOpen, setNextRouteOpen] = useState(false);
+  const [nextRouteInitialTab, setNextRouteInitialTab] = useState<NextRouteModalTab>("countries");
 
   const openAddModal = useCallback((tab?: SaveDestinationInitialTab) => {
     if (tab) setInitialTab(tab);
@@ -41,7 +42,10 @@ export function DashboardAddProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const closeAddModal = useCallback(() => setOpen(false), []);
-  const openNextRouteModal = useCallback(() => setNextRouteOpen(true), []);
+  const openNextRouteModal = useCallback((tab: NextRouteModalTab = "countries") => {
+    setNextRouteInitialTab(tab);
+    setNextRouteOpen(true);
+  }, []);
   const closeNextRouteModal = useCallback(() => setNextRouteOpen(false), []);
 
   const value = useMemo(
@@ -53,7 +57,11 @@ export function DashboardAddProvider({ children }: { children: ReactNode }) {
     <DashboardAddContext.Provider value={value}>
       {children}
       <SaveDestinationModal open={open} initialTab={initialTab} onClose={closeAddModal} />
-      <NextRouteModal open={nextRouteOpen} onClose={closeNextRouteModal} />
+      <NextRouteModal
+        open={nextRouteOpen}
+        initialTab={nextRouteInitialTab}
+        onClose={closeNextRouteModal}
+      />
     </DashboardAddContext.Provider>
   );
 }

@@ -7,18 +7,27 @@ import { createPortal } from "react-dom";
 import { COUNTRY_LIST, searchCountries } from "@/lib/data/countries";
 import { getPopularCountries } from "@/lib/data/popular-countries";
 import { POPULAR_DESTINATIONS } from "@/lib/data/popular-destinations";
-import { nextRouteMessages, saveDestinationMessages } from "@/lib/i18n/client-messages";
+import { commonMessages, nextRouteMessages, saveDestinationMessages } from "@/lib/i18n/client-messages";
 import { notifyNextRouteChanged } from "@/lib/client/session-page-cache";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
-import { buildCountryStop, buildCityStop, parseNextRoute, stopDedupeKey } from "@/lib/utils/next-route";
+import {
+  areNextRouteStopsEqual,
+  buildCountryStop,
+  buildCityStop,
+  parseNextRoute,
+  stopDedupeKey,
+} from "@/lib/utils/next-route";
 import type { NextRouteStop } from "@/types/database";
+
+export type NextRouteModalTab = "countries" | "cities" | "route";
 
 type NextRouteModalProps = {
   open: boolean;
   onClose: () => void;
+  initialTab?: NextRouteModalTab;
 };
 
-type NextRouteTab = "countries" | "cities" | "route";
+type NextRouteTab = NextRouteModalTab;
 
 type BrowseRow = {
   id: string;
@@ -134,7 +143,7 @@ function buildStopFromResult(result: SearchResult): NextRouteStop {
   return buildCityStop(result.cityName!, result.countryCode, result.countryName);
 }
 
-export function NextRouteModal({ open, onClose }: NextRouteModalProps) {
+export function NextRouteModal({ open, onClose, initialTab = "countries" }: NextRouteModalProps) {
   const [stops, setStops] = useState<NextRouteStop[]>([]);
   const [tab, setTab] = useState<NextRouteTab>("countries");
   const [query, setQuery] = useState("");
@@ -142,7 +151,9 @@ export function NextRouteModal({ open, onClose }: NextRouteModalProps) {
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const persistRef = useRef<NextRouteStop[] | null>(null);
+  const [savedStops, setSavedStops] = useState<NextRouteStop[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const hasRouteRef = useRef(false);
 
   const trimmedQuery = query.trim();
@@ -153,17 +164,18 @@ export function NextRouteModal({ open, onClose }: NextRouteModalProps) {
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape" && !saving) onClose();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
+  }, [open, onClose, saving]);
 
   useEffect(() => {
     if (!open) return;
     setQuery("");
-    setTab("countries");
+    setTab(initialTab);
     setSearchResults([]);
+    setSaveError(null);
 
     const background = hasRouteRef.current;
     if (!background) {
@@ -172,13 +184,20 @@ export function NextRouteModal({ open, onClose }: NextRouteModalProps) {
 
     fetch("/api/me/next-route")
       .then((res) => (res.ok ? res.json() : { stops: [] }))
-      .then((data) => setStops(parseNextRoute(data.stops)))
-      .catch(() => setStops([]))
+      .then((data) => {
+        const parsed = parseNextRoute(data.stops);
+        setStops(parsed);
+        setSavedStops(parsed);
+      })
+      .catch(() => {
+        setStops([]);
+        setSavedStops([]);
+      })
       .finally(() => {
         hasRouteRef.current = true;
         setLoadingRoute(false);
       });
-  }, [open]);
+  }, [open, initialTab]);
 
   useEffect(() => {
     if (!open || !isSearching) {
@@ -244,35 +263,46 @@ export function NextRouteModal({ open, onClose }: NextRouteModalProps) {
     };
   }, [open, isSearching, trimmedQuery]);
 
-  const persistStops = useCallback(async (nextStops: NextRouteStop[]) => {
-    persistRef.current = nextStops;
-    const snapshot = nextStops;
+  const hasUnsavedChanges = useMemo(
+    () => !areNextRouteStopsEqual(stops, savedStops),
+    [savedStops, stops]
+  );
+
+  const applyStops = useCallback((updater: (prev: NextRouteStop[]) => NextRouteStop[]) => {
+    setSaveError(null);
+    setStops((prev) => updater(prev));
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    if (saving || !hasUnsavedChanges) return;
+
+    setSaving(true);
+    setSaveError(null);
+
     try {
       const res = await fetch("/api/me/next-route", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stops: snapshot }),
+        body: JSON.stringify({ stops }),
       });
-      if (!res.ok) return;
+
+      if (!res.ok) {
+        setSaveError(nextRouteMessages.saveFailed);
+        return;
+      }
 
       const data = (await res.json()) as { stops?: unknown };
       const saved = parseNextRoute(data.stops);
+      setStops(saved);
+      setSavedStops(saved);
       notifyNextRouteChanged(saved);
+      onClose();
     } catch {
-      // Keep optimistic UI; user can retry by toggling a stop.
+      setSaveError(nextRouteMessages.saveFailed);
+    } finally {
+      setSaving(false);
     }
-  }, []);
-
-  const applyStops = useCallback(
-    (updater: (prev: NextRouteStop[]) => NextRouteStop[]) => {
-      setStops((prev) => {
-        const next = updater(prev);
-        void persistStops(next);
-        return next;
-      });
-    },
-    [persistStops]
-  );
+  }, [hasUnsavedChanges, onClose, saving, stops]);
 
   const addToRoute = useCallback(
     (result: SearchResult) => {
@@ -374,6 +404,7 @@ export function NextRouteModal({ open, onClose }: NextRouteModalProps) {
         className="save-destination-modal__backdrop"
         aria-label={nextRouteMessages.close}
         onClick={onClose}
+        disabled={saving}
       />
 
       <div
@@ -394,6 +425,7 @@ export function NextRouteModal({ open, onClose }: NextRouteModalProps) {
             className="save-destination-modal__close"
             onClick={onClose}
             aria-label={nextRouteMessages.close}
+            disabled={saving}
           >
             ✕
           </button>
@@ -555,6 +587,26 @@ export function NextRouteModal({ open, onClose }: NextRouteModalProps) {
           )}
         </ul>
         )}
+
+        {!showRouteSkeleton ? (
+          <div className="save-destination-modal__footer">
+            <p
+              className={`save-destination-modal__footer-hint${
+                saveError ? " save-destination-modal__footer-hint--error" : ""
+              }`}
+            >
+              {saveError ?? nextRouteMessages.saveHint}
+            </p>
+            <button
+              type="button"
+              className="save-destination-modal__save-btn"
+              disabled={!hasUnsavedChanges || saving}
+              onClick={() => void handleSave()}
+            >
+              {saving ? commonMessages.loading : commonMessages.save}
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>,
     document.body

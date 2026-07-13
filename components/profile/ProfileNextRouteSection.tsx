@@ -4,10 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
 import {
   NEXT_ROUTE_CHANGED_EVENT,
   PROFILE_DATA_STALE_EVENT,
-  notifyNextRouteChanged,
   readOwnNextRouteCache,
   writeOwnNextRouteCache,
 } from "@/lib/client/session-page-cache";
@@ -61,8 +61,8 @@ export function ProfileNextRouteSection({
 }: ProfileNextRouteSectionProps) {
   const router = useRouter();
   const pathname = usePathname() ?? "/";
+  const { openNextRouteModal } = useDashboardAdd();
   const [stops, setStops] = useState(() => resolveInitialStops(initialStops, isOwnProfile));
-  const [reorderBusy, setReorderBusy] = useState(false);
 
   const applyStops = useCallback((incoming: NextRouteStop[], options?: { replace?: boolean }) => {
     const parsed = parseNextRoute(incoming);
@@ -116,47 +116,6 @@ export function ProfileNextRouteSection({
     };
   }, [applyStops, isOwnProfile, loadOwnRoute]);
 
-  const persistStops = useCallback(
-    async (nextStops: NextRouteStop[]) => {
-      setReorderBusy(true);
-      applyStops(nextStops, { replace: true });
-      try {
-        const res = await fetch("/api/me/next-route", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ stops: nextStops }),
-        });
-        if (!res.ok) {
-          void loadOwnRoute();
-          return;
-        }
-        const data = (await res.json()) as { stops?: unknown };
-        notifyNextRouteChanged(parseNextRoute(data.stops));
-      } catch {
-        void loadOwnRoute();
-      } finally {
-        setReorderBusy(false);
-      }
-    },
-    [applyStops, loadOwnRoute]
-  );
-
-  const moveStop = useCallback(
-    (index: number, direction: -1 | 1) => {
-      if (reorderBusy) return;
-      setStops((prev) => {
-        const target = index + direction;
-        if (target < 0 || target >= prev.length) return prev;
-        const next = [...prev];
-        const [item] = next.splice(index, 1);
-        next.splice(target, 0, item!);
-        void persistStops(next);
-        return next;
-      });
-    },
-    [persistStops, reorderBusy]
-  );
-
   useEffect(() => {
     function scrollToSection() {
       if (window.location.hash !== "#profile-next-route") return;
@@ -184,15 +143,26 @@ export function ProfileNextRouteSection({
   return (
     <section id="profile-next-route" className="profile-section profile-next-route">
       <div className="profile-owner-section profile-next-route-box">
-        <div className="profile-owner-section__header">
-          <div className="profile-owner-section__intro">
+        <div className="profile-owner-section__header profile-next-route-box__header">
+          <div className="profile-next-route-box__header-side">
+            {isOwnProfile && stops.length > 0 ? (
+              <button
+                type="button"
+                className="profile-owner-section__btn"
+                onClick={() => openNextRouteModal("route")}
+              >
+                {profileMessages.sortRoute}
+              </button>
+            ) : null}
+          </div>
+          <div className="profile-owner-section__intro profile-next-route-box__intro">
             <h3 className="profile-owner-section__title">{profileMessages.nextRouteTitle}</h3>
             {stopCountLabel ? (
               <p className="profile-owner-section__count">{stopCountLabel}</p>
             ) : null}
           </div>
-          {isOwnProfile ? (
-            <div className="profile-owner-section__actions">
+          <div className="profile-next-route-box__header-side profile-next-route-box__header-side--end">
+            {isOwnProfile ? (
               <button
                 type="button"
                 className="profile-owner-section__btn profile-owner-section__btn--add"
@@ -200,8 +170,8 @@ export function ProfileNextRouteSection({
               >
                 {profileMessages.ownerAdd}
               </button>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
 
         {stops.length === 0 ? (
@@ -211,11 +181,13 @@ export function ProfileNextRouteSection({
             {stops.map((stop, index) => {
               const { title, subtitle, countryCode } = getNextRouteStopDisplay(stop);
               const flagUrl = countryCode ? countryCodeToFlagUrl(countryCode) : "";
-              const canReorder = isOwnProfile && stops.length > 1;
 
               return (
                 <li key={stop.id} className="profile-next-route-item">
                   <div className="profile-next-route-row">
+                    <span className="profile-next-route-index" aria-hidden>
+                      {index + 1}
+                    </span>
                     {flagUrl ? (
                       <span className="profile-next-route-flag">
                         <Image
@@ -242,28 +214,6 @@ export function ProfileNextRouteSection({
                       ) : null}
                     </span>
                   </div>
-                  {canReorder ? (
-                    <div className="profile-next-route-actions">
-                      <button
-                        type="button"
-                        className="profile-next-route-sort-btn"
-                        onClick={() => moveStop(index, -1)}
-                        disabled={index === 0 || reorderBusy}
-                        aria-label={nextRouteMessages.moveUp}
-                      >
-                        ↑
-                      </button>
-                      <button
-                        type="button"
-                        className="profile-next-route-sort-btn"
-                        onClick={() => moveStop(index, 1)}
-                        disabled={index === stops.length - 1 || reorderBusy}
-                        aria-label={nextRouteMessages.moveDown}
-                      >
-                        ↓
-                      </button>
-                    </div>
-                  ) : null}
                 </li>
               );
             })}

@@ -95,7 +95,9 @@
     "searchIdle": "Type at least 2 characters to search.",
     "searchEmpty": "No destinations match your search.",
     "searching": "Searching…",
-    "routeStopCount": "{count} stops on your route"
+    "routeStopCount": "{count} stops on your route",
+    "saveHint": "Reorder or edit your route, then tap Save.",
+    "saveFailed": "Could not save your route. Please try again."
   },
   "nextRouteDestination": {
     "selectCountryTitle": "Add countries and cities to your next route",
@@ -420,6 +422,7 @@
     "myTrips": "My trips",
     "nextRouteTitle": "Next Route",
     "nextRouteEmptyOnProfile": "No stops yet. Add countries and cities to build your upcoming route.",
+    "sortRoute": "Sort route",
     "visitorTrips": "{name}'s trips",
     "myPhotos": "My photos",
     "visitorPhotos": "{name}'s photos",
