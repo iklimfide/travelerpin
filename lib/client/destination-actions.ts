@@ -1,5 +1,6 @@
 import type { QuickDestinationInput } from "@/lib/validations/destination";
 import { offerShareAfterPin } from "@/lib/client/share-pin-prompt";
+import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
 
 export async function quickAddDestination(
   payload: QuickDestinationInput
@@ -21,6 +22,7 @@ export async function quickAddDestination(
   const data = await res.json();
   const added = Boolean(data.added);
   if (added) {
+    notifyProfileDataChanged();
     offerShareAfterPin(
       payload.kind === "country"
         ? { kind: "country", name: payload.country_name }
@@ -52,9 +54,13 @@ export async function quickRemoveDestination(
   }
 
   const data = await res.json();
+  const removed = Boolean(data.removed);
+  if (removed || data.notFound) {
+    notifyProfileDataChanged();
+  }
   return {
     ok: true,
-    removed: Boolean(data.removed),
+    removed,
     countryRemoved: Boolean(data.countryRemoved),
     notFound: Boolean(data.notFound),
   };

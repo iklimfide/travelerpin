@@ -85,14 +85,14 @@ export function ParkList({ parks, countries, embedded = false }: ParkListProps) 
     const res = await fetch(`/api/parks/${id}`, { method: "DELETE" });
     if (!res.ok) {
       if (res.status === 404) {
-        notifyProfileDataChanged();
+        notifyProfileDataChanged(undefined, { removeParkId: id });
         return;
       }
       const data = await res.json();
       await modal.alert(data.error ?? "Failed to delete park", { variant: "error" });
       return;
     }
-    notifyProfileDataChanged();
+    notifyProfileDataChanged(undefined, { removeParkId: id });
   }
 
   if (adding) {

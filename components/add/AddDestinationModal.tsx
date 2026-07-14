@@ -9,7 +9,6 @@ import {
   TRAVEL_STATE_UPDATED_EVENT,
   notifyTravelStateUpdated,
   readTravelStateCache,
-  writeTravelStateCache,
   type TravelStateData,
 } from "@/lib/client/session-page-cache";
 import {
@@ -266,20 +265,20 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
     setVisitedCities(optimistic.visitedCities);
 
     const cached = readTravelStateCache();
-    if (cached) {
-      const nextData: TravelStateData = {
-        ...cached,
-        visitedCodes: [...optimistic.visitedCodes],
-        visitedCities: optimistic.visitedCities,
-        stats: {
-          ...cached.stats,
-          countries: optimistic.visitedCodes.size,
-          cities: optimistic.visitedCities.length,
-        },
-      };
-      writeTravelStateCache(nextData);
-      notifyTravelStateUpdated(nextData);
-    }
+    const nextData: TravelStateData = {
+      visitedCountries: cached?.visitedCountries ?? [],
+      visitedCities: optimistic.visitedCities,
+      visitedParks: cached?.visitedParks ?? [],
+      wishlistCountries: cached?.wishlistCountries ?? [],
+      visitedCodes: [...optimistic.visitedCodes],
+      stats: {
+        countries: optimistic.visitedCodes.size,
+        cities: optimistic.visitedCities.length,
+        nationalParks: cached?.stats.nationalParks ?? 0,
+        themeParks: cached?.stats.themeParks ?? 0,
+      },
+    };
+    notifyTravelStateUpdated(nextData);
 
     setPendingCountryCodes(new Set());
     setPendingCities(new Map());

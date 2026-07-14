@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { LIMITS } from "@/lib/constants";
 import { translateCity, translateCommon } from "@/lib/i18n/client-messages";
 import { addCity } from "@/lib/client/city-actions";
+import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { isValidInstagramUrl } from "@/lib/utils/instagram";
@@ -61,7 +61,6 @@ export function CityForm({
   const isEdit = Boolean(city);
   const t = translateCity;
   const tCommon = translateCommon;
-  const router = useRouter();
   const modal = useModal();
   const toast = useToast();
   const abortRef = useRef<AbortController | null>(null);
@@ -181,7 +180,6 @@ export function CityForm({
         setCoords(null);
         setSearchResults([]);
         onSuccess?.();
-        router.refresh();
       } finally {
         setLoading(false);
       }
@@ -193,7 +191,6 @@ export function CityForm({
       modal,
       needsCountryPicker,
       onSuccess,
-      router,
       t,
       toast,
       trimmedQuery,
@@ -451,8 +448,8 @@ export function CityForm({
         return;
       }
 
+      notifyProfileDataChanged();
       onSuccess?.();
-      router.refresh();
     } finally {
       setLoading(false);
     }

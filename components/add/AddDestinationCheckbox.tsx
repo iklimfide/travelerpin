@@ -18,7 +18,11 @@ export function AddDestinationCheckbox({
         className="add-destination-checkbox__input"
         checked={checked}
         disabled={disabled}
-        onChange={onChange}
+        onClick={(event) => event.stopPropagation()}
+        onChange={(event) => {
+          event.stopPropagation();
+          onChange();
+        }}
         aria-label={label}
       />
       <span className="add-destination-checkbox__box" aria-hidden>

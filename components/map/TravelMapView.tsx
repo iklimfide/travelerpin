@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { WorldMap } from "@/components/map/WorldMap";
 import { CountryPopup } from "@/components/map/CountryPopup";
 import { MapContinentControl } from "@/components/map/MapContinentControl";
@@ -18,6 +18,7 @@ import {
   removeWishlistCountry,
 } from "@/lib/client/country-actions";
 import {
+  PROFILE_DATA_STALE_EVENT,
   TRAVEL_STATE_UPDATED_EVENT,
   type TravelStateData,
 } from "@/lib/client/session-page-cache";
@@ -148,6 +149,9 @@ export function TravelMapView({
     }
   }, [editable, isLoggedIn]);
 
+  const syncTravelStateRef = useRef(syncTravelState);
+  syncTravelStateRef.current = syncTravelState;
+
   useEffect(() => {
     function onTravelStateUpdated(event: Event) {
       const detail = (event as CustomEvent<{ data: TravelStateData }>).detail;
@@ -171,8 +175,16 @@ export function TravelMapView({
       setOptimisticVisitedCodes(new Set());
     }
 
+    function onProfileStale() {
+      void syncTravelStateRef.current({ force: true });
+    }
+
     window.addEventListener(TRAVEL_STATE_UPDATED_EVENT, onTravelStateUpdated);
-    return () => window.removeEventListener(TRAVEL_STATE_UPDATED_EVENT, onTravelStateUpdated);
+    window.addEventListener(PROFILE_DATA_STALE_EVENT, onProfileStale);
+    return () => {
+      window.removeEventListener(TRAVEL_STATE_UPDATED_EVENT, onTravelStateUpdated);
+      window.removeEventListener(PROFILE_DATA_STALE_EVENT, onProfileStale);
+    };
   }, [editable, isLoggedIn]);
 
   const visitedCodeSet = useMemo(() => {

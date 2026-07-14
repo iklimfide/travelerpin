@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { CityForm } from "@/components/dashboard/CityForm";
 import { ProfileDestinationCardActions } from "@/components/profile/ProfileDestinationCardActions";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
 import { ProfileCityLink, ProfileCountryLink } from "@/components/profile/ProfilePlaceLink";
 import { useModal } from "@/components/ui/ModalProvider";
+import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
+import { getCountryName } from "@/lib/data/countries";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findCityHubSlug } from "@/lib/data/city-hubs";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
@@ -41,9 +42,11 @@ type CityListProps = {
 function sortCities(cities: VisitedCity[], countryFilter: string): VisitedCity[] {
   return [...cities].sort((a, b) => {
     if (countryFilter === ALL_COUNTRIES) {
-      const byCountry = a.country_name.localeCompare(b.country_name, undefined, {
-        sensitivity: "base",
-      });
+      const byCountry = getCountryName(a.country_code).localeCompare(
+        getCountryName(b.country_code),
+        undefined,
+        { sensitivity: "base" }
+      );
       if (byCountry !== 0) return byCountry;
     }
     return a.city_name.localeCompare(b.city_name, undefined, { sensitivity: "base" });
@@ -51,7 +54,6 @@ function sortCities(cities: VisitedCity[], countryFilter: string): VisitedCity[]
 }
 
 export function CityList({ cities, countries, embedded = false }: CityListProps) {
-  const router = useRouter();
   const modal = useModal();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
@@ -64,7 +66,7 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
     for (const city of cities) {
       const code = city.country_code.toUpperCase();
       if (!map.has(code)) {
-        map.set(code, city.country_name);
+        map.set(code, getCountryName(code));
       }
     }
     return [...map.entries()]
@@ -90,11 +92,15 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
 
     const res = await fetch(`/api/cities/${id}`, { method: "DELETE" });
     if (!res.ok) {
+      if (res.status === 404) {
+        notifyProfileDataChanged(undefined, { removeCityId: id });
+        return;
+      }
       const data = await res.json();
       await modal.alert(data.error ?? "Failed to delete city", { variant: "error" });
       return;
     }
-    router.refresh();
+    notifyProfileDataChanged(undefined, { removeCityId: id });
   }
 
   if (adding) {
@@ -182,6 +188,7 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
             >
               {filteredCities.map((city) => {
                 const displayName = canonicalCityName(city.country_code, city.city_name);
+                const countryName = getCountryName(city.country_code);
                 const visitSummary = formatVisitDatesSummary(
                   city.visit_dates ?? [],
                   (count) => translateCity("visitCount", { count }),
@@ -189,10 +196,10 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
                 );
                 const citySlug =
                   findCityHubSlug(city.country_code, displayName) ?? buildCitySlug(displayName);
-                const countrySlug = resolveCountryHubSlug(city.country_code, city.country_name);
+                const countrySlug = resolveCountryHubSlug(city.country_code, countryName);
                 const fullTitle =
                   countryFilter === ALL_COUNTRIES
-                    ? `${displayName}, ${city.country_name}`
+                    ? `${displayName}, ${countryName}`
                     : displayName;
 
                 return (
@@ -218,9 +225,9 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
                           </span>
                           <ProfileCountryLink
                             slug={countrySlug}
-                            name={city.country_name}
+                            name={countryName}
                             className={ownerHubLinkClass(embedded, true)}
-                            title={city.country_name}
+                            title={countryName}
                           />
                         </>
                       ) : null}

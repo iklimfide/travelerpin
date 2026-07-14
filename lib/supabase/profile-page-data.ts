@@ -140,7 +140,7 @@ export function getCachedPublicProfileBundle(
         return null;
       }
     },
-    ["public-profile-bundle-v3", key],
+    ["public-profile-bundle-v4", key],
     // Indefinite until pin/profile write calls revalidateProfileForPin.
     { revalidate: false, tags: [profileCacheTag(key)] }
   )();
@@ -250,6 +250,12 @@ export const loadPublicProfilePage = cache(
           );
 
           if (isOwnProfile) {
+            // Owner pin edits must not wait on indefinite public cache / revalidateTag lag.
+            const freshPins = await loadProfileRows(supabase, profile);
+            visitedCountries = freshPins.visitedCountries;
+            visitedCities = freshPins.visitedCities;
+            visitedParks = freshPins.visitedParks;
+
             const { data: routeRow, error: routeError } = await supabase
               .from("profiles")
               .select("next_route")

@@ -152,20 +152,36 @@ export function CityPickerStep({
     const checked = onMap || pending;
     const displayName = formatKnownPlaceName(city.name);
 
+    function toggle() {
+      if (onMap) return;
+      onToggleCity({
+        ...city,
+        countryCode,
+      });
+    }
+
     return (
       <div
         key={key}
-        className={`add-destination-city-row${onMap ? " is-disabled" : ""}`}
+        className={`add-destination-city-row${onMap ? " is-disabled" : ""}${pending ? " is-pending" : ""}`}
+        onClick={onMap ? undefined : toggle}
+        onKeyDown={
+          onMap
+            ? undefined
+            : (event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  toggle();
+                }
+              }
+        }
+        role={onMap ? undefined : "button"}
+        tabIndex={onMap ? undefined : 0}
       >
         <AddDestinationCheckbox
           checked={checked}
           disabled={onMap}
-          onChange={() =>
-            onToggleCity({
-              ...city,
-              countryCode,
-            })
-          }
+          onChange={toggle}
           label={displayName}
         />
         <div className="add-destination-city-row__body">

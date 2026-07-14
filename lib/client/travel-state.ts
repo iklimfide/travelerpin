@@ -1,4 +1,6 @@
-import { addCitiesBatch } from "@/lib/client/city-actions";
+import {
+  addCitiesBatch,
+} from "@/lib/client/city-actions";
 import { addVisitedCountry } from "@/lib/client/country-actions";
 import { getCountryName } from "@/lib/data/countries";
 import { canonicalCityName, citiesAreSame } from "@/lib/utils/city-aliases";
@@ -6,7 +8,6 @@ import {
   notifyTravelStateUpdated,
   readTravelStateCache,
   type TravelStateData,
-  writeTravelStateCache,
 } from "@/lib/client/session-page-cache";
 import type { VisitedCity } from "@/types/database";
 
@@ -41,7 +42,6 @@ async function fetchTravelStateFromNetwork(): Promise<FetchTravelStateResult> {
   }
 
   const data = normalizeTravelStateData((await res.json()) as Partial<TravelStateData>);
-  writeTravelStateCache(data);
   notifyTravelStateUpdated(data);
   return { ok: true, data, fromCache: false };
 }

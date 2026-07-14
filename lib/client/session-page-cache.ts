@@ -17,7 +17,7 @@ type CachedTravelStatePayload = {
   data: TravelStateData;
 };
 
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 const OWN_USERNAME_KEY = "tp:own-username";
 
 export type CachedProfilePayload = {
@@ -109,6 +109,31 @@ export const PROFILE_DATA_STALE_EVENT = "tp:profile-data-stale";
 export const NEXT_ROUTE_CHANGED_EVENT = "tp:next-route-changed";
 export const TRAVEL_STATE_UPDATED_EVENT = "tp:travel-state-updated";
 
+export type ProfileDataStaleDetail = {
+  username?: string;
+  removeCityId?: string;
+  removeParkId?: string;
+};
+
+/** Merge travel-state pins into the own-profile session cache (map ↔ My cities sync). */
+export function syncOwnProfileCacheFromTravelState(data: TravelStateData): void {
+  const username = getOwnUsername();
+  if (!username) return;
+
+  const cached = readProfileCache(username);
+  if (!cached) return;
+
+  writeProfileCache(username, {
+    ...cached,
+    visitedCountries: data.visitedCountries,
+    visitedCities: data.visitedCities,
+    visitedParks: data.visitedParks,
+    wishlistCountries: data.wishlistCountries,
+    visitedCodes: data.visitedCodes,
+    stats: data.stats,
+  });
+}
+
 const OWN_TRAVEL_STATE_CACHE_KEY = `tp:v${CACHE_VERSION}:own-travel-state`;
 
 const OWN_NEXT_ROUTE_CACHE_KEY = `tp:v${CACHE_VERSION}:own-next-route`;
@@ -152,17 +177,24 @@ export function notifyNextRouteChanged(stops: NextRouteStop[]): void {
 }
 
 /** Bust profile session cache and ask mounted profile views to refetch. */
-export function notifyProfileDataChanged(username?: string | null): void {
-  const normalized = username?.trim().toLowerCase() ?? getOwnUsername();
-  if (!normalized) return;
+export function notifyProfileDataChanged(
+  username?: string | null,
+  options?: { removeCityId?: string; removeParkId?: string }
+): void {
+  const normalized = username?.trim().toLowerCase() ?? getOwnUsername() ?? undefined;
 
-  invalidateProfileCache(normalized);
-  invalidateTravelStateCache();
+  if (normalized) {
+    invalidateProfileCache(normalized);
+  }
 
   if (typeof window === "undefined") return;
   window.dispatchEvent(
     new CustomEvent(PROFILE_DATA_STALE_EVENT, {
-      detail: { username: normalized },
+      detail: {
+        username: normalized,
+        removeCityId: options?.removeCityId,
+        removeParkId: options?.removeParkId,
+      } satisfies ProfileDataStaleDetail,
     })
   );
 }
@@ -187,6 +219,7 @@ export function invalidateTravelStateCache(): void {
 
 export function notifyTravelStateUpdated(data: TravelStateData): void {
   writeTravelStateCache(data);
+  syncOwnProfileCacheFromTravelState(data);
 
   if (typeof window === "undefined") return;
   window.dispatchEvent(
