@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
-import { TravelMapFocusShell } from "@/components/map/TravelMapFocusShell";
 import { HomeFeatures } from "@/components/home/HomeFeatures";
 import { ProfileHeroCover } from "@/components/profile/ProfileHeroCover";
 import { ProfileIdentityCard } from "@/components/profile/ProfileIdentityCard";
@@ -20,7 +19,6 @@ import { ProfileTravelUpdateSection } from "@/components/profile/ProfileTravelUp
 import { ProfileNextRouteSection } from "@/components/profile/ProfileNextRouteSection";
 import { ProfileVisitorDestinations } from "@/components/profile/ProfileVisitorDestinations";
 import { ProfileTripsRow } from "@/components/profile/ProfileTripsRow";
-import { PublicGuestAuthLinks } from "@/components/nav/PublicGuestAuthLinks";
 import {
   buildProfileTrips,
   WORLD_COUNTRY_TOTAL,
@@ -114,19 +112,6 @@ export async function PublicProfileView({
 
   const profileBody = (
     <div className={`profile-page${embedded ? " profile-page--embedded" : ""}`}>
-      {isGuest && !embedded ? (
-        <div className="profile-guest-auth-bar">
-          <PublicGuestAuthLinks
-            loginHref={`/login?next=${encodeURIComponent(profilePath(profile.username))}`}
-            registerHref={`/register?next=${encodeURIComponent(profilePath(profile.username))}`}
-            loginLabel={tCommon("login")}
-            registerLabel={tCommon("register")}
-            className="home-guest-auth"
-            linkClassName="home-guest-auth__link"
-            primaryClassName="home-guest-auth__link home-guest-auth__link--primary"
-          />
-        </div>
-      ) : null}
       <div className="profile-shell">
         <div
           id={`profile-story-capture-${profile.username.toLowerCase()}`}
@@ -359,13 +344,5 @@ export async function PublicProfileView({
     </div>
   );
 
-  if (embedded) {
-    return profileBody;
-  }
-
-  return (
-    <TravelMapFocusShell>
-      {profileBody}
-    </TravelMapFocusShell>
-  );
+  return profileBody;
 }

@@ -1,9 +1,7 @@
 "use client";
 
-import { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { geoCentroid, geoNaturalEarth1, geoPath } from "d3-geo";
-import { select } from "d3-selection";
-import { zoom, zoomIdentity, type ZoomBehavior, type ZoomTransform } from "d3-zoom";
 import type { Feature, Geometry, FeatureCollection } from "geojson";
 import countriesLib from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
@@ -13,38 +11,28 @@ import {
   buildCountryFeatures,
   countryMetaFromFeature,
   countryCodesToNumericIds,
-  findCountryFeatureByCode,
   normalizeCountryNumericId,
 } from "@/lib/map/country";
 import { type ContinentId, DEFAULT_MAP_CONTINENT } from "@/lib/map/continents";
 import { filterVisibleForContinent, filterMainlandWorldFeatures, selectFitFeatures } from "@/lib/map/continent-fit";
 import { clipCountryToMainland } from "@/lib/map/mainland";
 import { fitProjectionFill } from "@/lib/map/projection-fit";
-import { clampFocusTransform, clampTransform, transformForCountryFocus, transformForFeature, transformToString } from "@/lib/map/zoom";
 import { isTinyCountryOnMap } from "@/lib/map/micro-states";
 import { MapCountryPin } from "@/components/map/MapCountryPin";
-import { MapCityPin } from "@/components/map/MapCityPin";
 import { MapCountryLabel } from "@/components/map/MapCountryLabel";
 import {
   MapMicroStateMarker,
   microStateMarkerColors,
 } from "@/components/map/MapMicroStateMarker";
-import type { VisitedCity } from "@/types/database";
 
 countriesLib.registerLocale(enLocale);
 
 type WorldMapProps = {
   visitedCountryCodes: string[];
   wishlistCountryCodes?: string[];
-  userCities?: VisitedCity[];
   onCountryClick?: (country: { code: string; name: string }) => void;
-  onCityClick?: (city: VisitedCity) => void;
   interactive?: boolean;
-  explorable?: boolean;
   continent?: ContinentId;
-  focusRequest?: { code: string; nonce: number } | null;
-  onFocusComplete?: () => void;
-  pinnedCountryCode?: string | null;
   /** Static profile map: inhabited mainlands, no polar clutter or micro-state dots. */
   mainlandWorld?: boolean;
 };
@@ -88,23 +76,13 @@ function buildProjection(
 export function WorldMap({
   visitedCountryCodes,
   wishlistCountryCodes = [],
-  userCities = [],
   onCountryClick,
-  onCityClick,
   interactive = true,
-  explorable = false,
   continent = DEFAULT_MAP_CONTINENT,
-  focusRequest = null,
-  onFocusComplete,
-  pinnedCountryCode = null,
   mainlandWorld = false,
 }: WorldMapProps) {
   const [mapReady, setMapReady] = useState(false);
   const [hoveredCountryId, setHoveredCountryId] = useState<string | null>(null);
-  const [zoomK, setZoomK] = useState(1);
-  const svgRef = useRef<SVGSVGElement>(null);
-  const mapGroupRef = useRef<SVGGElement>(null);
-  const zoomBehaviorRef = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null);
 
   useEffect(() => {
     setMapReady(true);
@@ -204,161 +182,6 @@ export function WorldMap({
     return positions;
   }, [visibleFeatures, projection, pathGenerator, visitedNumericIds]);
 
-  const inverseScale = 1 / zoomK;
-
-  const focusedCityPins = useMemo(() => {
-    if (!pinnedCountryCode) return [];
-
-    const code = pinnedCountryCode.toUpperCase();
-    const pins: { id: string; x: number; y: number; city: VisitedCity }[] = [];
-
-    for (const city of userCities) {
-      if (city.country_code.toUpperCase() !== code) continue;
-      if (city.latitude == null || city.longitude == null) continue;
-      const point = projection([city.longitude, city.latitude]);
-      if (!point) continue;
-
-      pins.push({
-        id: city.id,
-        x: point[0],
-        y: point[1],
-        city,
-      });
-    }
-
-    return pins;
-  }, [pinnedCountryCode, projection, userCities]);
-
-  const syncZoomK = useCallback((transform: ZoomTransform) => {
-    setZoomK(transform.k);
-  }, []);
-
-  const applyFocusTransform = useCallback((next: ZoomTransform) => {
-    if (!mapGroupRef.current) return;
-
-    const clamped = clampFocusTransform(next, WIDTH, HEIGHT);
-    const mapGroup = select(mapGroupRef.current);
-    mapGroup.attr("transform", transformToString(clamped));
-
-    if (svgRef.current) {
-      select(svgRef.current).property("__zoom", clamped);
-    }
-
-    syncZoomK(clamped);
-  }, [syncZoomK]);
-
-  const applyTransform = useCallback((next: ZoomTransform, animate = false) => {
-    if (!mapGroupRef.current) return;
-
-    const clamped = clampTransform(next, WIDTH, HEIGHT);
-    const mapGroup = select(mapGroupRef.current);
-
-    if (animate && svgRef.current && zoomBehaviorRef.current) {
-      select(svgRef.current).call(zoomBehaviorRef.current.transform, clamped);
-      return;
-    }
-
-    mapGroup.attr("transform", transformToString(clamped));
-    if (svgRef.current) {
-      select(svgRef.current).property("__zoom", clamped);
-    }
-
-    syncZoomK(clamped);
-  }, [syncZoomK]);
-
-  const skipNextResetRef = useRef(false);
-
-  const resetZoom = useCallback(() => {
-    if (!mapGroupRef.current) return;
-
-    if (svgRef.current && zoomBehaviorRef.current) {
-      select(svgRef.current).call(zoomBehaviorRef.current.transform, zoomIdentity);
-      return;
-    }
-
-    select(mapGroupRef.current).attr("transform", transformToString(zoomIdentity));
-    syncZoomK(zoomIdentity);
-  }, [syncZoomK]);
-
-  const focusCountry = useCallback(
-    (country: Feature<Geometry>) => {
-      const next = transformForCountryFocus(pathGenerator, country, WIDTH, HEIGHT);
-      applyFocusTransform(next);
-    },
-    [applyFocusTransform, pathGenerator]
-  );
-
-  useEffect(() => {
-    if (!mapReady) return;
-
-    if (focusRequest) {
-      const country = findCountryFeatureByCode(mainlandFeatures, focusRequest.code, continent);
-      if (!country) {
-        onFocusComplete?.();
-        return;
-      }
-
-      const id =
-        country.id != null && country.id !== "" ? String(country.id) : null;
-      if (id) setHoveredCountryId(id);
-
-      focusCountry(country);
-      skipNextResetRef.current = true;
-      onFocusComplete?.();
-      return;
-    }
-
-    if (skipNextResetRef.current) {
-      skipNextResetRef.current = false;
-      return;
-    }
-
-    resetZoom();
-  }, [
-    continent,
-    focusCountry,
-    focusRequest,
-    mainlandFeatures,
-    mapReady,
-    onFocusComplete,
-    projection,
-    resetZoom,
-  ]);
-
-  useEffect(() => {
-    if (!explorable || !svgRef.current || !mapGroupRef.current) return;
-
-    const svg = select(svgRef.current);
-    const mapGroup = select(mapGroupRef.current);
-
-    const behavior = zoom<SVGSVGElement, unknown>()
-      .scaleExtent([1, 8])
-      .filter((event) => {
-        if (event.type === "wheel") return true;
-        if (event.type === "dblclick") return true;
-        return event.button === 0;
-      })
-      .on("zoom", (event) => {
-        const clamped = clampTransform(event.transform, WIDTH, HEIGHT);
-        mapGroup.attr("transform", transformToString(clamped));
-        svg.property("__zoom", clamped);
-        setZoomK(clamped.k);
-      });
-
-    zoomBehaviorRef.current = behavior;
-    svg.call(behavior);
-
-    svg.on("dblclick.zoom", (event) => {
-      event.preventDefault();
-      applyTransform(zoomIdentity, true);
-    });
-
-    return () => {
-      svg.on(".zoom", null);
-      zoomBehaviorRef.current = null;
-    };
-  }, [applyTransform, explorable]);
-
   const handleCountryClick = useCallback(
     (country: Feature<Geometry>, id: string) => {
       if (!interactive || !onCountryClick) return;
@@ -366,17 +189,14 @@ export function WorldMap({
       const meta = countryMetaFromFeature(country);
       if (!meta) return;
 
-      if (explorable) {
-        focusCountry(country);
-      }
       onCountryClick(meta);
       setHoveredCountryId(id);
     },
-    [explorable, focusCountry, interactive, onCountryClick]
+    [interactive, onCountryClick]
   );
 
   const hoveredCountryLabel = useMemo(() => {
-    if (!hoveredCountryId || pinnedCountryCode) return null;
+    if (!hoveredCountryId) return null;
 
     const country = countryById.get(hoveredCountryId);
     if (!country) return null;
@@ -389,27 +209,24 @@ export function WorldMap({
     if (!point) return null;
 
     return { x: point[0], y: point[1], name: meta.name };
-  }, [countryById, hoveredCountryId, pinnedCountryCode, projection]);
+  }, [countryById, hoveredCountryId, projection]);
 
   return (
     <div
       className={`relative w-full overflow-hidden aspect-[800/450] ${
         mainlandWorld ? "" : "border-y border-slate-700/50"
-      } ${explorable ? "touch-none" : ""}`}
+      }`}
       style={{ backgroundColor: MAP_CSS.background }}
     >
       <svg
-        ref={svgRef}
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        className={`absolute inset-0 size-full [preserveAspectRatio:xMidYMid_meet] ${
-          explorable ? "cursor-grab active:cursor-grabbing" : ""
-        }`}
+        className="absolute inset-0 size-full [preserveAspectRatio:xMidYMid_meet]"
         role="img"
         aria-label="World travel map"
       >
         <rect width={WIDTH} height={HEIGHT} fill={MAP_CSS.background} />
 
-        <g ref={mapGroupRef}>
+        <g>
           {mapReady &&
             visibleFeatures.map((country, index) => {
             const id =
@@ -501,35 +318,21 @@ export function WorldMap({
 
           {mapReady &&
             !mainlandWorld &&
-            !pinnedCountryCode &&
             visitedPinPositions.map((pin) => (
               <MapCountryPin
                 key={`pin-${pin.id}`}
                 x={pin.x}
                 y={pin.y}
-                inverseScale={inverseScale}
+                inverseScale={1}
               />
             ))}
 
-          {mapReady &&
-            focusedCityPins.map((pin) => (
-              <MapCityPin
-                key={`city-${pin.id}`}
-                x={pin.x}
-                y={pin.y}
-                name={pin.city.city_name}
-                inverseScale={inverseScale}
-                interactive={interactive && !!onCityClick}
-                onClick={() => onCityClick?.(pin.city)}
-              />
-            ))}
-
-          {mapReady && hoveredCountryLabel && zoomK < 1.25 && (
+          {mapReady && hoveredCountryLabel && (
             <MapCountryLabel
               x={hoveredCountryLabel.x}
               y={hoveredCountryLabel.y}
               name={hoveredCountryLabel.name}
-              inverseScale={inverseScale}
+              inverseScale={1}
             />
           )}
         </g>

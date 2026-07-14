@@ -9,11 +9,11 @@ type OwnProfileShellProps = {
   children: ReactNode;
 };
 
-/** Bottom bar for all users; notifications when signed in. Requires DashboardAddProvider above. */
+/** App chrome for all users; notifications when signed in. Requires DashboardAddProvider above. */
 export function OwnProfileShell({ ownProfile, children }: OwnProfileShellProps) {
   const shell = (
     <>
-      <div className="dashboard-shell">
+      <div className={`dashboard-shell${ownProfile ? "" : " dashboard-shell--guest"}`}>
         {children}
         <SiteFooter />
       </div>

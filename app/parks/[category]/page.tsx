@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ParkCategoryPageContent } from "@/components/park/ParkCategoryPageContent";
 import { listParkHubsByCategory } from "@/lib/data/park-hubs";
-import { getAuthUser } from "@/lib/supabase/auth";
 import { DEFAULT_DESCRIPTION, parkCategoryPath, parkCategoryUrl } from "@/lib/seo/site";
 import {
   PIN_MAP_OG_DESCRIPTION,
@@ -73,32 +72,19 @@ export default async function ParkCategoryPage({ params }: PageProps) {
   if (!category) notFound();
 
   const parks = listParkHubsByCategory(category);
-  const [t, tCommon, user] = await Promise.all([
-    getTranslations("parksListing"),
-    getTranslations("common"),
-    getAuthUser(),
-  ]);
-
-  const returnPath = parkCategoryPath(category);
-  const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;
-  const registerHref = `/register?next=${encodeURIComponent(returnPath)}`;
+  const t = await getTranslations("parksListing");
 
   return (
     <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden">
       <ParkCategoryPageContent
         category={category}
         parks={parks}
-        loginHref={loginHref}
-        registerHref={registerHref}
-        isLoggedIn={Boolean(user)}
         labels={{
           home: t("home"),
           title: t(categoryTitleKey(category)),
           description: t(categoryDescriptionKey(category)),
           parkCount: t("parkCount", { count: parks.length }),
           inCountry: t.raw("inCountry"),
-          login: tCommon("login"),
-          register: tCommon("register"),
         }}
       />
     </main>

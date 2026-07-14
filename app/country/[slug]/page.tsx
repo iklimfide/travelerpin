@@ -83,7 +83,6 @@ export default async function CountryHubPage({ params }: PageProps) {
 
   const returnPath = countryPath(slug);
   const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;
-  const registerHref = `/register?next=${encodeURIComponent(returnPath)}`;
 
   const [t, tCommon, cachedTravelers, cachedCountryPins, user, supabase] = await Promise.all([
     getTranslations("countryHub"),
@@ -204,7 +203,6 @@ export default async function CountryHubPage({ params }: PageProps) {
           editOwnerPark={editOwnerPark}
           visitedCountries={visitedCountries}
           loginHref={loginHref}
-          registerHref={registerHref}
           pinCountItems={pinCountItems}
           labels={labels}
         />

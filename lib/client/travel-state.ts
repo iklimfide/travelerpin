@@ -1,7 +1,6 @@
-import { addCitiesBatch, addCity } from "@/lib/client/city-actions";
+import { addCitiesBatch } from "@/lib/client/city-actions";
 import { addVisitedCountry } from "@/lib/client/country-actions";
 import { getCountryName } from "@/lib/data/countries";
-import { catalogCountryCode } from "@/lib/data/uk-nations";
 import { canonicalCityName, citiesAreSame } from "@/lib/utils/city-aliases";
 import {
   notifyTravelStateUpdated,
@@ -12,6 +11,11 @@ import {
 import type { VisitedCity } from "@/types/database";
 
 export type { TravelStateData };
+
+export type PendingCitySelection = {
+  countryCode: string;
+  cityName: string;
+};
 
 type FetchTravelStateResult =
   | { ok: true; data: TravelStateData; fromCache: boolean }
@@ -78,12 +82,11 @@ export async function fetchTravelState(options?: {
   }
 }
 
-function parseCityKey(key: string): { countryCode: string; cityName: string } {
-  const colon = key.indexOf(":");
-  return {
-    countryCode: key.slice(0, colon).toUpperCase(),
-    cityName: key.slice(colon + 1),
-  };
+/** Fire-and-forget full travel-state sync (does not block Save UI). */
+export function refreshTravelStateAfterSave(): void {
+  void fetchTravelStateFromNetwork().catch(() => {
+    // Keep existing cache if refresh fails.
+  });
 }
 
 function isCityOnMap(
@@ -98,55 +101,17 @@ function isCityOnMap(
   );
 }
 
-async function resolveCityCoords(
-  countryCode: string,
-  cityNames: string[]
-): Promise<Map<string, { latitude: number; longitude: number }>> {
-  const res = await fetch(
-    `/api/cities/tourist?country=${encodeURIComponent(catalogCountryCode(countryCode))}`
-  );
-  if (!res.ok) return new Map();
-
-  const data = (await res.json()) as {
-    cities?: { name: string; latitude: number; longitude: number }[];
-  };
-
-  const coords = new Map<string, { latitude: number; longitude: number }>();
-  for (const cityName of cityNames) {
-    const canonicalName = canonicalCityName(countryCode, cityName);
-    const match = (data.cities ?? []).find(
-      (city) =>
-        city.name.toLowerCase() === cityName.toLowerCase() ||
-        citiesAreSame(countryCode, city.name, cityName)
-    );
-    if (match) {
-      coords.set(cityName, {
-        latitude: match.latitude,
-        longitude: match.longitude,
-      });
-      if (canonicalName !== cityName) {
-        coords.set(canonicalName, {
-          latitude: match.latitude,
-          longitude: match.longitude,
-        });
-      }
-    }
-  }
-
-  return coords;
-}
-
 export async function savePendingDestinations(params: {
   pendingCountryCodes: Iterable<string>;
-  pendingCityKeys: Iterable<string>;
+  pendingCities: Iterable<PendingCitySelection>;
   visitedCodes: ReadonlySet<string>;
   visitedCities: VisitedCity[];
 }): Promise<{ ok: true; savedCount: number } | { ok: false; error: string }> {
   const pendingCountryCodes = [...params.pendingCountryCodes];
-  const pendingCityKeys = [...params.pendingCityKeys];
+  const pendingCities = [...params.pendingCities];
 
   const countriesWithPendingCities = new Set(
-    pendingCityKeys.map((key) => parseCityKey(key).countryCode)
+    pendingCities.map((city) => city.countryCode.toUpperCase())
   );
 
   const newCountryCodes = pendingCountryCodes
@@ -162,38 +127,23 @@ export async function savePendingDestinations(params: {
     savedCount += 1;
   }
 
-  const citiesByCountry = new Map<string, string[]>();
-  for (const key of pendingCityKeys) {
-    const { countryCode, cityName } = parseCityKey(key);
-    const canonicalName = canonicalCityName(countryCode, cityName);
+  const citiesByCountry = new Map<string, { city_name: string }[]>();
+
+  for (const city of pendingCities) {
+    const countryCode = city.countryCode.toUpperCase();
+    const canonicalName = canonicalCityName(countryCode, city.cityName);
     if (isCityOnMap(params.visitedCities, countryCode, canonicalName)) continue;
 
     const list = citiesByCountry.get(countryCode) ?? [];
-    list.push(canonicalName);
+    list.push({ city_name: canonicalName });
     citiesByCountry.set(countryCode, list);
   }
 
-  for (const [countryCode, cityNames] of citiesByCountry) {
+  for (const [countryCode, cities] of citiesByCountry) {
     const countryName = getCountryName(countryCode);
-    const coords = await resolveCityCoords(countryCode, cityNames);
-    const withCoords: { city_name: string; latitude: number; longitude: number }[] = [];
-    const withoutCoords: string[] = [];
 
-    for (const cityName of cityNames) {
-      const match = coords.get(cityName);
-      if (match) {
-        withCoords.push({
-          city_name: cityName,
-          latitude: match.latitude,
-          longitude: match.longitude,
-        });
-      } else {
-        withoutCoords.push(cityName);
-      }
-    }
-
-    for (let index = 0; index < withCoords.length; index += 50) {
-      const chunk = withCoords.slice(index, index + 50);
+    for (let index = 0; index < cities.length; index += 50) {
+      const chunk = cities.slice(index, index + 50);
       const result = await addCitiesBatch({
         country_code: countryCode,
         country_name: countryName,
@@ -201,16 +151,6 @@ export async function savePendingDestinations(params: {
       });
       if (!result.ok) return result;
       savedCount += result.added;
-    }
-
-    for (const cityName of withoutCoords) {
-      const result = await addCity({
-        city_name: cityName,
-        country_code: countryCode,
-        country_name: countryName,
-      });
-      if (!result.ok) return result;
-      savedCount += 1;
     }
   }
 

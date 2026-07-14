@@ -3,14 +3,12 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { WorldMap } from "@/components/map/WorldMap";
 import { CountryPopup } from "@/components/map/CountryPopup";
-import { CityPopup } from "@/components/map/CityPopup";
 import { MapContinentControl } from "@/components/map/MapContinentControl";
 import { MapCountrySearch } from "@/components/map/MapCountrySearch";
 import { MapPopularDestinations } from "@/components/map/MapPopularDestinations";
 import { MapPopularParks } from "@/components/map/MapPopularParks";
 import { MapLegend } from "@/components/map/MapLegend";
 import { VisitedCountryFlags } from "@/components/map/VisitedCountryFlags";
-import { useOptionalMapFocus, type MapFocusTarget } from "@/components/map/MapFocusContext";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
 import {
@@ -52,7 +50,6 @@ type TravelMapViewProps = {
   /** When false, map is view-only (e.g. visitors on a shared profile). Defaults to isLoggedIn. */
   canEditMap?: boolean;
   interactive?: boolean;
-  explorable?: boolean;
   showContinentFilter?: boolean;
   /** Landing page: card shell, filters below hero, light controls. */
   homeLayout?: boolean;
@@ -73,7 +70,6 @@ export function TravelMapView({
   isLoggedIn = false,
   canEditMap,
   interactive = true,
-  explorable = false,
   showContinentFilter = false,
   homeLayout = false,
   profileHeader,
@@ -82,7 +78,6 @@ export function TravelMapView({
   const editable = canEditMap ?? isLoggedIn;
   const modal = useModal();
   const toast = useToast();
-  const mapFocus = useOptionalMapFocus();
   const [localVisitedCountryCodes, setLocalVisitedCountryCodes] = useState(visitedCountryCodes);
   const [localWishlistCountryCodes, setLocalWishlistCountryCodes] = useState(wishlistCountryCodes);
   const [localVisitedCountries, setLocalVisitedCountries] = useState(visitedCountries);
@@ -92,14 +87,9 @@ export function TravelMapView({
   const [localCitiesCountryCodes, setLocalCitiesCountryCodes] = useState(citiesCountryCodes);
   const [localParksCountryCodes, setLocalParksCountryCodes] = useState(parksCountryCodes);
   const [selectedCountry, setSelectedCountry] = useState<CountrySelection | null>(null);
-  const [selectedCity, setSelectedCity] = useState<VisitedCity | null>(null);
   const [continent, setContinent] = useState<ContinentId>(
     homeLayout || compactProfile ? "world" : DEFAULT_MAP_CONTINENT
   );
-  const [focusRequest, setFocusRequest] = useState<{ code: string; nonce: number } | null>(
-    null
-  );
-  const [pinnedCountryCode, setPinnedCountryCode] = useState<string | null>(null);
   const [cityPickerFirst, setCityPickerFirst] = useState(false);
   const [busyCode, setBusyCode] = useState<string | null>(null);
   const [optimisticVisitedCodes, setOptimisticVisitedCodes] = useState<Set<string>>(
@@ -278,7 +268,6 @@ export function TravelMapView({
   const handleCountryClick = (country: CountrySelection) => {
     setCityPickerFirst(false);
     setSelectedCountry(country);
-    setPinnedCountryCode(country.code);
   };
 
   const handleVisitedChange = async (checked: boolean) => {
@@ -370,48 +359,35 @@ export function TravelMapView({
   const handleCitiesAdded = () => {
     void syncTravelState();
     setSelectedCountry(null);
-    setPinnedCountryCode(null);
     setCityPickerFirst(false);
   };
 
   const handleParksAdded = () => {
     void syncTravelState();
     setSelectedCountry(null);
-    setPinnedCountryCode(null);
     setCityPickerFirst(false);
   };
 
   const handleCountrySearch = (country: { code: string; name: string }) => {
-    focusCountryOnMap(country);
+    const code = country.code.toUpperCase();
+    const countryContinent = getCountryContinent(code);
+    setCityPickerFirst(false);
+    if (interactive) {
+      setSelectedCountry({ code, name: country.name });
+    }
+    if (countryContinent) {
+      setContinent(countryContinent);
+    }
   };
-
-  const focusCountryOnMap = useCallback(
-    (country: MapFocusTarget) => {
-      const code = country.code.toUpperCase();
-      const countryContinent = getCountryContinent(code);
-      setCityPickerFirst(false);
-      setPinnedCountryCode(code);
-      if (explorable) {
-        setSelectedCountry({ code, name: country.name });
-      }
-      if (countryContinent) {
-        setContinent(countryContinent);
-      }
-      setFocusRequest({ code, nonce: Date.now() });
-    },
-    [explorable]
-  );
 
   const handleDestinationAdded = useCallback(
     (destination: PopularDestination) => {
       const code = destination.countryCode.toUpperCase();
       const countryContinent = getCountryContinent(code);
       setOptimisticVisitedCodes((prev) => new Set(prev).add(code));
-      setPinnedCountryCode(code);
       if (countryContinent) {
         setContinent(countryContinent);
       }
-      setFocusRequest({ code, nonce: Date.now() });
       void syncTravelState();
     },
     [syncTravelState]
@@ -426,7 +402,6 @@ export function TravelMapView({
           next.delete(code);
           return next;
         });
-        setPinnedCountryCode(null);
       }
       void syncTravelState();
     },
@@ -438,11 +413,9 @@ export function TravelMapView({
       const code = park.countryCode.toUpperCase();
       const countryContinent = getCountryContinent(code);
       setOptimisticVisitedCodes((prev) => new Set(prev).add(code));
-      setPinnedCountryCode(code);
       if (countryContinent) {
         setContinent(countryContinent);
       }
-      setFocusRequest({ code, nonce: Date.now() });
       void syncTravelState();
     },
     [syncTravelState]
@@ -457,18 +430,11 @@ export function TravelMapView({
           next.delete(code);
           return next;
         });
-        setPinnedCountryCode(null);
       }
       void syncTravelState();
     },
     [syncTravelState]
   );
-
-  useEffect(() => {
-    if (!mapFocus) return;
-    mapFocus.registerFocusHandler(focusCountryOnMap);
-    return () => mapFocus.registerFocusHandler(null);
-  }, [focusCountryOnMap, mapFocus]);
 
   const filterGrid = showContinentFilter ? (
     <div
@@ -483,7 +449,6 @@ export function TravelMapView({
           continent={continent}
           onChange={(next) => {
             setContinent(next);
-            setPinnedCountryCode(null);
           }}
         />
       </div>
@@ -525,15 +490,9 @@ export function TravelMapView({
       <WorldMap
         visitedCountryCodes={[...visitedCodeSet]}
         wishlistCountryCodes={localWishlistCountryCodes}
-        userCities={localUserCities}
-        onCountryClick={explorable ? handleCountryClick : undefined}
-        onCityClick={interactive && localUserCities.length > 0 ? (city) => setSelectedCity(city) : undefined}
+        onCountryClick={interactive ? handleCountryClick : undefined}
         interactive={interactive}
-        explorable={explorable}
         continent={continent}
-        focusRequest={focusRequest}
-        onFocusComplete={() => setFocusRequest(null)}
-        pinnedCountryCode={pinnedCountryCode}
         mainlandWorld={compactProfile || homeLayout}
       />
     </div>
@@ -545,7 +504,7 @@ export function TravelMapView({
       userCities={localUserCities}
       userParks={localUserParks}
       countryCodes={localVisitedCountryCodes}
-      onCountryClick={explorable ? focusCountryOnMap : undefined}
+      onCountryClick={interactive ? handleCountryClick : undefined}
       variant={homeLayout ? "landing" : "default"}
       className={
         homeLayout ? "border-t border-[#d8e1ef] !px-3 !py-2 sm:!px-4 sm:!py-2.5" : ""
@@ -582,13 +541,9 @@ export function TravelMapView({
           cityPickerFirst={cityPickerFirst}
           onClose={() => {
             setSelectedCountry(null);
-            setPinnedCountryCode(null);
             setCityPickerFirst(false);
           }}
         />
-      )}
-      {selectedCity && (
-        <CityPopup city={selectedCity} onClose={() => setSelectedCity(null)} />
       )}
     </>
   );
@@ -619,11 +574,6 @@ export function TravelMapView({
       {filterGrid}
       {mapBlock}
       {!compactProfile ? flagsBlock : null}
-      {explorable && !homeLayout && !compactProfile && (
-        <p className="mt-1 hidden text-center text-xs text-slate-500 sm:mt-2 sm:block">
-          {showContinentFilter ? mapMessages.demoExploreHint : mapMessages.exploreHint}
-        </p>
-      )}
       {!compactProfile ? <MapLegend showWishlist={showWishlist} /> : null}
       {popups}
     </div>

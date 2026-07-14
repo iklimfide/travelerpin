@@ -8,8 +8,8 @@ export const cityBatchSchema = z.object({
     .array(
       z.object({
         city_name: z.string().min(1).max(100).transform(formatCityDisplayName),
-        latitude: z.number().min(-90).max(90),
-        longitude: z.number().min(-180).max(180),
+        latitude: z.number().min(-90).max(90).optional(),
+        longitude: z.number().min(-180).max(180).optional(),
       })
     )
     .min(1, "Select at least one city")

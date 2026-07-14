@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AddDestinationCheckbox } from "@/components/add/AddDestinationCheckbox";
 import { addDestinationMessages, mapMessages } from "@/lib/i18n/client-messages";
 import { catalogCountryCode, flagCountryCode } from "@/lib/data/uk-nations";
@@ -70,6 +70,8 @@ export function CityPickerStep({
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const [openTierLevel, setOpenTierLevel] = useState<number | null>(null);
+  const cityListRef = useRef<HTMLDivElement>(null);
+  const tierSectionRefs = useRef<Map<number, HTMLElement>>(new Map());
 
   const existingNames = useMemo(
     () => existingCityNames,
@@ -124,6 +126,24 @@ export function CityPickerStep({
   function toggleTier(level: number) {
     setOpenTierLevel((current) => (current === level ? null : level));
   }
+
+  useEffect(() => {
+    if (openTierLevel == null) return;
+
+    const section = tierSectionRefs.current.get(openTierLevel);
+    const list = cityListRef.current;
+    if (!section || !list) return;
+
+    // Keep the expanded header near the top of the list so the panel opens downward into view.
+    const frame = window.requestAnimationFrame(() => {
+      const listRect = list.getBoundingClientRect();
+      const sectionRect = section.getBoundingClientRect();
+      const nextTop = list.scrollTop + (sectionRect.top - listRect.top) - 8;
+      list.scrollTo({ top: Math.max(0, nextTop), behavior: "smooth" });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [openTierLevel]);
 
   function renderCityRow(city: CatalogCity) {
     const key = citySelectionKey(countryCode, city.name);
@@ -198,7 +218,7 @@ export function CityPickerStep({
         />
       </div>
 
-      <div className="add-destination-city-list">
+      <div className="add-destination-city-list" ref={cityListRef}>
         {loading ? (
           <AddDestinationCityListSkeleton rows={8} />
         ) : totalCityCount === 0 && isFiltering ? (
@@ -213,7 +233,14 @@ export function CityPickerStep({
                 {moreTiers.map((tier) => {
                   const expanded = openTierLevel === tier.level;
                   return (
-                    <section key={tier.level} className="add-destination-city-tier">
+                    <section
+                      key={tier.level}
+                      className="add-destination-city-tier"
+                      ref={(node) => {
+                        if (node) tierSectionRefs.current.set(tier.level, node);
+                        else tierSectionRefs.current.delete(tier.level);
+                      }}
+                    >
                       <button
                         type="button"
                         className={`add-destination-city-tier__header${expanded ? " is-expanded" : ""}`}

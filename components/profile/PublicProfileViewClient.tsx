@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { TravelMapFocusShell } from "@/components/map/TravelMapFocusShell";
 import { HomeFeaturesClient } from "@/components/home/HomeFeaturesClient";
 import { ProfileHeroCover } from "@/components/profile/ProfileHeroCover";
 import { ProfileIdentityCard } from "@/components/profile/ProfileIdentityCard";
@@ -14,7 +13,6 @@ import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
 import { ProfileTravelUpdateCard } from "@/components/profile/ProfileTravelUpdateCard";
 import { ProfileNextRouteSection } from "@/components/profile/ProfileNextRouteSection";
 import { ProfileVisitorDestinations } from "@/components/profile/ProfileVisitorDestinations";
-import { PublicGuestAuthLinks } from "@/components/nav/PublicGuestAuthLinks";
 import { ProfileTripsRow } from "@/components/profile/ProfileTripsRow";
 import {
   buildProfileTrips,
@@ -104,19 +102,6 @@ export function PublicProfileViewClient({
 
   const profileBody = (
     <div className={`profile-page${embedded ? " profile-page--embedded" : ""}`}>
-      {isGuest && !embedded ? (
-        <div className="profile-guest-auth-bar">
-          <PublicGuestAuthLinks
-            loginHref={`/login?next=${encodeURIComponent(profilePath(profile.username))}`}
-            registerHref={`/register?next=${encodeURIComponent(profilePath(profile.username))}`}
-            loginLabel={tCommon("login")}
-            registerLabel={tCommon("register")}
-            className="home-guest-auth"
-            linkClassName="home-guest-auth__link"
-            primaryClassName="home-guest-auth__link home-guest-auth__link--primary"
-          />
-        </div>
-      ) : null}
       <div className="profile-shell">
         <div
           id={`profile-story-capture-${profile.username.toLowerCase()}`}
@@ -336,9 +321,5 @@ export function PublicProfileViewClient({
     </div>
   );
 
-  if (embedded) {
-    return profileBody;
-  }
-
-  return <TravelMapFocusShell>{profileBody}</TravelMapFocusShell>;
+  return profileBody;
 }

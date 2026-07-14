@@ -11,18 +11,45 @@
 @media (max-width: 760px) {
   .add-destination-modal {
     padding: 0;
-    align-items: stretch;
+    align-items: flex-end;
   }
 
   .add-destination-modal__sheet {
     width: 100%;
     max-width: none;
-    max-height: none;
-    height: 100%;
-    min-height: 100dvh;
-    border-radius: 0;
+    height: auto;
+    max-height: 100dvh;
+    min-height: 0;
+    border-radius: 16px 16px 0 0;
     border-left: none;
     border-right: none;
+    border-bottom: none;
+  }
+
+  .add-destination-modal__footer--action-only {
+    padding-top: 6px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* City step needs full height so "More cities" expands downward in the list scroll. */
+  .add-destination-modal:has(.add-destination-step--city) {
+    align-items: stretch;
+  }
+
+  .add-destination-modal__sheet:has(.add-destination-step--city) {
+    height: 100%;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .add-destination-list-hint {
+    margin-top: 8px;
+    margin-bottom: 0;
+    font-size: clamp(0.6rem, 2.55vw, 0.7rem);
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    white-space: nowrap;
   }
 }
 
@@ -115,7 +142,8 @@
   padding: 0 18px 12px;
 }
 
-.add-destination-modal__body:has(.add-destination-step--city) {
+.add-destination-modal__body:has(.add-destination-step--city),
+.add-destination-modal__body:has(.add-destination-step--countries) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -133,6 +161,10 @@
   background: #f8fafc;
 }
 
+.add-destination-modal__footer--action-only {
+  justify-content: center;
+}
+
 .add-destination-modal__footer-hint {
   margin: 0;
   flex: 1;
@@ -144,6 +176,14 @@
 
 .add-destination-modal__footer-hint--error {
   color: #dc2626;
+}
+
+.add-destination-list-hint {
+  margin: 10px 2px 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #64748b;
+  text-align: center;
 }
 
 .add-destination-checkbox {
@@ -194,6 +234,68 @@
 .add-destination-search {
   position: relative;
   margin-bottom: 14px;
+}
+
+.add-destination-step--countries {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.add-destination-countries-toolbar {
+  flex-shrink: 0;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: #f3f6fa;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.add-destination-countries-toolbar .add-destination-search {
+  margin-bottom: 0;
+}
+
+.add-destination-countries-scroll {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 4px;
+}
+
+.add-destination-countries-scroll__inner {
+  width: 100%;
+}
+
+/* Mobile: pack country sheet to content height at the bottom (no stretch gap). */
+@media (max-width: 760px) {
+  .add-destination-modal__body:has(.add-destination-step--countries) {
+    display: block;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-bottom: 0;
+  }
+
+  .add-destination-step--countries {
+    flex: none;
+    min-height: 0;
+  }
+
+  .add-destination-countries-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  .add-destination-countries-scroll {
+    display: block;
+    flex: none;
+    overflow: visible;
+    min-height: 0;
+    padding-bottom: 0;
+  }
 }
 
 .add-destination-search__icon {

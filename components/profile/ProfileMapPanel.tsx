@@ -64,7 +64,6 @@ export function ProfileMapPanel({
           ]}
           isLoggedIn={isLoggedIn}
           canEditMap={canEditMap}
-          explorable={false}
           interactive={false}
           showContinentFilter={false}
           compactProfile

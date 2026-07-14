@@ -4,13 +4,18 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useAddDestination } from "@/components/add/AddDestinationProvider";
 import { BottomBarProfileNav } from "@/components/dashboard/BottomBarProfileNav";
-import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
+import { PublicGuestAuthLinks } from "@/components/nav/PublicGuestAuthLinks";
 import { NotificationsNavLink } from "@/components/notifications/NotificationsNavLink";
 import { useIsDesktopDashboardNav } from "@/lib/hooks/useIsDesktopDashboardNav";
 import { useVisualViewportFixed } from "@/lib/hooks/useVisualViewportFixed";
-import { addDestinationMessages, dashboardNavMessages } from "@/lib/i18n/client-messages";
+import {
+  addDestinationMessages,
+  commonMessages,
+  dashboardNavMessages,
+} from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
 
 type DashboardBottomBarProps = {
@@ -21,16 +26,8 @@ function loginHrefFor(pathname: string): string {
   return `/login?next=${encodeURIComponent(pathname)}`;
 }
 
-function HomeIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width={22} height={22} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
-      <path
-        d="M4.5 10.5 12 4.5l7.5 6v8.25a1.5 1.5 0 0 1-1.5 1.5H6a1.5 1.5 0 0 1-1.5-1.5V10.5Z"
-        strokeLinejoin="round"
-      />
-      <path d="M9.75 19.5V12h4.5v7.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+function registerHrefFor(pathname: string): string {
+  return `/register?next=${encodeURIComponent(pathname)}`;
 }
 
 function RouteIcon() {
@@ -113,27 +110,25 @@ function NavLink({
 export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { openAddModal } = useDashboardAdd();
+  const { open: openAddDestination, isOpen: addDestinationOpen } = useAddDestination();
   const barRef = useRef<HTMLElement>(null);
   const [mounted, setMounted] = useState(false);
   const isDesktopNav = useIsDesktopDashboardNav();
   const currentPath = pathname ?? "/";
   const username = ownProfile?.username ?? null;
+  const isGuest = !username;
+  // Guests always use the top bar (mobile + desktop); signed-in users only on desktop.
+  const showTopChrome = isDesktopNav || isGuest;
   const mapHref = username ? profilePath(username) : loginHrefFor(currentPath);
   const brandHref = username ? profilePath(username) : "/";
+  const loginHref = loginHrefFor(currentPath);
+  const registerHref = registerHrefFor(currentPath);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useVisualViewportFixed(barRef, { enabled: !isDesktopNav });
-
-  const homeItem: NavItem = {
-    href: "/",
-    label: dashboardNavMessages.home,
-    isActive: (path) => path === "/",
-    icon: <HomeIcon />,
-  };
+  useVisualViewportFixed(barRef, { enabled: !showTopChrome });
 
   const mapItem: NavItem = {
     href: mapHref,
@@ -147,15 +142,7 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
       router.push(loginHrefFor(currentPath));
       return;
     }
-    openAddModal();
-  }
-
-  function handleAddDestinationClick() {
-    if (!username) {
-      router.push(loginHrefFor(currentPath));
-      return;
-    }
-    router.push(`/c/add?next=${encodeURIComponent(currentPath)}`);
+    openAddDestination();
   }
 
   function handleNextRouteClick() {
@@ -177,8 +164,8 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
   const profileNav = (
     <BottomBarProfileNav
       ownProfile={ownProfile}
-      loginHref={loginHrefFor(currentPath)}
-      menuPlacement={isDesktopNav ? "below" : "above"}
+      loginHref={loginHref}
+      menuPlacement={showTopChrome ? "below" : "above"}
       showBarDestinationsInMenu={isDesktopNav && Boolean(username)}
       mapHref={mapHref}
       mapActive={mapItem.isActive(pathname)}
@@ -190,9 +177,13 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
   const notificationsNav = <NotificationsNavLink variant="bottomBar" />;
 
   const bar = (
-    <nav ref={barRef} className="dashboard-bottom-bar" aria-label="Dashboard navigation">
+    <nav
+      ref={barRef}
+      className={`dashboard-bottom-bar${showTopChrome ? " dashboard-bottom-bar--top" : ""}`}
+      aria-label="Dashboard navigation"
+    >
       <div className="dashboard-bottom-bar__inner">
-        {isDesktopNav ? (
+        {showTopChrome ? (
           <>
             <Link href={brandHref} className="dashboard-top-bar__brand">
               <img
@@ -205,44 +196,54 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
               <span className="dashboard-top-bar__brand-label">TravelerPin.com</span>
             </Link>
             <div className="dashboard-top-bar__actions">
-              {notificationsNav}
-              {profileNav}
+              {isGuest ? (
+                <PublicGuestAuthLinks
+                  loginHref={loginHref}
+                  registerHref={registerHref}
+                  loginLabel={commonMessages.login}
+                  registerLabel={commonMessages.register}
+                  className="dashboard-top-bar__auth-links"
+                  linkClassName="dashboard-top-bar__auth-link"
+                  primaryClassName="dashboard-top-bar__auth-link dashboard-top-bar__auth-link--primary"
+                />
+              ) : (
+                <>
+                  {notificationsNav}
+                  {profileNav}
+                </>
+              )}
             </div>
           </>
         ) : (
           <>
-            {username ? (
-              <>
-                <button
-                  type="button"
-                  className={`dashboard-bottom-bar__item${
-                    pathname === "/c/add" ? " dashboard-bottom-bar__item--active" : ""
-                  }`}
-                  aria-label={addDestinationMessages.selectCountryTitle}
-                  onClick={handleAddDestinationClick}
-                >
-                  <span className="dashboard-bottom-bar__icon">
-                    <GlobeIcon />
-                  </span>
-                  <span className="dashboard-bottom-bar__label">{dashboardNavMessages.addVisited}</span>
-                </button>
-                <button
-                  type="button"
-                  className={`dashboard-bottom-bar__item${
-                    pathname === "/c/next" ? " dashboard-bottom-bar__item--active" : ""
-                  }`}
-                  aria-label={dashboardNavMessages.nextRoute}
-                  onClick={handleNextRouteClick}
-                >
-                  <span className="dashboard-bottom-bar__icon">
-                    <RouteIcon />
-                  </span>
-                  <span className="dashboard-bottom-bar__label">{dashboardNavMessages.nextRoute}</span>
-                </button>
-              </>
-            ) : (
-              <NavLink item={homeItem} pathname={pathname} />
-            )}
+            <button
+              type="button"
+                className={`dashboard-bottom-bar__item${
+                  addDestinationOpen || pathname === "/c/add"
+                    ? " dashboard-bottom-bar__item--active"
+                    : ""
+                }`}
+              aria-label={addDestinationMessages.selectCountryTitle}
+              onClick={handleAddClick}
+            >
+              <span className="dashboard-bottom-bar__icon">
+                <GlobeIcon />
+              </span>
+              <span className="dashboard-bottom-bar__label">{dashboardNavMessages.addVisited}</span>
+            </button>
+            <button
+              type="button"
+              className={`dashboard-bottom-bar__item${
+                pathname === "/c/next" ? " dashboard-bottom-bar__item--active" : ""
+              }`}
+              aria-label={dashboardNavMessages.nextRoute}
+              onClick={handleNextRouteClick}
+            >
+              <span className="dashboard-bottom-bar__icon">
+                <RouteIcon />
+              </span>
+              <span className="dashboard-bottom-bar__label">{dashboardNavMessages.nextRoute}</span>
+            </button>
             <NavLink item={mapItem} pathname={pathname} />
             <div className="dashboard-bottom-bar__add-slot">
               <button
@@ -264,16 +265,17 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
 
   if (!mounted) return null;
 
-  const desktopAddFab = isDesktopNav ? (
-    <button
-      type="button"
-      className="dashboard-desktop-add-fab"
-      aria-label={dashboardNavMessages.add}
-      onClick={handleAddClick}
-    >
-      <PlusIcon />
-    </button>
-  ) : null;
+  const desktopAddFab =
+    isDesktopNav && !isGuest ? (
+      <button
+        type="button"
+        className="dashboard-desktop-add-fab"
+        aria-label={dashboardNavMessages.add}
+        onClick={handleAddClick}
+      >
+        <PlusIcon />
+      </button>
+    ) : null;
 
   return createPortal(
     <>

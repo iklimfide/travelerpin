@@ -85,7 +85,6 @@ export default async function CityHubPage({ params }: PageProps) {
   const { hub, touristCity, parks: allParks } = context;
   const returnPath = cityPath(slug);
   const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;
-  const registerHref = `/register?next=${encodeURIComponent(returnPath)}`;
 
   const [t, tCommon, cachedCityPins, user] = await Promise.all([
     getTranslations("cityHub"),
@@ -191,7 +190,6 @@ export default async function CityHubPage({ params }: PageProps) {
         ownerCity={ownerCity}
         visitedCountries={visitedCountries}
         loginHref={loginHref}
-        registerHref={registerHref}
         pinCountItems={pinCountItems}
         labels={labels}
       />

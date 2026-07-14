@@ -10,39 +10,25 @@ import type { ParkCategorySlug } from "@/lib/utils/park-category";
 type ParkCategoryPageContentProps = {
   category: ParkCategorySlug;
   parks: ParkHub[];
-  loginHref: string;
-  registerHref: string;
-  isLoggedIn: boolean;
   labels: {
     home: string;
     title: string;
     description: string;
     parkCount: string;
     inCountry: string;
-    login: string;
-    register: string;
   };
 };
 
 export function ParkCategoryPageContent({
   category,
   parks,
-  loginHref,
-  registerHref,
-  isLoggedIn,
   labels,
 }: ParkCategoryPageContentProps) {
   const categoryLabel = labels.title;
 
   return (
     <div className="city-page">
-      <HubPageTopBar
-        loginHref={loginHref}
-        registerHref={registerHref}
-        loginLabel={labels.login}
-        registerLabel={labels.register}
-        showAuthLinks={!isLoggedIn}
-      >
+      <HubPageTopBar>
         <nav className="city-page__top-nav" aria-label="Park category navigation">
           <Link href="/" className="city-page__nav-badge city-page__nav-badge--icon" aria-label={labels.home}>
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden fill="none" stroke="currentColor" strokeWidth="2">

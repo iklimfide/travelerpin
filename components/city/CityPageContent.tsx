@@ -30,7 +30,6 @@ type CityPageContentProps = {
   ownerCity: VisitedCity | null;
   visitedCountries: VisitedCountry[];
   loginHref: string;
-  registerHref: string;
   pinCountItems?: HubPinStatItem[];
   labels: {
     home: string;
@@ -78,7 +77,6 @@ export function CityPageContent({
   ownerCity,
   visitedCountries,
   loginHref,
-  registerHref,
   pinCountItems = [],
   labels,
 }: CityPageContentProps) {
@@ -119,13 +117,7 @@ export function CityPageContent({
 
   return (
     <div className="city-page">
-      <HubPageTopBar
-        loginHref={loginHref}
-        registerHref={registerHref}
-        loginLabel={labels.login}
-        registerLabel={labels.register}
-        showAuthLinks={!visitorState.isLoggedIn}
-      >
+      <HubPageTopBar>
         <CityPageNav hub={hub} labels={labels} />
       </HubPageTopBar>
 

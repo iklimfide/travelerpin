@@ -81,7 +81,6 @@ export default async function ParkHubPage({ params }: PageProps) {
 
   const returnPath = parkPath(slug);
   const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;
-  const registerHref = `/register?next=${encodeURIComponent(returnPath)}`;
 
   const [t, tCommon, cachedParkPins, user] = await Promise.all([
     getTranslations("parkHub"),
@@ -182,7 +181,6 @@ export default async function ParkHubPage({ params }: PageProps) {
         ownerPark={ownerPark}
         visitedCountries={visitedCountries}
         loginHref={loginHref}
-        registerHref={registerHref}
         pinCountItems={pinCountItems}
         labels={labels}
       />

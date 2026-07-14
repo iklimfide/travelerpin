@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -16,6 +17,7 @@ import { AddDestinationModal } from "@/components/add/AddDestinationModal";
 type AddDestinationContextValue = {
   open: () => void;
   close: () => void;
+  isOpen: boolean;
 };
 
 const AddDestinationContext = createContext<AddDestinationContextValue | null>(null);
@@ -26,6 +28,7 @@ export function useAddDestination(): AddDestinationContextValue {
     return {
       open: () => {},
       close: () => {},
+      isOpen: false,
     };
   }
   return ctx;
@@ -53,9 +56,20 @@ function AddDestinationProviderInner({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const nextFromUrl = sanitizeNext(searchParams?.get("next") ?? null);
   const routeOpen = pathname === "/c/add";
+  const wasRouteOpen = useRef(false);
 
+  // Deep link: open when URL is /c/add; close only when leaving that route.
+  // Soft-open via open() does not touch the URL and is not cleared by this sync.
   useEffect(() => {
-    setOpen(routeOpen);
+    if (routeOpen) {
+      wasRouteOpen.current = true;
+      setOpen(true);
+      return;
+    }
+    if (wasRouteOpen.current) {
+      wasRouteOpen.current = false;
+      setOpen(false);
+    }
   }, [routeOpen]);
 
   const close = useCallback(() => {
@@ -72,7 +86,10 @@ function AddDestinationProviderInner({ children }: { children: ReactNode }) {
     setOpen(true);
   }, []);
 
-  const ctxValue = useMemo(() => ({ open: openModal, close }), [openModal, close]);
+  const ctxValue = useMemo(
+    () => ({ open: openModal, close, isOpen: open }),
+    [openModal, close, open]
+  );
 
   return (
     <AddDestinationContext.Provider value={ctxValue}>

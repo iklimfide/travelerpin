@@ -29,6 +29,7 @@ type CountryPickerStepProps = {
   countriesOnly?: boolean;
   searchPlaceholder?: string;
   regionProgressSuffix?: string;
+  listHint?: string;
 };
 
 const MIN_SEARCH_LENGTH = 2;
@@ -89,6 +90,7 @@ export function CountryPickerStep({
   countriesOnly = false,
   searchPlaceholder,
   regionProgressSuffix = "visited",
+  listHint,
 }: CountryPickerStepProps) {
   const progressCodes = countedCodes ?? visitedCodes;
 
@@ -152,88 +154,99 @@ export function CountryPickerStep({
   }
 
   return (
-    <div className="add-destination-step">
-      <div className="add-destination-search">
-        <span className="add-destination-search__icon" aria-hidden>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.4" />
-            <path d="M10.5 10.5L13 13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-          </svg>
-        </span>
-        <input
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder={searchPlaceholder ?? addDestinationMessages.searchCountries}
-          className="add-destination-search__input"
-          autoComplete="off"
-        />
+    <div className="add-destination-step add-destination-step--countries">
+      <div className="add-destination-countries-toolbar">
+        <div className="add-destination-search">
+          <span className="add-destination-search__icon" aria-hidden>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.4" />
+              <path d="M10.5 10.5L13 13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+            </svg>
+          </span>
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={searchPlaceholder ?? addDestinationMessages.searchCountries}
+            className="add-destination-search__input"
+            autoComplete="off"
+          />
+        </div>
       </div>
 
-      {isSearching ? (
-        <div className="add-destination-country-grid-wrap">
-          {searchResults.length === 0 ? (
-            <p className="add-destination-empty">{addDestinationMessages.noCountryResults}</p>
-          ) : (
-            <div className="add-destination-country-grid">
-              {searchResults.map((country) => renderCountry(country))}
+      <div className="add-destination-countries-scroll">
+        <div className="add-destination-countries-scroll__inner">
+          {isSearching ? (
+            <div className="add-destination-country-grid-wrap">
+              {searchResults.length === 0 ? (
+                <p className="add-destination-empty">{addDestinationMessages.noCountryResults}</p>
+              ) : (
+                <div className="add-destination-country-grid">
+                  {searchResults.map((country) => renderCountry(country))}
+                </div>
+              )}
             </div>
+          ) : (
+            <>
+              <div className="add-destination-region-list">
+                {ADD_REGION_ORDER.map((region) => {
+                  if (region === "special" && groups.special.length === 0) {
+                    return null;
+                  }
+
+                  const expanded = expandedRegion === region;
+                  const { visited, total } = regionCountryCounts(region, progressCodes, groups);
+
+                  return (
+                    <section key={region} className="add-destination-region">
+                      <button
+                        type="button"
+                        className={`add-destination-region__header${expanded ? " is-expanded" : ""}`}
+                        aria-expanded={expanded}
+                        onClick={() => toggleRegion(region)}
+                      >
+                        <span className="add-destination-region__chevron" aria-hidden>
+                          {expanded ? "▴" : "▾"}
+                        </span>
+                        <span className="add-destination-region__label">
+                          <span
+                            className={`add-destination-region__emoji${
+                              ADD_REGION_BROWN_EMOJI.has(region)
+                                ? " add-destination-region__emoji--brown"
+                                : ""
+                            }`}
+                            aria-hidden
+                          >
+                            {ADD_REGION_EMOJI[region]}
+                          </span>
+                          <span>{addDestinationMessages.regions[region]}</span>
+                        </span>
+                        <span
+                          className="add-destination-region__count"
+                          aria-label={`${visited} of ${total} countries ${regionProgressSuffix}`}
+                        >
+                          {visited} / {total}
+                        </span>
+                      </button>
+
+                      {expanded ? (
+                        <div className="add-destination-region__panel">
+                          <div className="add-destination-country-grid">
+                            {groups[region].map((country) => renderCountry(country))}
+                          </div>
+                        </div>
+                      ) : null}
+                    </section>
+                  );
+                })}
+              </div>
+              {listHint ? (
+                <p className="add-destination-list-hint">{listHint}</p>
+              ) : null}
+            </>
           )}
         </div>
-      ) : (
-        <div className="add-destination-region-list">
-          {ADD_REGION_ORDER.map((region) => {
-            if (region === "special" && groups.special.length === 0) {
-              return null;
-            }
-
-            const expanded = expandedRegion === region;
-            const { visited, total } = regionCountryCounts(region, progressCodes, groups);
-
-            return (
-              <section key={region} className="add-destination-region">
-                <button
-                  type="button"
-                  className={`add-destination-region__header${expanded ? " is-expanded" : ""}`}
-                  aria-expanded={expanded}
-                  onClick={() => toggleRegion(region)}
-                >
-                  <span className="add-destination-region__chevron" aria-hidden>
-                    {expanded ? "▴" : "▾"}
-                  </span>
-                  <span className="add-destination-region__label">
-                    <span
-                      className={`add-destination-region__emoji${
-                        ADD_REGION_BROWN_EMOJI.has(region)
-                          ? " add-destination-region__emoji--brown"
-                          : ""
-                      }`}
-                      aria-hidden
-                    >
-                      {ADD_REGION_EMOJI[region]}
-                    </span>
-                    <span>{addDestinationMessages.regions[region]}</span>
-                  </span>
-                  <span
-                    className="add-destination-region__count"
-                    aria-label={`${visited} of ${total} countries ${regionProgressSuffix}`}
-                  >
-                    {visited} / {total}
-                  </span>
-                </button>
-
-                {expanded ? (
-                  <div className="add-destination-region__panel">
-                    <div className="add-destination-country-grid">
-                      {groups[region].map((country) => renderCountry(country))}
-                    </div>
-                  </div>
-                ) : null}
-              </section>
-            );
-          })}
-        </div>
-      )}
+      </div>
     </div>
   );
 }

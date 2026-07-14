@@ -12,8 +12,8 @@ const COUNTRY_ALIASES: Record<string, Record<string, string>> = {
     [normalizeCityKey("Frankfurt")]: normalizeCityKey("Frankfurt am Main"),
   },
   TR: {
-    [normalizeCityKey("Goreme")]: normalizeCityKey("Cappadocia"),
-    [normalizeCityKey("Göreme")]: normalizeCityKey("Cappadocia"),
+    [normalizeCityKey("Cappadocia")]: normalizeCityKey("Göreme"),
+    [normalizeCityKey("Goreme")]: normalizeCityKey("Göreme"),
     [normalizeCityKey("Sanliurfa")]: normalizeCityKey("Şanlıurfa"),
     [normalizeCityKey("Canakkale")]: normalizeCityKey("Çanakkale"),
   },
@@ -34,7 +34,7 @@ const CANONICAL_DISPLAY: Record<string, Record<string, string>> = {
     [normalizeCityKey("Frankfurt am Main")]: "Frankfurt am Main",
   },
   TR: {
-    [normalizeCityKey("Cappadocia")]: "Cappadocia",
+    [normalizeCityKey("Göreme")]: "Göreme",
     [normalizeCityKey("Şanlıurfa")]: "Şanlıurfa",
     [normalizeCityKey("Çanakkale")]: "Çanakkale",
   },

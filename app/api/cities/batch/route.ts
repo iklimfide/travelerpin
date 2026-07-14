@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
 import { publishCityHubOnPin } from "@/lib/supabase/published-hubs";
@@ -71,8 +71,8 @@ export async function POST(request: Request) {
     city_name: city.city_name,
     country_code: code,
     country_name,
-    latitude: city.latitude,
-    longitude: city.longitude,
+    latitude: city.latitude ?? null,
+    longitude: city.longitude ?? null,
     note: null,
     media_type: null,
     media_url: null,
@@ -88,18 +88,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  for (const city of inserted ?? []) {
-    revalidateCityHubForPin(city.country_code, city.city_name);
-    await publishCityHubOnPin(supabase, city);
-    await notifyFollowersAfterCityPin(supabase, user.id, city);
-  }
-  if ((inserted ?? []).length > 0) {
+  const insertedCities = inserted ?? [];
+  if (insertedCities.length > 0) {
+    // Bust profile cache before the client refetches so My cities stays in sync.
     await revalidateProfileForPin(supabase, user.id);
+
+    after(async () => {
+      for (const city of insertedCities) {
+        revalidateCityHubForPin(city.country_code, city.city_name);
+        await publishCityHubOnPin(supabase, city);
+        await notifyFollowersAfterCityPin(supabase, user.id, city);
+      }
+    });
   }
 
   return NextResponse.json({
-    added: inserted?.length ?? 0,
+    added: insertedCities.length,
     skipped: cities.length - toInsert.length,
-    cities: inserted,
+    cities: insertedCities,
   });
 }

@@ -5,19 +5,25 @@ import { Skeleton } from "@/components/ui/Skeleton";
 export function AddDestinationCountryPickerSkeleton() {
   return (
     <div
-      className="add-destination-step add-destination-step--skeleton"
+      className="add-destination-step add-destination-step--countries add-destination-step--skeleton"
       role="status"
       aria-live="polite"
       aria-busy="true"
       aria-label={addDestinationMessages.loading}
     >
-      <Skeleton className="add-destination-skeleton-search" />
-      <div className="add-destination-region-list add-destination-region-list--skeleton">
-        {ADD_REGION_ORDER.map((region) => (
-          <div key={region} className="add-destination-region add-destination-region--skeleton">
-            <Skeleton className="add-destination-skeleton-region-header" />
+      <div className="add-destination-countries-toolbar">
+        <Skeleton className="add-destination-skeleton-search" />
+      </div>
+      <div className="add-destination-countries-scroll">
+        <div className="add-destination-countries-scroll__inner">
+          <div className="add-destination-region-list add-destination-region-list--skeleton">
+            {ADD_REGION_ORDER.map((region) => (
+              <div key={region} className="add-destination-region add-destination-region--skeleton">
+                <Skeleton className="add-destination-skeleton-region-header" />
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );

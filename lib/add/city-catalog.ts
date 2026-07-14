@@ -1,4 +1,5 @@
 import { isPopularTouristCity } from "@/lib/add/popular-cities-by-country";
+import trCities from "@/lib/add/tr-cities.json";
 import { getCountryCapitalName, matchesCapitalCity } from "@/lib/data/country-capitals";
 import { getMajorCitiesForCountry, type MajorCity } from "@/lib/data/major-cities";
 import { TOURIST_CITIES, type TouristCity } from "@/lib/data/tourist-cities";
@@ -60,46 +61,36 @@ const TIER1_TOURIST_KEYS = new Set(
   [
     "Bodrum",
     "Kusadasi",
+    "Kuşadası",
     "Marmaris",
     "Fethiye",
-    "Alanya",
-    "Side",
-    "Kas",
+    "Çeşme",
     "Cesme",
-    "Cappadocia",
+    "Göreme",
     "Goreme",
-    "Pamukkale",
-    "Ephesus",
     "Giethoorn",
     "Delft",
     "Haarlem",
     "Leiden",
     "Maastricht",
     "Utrecht",
-    "Dalaman",
-    "Kemer",
-    "Safranbolu",
     "Pattaya",
     "Phuket",
     "Patong",
   ].map(normalizeCityKey)
 );
 
+/** Turkey: only these get the Popular badge (provinces stay unlabelled). */
+const TR_POPULAR_CITY_KEYS = new Set(
+  ["Fethiye", "Çeşme", "Cesme", "Bodrum", "Marmaris", "Antalya", "Göreme", "Goreme"].map(
+    normalizeCityKey
+  )
+);
+
 const PINNED_AFTER_CAPITAL: Record<string, string[]> = {
   TH: ["Pattaya", "Phuket", "Patong"],
+  TR: ["Bodrum", "Marmaris", "Fethiye", "Çeşme", "Göreme", "Kuşadası"],
 };
-
-const TR_DISTRICT_NOISE = new Set(
-  [
-    "Bagcilar",
-    "Uskudar",
-    "Kadikoy",
-    "Beyoglu",
-    "Seyhan",
-    "Gaziemir",
-    "Yenisehir",
-  ].map(normalizeCityKey)
-);
 
 const DE_HAMBURG_DISTRICT_NOISE = new Set(
   ["Wandsbek", "Altona", "Eimsbüttel", "Marienthal", "Barmbek", "Harburg"].map(normalizeCityKey)
@@ -172,8 +163,6 @@ function isExcludedCity(
 ): boolean {
   const code = countryCode.toUpperCase();
   const key = normalizeCityKey(cityName);
-
-  if (code === "TR" && TR_DISTRICT_NOISE.has(key)) return true;
 
   const hyphenMatch = cityName.match(/^(.+?)[\s-](Nord|Süd|Sud|Mitte|Ost|West|Hordel)$/iu);
   if (hyphenMatch && parentCityKeys.has(normalizeCityKey(hyphenMatch[1]))) {
@@ -253,8 +242,28 @@ function buildTouristNameKeys(countryCode: string): Set<string> {
   return keys;
 }
 
+function mergeTrCatalogCities(): CatalogEntry[] {
+  const majorByKey = buildMajorCityIndex("TR");
+
+  return (trCities as TouristCity[]).map((city) => ({
+    city: {
+      countryCode: "TR",
+      name: city.name,
+      latitude: city.latitude,
+      longitude: city.longitude,
+    },
+    fromTouristList: true,
+    population: resolvePopulation("TR", city.name, majorByKey),
+    tier1Boost: isTier1TouristBoost(city.name),
+  }));
+}
+
 function mergeCatalogCities(countryCode: string): CatalogEntry[] {
   const code = countryCode.toUpperCase();
+  if (code === "TR") {
+    return mergeTrCatalogCities();
+  }
+
   const majors = getMajorCitiesForCountry(code);
   const majorByKey = buildMajorCityIndex(code);
   const parentCityKeys = buildParentCityKeys(majors);
@@ -305,6 +314,10 @@ function mergeCatalogCities(countryCode: string): CatalogEntry[] {
 function isNotableTouristEntry(entry: CatalogEntry): boolean {
   const key = normalizeCityKey(entry.city.name);
   if (TOURIST_LIST_NOISE.has(key)) return false;
+
+  if (entry.city.countryCode.toUpperCase() === "TR") {
+    return TR_POPULAR_CITY_KEYS.has(key);
+  }
 
   if (entry.tier1Boost || isPopularTouristCity(entry.city.countryCode, entry.city.name)) {
     return true;
