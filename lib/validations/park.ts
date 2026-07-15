@@ -70,6 +70,15 @@ export const parkBatchSchema = z.object({
 
 export type ParkBatchInput = z.infer<typeof parkBatchSchema>;
 
+export const parkBatchDeleteSchema = z.object({
+  ids: z
+    .array(z.string().min(1))
+    .min(1, "Select at least one park")
+    .max(50, "You can delete up to 50 parks at a time"),
+});
+
+export type ParkBatchDeleteInput = z.infer<typeof parkBatchDeleteSchema>;
+
 export const quickParkSchema = z.object({
   park_name: z.string().min(1).max(100).transform(formatCityDisplayName),
   park_type: parkTypeSchema,

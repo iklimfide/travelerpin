@@ -5,7 +5,12 @@ import { findParkHubSlug } from "@/lib/data/park-hubs";
 import type { ParkType, VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
-import { buildProfileTrips, deprioritizeResidenceCountry, type ProfileTrip } from "@/lib/utils/profile-page";
+import {
+  buildProfileTrips,
+  countryLastPinnedAt,
+  deprioritizeResidenceCountry,
+  type ProfileTrip,
+} from "@/lib/utils/profile-page";
 import { resolveResidenceCountryCode } from "@/lib/utils/residence-city";
 
 function countryHubSlug(countryCode: string, countryName?: string): string | null {
@@ -87,6 +92,17 @@ export function buildProfileAllDestinations(
     parksByCountry.set(code, list);
   }
 
+  const lastPinnedByCode = new Map<string, number>();
+  for (const country of countryList) {
+    const code = country.code.toUpperCase();
+    lastPinnedByCode.set(
+      code,
+      new Date(
+        countryLastPinnedAt(code, visitedByCode, citiesByCountry, parksByCountry)
+      ).getTime()
+    );
+  }
+
   const countries: ProfileCountryDestination[] = deprioritizeResidenceCountry(
     countryList.map((country) => {
       const code = country.code.toUpperCase();
@@ -105,7 +121,9 @@ export function buildProfileAllDestinations(
     }),
     residenceCountryCode,
     (country) => country.code,
-    () => 0
+    (a, b) =>
+      (lastPinnedByCode.get(b.code.toUpperCase()) ?? 0) -
+      (lastPinnedByCode.get(a.code.toUpperCase()) ?? 0)
   );
 
   const parks: ProfileParkDestination[] = deprioritizeResidenceCountry(

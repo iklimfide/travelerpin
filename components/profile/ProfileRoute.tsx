@@ -30,8 +30,16 @@ function applyOptimisticRemovals(
   if (detail.removeCityId) {
     visitedCities = visitedCities.filter((city) => city.id !== detail.removeCityId);
   }
+  if (detail.removeCityIds?.length) {
+    const removeSet = new Set(detail.removeCityIds);
+    visitedCities = visitedCities.filter((city) => !removeSet.has(city.id));
+  }
   if (detail.removeParkId) {
     visitedParks = visitedParks.filter((park) => park.id !== detail.removeParkId);
+  }
+  if (detail.removeParkIds?.length) {
+    const removeSet = new Set(detail.removeParkIds);
+    visitedParks = visitedParks.filter((park) => !removeSet.has(park.id));
   }
   if (visitedCities === data.visitedCities && visitedParks === data.visitedParks) {
     return data;
@@ -125,7 +133,12 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
       const target = detail?.username ?? getOwnUsername();
       if (target && target !== normalized) return;
 
-      if (detail?.removeCityId || detail?.removeParkId) {
+      if (
+        detail?.removeCityId ||
+        detail?.removeCityIds?.length ||
+        detail?.removeParkId ||
+        detail?.removeParkIds?.length
+      ) {
         setData((prev) => (prev ? applyOptimisticRemovals(prev, detail) : prev));
       }
 

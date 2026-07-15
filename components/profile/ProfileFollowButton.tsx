@@ -16,6 +16,8 @@ type ProfileFollowButtonProps = {
   canFollow: boolean;
   isLoggedIn: boolean;
   variant?: "default" | "actionBar";
+  /** When false, only the Follow / Following button is rendered. */
+  showStats?: boolean;
 };
 
 export function ProfileFollowButton({
@@ -27,6 +29,7 @@ export function ProfileFollowButton({
   canFollow,
   isLoggedIn,
   variant = "default",
+  showStats = true,
 }: ProfileFollowButtonProps) {
   const router = useRouter();
   const { requireLogin } = useAuthGate();
@@ -57,6 +60,16 @@ export function ProfileFollowButton({
 
   const statsClass = isActionBar ? "profile-follow-stats--compact" : "";
 
+  const statsNode = showStats ? (
+    <ProfileFollowStats
+      username={username}
+      displayName={displayName}
+      followerCount={followerCount}
+      followingCount={followingCount}
+      className={statsClass}
+    />
+  ) : null;
+
   if (!canFollow && !isLoggedIn) {
     if (isActionBar) {
       return (
@@ -69,13 +82,7 @@ export function ProfileFollowButton({
           >
             {profileMessages.follow}
           </button>
-          <ProfileFollowStats
-            username={username}
-            displayName={displayName}
-            followerCount={followerCount}
-            followingCount={followingCount}
-            className={statsClass}
-          />
+          {statsNode}
         </div>
       );
     }
@@ -83,17 +90,13 @@ export function ProfileFollowButton({
     return (
       <div className="profile-follow-row">
         <p className="profile-follow-hint">{profileMessages.followToSeePins}</p>
-        <ProfileFollowStats
-          username={username}
-          displayName={displayName}
-          followerCount={followerCount}
-          followingCount={followingCount}
-        />
+        {statsNode}
       </div>
     );
   }
 
   if (!canFollow) {
+    if (!showStats) return null;
     if (!isActionBar || (followerCount <= 0 && followingCount <= 0)) return null;
 
     return (
@@ -124,13 +127,7 @@ export function ProfileFollowButton({
       >
         {isFollowing ? profileMessages.following : profileMessages.follow}
       </button>
-      <ProfileFollowStats
-        username={username}
-        displayName={displayName}
-        followerCount={followerCount}
-        followingCount={followingCount}
-        className={statsClass}
-      />
+      {statsNode}
     </div>
   );
 }

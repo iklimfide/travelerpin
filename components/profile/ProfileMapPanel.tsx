@@ -1,8 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { TravelMapView } from "@/components/map/TravelMapView";
 import { VisitedCountryFlags } from "@/components/map/VisitedCountryFlags";
+import { DEMO_VISITED_COUNTRIES, DEMO_VISITED_COUNTRY_CODES } from "@/lib/data/demo-countries";
+import { DEMO_WISHLIST_COUNTRY_CODES } from "@/lib/data/demo-wishlist";
+import {
+  SHARE_MAP_SHOWCASE_END_EVENT,
+  SHARE_MAP_SHOWCASE_START_EVENT,
+} from "@/lib/client/share-map-showcase";
 import { worldCoveragePercent } from "@/lib/utils/profile-page";
 import type { VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 
@@ -45,10 +52,31 @@ export function ProfileMapPanel({
 }: ProfileMapPanelProps) {
   const coverage = worldCoveragePercent(countryCount);
   const showHead = Boolean(title || detailLabel);
+  const [shareShowcaseMap, setShareShowcaseMap] = useState(false);
+
+  useEffect(() => {
+    // Share-card PNG capture: temporarily paint Jennifer's denser sample map fill.
+    function onStart() {
+      setShareShowcaseMap(true);
+    }
+    function onEnd() {
+      setShareShowcaseMap(false);
+    }
+
+    window.addEventListener(SHARE_MAP_SHOWCASE_START_EVENT, onStart);
+    window.addEventListener(SHARE_MAP_SHOWCASE_END_EVENT, onEnd);
+    return () => {
+      window.removeEventListener(SHARE_MAP_SHOWCASE_START_EVENT, onStart);
+      window.removeEventListener(SHARE_MAP_SHOWCASE_END_EVENT, onEnd);
+    };
+  }, []);
 
   const panel = (
     <>
-      <div className="profile-mini-map">
+      <div
+        className="profile-mini-map"
+        data-share-map-showcase={shareShowcaseMap ? "1" : undefined}
+      >
         <TravelMapView
           visitedCountryCodes={visitedCountryCodes}
           wishlistCountryCodes={wishlistCountryCodes}
@@ -62,6 +90,12 @@ export function ProfileMapPanel({
           parksCountryCodes={[
             ...new Set(visitedParks.map((p) => p.country_code.toUpperCase())),
           ]}
+          shareFillCountryCodes={
+            shareShowcaseMap ? [...DEMO_VISITED_COUNTRY_CODES] : null
+          }
+          shareFillWishlistCountryCodes={
+            shareShowcaseMap ? [...DEMO_WISHLIST_COUNTRY_CODES] : null
+          }
           isLoggedIn={isLoggedIn}
           canEditMap={canEditMap}
           interactive={false}
@@ -75,10 +109,12 @@ export function ProfileMapPanel({
       </div>
 
       <VisitedCountryFlags
-        visitedCountries={visitedCountries}
-        userCities={visitedCities}
-        userParks={visitedParks}
-        countryCodes={visitedCountryCodes}
+        visitedCountries={shareShowcaseMap ? DEMO_VISITED_COUNTRIES : visitedCountries}
+        userCities={shareShowcaseMap ? [] : visitedCities}
+        userParks={shareShowcaseMap ? [] : visitedParks}
+        countryCodes={
+          shareShowcaseMap ? [...DEMO_VISITED_COUNTRY_CODES] : visitedCountryCodes
+        }
         variant="landing"
         disableCountryLinks={Boolean(allHref)}
         className="border-t border-[#d8e1ef] !px-4 !py-3"

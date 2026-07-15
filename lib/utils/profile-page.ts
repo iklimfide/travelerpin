@@ -91,21 +91,31 @@ export function deprioritizeResidenceCountry<T>(
   });
 }
 
-function countryTripCreatedAt(
+function parseCreatedAtMs(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const ms = new Date(value).getTime();
+  return Number.isFinite(ms) ? ms : null;
+}
+
+/** Latest pin time for a country (country row, city, or park). */
+export function countryLastPinnedAt(
   code: string,
   visitedByCode: Map<string, VisitedCountry>,
   citiesByCountry: Map<string, VisitedCity[]>,
   parksByCountry: Map<string, VisitedPark[]>
 ): string {
-  const visited = visitedByCode.get(code.toUpperCase());
-  if (visited) return visited.created_at;
-
+  const upper = code.toUpperCase();
   const dates: number[] = [];
-  for (const city of citiesByCountry.get(code.toUpperCase()) ?? []) {
-    dates.push(new Date(city.created_at).getTime());
+  const visited = visitedByCode.get(upper);
+  const visitedMs = parseCreatedAtMs(visited?.created_at);
+  if (visitedMs != null) dates.push(visitedMs);
+  for (const city of citiesByCountry.get(upper) ?? []) {
+    const ms = parseCreatedAtMs(city.created_at);
+    if (ms != null) dates.push(ms);
   }
-  for (const park of parksByCountry.get(code.toUpperCase()) ?? []) {
-    dates.push(new Date(park.created_at).getTime());
+  for (const park of parksByCountry.get(upper) ?? []) {
+    const ms = parseCreatedAtMs(park.created_at);
+    if (ms != null) dates.push(ms);
   }
   if (dates.length === 0) return new Date(0).toISOString();
   return new Date(Math.max(...dates)).toISOString();
@@ -117,9 +127,12 @@ function sortProfileTripsByKindAndDate(
 ): ProfileTrip[] {
   const residenceCountryCode = resolveResidenceCountryCode(residence);
 
-  const countries = trips
-    .filter((trip) => trip.kind === "country")
-    .sort(sortTripsByDateDesc);
+  const countries = deprioritizeResidenceCountry(
+    trips.filter((trip) => trip.kind === "country"),
+    residenceCountryCode,
+    (trip) => trip.countryCode,
+    sortTripsByDateDesc
+  );
   const cities = deprioritizeResidenceCountry(
     trips.filter((trip) => trip.kind === "city"),
     residenceCountryCode,
@@ -186,7 +199,7 @@ export function buildProfileTrips(
       countrySlug: countryHubSlug(country.code, country.name),
       imageUrl: null,
       note: null,
-      createdAt: countryTripCreatedAt(code, visitedByCode, citiesByCountry, parksByCountry),
+      createdAt: countryLastPinnedAt(code, visitedByCode, citiesByCountry, parksByCountry),
       badge: null,
     };
   });

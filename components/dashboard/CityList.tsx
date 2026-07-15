@@ -1,12 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CityForm } from "@/components/dashboard/CityForm";
-import { ProfileDestinationCardActions } from "@/components/profile/ProfileDestinationCardActions";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
 import { ProfileCityLink, ProfileCountryLink } from "@/components/profile/ProfilePlaceLink";
 import { useModal } from "@/components/ui/ModalProvider";
-import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
+import { deleteCitiesBatch } from "@/lib/client/city-actions";
 import { getCountryName } from "@/lib/data/countries";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findCityHubSlug } from "@/lib/data/city-hubs";
@@ -15,6 +14,7 @@ import { buildCitySlug } from "@/lib/utils/city-slug";
 import {
   cityMessages,
   commonMessages,
+  formatMessage,
   modalMessages,
   translateCity,
 } from "@/lib/i18n/client-messages";
@@ -37,6 +37,8 @@ type CityListProps = {
   cities: VisitedCity[];
   countries: VisitedCountry[];
   embedded?: boolean;
+  /** When set, filter the list to this country code (e.g. from My Countries remove flow). */
+  initialCountryFilter?: string | null;
 };
 
 function sortCities(cities: VisitedCity[], countryFilter: string): VisitedCity[] {
@@ -53,11 +55,27 @@ function sortCities(cities: VisitedCity[], countryFilter: string): VisitedCity[]
   });
 }
 
-export function CityList({ cities, countries, embedded = false }: CityListProps) {
+export function CityList({
+  cities,
+  countries,
+  embedded = false,
+  initialCountryFilter = null,
+}: CityListProps) {
   const modal = useModal();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
-  const [countryFilter, setCountryFilter] = useState(ALL_COUNTRIES);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [deleting, setDeleting] = useState(false);
+  const [countryFilter, setCountryFilter] = useState(() =>
+    initialCountryFilter?.trim()
+      ? initialCountryFilter.trim().toUpperCase()
+      : ALL_COUNTRIES
+  );
+
+  useEffect(() => {
+    if (!initialCountryFilter?.trim()) return;
+    setCountryFilter(initialCountryFilter.trim().toUpperCase());
+  }, [initialCountryFilter]);
 
   const canAddCity = countries.length > 0;
 
@@ -69,10 +87,16 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
         map.set(code, getCountryName(code));
       }
     }
+    if (initialCountryFilter?.trim()) {
+      const code = initialCountryFilter.trim().toUpperCase();
+      if (!map.has(code)) {
+        map.set(code, getCountryName(code));
+      }
+    }
     return [...map.entries()]
       .map(([code, name]) => ({ code, name }))
       .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
-  }, [cities]);
+  }, [cities, initialCountryFilter]);
 
   const filteredCities = useMemo(() => {
     const list =
@@ -83,24 +107,83 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
     return sortCities(list, countryFilter);
   }, [cities, countryFilter]);
 
-  async function handleDelete(id: string) {
-    const confirmed = await modal.confirm(modalMessages.deleteCityMessage, {
-      title: modalMessages.deleteCityTitle,
-      destructive: true,
-    });
-    if (!confirmed) return;
+  const showCountryFilter = countryOptions.length > 1 || countryFilter !== ALL_COUNTRIES;
+  const selectedCount = useMemo(
+    () => filteredCities.filter((city) => selectedIds.has(city.id)).length,
+    [filteredCities, selectedIds]
+  );
+  const allFilteredSelected =
+    filteredCities.length > 0 && selectedCount === filteredCities.length;
 
-    const res = await fetch(`/api/cities/${id}`, { method: "DELETE" });
-    if (!res.ok) {
-      if (res.status === 404) {
-        notifyProfileDataChanged(undefined, { removeCityId: id });
-        return;
+  useEffect(() => {
+    const visible = new Set(filteredCities.map((city) => city.id));
+    setSelectedIds((prev) => {
+      let changed = false;
+      const next = new Set<string>();
+      for (const id of prev) {
+        if (visible.has(id)) next.add(id);
+        else changed = true;
       }
-      const data = await res.json();
-      await modal.alert(data.error ?? "Failed to delete city", { variant: "error" });
+      return changed ? next : prev;
+    });
+  }, [filteredCities]);
+
+  function toggleCity(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    if (allFilteredSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        for (const city of filteredCities) next.delete(city.id);
+        return next;
+      });
       return;
     }
-    notifyProfileDataChanged(undefined, { removeCityId: id });
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      for (const city of filteredCities) next.add(city.id);
+      return next;
+    });
+  }
+
+  async function handleDeleteSelected() {
+    const ids = filteredCities
+      .filter((city) => selectedIds.has(city.id))
+      .map((city) => city.id);
+    if (ids.length === 0 || deleting) return;
+
+    const confirmed = await modal.confirm(
+      ids.length === 1
+        ? modalMessages.deleteCityMessage
+        : cityMessages.deleteSelectedMessage,
+      {
+        title:
+          ids.length === 1
+            ? modalMessages.deleteCityTitle
+            : cityMessages.deleteSelectedTitle,
+        destructive: true,
+      }
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      const result = await deleteCitiesBatch({ ids });
+      if (!result.ok) {
+        await modal.alert(result.error, { variant: "error" });
+        return;
+      }
+      setSelectedIds(new Set());
+    } finally {
+      setDeleting(false);
+    }
   }
 
   if (adding) {
@@ -150,7 +233,7 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
         <p className={embedded ? "profile-owner-empty" : "text-sm text-slate-500"}>{cityMessages.empty}</p>
       ) : (
         <>
-          {countryOptions.length > 1 ? (
+          {showCountryFilter ? (
             <div className="max-w-xs">
               <label
                 htmlFor="city-list-country-filter"
@@ -179,96 +262,145 @@ export function CityList({ cities, countries, embedded = false }: CityListProps)
               {cityMessages.noCitiesInCountry}
             </p>
           ) : (
-            <ul
-              className={
-                embedded
-                  ? "profile-owner-table max-h-[min(28rem,60vh)] divide-y overflow-y-auto scrollbar-thin"
-                  : "max-h-[min(28rem,60vh)] divide-y divide-slate-800 overflow-y-auto rounded-xl border border-slate-700 scrollbar-thin"
-              }
-            >
-              {filteredCities.map((city) => {
-                const displayName = canonicalCityName(city.country_code, city.city_name);
-                const countryName = getCountryName(city.country_code);
-                const visitSummary = formatVisitDatesSummary(
-                  city.visit_dates ?? [],
-                  (count) => translateCity("visitCount", { count }),
-                  getIntlLocale()
-                );
-                const citySlug =
-                  findCityHubSlug(city.country_code, displayName) ?? buildCitySlug(displayName);
-                const countrySlug = resolveCountryHubSlug(city.country_code, countryName);
-                const fullTitle =
-                  countryFilter === ALL_COUNTRIES
-                    ? `${displayName}, ${countryName}`
-                    : displayName;
-
-                return (
-                <li
-                  key={city.id}
-                  className={`flex items-center justify-between gap-3 px-4 py-3${embedded ? " profile-owner-table-row" : ""}`}
+            <>
+              <div
+                className={`flex flex-wrap items-center justify-between gap-2 text-xs${
+                  embedded ? " text-[#6b7f96]" : " text-slate-500"
+                }`}
+              >
+                <span>
+                  {formatMessage(cityMessages.cityCount, {
+                    count: filteredCities.length,
+                    selected: selectedCount,
+                  })}
+                </span>
+                <button
+                  type="button"
+                  onClick={toggleSelectAll}
+                  className={
+                    embedded
+                      ? "font-medium text-[var(--profile-primary)] hover:underline"
+                      : "text-blue-400 hover:text-blue-300"
+                  }
                 >
-                  <div className="min-w-0 flex-1">
-                    <p
-                      className={`truncate font-medium ${embedded ? "profile-owner-show-primary" : "text-white"}`}
-                      title={fullTitle}
+                  {allFilteredSelected ? cityMessages.deselectAll : cityMessages.selectAll}
+                </button>
+              </div>
+
+              <ul
+                className={
+                  embedded
+                    ? "profile-owner-table max-h-[min(28rem,60vh)] divide-y overflow-y-auto scrollbar-thin"
+                    : "max-h-[min(28rem,60vh)] divide-y divide-slate-800 overflow-y-auto rounded-xl border border-slate-700 scrollbar-thin"
+                }
+              >
+                {filteredCities.map((city) => {
+                  const displayName = canonicalCityName(city.country_code, city.city_name);
+                  const countryName = getCountryName(city.country_code);
+                  const visitSummary = formatVisitDatesSummary(
+                    city.visit_dates ?? [],
+                    (count) => translateCity("visitCount", { count }),
+                    getIntlLocale()
+                  );
+                  const citySlug =
+                    findCityHubSlug(city.country_code, displayName) ?? buildCitySlug(displayName);
+                  const countrySlug = resolveCountryHubSlug(city.country_code, countryName);
+                  const fullTitle =
+                    countryFilter === ALL_COUNTRIES
+                      ? `${displayName}, ${countryName}`
+                      : displayName;
+                  const checked = selectedIds.has(city.id);
+
+                  return (
+                    <li
+                      key={city.id}
+                      className={`flex items-center justify-between gap-3 px-4 py-3${embedded ? " profile-owner-table-row" : ""}`}
                     >
-                      <ProfileCityLink
-                        slug={citySlug}
-                        name={displayName}
-                        className={ownerHubLinkClass(embedded)}
-                        title={displayName}
-                      />
-                      {countryFilter === ALL_COUNTRIES ? (
-                        <>
-                          <span className={embedded ? "profile-owner-show-secondary" : "font-normal text-slate-400"}>
-                            ,{" "}
+                      <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          disabled={deleting}
+                          onChange={() => toggleCity(city.id)}
+                          className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-600 bg-slate-900 text-blue-500 focus:ring-blue-500/40 disabled:opacity-60"
+                          aria-label={displayName}
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span
+                            className={`block truncate font-medium ${embedded ? "profile-owner-show-primary" : "text-white"}`}
+                            title={fullTitle}
+                          >
+                            <ProfileCityLink
+                              slug={citySlug}
+                              name={displayName}
+                              className={ownerHubLinkClass(embedded)}
+                              title={displayName}
+                            />
+                            {countryFilter === ALL_COUNTRIES ? (
+                              <>
+                                <span
+                                  className={
+                                    embedded
+                                      ? "profile-owner-show-secondary"
+                                      : "font-normal text-slate-400"
+                                  }
+                                >
+                                  ,{" "}
+                                </span>
+                                <ProfileCountryLink
+                                  slug={countrySlug}
+                                  name={countryName}
+                                  className={ownerHubLinkClass(embedded, true)}
+                                  title={countryName}
+                                />
+                              </>
+                            ) : null}
                           </span>
-                          <ProfileCountryLink
-                            slug={countrySlug}
-                            name={countryName}
-                            className={ownerHubLinkClass(embedded, true)}
-                            title={countryName}
-                          />
-                        </>
-                      ) : null}
-                    </p>
-                    {visitSummary ? (
-                      <p className="text-xs text-slate-500">{visitSummary}</p>
-                    ) : city.media_type ? (
-                      <p className="text-xs text-slate-500 capitalize">{city.media_type}</p>
-                    ) : null}
-                  </div>
-                  <div className="flex shrink-0 gap-2">
-                    {embedded ? (
-                      <ProfileDestinationCardActions
-                        onEdit={() => setEditingId(city.id)}
-                        onRemove={() => handleDelete(city.id)}
-                        editLabel={commonMessages.edit}
-                        removeLabel={commonMessages.delete}
-                      />
-                    ) : (
-                      <>
+                          {visitSummary ? (
+                            <span className="mt-0.5 block text-xs text-slate-500">{visitSummary}</span>
+                          ) : city.media_type ? (
+                            <span className="mt-0.5 block text-xs text-slate-500 capitalize">
+                              {city.media_type}
+                            </span>
+                          ) : null}
+                        </span>
+                      </label>
+                      <div className="flex shrink-0 gap-2">
                         <button
                           type="button"
                           onClick={() => setEditingId(city.id)}
-                          className="text-sm text-blue-400 hover:text-blue-300"
+                          disabled={deleting}
+                          className={
+                            embedded
+                              ? "profile-destination-card-actions__btn"
+                              : "text-sm text-blue-400 hover:text-blue-300 disabled:opacity-60"
+                          }
                         >
                           {commonMessages.edit}
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(city.id)}
-                          className="text-sm text-red-400 hover:text-red-300"
-                        >
-                          {commonMessages.delete}
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </li>
-              );
-              })}
-            </ul>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <button
+                type="button"
+                onClick={() => void handleDeleteSelected()}
+                disabled={deleting || selectedCount === 0}
+                className={
+                  embedded
+                    ? "w-full rounded-xl bg-[#dc2626] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#b91c1c] disabled:cursor-not-allowed disabled:opacity-50"
+                    : "w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                }
+              >
+                {deleting
+                  ? commonMessages.loading
+                  : selectedCount > 0
+                    ? formatMessage(cityMessages.deleteSelectedCount, { count: selectedCount })
+                    : cityMessages.deleteSelected}
+              </button>
+            </>
           )}
         </>
       )}

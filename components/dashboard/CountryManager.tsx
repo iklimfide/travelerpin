@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
-import { countryMessages, wishlistMessages } from "@/lib/i18n/client-messages";
+import { countryMessages, formatMessage, modalMessages, wishlistMessages } from "@/lib/i18n/client-messages";
 import { CountryCityPickerSheet } from "@/components/map/CountryCityPickerSheet";
 import { ProfileCountryLink } from "@/components/profile/ProfilePlaceLink";
 import { COUNTRY_LIST, searchCountries } from "@/lib/data/countries";
@@ -23,6 +23,8 @@ type CountryManagerProps = {
   visitedCities: VisitedCity[];
   visitedParks?: VisitedPark[];
   embedded?: boolean;
+  /** Opens My Cities edit for this country when remove is blocked by places. */
+  onEditCountryCities?: (countryCode: string, countryName: string) => void;
 };
 
 type CountryRow = {
@@ -42,6 +44,7 @@ export function CountryManager({
   visitedCities,
   visitedParks = [],
   embedded = false,
+  onEditCountryCities,
 }: CountryManagerProps) {
   const router = useRouter();
   const modal = useModal();
@@ -118,12 +121,26 @@ export function CountryManager({
     return true;
   }
 
+  function showRemovePlacesFirst(row: CountryRow) {
+    if (onEditCountryCities) {
+      toast.showAction({
+        message: countryMessages.removePlacesFirst,
+        actionLabel: formatMessage(countryMessages.editCitiesInCountry, { name: row.name }),
+        dismissLabel: modalMessages.ok,
+        accent: "blue",
+        onAction: () => onEditCountryCities(row.code, row.name),
+      });
+      return;
+    }
+    toast.show(countryMessages.removePlacesFirst);
+  }
+
   async function removeVisited(row: CountryRow) {
     if (
       row.visitedViaPlacesOnly ||
       countryHasMappedPlaces(row.code, visitedCities, visitedParks)
     ) {
-      toast.show(countryMessages.removePlacesFirst);
+      showRemovePlacesFirst(row);
       return false;
     }
     if (!row.visitedId) return false;
@@ -131,7 +148,7 @@ export function CountryManager({
     const result = await removeVisitedCountry(row.visitedId);
     if (!result.ok) {
       if (isCountryRemoveBlockedByPlacesError(result.error)) {
-        toast.show(countryMessages.removePlacesFirst);
+        showRemovePlacesFirst(row);
         return false;
       }
       await modal.alert(result.error, { variant: "error" });

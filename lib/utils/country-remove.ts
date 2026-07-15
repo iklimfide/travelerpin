@@ -15,6 +15,8 @@ export function isCountryRemoveBlockedByPlacesError(error: string | undefined): 
   const lower = error.toLowerCase();
   return (
     (lower.includes("remove cities") && lower.includes("first")) ||
-    (lower.includes("delete") && lower.includes("cities or parks"))
+    (lower.includes("delete") && lower.includes("cities or parks")) ||
+    (lower.includes("delete the cities") && lower.includes("this region")) ||
+    (lower.includes("delete the cities") && lower.includes("this country"))
   );
 }

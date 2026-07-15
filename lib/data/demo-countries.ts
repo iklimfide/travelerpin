@@ -9,6 +9,9 @@ const DEMO_VISITED_CODES = [
   "US", "CA", "MX", "BR", "AR", "CL", "CO",
   "JP", "TH", "VN", "IN", "AE", "KR", "SG", "ID",
   "MA", "EG", "ZA", "KE", "TZ",
+  // West Africa
+  "SN", "GH", "NG", "CI", "ML",
+  "RU",
   "AU", "NZ",
 ] as const;
 

@@ -19,6 +19,8 @@ type ProfileIdentityCardProps = {
   displayName: string;
   username: string;
   bio: string | null;
+  residence?: string | null;
+  residenceHref?: string | null;
   instagramUrl?: string | null;
   /** Demo/sample profiles: show this toast instead of opening Instagram. */
   instagramSampleNotice?: string | null;
@@ -30,7 +32,6 @@ type ProfileIdentityCardProps = {
     cities: string;
     nationalParks: string;
     themeParks: string;
-    share: string;
   };
   profileHref?: string;
   followUsername?: string;
@@ -48,6 +49,8 @@ export function ProfileIdentityCard({
   displayName,
   username,
   bio,
+  residence = null,
+  residenceHref = null,
   instagramUrl,
   instagramSampleNotice,
   stats,
@@ -65,6 +68,7 @@ export function ProfileIdentityCard({
   const [avatarLightboxOpen, setAvatarLightboxOpen] = useState(false);
   const avatarImageSrc = resolvePublicMediaImageUrl(avatarUrl) ?? avatarUrl;
   const canExpandAvatar = Boolean(avatarImageSrc);
+  const residenceLabel = residence?.trim() || null;
 
   const avatarNode = (
     <ProfileAvatar
@@ -76,14 +80,19 @@ export function ProfileIdentityCard({
     />
   );
 
+  const residencePill = residenceLabel ? (
+    <>
+      <span aria-hidden>📍</span>
+      <span>{residenceLabel}</span>
+    </>
+  ) : null;
+
   return (
     <section className="profile-card">
       <ProfileActionButtons
         username={username}
         displayName={displayName}
-        stats={stats}
         isOwnProfile={isOwnProfile}
-        shareLabel={labels.share}
         followUsername={followUsername}
         followState={followState}
         canFollow={canFollow}
@@ -108,6 +117,25 @@ export function ProfileIdentityCard({
           avatarNode
         )}
       </div>
+
+      {residencePill ? (
+        residenceHref ? (
+          <Link
+            href={residenceHref}
+            className="profile-city-pill profile-city-pill--link absolute top-[14px] right-[14px] z-[1] max-w-[min(40%,10rem)] rounded-2xl !bg-[#e8eef5] !px-2.5 !py-1.5 !text-[0.7rem] !font-semibold !leading-[1.2] !text-[#64748b] shadow-sm !backdrop-blur-none hover:!bg-[#dce5f0] hover:!text-[#2563eb] sm:max-w-[12rem]"
+            title={residenceLabel ?? undefined}
+          >
+            {residencePill}
+          </Link>
+        ) : (
+          <div
+            className="profile-city-pill absolute top-[14px] right-[14px] z-[1] max-w-[min(40%,10rem)] rounded-2xl !bg-[#e8eef5] !px-2.5 !py-1.5 !text-[0.7rem] !font-semibold !leading-[1.2] !text-[#64748b] shadow-sm !backdrop-blur-none sm:max-w-[12rem]"
+            title={residenceLabel ?? undefined}
+          >
+            {residencePill}
+          </div>
+        )
+      ) : null}
 
       {avatarLightboxOpen && avatarImageSrc ? (
         <ProfileAvatarLightbox

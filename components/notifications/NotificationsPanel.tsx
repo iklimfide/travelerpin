@@ -252,28 +252,33 @@ export function NotificationsPanel({
   return (
     <div className={`notifications-page${isModal ? " notifications-page--modal" : ""}`}>
       <div
-        className={`notifications-page__head${isModal ? " notifications-page__head--modal" : ""}`}
+        className={`notifications-page__head${isModal ? " notifications-page__head--modal" : ""}${
+          detailGroup ? " notifications-page__head--detail" : ""
+        }`}
       >
         {detailGroup ? (
           <>
-            <div className="notifications-page__detail-head">
+            <button
+              type="button"
+              className="notifications-page__back"
+              onClick={() => setDetailGroup(null)}
+            >
+              ← {notificationMessages.pin_batch_back}
+            </button>
+            {notificationActorProfileHref(detailGroup.representative) ? (
               <button
                 type="button"
-                className="notifications-page__back"
-                onClick={() => setDetailGroup(null)}
+                id="notifications-modal-title"
+                className="notifications-page__title notifications-page__actor-name w-full min-w-0 cursor-pointer border-0 bg-transparent p-0 text-inherit hover:underline"
+                onClick={handleOpenProfile}
               >
-                ← {notificationMessages.pin_batch_back}
+                {detailName}
               </button>
+            ) : (
               <h1 id="notifications-modal-title" className="notifications-page__title">
-                {notificationMessages.pin_batch_title}
+                {detailName}
               </h1>
-              <p className="notifications-page__detail-summary">
-                {formatMessage(notificationMessages.pin_batch, {
-                  name: detailName,
-                  count: detailGroup.pinCount,
-                })}
-              </p>
-            </div>
+            )}
             {isModal && onClose ? (
               <div className="notifications-page__actions">
                 <button
@@ -287,7 +292,9 @@ export function NotificationsPanel({
                   </svg>
                 </button>
               </div>
-            ) : null}
+            ) : (
+              <span className="notifications-page__head-spacer" aria-hidden="true" />
+            )}
           </>
         ) : (
           <>
@@ -353,17 +360,6 @@ export function NotificationsPanel({
                 </li>
               ))}
             </ul>
-            {notificationActorProfileHref(detailGroup.representative) ? (
-              <div className="notifications-page__detail-footer">
-                <button
-                  type="button"
-                  className="notifications-page__profile-link"
-                  onClick={handleOpenProfile}
-                >
-                  {notificationMessages.pin_batch_view_profile}
-                </button>
-              </div>
-            ) : null}
           </>
         ) : loading ? (
           <p className="notifications-page__empty">{notificationMessages.loading}</p>

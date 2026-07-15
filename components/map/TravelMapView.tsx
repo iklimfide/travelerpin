@@ -57,6 +57,10 @@ type TravelMapViewProps = {
   profileHeader?: ReactNode;
   /** Public profile card: map only, flags/legend rendered outside. */
   compactProfile?: boolean;
+  /** When set, WorldMap fill uses these codes (e.g. share-card showcase) without touching local pin state. */
+  shareFillCountryCodes?: string[] | null;
+  /** Wishlist (orange) fill used together with shareFillCountryCodes. */
+  shareFillWishlistCountryCodes?: string[] | null;
 };
 
 export function TravelMapView({
@@ -75,6 +79,8 @@ export function TravelMapView({
   homeLayout = false,
   profileHeader,
   compactProfile = false,
+  shareFillCountryCodes = null,
+  shareFillWishlistCountryCodes = null,
 }: TravelMapViewProps) {
   const editable = canEditMap ?? isLoggedIn;
   const modal = useModal();
@@ -500,8 +506,16 @@ export function TravelMapView({
         </div>
       ) : null}
       <WorldMap
-        visitedCountryCodes={[...visitedCodeSet]}
-        wishlistCountryCodes={localWishlistCountryCodes}
+        visitedCountryCodes={
+          shareFillCountryCodes && shareFillCountryCodes.length > 0
+            ? shareFillCountryCodes
+            : [...visitedCodeSet]
+        }
+        wishlistCountryCodes={
+          shareFillCountryCodes && shareFillCountryCodes.length > 0
+            ? (shareFillWishlistCountryCodes ?? [])
+            : localWishlistCountryCodes
+        }
         onCountryClick={interactive ? handleCountryClick : undefined}
         interactive={interactive}
         continent={continent}

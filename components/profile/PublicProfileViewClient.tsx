@@ -108,8 +108,6 @@ export function PublicProfileViewClient({
           className="profile-story-capture"
         >
           <ProfileHeroCover
-            residence={profile.residence}
-            residenceHref={residenceHref}
             heroTitle={heroTitle}
             heroSubtitle={
               isOwnProfile
@@ -124,6 +122,8 @@ export function PublicProfileViewClient({
               displayName={displayName}
               username={profile.username}
               bio={profile.bio}
+              residence={profile.residence}
+              residenceHref={residenceHref}
               instagramUrl={profile.instagram_url}
               instagramSampleNotice={
                 isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
@@ -137,7 +137,6 @@ export function PublicProfileViewClient({
                 cities: t("statCitiesShort"),
                 nationalParks: t("statNationalParksShort"),
                 themeParks: t("statThemeParksShort"),
-                share: t("shareProfile"),
               }}
               followUsername={!isOwnProfile ? profile.username : undefined}
               followState={followState}

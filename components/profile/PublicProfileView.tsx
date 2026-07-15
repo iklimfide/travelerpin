@@ -118,8 +118,6 @@ export async function PublicProfileView({
           className="profile-story-capture"
         >
           <ProfileHeroCover
-            residence={profile.residence}
-            residenceHref={residenceHref}
             heroTitle={heroTitle}
             heroSubtitle={
               isOwnProfile
@@ -134,6 +132,8 @@ export async function PublicProfileView({
               displayName={displayName}
               username={profile.username}
               bio={profile.bio}
+              residence={profile.residence}
+              residenceHref={residenceHref}
               instagramUrl={profile.instagram_url}
               instagramSampleNotice={
                 isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
@@ -147,7 +147,6 @@ export async function PublicProfileView({
                 cities: t("statCitiesShort"),
                 nationalParks: t("statNationalParksShort"),
                 themeParks: t("statThemeParksShort"),
-                share: t("shareProfile"),
               }}
               followUsername={!isOwnProfile ? profile.username : undefined}
               followState={followState}

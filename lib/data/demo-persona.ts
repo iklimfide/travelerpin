@@ -6,7 +6,7 @@ export const DEMO_PERSONA = {
   bio: "Weekend city breaks, Natura&Parks, and theme parks — pinning every stop along the way.",
   residence: "Los Angeles",
   instagramUrl: "https://www.instagram.com/jennifer.travels/",
-  visitedCountries: 35,
+  visitedCountries: 41,
   visitedCities: 124,
   wishlistCountries: 8,
   nationalParks: 10,

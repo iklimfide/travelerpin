@@ -17,3 +17,12 @@ export const cityBatchSchema = z.object({
 });
 
 export type CityBatchInput = z.infer<typeof cityBatchSchema>;
+
+export const cityBatchDeleteSchema = z.object({
+  ids: z
+    .array(z.string().min(1))
+    .min(1, "Select at least one city")
+    .max(50, "You can delete up to 50 cities at a time"),
+});
+
+export type CityBatchDeleteInput = z.infer<typeof cityBatchDeleteSchema>;

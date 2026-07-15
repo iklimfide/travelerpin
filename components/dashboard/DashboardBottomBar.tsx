@@ -12,7 +12,6 @@ import { NotificationsNavLink } from "@/components/notifications/NotificationsNa
 import { useIsDesktopDashboardNav } from "@/lib/hooks/useIsDesktopDashboardNav";
 import { useVisualViewportFixed } from "@/lib/hooks/useVisualViewportFixed";
 import {
-  addDestinationMessages,
   commonMessages,
   dashboardNavMessages,
 } from "@/lib/i18n/client-messages";
@@ -58,17 +57,6 @@ function MapPinIcon() {
   );
 }
 
-function GlobeIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width={22} height={22} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M3 12h18" />
-      <path d="M12 3c2.5 2.5 3.5 5.5 3.5 9s-1 6.5-3.5 9" strokeLinecap="round" />
-      <path d="M12 3c-2.5 2.5-3.5 5.5-3.5 9s1 6.5 3.5 9" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function PlusIcon() {
   return (
     <svg viewBox="0 0 24 24" width={26} height={26} aria-hidden fill="none" stroke="currentColor" strokeWidth={2.4}>
@@ -110,7 +98,7 @@ function NavLink({
 export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { open: openAddDestination, isOpen: addDestinationOpen } = useAddDestination();
+  const { open: openAddDestination } = useAddDestination();
   const barRef = useRef<HTMLElement>(null);
   const [mounted, setMounted] = useState(false);
   const isDesktopNav = useIsDesktopDashboardNav();
@@ -216,21 +204,6 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
           </>
         ) : (
           <>
-            <button
-              type="button"
-                className={`dashboard-bottom-bar__item${
-                  addDestinationOpen || pathname === "/c/add"
-                    ? " dashboard-bottom-bar__item--active"
-                    : ""
-                }`}
-              aria-label={addDestinationMessages.selectCountryTitle}
-              onClick={handleAddClick}
-            >
-              <span className="dashboard-bottom-bar__icon">
-                <GlobeIcon />
-              </span>
-              <span className="dashboard-bottom-bar__label">{dashboardNavMessages.addVisited}</span>
-            </button>
             <button
               type="button"
               className={`dashboard-bottom-bar__item${

@@ -17,7 +17,7 @@ type CachedTravelStatePayload = {
   data: TravelStateData;
 };
 
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3;
 const OWN_USERNAME_KEY = "tp:own-username";
 
 export type CachedProfilePayload = {
@@ -112,7 +112,9 @@ export const TRAVEL_STATE_UPDATED_EVENT = "tp:travel-state-updated";
 export type ProfileDataStaleDetail = {
   username?: string;
   removeCityId?: string;
+  removeCityIds?: string[];
   removeParkId?: string;
+  removeParkIds?: string[];
 };
 
 /** Merge travel-state pins into the own-profile session cache (map ↔ My cities sync). */
@@ -179,7 +181,12 @@ export function notifyNextRouteChanged(stops: NextRouteStop[]): void {
 /** Bust profile session cache and ask mounted profile views to refetch. */
 export function notifyProfileDataChanged(
   username?: string | null,
-  options?: { removeCityId?: string; removeParkId?: string }
+  options?: {
+    removeCityId?: string;
+    removeCityIds?: string[];
+    removeParkId?: string;
+    removeParkIds?: string[];
+  }
 ): void {
   const normalized = username?.trim().toLowerCase() ?? getOwnUsername() ?? undefined;
 
@@ -193,7 +200,9 @@ export function notifyProfileDataChanged(
       detail: {
         username: normalized,
         removeCityId: options?.removeCityId,
+        removeCityIds: options?.removeCityIds,
         removeParkId: options?.removeParkId,
+        removeParkIds: options?.removeParkIds,
       } satisfies ProfileDataStaleDetail,
     })
   );

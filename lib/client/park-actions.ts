@@ -1,5 +1,5 @@
-import type { ParkBatchInput } from "@/lib/validations/park";
-import type { ParkInput } from "@/lib/validations/park";
+import type { ParkBatchDeleteInput, ParkBatchInput, ParkInput } from "@/lib/validations/park";
+import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
 import { offerShareAfterPin } from "@/lib/client/share-pin-prompt";
 
 function parkPinKind(
@@ -64,4 +64,29 @@ export async function addParksBatch(
     added,
     skipped: (data.skipped as number) ?? 0,
   };
+}
+
+export async function deleteParksBatch(
+  payload: ParkBatchDeleteInput
+): Promise<{ ok: true; deleted: number; ids: string[] } | { ok: false; error: string }> {
+  const res = await fetch("/api/parks/batch", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    return { ok: false, error: (data.error as string) ?? "Failed to delete parks" };
+  }
+
+  const data = await res.json();
+  const ids = Array.isArray(data.ids) ? (data.ids as string[]) : payload.ids;
+  const deleted = (data.deleted as number) ?? ids.length;
+
+  if (deleted > 0) {
+    notifyProfileDataChanged(undefined, { removeParkIds: ids });
+  }
+
+  return { ok: true, deleted, ids };
 }

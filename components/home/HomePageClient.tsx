@@ -18,13 +18,14 @@ export function HomePageClient() {
   const [data, setData] = useState<PublicProfilePageData | null>(null);
 
   useEffect(() => {
-    let cached = readHomeCache();
-    if (!cached) {
-      cached = buildStaticDemoPublicProfilePage();
-      writeHomeCache(cached);
-    }
-
-    setData(cached);
+    // Always rebuild demo map data from code so sample profile stays in sync.
+    const fresh = buildStaticDemoPublicProfilePage();
+    const previous = readHomeCache();
+    const next = previous
+      ? { ...fresh, isLoggedIn: previous.isLoggedIn }
+      : fresh;
+    writeHomeCache(next);
+    setData(next);
 
     const supabase = createClient();
     let cancelled = false;

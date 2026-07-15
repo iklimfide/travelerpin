@@ -5876,12 +5876,54 @@ a.save-destination-modal__name-link:hover {
   align-items: center;
   justify-content: center;
   margin-bottom: 0;
-  padding: 18px 48px 14px;
+  padding: 14px 12px;
   background: #2563eb;
 }
 
+.notifications-page__head--detail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  position: relative;
+}
+
+.notifications-page__head--detail .notifications-page__back {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.notifications-page__head--detail .notifications-page__title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: calc(100% - 9.5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notifications-page__head--detail .notifications-page__actions,
+.notifications-page__head--detail .notifications-page__head-spacer {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.notifications-page__head-spacer {
+  display: block;
+  width: 36px;
+  height: 36px;
+}
+
 .notifications-page__head--modal .notifications-page__title {
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   text-align: center;
   color: #fff;
   font-size: 1.15rem;
@@ -5901,10 +5943,10 @@ a.save-destination-modal__name-link:hover {
 }
 
 .notifications-page__head--modal .notifications-page__actions {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+  position: static;
+  right: auto;
+  top: auto;
+  transform: none;
 }
 
 .notifications-page__head--modal .notifications-page__close {

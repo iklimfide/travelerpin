@@ -124,7 +124,7 @@ export function ProfileFollowListModal({
         aria-labelledby={titleId}
         className="profile-followers-modal__sheet"
       >
-        <div className="profile-followers-modal__head">
+        <div className="profile-all-destinations-modal__head">
           <h2 id={titleId} className="profile-followers-modal__title">
             {title}
           </h2>

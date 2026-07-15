@@ -1,51 +1,25 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 type ProfileHeroCoverProps = {
-  residence: string | null;
-  residenceHref?: string | null;
   heroTitle: ReactNode;
   heroSubtitle: string;
 };
 
-export function ProfileHeroCover({
-  residence,
-  residenceHref,
-  heroTitle,
-  heroSubtitle,
-}: ProfileHeroCoverProps) {
-  const residencePill = residence ? (
-    <>
-      <span aria-hidden>📍</span>
-      <span>{residence}</span>
-    </>
-  ) : null;
+export function ProfileHeroCover({ heroTitle, heroSubtitle }: ProfileHeroCoverProps) {
+  const titleText = typeof heroTitle === "string" ? heroTitle : undefined;
 
   return (
     <header className="profile-hero">
       <div className="profile-hero-card">
         <div className="profile-hero-overlay" aria-hidden />
 
-        <div className="profile-hero-top">
-          {residencePill ? (
-            residenceHref ? (
-              <Link
-                href={residenceHref}
-                className="profile-city-pill profile-city-pill--link"
-                title={residence ?? undefined}
-              >
-                {residencePill}
-              </Link>
-            ) : (
-              <div className="profile-city-pill" title={residence ?? undefined}>
-                {residencePill}
-              </div>
-            )
-          ) : null}
-        </div>
-
-        <div className="profile-hero-title">
-          <h1>{heroTitle}</h1>
+        <div className="profile-hero-title !max-w-full">
+          <h1
+            className="!mb-1.5 !overflow-hidden !text-ellipsis !whitespace-nowrap"
+            title={titleText}
+          >
+            {heroTitle}
+          </h1>
           <p>{heroSubtitle}</p>
         </div>
       </div>

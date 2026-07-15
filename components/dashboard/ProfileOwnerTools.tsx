@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { CountryManager } from "@/components/dashboard/CountryManager";
 import { CityList } from "@/components/dashboard/CityList";
 import { ParkList } from "@/components/dashboard/ParkList";
@@ -31,8 +31,19 @@ export function ProfileOwnerTools({
   const [countriesPanel, setCountriesPanel] = useState<ProfileOwnerPanelMode>("closed");
   const [citiesPanel, setCitiesPanel] = useState<ProfileOwnerPanelMode>("closed");
   const [parksPanel, setParksPanel] = useState<ProfileOwnerPanelMode>("closed");
+  const [citiesCountryFilter, setCitiesCountryFilter] = useState<string | null>(null);
 
   const visitedCountryCount = visitedCodes.length;
+
+  const openCitiesForCountry = useCallback((countryCode: string) => {
+    setCountriesPanel("closed");
+    setParksPanel("closed");
+    setCitiesCountryFilter(countryCode.toUpperCase());
+    setCitiesPanel("edit");
+    requestAnimationFrame(() => {
+      document.getElementById("dashboard-add")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, []);
 
   return (
     <div id="dashboard-add" className="profile-dashboard-add-anchor profile-owner-tools">
@@ -53,6 +64,7 @@ export function ProfileOwnerTools({
             visitedCountryCodes={visitedCodes}
             visitedCities={visitedCities}
             visitedParks={visitedParks}
+            onEditCountryCities={(countryCode) => openCitiesForCountry(countryCode)}
           />
         }
       />
@@ -61,9 +73,19 @@ export function ProfileOwnerTools({
         title={profileMessages.myCities}
         countLabel={profileMessages.ownerCountCities.replace("{count}", String(visitedCities.length))}
         panel={citiesPanel}
-        onPanelChange={setCitiesPanel}
+        onPanelChange={(mode) => {
+          setCitiesPanel(mode);
+          if (mode === "closed") setCitiesCountryFilter(null);
+        }}
         onAdd={() => openAddModal("cities")}
-        editContent={<CityList embedded cities={visitedCities} countries={visitedCountries} />}
+        editContent={
+          <CityList
+            embedded
+            cities={visitedCities}
+            countries={visitedCountries}
+            initialCountryFilter={citiesCountryFilter}
+          />
+        }
       />
 
       <ProfileOwnerSection

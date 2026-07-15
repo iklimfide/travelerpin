@@ -1,4 +1,4 @@
-import type { CityBatchInput } from "@/lib/validations/city-batch";
+import type { CityBatchDeleteInput, CityBatchInput } from "@/lib/validations/city-batch";
 import type { CityInput } from "@/lib/validations/city";
 import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
 import { offerShareAfterPin } from "@/lib/client/share-pin-prompt";
@@ -57,4 +57,29 @@ export async function addCitiesBatch(
     added,
     skipped: (data.skipped as number) ?? 0,
   };
+}
+
+export async function deleteCitiesBatch(
+  payload: CityBatchDeleteInput
+): Promise<{ ok: true; deleted: number; ids: string[] } | { ok: false; error: string }> {
+  const res = await fetch("/api/cities/batch", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    return { ok: false, error: (data.error as string) ?? "Failed to delete cities" };
+  }
+
+  const data = await res.json();
+  const ids = Array.isArray(data.ids) ? (data.ids as string[]) : payload.ids;
+  const deleted = (data.deleted as number) ?? ids.length;
+
+  if (deleted > 0) {
+    notifyProfileDataChanged(undefined, { removeCityIds: ids });
+  }
+
+  return { ok: true, deleted, ids };
 }
