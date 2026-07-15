@@ -12,18 +12,22 @@ import type { ParkType } from "@/types/database";
 
 export { sortCitiesForAddModal };
 
+/**
+ * Public overlay tables are RLS-readable with the anon key.
+ * Prefer anon for reads so a bad/missing SERVICE_ROLE_KEY cannot wipe
+ * popularity/exclusions on production (admin writes stay on service role).
+ */
 function createOverlayReadClient() {
-  const admin = createAdminSupabaseClient();
-  if (admin) return admin;
-
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (url && anon) {
+    return createSupabaseClient(url, anon, {
+      global: { fetch: fetchWithTimeout },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+  }
 
-  return createSupabaseClient(url, key, {
-    global: { fetch: fetchWithTimeout },
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  return createAdminSupabaseClient();
 }
 
 export type YpCatalogCityRow = {
