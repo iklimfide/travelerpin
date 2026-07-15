@@ -16,8 +16,8 @@ type ParkPageActionsProps = {
   parkType: ParkType;
   countryCode: string;
   countryName: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number | null;
+  longitude?: number | null;
   visitorState: ParkVisitorState;
   loginHref: string;
   labels: {
@@ -81,8 +81,7 @@ export function ParkPageActions({
           park_type: parkType,
           country_code: countryCode,
           country_name: countryName,
-          latitude,
-          longitude,
+          ...(latitude != null && longitude != null ? { latitude, longitude } : {}),
         });
 
         if (!result.ok) {

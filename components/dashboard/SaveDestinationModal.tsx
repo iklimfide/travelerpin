@@ -103,8 +103,8 @@ type DestinationRow =
       countryName: string;
       parkName: string;
       parkType: ParkType;
-      latitude: number;
-      longitude: number;
+      latitude?: number;
+      longitude?: number;
     };
 
 export type SaveDestinationInitialTab = "popular" | "countries" | "cities" | "parks" | "want";
@@ -227,12 +227,19 @@ function visitedParkToRow(park: VisitedPark): DestinationRow {
     countryName: park.country_name,
     parkName: park.park_name,
     parkType: park.park_type as ParkType,
-    latitude: park.latitude ?? 0,
-    longitude: park.longitude ?? 0,
+    ...(park.latitude != null && park.longitude != null
+      ? { latitude: park.latitude, longitude: park.longitude }
+      : {}),
   };
 }
 
 function parkToRow(park: SearchParkResult | PopularPark): DestinationRow {
+  const hasCoords =
+    "latitude" in park &&
+    "longitude" in park &&
+    typeof park.latitude === "number" &&
+    typeof park.longitude === "number";
+
   return {
     id: destinationId("park", park.countryCode, park.parkName, park.parkType),
     kind: "park",
@@ -242,8 +249,7 @@ function parkToRow(park: SearchParkResult | PopularPark): DestinationRow {
     countryName: park.countryName,
     parkName: park.parkName,
     parkType: park.parkType,
-    latitude: park.latitude,
-    longitude: park.longitude,
+    ...(hasCoords ? { latitude: park.latitude, longitude: park.longitude } : {}),
   };
 }
 
@@ -1094,8 +1100,9 @@ export function SaveDestinationModal({
             park_type: row.parkType,
             country_code: row.countryCode,
             country_name: row.countryName,
-            latitude: row.latitude,
-            longitude: row.longitude,
+            ...(row.latitude != null && row.longitude != null
+              ? { latitude: row.latitude, longitude: row.longitude }
+              : {}),
           };
 
           if (added) {

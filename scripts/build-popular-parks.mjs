@@ -31,14 +31,12 @@ function loadTouristParks() {
         /^([^,]+),([^,]+),"((?:[^"]|"")*)","((?:[^"]|"")*)",([^,]+),([^,]+)$/
       );
       if (!match) return null;
-      const [, parkType, countryCode, countryNameRaw, nameRaw, latitude, longitude] = match;
+      const [, parkType, countryCode, countryNameRaw, nameRaw] = match;
       return {
         parkType,
         countryCode,
         countryName: countryNameRaw.replace(/""/g, '"'),
         name: nameRaw.replace(/""/g, '"'),
-        latitude: Number.parseFloat(latitude),
-        longitude: Number.parseFloat(longitude),
       };
     })
     .filter(Boolean);
@@ -73,20 +71,13 @@ for (const entry of source) {
   const label = entry.label;
   const lookup = entry.lookup ?? label;
 
-  if (
-    entry.latitude != null &&
-    entry.longitude != null &&
-    Number.isFinite(entry.latitude) &&
-    Number.isFinite(entry.longitude)
-  ) {
+  if (entry.parkName) {
     destinations.push({
       parkType,
       countryCode: code,
-      parkName: entry.parkName ?? label,
+      parkName: entry.parkName,
       label,
       countryName: countryName(code),
-      latitude: entry.latitude,
-      longitude: entry.longitude,
     });
     continue;
   }
@@ -95,6 +86,13 @@ for (const entry of source) {
 
   if (!park) {
     missing.push(`${parkType} ${code} ${lookup}`);
+    destinations.push({
+      parkType,
+      countryCode: code,
+      parkName: label,
+      label,
+      countryName: countryName(code),
+    });
     continue;
   }
 
@@ -104,13 +102,11 @@ for (const entry of source) {
     parkName: park.name,
     label,
     countryName: countryName(code),
-    latitude: park.latitude,
-    longitude: park.longitude,
   });
 }
 
 if (missing.length > 0) {
-  console.warn("Missing popular parks:", missing.join("; "));
+  console.warn("Missing tourist-park name match (using label):", missing.join("; "));
 }
 
 const tsPath = path.join(root, "lib/data/popular-parks.ts");
@@ -124,8 +120,6 @@ export type PopularPark = {
   parkName: string;
   label: string;
   countryName: string;
-  latitude: number;
-  longitude: number;
 };
 
 export const POPULAR_PARKS: PopularPark[] = ${JSON.stringify(destinations, null, 2)};

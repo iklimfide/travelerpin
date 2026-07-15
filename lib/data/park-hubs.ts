@@ -16,8 +16,8 @@ export type ParkHub = {
   countryCode: string;
   countrySlug: string;
   countryName: string;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 const bySlug = new Map<string, ParkHub>();
@@ -29,8 +29,8 @@ function registerPark(input: {
   parkType: ParkType;
   countryCode: string;
   countryName: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number | null;
+  longitude?: number | null;
 }) {
   const slug = buildParkSlug(input.name, input.countryCode);
   if (bySlug.has(slug)) return;
@@ -45,8 +45,8 @@ function registerPark(input: {
     countryCode: input.countryCode.toUpperCase(),
     countrySlug: countryHub?.slug ?? input.countryCode.toLowerCase(),
     countryName: countryHub?.name ?? input.countryName,
-    latitude: input.latitude,
-    longitude: input.longitude,
+    latitude: input.latitude ?? null,
+    longitude: input.longitude ?? null,
   });
 }
 
@@ -59,8 +59,6 @@ for (const park of POPULAR_PARKS) {
     parkType: park.parkType,
     countryCode: park.countryCode,
     countryName: park.countryName,
-    latitude: park.latitude,
-    longitude: park.longitude,
   });
 }
 
@@ -97,8 +95,8 @@ export function hubFromParkFields(fields: {
   parkType: ParkType;
   countryCode: string;
   countryName: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number | null;
+  longitude?: number | null;
 }): ParkHub {
   return ensureParkHubFromTouristPark({
     name: fields.parkName,
@@ -121,8 +119,8 @@ export function ensureParkHubFromTouristPark(park: {
   parkType: ParkType;
   countryCode: string;
   countryName: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number | null;
+  longitude?: number | null;
 }): ParkHub {
   const slug = buildParkSlug(park.name, park.countryCode);
   const existing = bySlug.get(slug);

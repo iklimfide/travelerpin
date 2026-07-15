@@ -26,8 +26,6 @@ function parkPayload(park: PopularPark) {
     park_type: park.parkType,
     country_code: park.countryCode,
     country_name: park.countryName,
-    latitude: park.latitude,
-    longitude: park.longitude,
   };
 }
 

@@ -8,8 +8,6 @@ export type PopularPark = {
   parkName: string;
   label: string;
   countryName: string;
-  latitude: number;
-  longitude: number;
 };
 
 export const POPULAR_PARKS: PopularPark[] = [
@@ -18,377 +16,293 @@ export const POPULAR_PARKS: PopularPark[] = [
     "countryCode": "US",
     "parkName": "Yellowstone",
     "label": "Yellowstone",
-    "countryName": "United States (United States of America)",
-    "latitude": 44.6,
-    "longitude": -110.5
+    "countryName": "United States (United States of America)"
   },
   {
     "parkType": "national_park",
     "countryCode": "US",
     "parkName": "Grand Canyon",
     "label": "Grand Canyon",
-    "countryName": "United States (United States of America)",
-    "latitude": 36.0553,
-    "longitude": -112.122
+    "countryName": "United States (United States of America)"
   },
   {
     "parkType": "national_park",
     "countryCode": "US",
     "parkName": "Yosemite",
     "label": "Yosemite",
-    "countryName": "United States (United States of America)",
-    "latitude": 37.7425,
-    "longitude": -119.5375
+    "countryName": "United States (United States of America)"
   },
   {
     "parkType": "national_park",
     "countryCode": "CA",
     "parkName": "Banff",
     "label": "Banff",
-    "countryName": "Canada",
-    "latitude": 51.166666666,
-    "longitude": -115.55
+    "countryName": "Canada"
   },
   {
     "parkType": "national_park",
     "countryCode": "ZA",
     "parkName": "Kruger",
     "label": "Kruger",
-    "countryName": "South Africa",
-    "latitude": -24.011389,
-    "longitude": 31.485278
+    "countryName": "South Africa"
   },
   {
     "parkType": "national_park",
     "countryCode": "TZ",
     "parkName": "Serengeti National Park",
     "label": "Serengeti",
-    "countryName": "Tanzania (United Republic of Tanzania)",
-    "latitude": -2.3333333,
-    "longitude": 34.8333333
+    "countryName": "Tanzania (United Republic of Tanzania)"
   },
   {
     "parkType": "national_park",
     "countryCode": "CH",
     "parkName": "Swiss",
     "label": "Swiss National Park",
-    "countryName": "Switzerland",
-    "latitude": 46.7,
-    "longitude": 10.095
+    "countryName": "Switzerland"
   },
   {
     "parkType": "national_park",
     "countryCode": "DE",
     "parkName": "Black Forest",
     "label": "Black Forest",
-    "countryName": "Germany",
-    "latitude": 48.56111111,
-    "longitude": 8.22138889
+    "countryName": "Germany"
   },
   {
     "parkType": "national_park",
     "countryCode": "DE",
     "parkName": "Berchtesgaden",
     "label": "Berchtesgaden",
-    "countryName": "Germany",
-    "latitude": 47.57,
-    "longitude": 12.96
+    "countryName": "Germany"
   },
   {
     "parkType": "national_park",
     "countryCode": "FR",
     "parkName": "Pyrénées",
     "label": "Pyrenees",
-    "countryName": "France",
-    "latitude": 42.8275,
-    "longitude": -0.175833333
+    "countryName": "France"
   },
   {
     "parkType": "national_park",
     "countryCode": "FR",
     "parkName": "Vanoise",
     "label": "Vanoise",
-    "countryName": "France",
-    "latitude": 45.3333,
-    "longitude": 6.83333
+    "countryName": "France"
   },
   {
     "parkType": "national_park",
     "countryCode": "ES",
     "parkName": "Teide",
     "label": "Teide",
-    "countryName": "Spain",
-    "latitude": 28.2647,
-    "longitude": -16.6181
+    "countryName": "Spain"
   },
   {
     "parkType": "national_park",
     "countryCode": "HR",
     "parkName": "Plitvice Lakes",
     "label": "Plitvice Lakes",
-    "countryName": "Croatia",
-    "latitude": 44.880445,
-    "longitude": 15.616035
+    "countryName": "Croatia"
   },
   {
     "parkType": "national_park",
     "countryCode": "GB",
     "parkName": "Lake District",
     "label": "Lake District",
-    "countryName": "UK (United Kingdom)",
-    "latitude": 54.45,
-    "longitude": -3.1
+    "countryName": "UK (United Kingdom)"
   },
   {
     "parkType": "national_park",
     "countryCode": "NO",
     "parkName": "Jotunheimen",
     "label": "Jotunheimen",
-    "countryName": "Norway",
-    "latitude": 61.5,
-    "longitude": 8.366666666
+    "countryName": "Norway"
   },
   {
     "parkType": "national_park",
     "countryCode": "TR",
     "parkName": "Göreme",
     "label": "Göreme",
-    "countryName": "Turkey (Türkiye)",
-    "latitude": 38.652777777,
-    "longitude": 34.863055555
+    "countryName": "Turkey (Türkiye)"
   },
   {
     "parkType": "national_park",
     "countryCode": "TR",
     "parkName": "Uludağ",
     "label": "Uludağ",
-    "countryName": "Turkey (Türkiye)",
-    "latitude": 40.07222222,
-    "longitude": 29.22138889
+    "countryName": "Turkey (Türkiye)"
   },
   {
     "parkType": "national_park",
     "countryCode": "TH",
     "parkName": "James Bond Island (Ko Tapu)",
     "label": "James Bond Island",
-    "countryName": "Thailand",
-    "latitude": 8.274444,
-    "longitude": 98.501667
+    "countryName": "Thailand"
   },
   {
     "parkType": "national_park",
     "countryCode": "TH",
     "parkName": "Phi Phi Islands",
     "label": "Phi Phi Islands",
-    "countryName": "Thailand",
-    "latitude": 7.7407,
-    "longitude": 98.7784
+    "countryName": "Thailand"
   },
   {
     "parkType": "theme_park",
     "countryCode": "US",
     "parkName": "Disneyland",
     "label": "Disneyland",
-    "countryName": "United States (United States of America)",
-    "latitude": 33.809,
-    "longitude": -117.919
+    "countryName": "United States (United States of America)"
   },
   {
     "parkType": "theme_park",
     "countryCode": "US",
     "parkName": "Walt Disney World Resort",
     "label": "Walt Disney World",
-    "countryName": "United States (United States of America)",
-    "latitude": 28.3722,
-    "longitude": -81.5494
+    "countryName": "United States (United States of America)"
   },
   {
     "parkType": "theme_park",
     "countryCode": "US",
     "parkName": "Universal Studios Florida",
     "label": "Universal Studios",
-    "countryName": "United States (United States of America)",
-    "latitude": 28.475,
-    "longitude": -81.47
+    "countryName": "United States (United States of America)"
   },
   {
     "parkType": "theme_park",
     "countryCode": "NL",
     "parkName": "Efteling",
     "label": "Efteling",
-    "countryName": "The Netherlands (Netherlands)",
-    "latitude": 51.650277777,
-    "longitude": 5.048055555
+    "countryName": "The Netherlands (Netherlands)"
   },
   {
     "parkType": "theme_park",
     "countryCode": "DE",
     "parkName": "Europa-Park",
     "label": "Europa-Park",
-    "countryName": "Germany",
-    "latitude": 48.268333,
-    "longitude": 7.720833
+    "countryName": "Germany"
   },
   {
     "parkType": "theme_park",
     "countryCode": "DE",
     "parkName": "Phantasialand",
     "label": "Phantasialand",
-    "countryName": "Germany",
-    "latitude": 50.8,
-    "longitude": 6.879444444
+    "countryName": "Germany"
   },
   {
     "parkType": "theme_park",
     "countryCode": "FR",
     "parkName": "Disneyland Paris",
     "label": "Disneyland Paris",
-    "countryName": "France",
-    "latitude": 48.868719444,
-    "longitude": 2.7818
+    "countryName": "France"
   },
   {
     "parkType": "theme_park",
     "countryCode": "FR",
     "parkName": "Parc Astérix",
     "label": "Parc Astérix",
-    "countryName": "France",
-    "latitude": 49.135277777,
-    "longitude": 2.571666666
+    "countryName": "France"
   },
   {
     "parkType": "theme_park",
     "countryCode": "ES",
     "parkName": "PortAventura Park",
     "label": "PortAventura",
-    "countryName": "Spain",
-    "latitude": 41.087777777,
-    "longitude": 1.157777777
+    "countryName": "Spain"
   },
   {
     "parkType": "theme_park",
     "countryCode": "IT",
     "parkName": "Gardaland",
     "label": "Gardaland",
-    "countryName": "Italy",
-    "latitude": 45.45722,
-    "longitude": 10.71083
+    "countryName": "Italy"
   },
   {
     "parkType": "theme_park",
     "countryCode": "GB",
     "parkName": "Alton Towers",
     "label": "Alton Towers",
-    "countryName": "UK (United Kingdom)",
-    "latitude": 52.990555555,
-    "longitude": -1.8925
+    "countryName": "UK (United Kingdom)"
   },
   {
     "parkType": "theme_park",
     "countryCode": "SE",
     "parkName": "Liseberg",
     "label": "Liseberg",
-    "countryName": "Sweden",
-    "latitude": 57.695555555,
-    "longitude": 11.99
+    "countryName": "Sweden"
   },
   {
     "parkType": "theme_park",
     "countryCode": "DK",
     "parkName": "Legoland Billund",
     "label": "Legoland",
-    "countryName": "Denmark",
-    "latitude": 55.73555556,
-    "longitude": 9.12611111
+    "countryName": "Denmark"
   },
   {
     "parkType": "theme_park",
     "countryCode": "BE",
     "parkName": "Plopsaland Belgium",
     "label": "Plopsaland",
-    "countryName": "Belgium",
-    "latitude": 51.079722,
-    "longitude": 2.596944
+    "countryName": "Belgium"
   },
   {
     "parkType": "theme_park",
     "countryCode": "JP",
     "parkName": "Tokyo Disneyland",
     "label": "Tokyo Disneyland",
-    "countryName": "Japan",
-    "latitude": 35.632777777,
-    "longitude": 139.880555555
+    "countryName": "Japan"
   },
   {
     "parkType": "botanical_garden",
     "countryCode": "TH",
     "parkName": "Nong Nooch",
     "label": "Nong Nooch",
-    "countryName": "Thailand",
-    "latitude": 12.766666666,
-    "longitude": 100.933333333
+    "countryName": "Thailand"
   },
   {
     "parkType": "national_park",
     "countryCode": "US",
     "parkName": "Niagara Falls",
     "label": "Niagara Falls",
-    "countryName": "United States (United States of America)",
-    "latitude": 43.0962,
-    "longitude": -79.0377
+    "countryName": "United States (United States of America)"
   },
   {
     "parkType": "national_park",
     "countryCode": "FR",
     "parkName": "French Alps",
     "label": "French Alps",
-    "countryName": "France",
-    "latitude": 45.9237,
-    "longitude": 6.8694
+    "countryName": "France"
   },
   {
     "parkType": "national_park",
     "countryCode": "IT",
     "parkName": "Lake Garda",
     "label": "Lake Garda",
-    "countryName": "Italy",
-    "latitude": 45.6049,
-    "longitude": 10.635
+    "countryName": "Italy"
   },
   {
     "parkType": "national_park",
     "countryCode": "GB",
     "parkName": "Stonehenge",
     "label": "Stonehenge",
-    "countryName": "UK (United Kingdom)",
-    "latitude": 51.1789,
-    "longitude": -1.8262
+    "countryName": "UK (United Kingdom)"
   },
   {
     "parkType": "national_park",
     "countryCode": "EG",
     "parkName": "Dead Sea",
     "label": "Dead Sea",
-    "countryName": "Egypt",
-    "latitude": 29.5,
-    "longitude": 34.9
+    "countryName": "Egypt"
   },
   {
     "parkType": "national_park",
     "countryCode": "IT",
     "parkName": "Vesuvius",
     "label": "Vesuvius",
-    "countryName": "Italy",
-    "latitude": 40.817,
-    "longitude": 14.427
+    "countryName": "Italy"
   },
   {
     "parkType": "national_park",
     "countryCode": "GB",
     "parkName": "Scottish Highlands",
     "label": "Scottish Highlands",
-    "countryName": "UK (United Kingdom)",
-    "latitude": 57.12,
-    "longitude": -4.71
+    "countryName": "UK (United Kingdom)"
   }
 ];

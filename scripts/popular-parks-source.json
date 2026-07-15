@@ -8,9 +8,7 @@
     "parkType": "national_park",
     "label": "Serengeti",
     "countryCode": "TZ",
-    "parkName": "Serengeti National Park",
-    "latitude": -2.3333333,
-    "longitude": 34.8333333
+    "parkName": "Serengeti National Park"
   },
   { "parkType": "national_park", "label": "Swiss National Park", "countryCode": "CH", "lookup": "Swiss" },
   { "parkType": "national_park", "label": "Black Forest", "countryCode": "DE", "lookup": "Black Forest" },
@@ -27,17 +25,13 @@
     "parkType": "national_park",
     "label": "James Bond Island",
     "countryCode": "TH",
-    "parkName": "James Bond Island (Ko Tapu)",
-    "latitude": 8.274444,
-    "longitude": 98.501667
+    "parkName": "James Bond Island (Ko Tapu)"
   },
   {
     "parkType": "national_park",
     "label": "Phi Phi Islands",
     "countryCode": "TH",
-    "parkName": "Phi Phi Islands",
-    "latitude": 7.7407,
-    "longitude": 98.7784
+    "parkName": "Phi Phi Islands"
   },
 
   { "parkType": "theme_park", "label": "Disneyland", "countryCode": "US", "lookup": "Disneyland" },
@@ -47,9 +41,7 @@
     "parkType": "theme_park",
     "label": "Efteling",
     "countryCode": "NL",
-    "parkName": "Efteling",
-    "latitude": 51.650277777,
-    "longitude": 5.048055555
+    "parkName": "Efteling"
   },
   { "parkType": "theme_park", "label": "Europa-Park", "countryCode": "DE", "lookup": "Europa-Park" },
   { "parkType": "theme_park", "label": "Phantasialand", "countryCode": "DE", "lookup": "Phantasialand" },
@@ -69,11 +61,11 @@
     "lookup": "Nong Nooch"
   },
 
-  { "parkType": "national_park", "label": "Niagara Falls", "countryCode": "US", "parkName": "Niagara Falls", "latitude": 43.0962, "longitude": -79.0377 },
-  { "parkType": "national_park", "label": "French Alps", "countryCode": "FR", "parkName": "French Alps", "latitude": 45.9237, "longitude": 6.8694 },
-  { "parkType": "national_park", "label": "Lake Garda", "countryCode": "IT", "parkName": "Lake Garda", "latitude": 45.6049, "longitude": 10.635 },
-  { "parkType": "national_park", "label": "Stonehenge", "countryCode": "GB", "parkName": "Stonehenge", "latitude": 51.1789, "longitude": -1.8262 },
-  { "parkType": "national_park", "label": "Dead Sea", "countryCode": "EG", "parkName": "Dead Sea", "latitude": 29.5, "longitude": 34.9 },
+  { "parkType": "national_park", "label": "Niagara Falls", "countryCode": "US", "parkName": "Niagara Falls" },
+  { "parkType": "national_park", "label": "French Alps", "countryCode": "FR", "parkName": "French Alps" },
+  { "parkType": "national_park", "label": "Lake Garda", "countryCode": "IT", "parkName": "Lake Garda" },
+  { "parkType": "national_park", "label": "Stonehenge", "countryCode": "GB", "parkName": "Stonehenge" },
+  { "parkType": "national_park", "label": "Dead Sea", "countryCode": "EG", "parkName": "Dead Sea" },
   { "parkType": "national_park", "label": "Vesuvius", "countryCode": "IT", "lookup": "Vesuvius" },
-  { "parkType": "national_park", "label": "Scottish Highlands", "countryCode": "GB", "parkName": "Scottish Highlands", "latitude": 57.12, "longitude": -4.71 }
+  { "parkType": "national_park", "label": "Scottish Highlands", "countryCode": "GB", "parkName": "Scottish Highlands" }
 ]
