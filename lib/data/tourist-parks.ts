@@ -42,17 +42,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "AL",
     "countryName": "Albania",
+    "name": "- Fir of Hotova",
+    "latitude": 40.30361111,
+    "longitude": 20.41111111
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "AL",
+    "countryName": "Albania",
     "name": "Albanian Alps",
     "latitude": 42.4554857,
     "longitude": 19.6381898
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AL",
-    "countryName": "Albania",
-    "name": "Botanical Gardens of Tirana",
-    "latitude": 41.30991111,
-    "longitude": 19.80604167
   },
   {
     "parkType": "national_park",
@@ -106,25 +106,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "AL",
     "countryName": "Albania",
-    "name": "National Park - Fir of Hotova",
-    "latitude": 40.30361111,
-    "longitude": 20.41111111
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "AL",
-    "countryName": "Albania",
     "name": "Prespa",
     "latitude": 40.825555555,
     "longitude": 20.898611111
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "AL",
-    "countryName": "Albania",
-    "name": "Q125993818",
-    "latitude": 41.783333333,
-    "longitude": 20.183333333
   },
   {
     "parkType": "national_park",
@@ -149,6 +133,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Thethi",
     "latitude": 42.395833333,
     "longitude": 19.774444444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "AL",
+    "countryName": "Albania",
+    "name": "Tirana",
+    "latitude": 41.30991111,
+    "longitude": 19.80604167
   },
   {
     "parkType": "national_park",
@@ -199,14 +191,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 3.008333333
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "DZ",
-    "countryName": "Algeria",
-    "name": "Botanical Garden of Hamma",
-    "latitude": 36.748,
-    "longitude": 3.076
-  },
-  {
     "parkType": "national_park",
     "countryCode": "DZ",
     "countryName": "Algeria",
@@ -247,6 +231,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 5.1
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DZ",
+    "countryName": "Algeria",
+    "name": "Hamma",
+    "latitude": 36.748,
+    "longitude": 3.076
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "DZ",
     "countryName": "Algeria",
@@ -261,14 +253,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Mostaland",
     "latitude": 35.955793132,
     "longitude": 0.0991824
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DZ",
-    "countryName": "Algeria",
-    "name": "Q3258881",
-    "latitude": 35.55,
-    "longitude": 6.17
   },
   {
     "parkType": "national_park",
@@ -594,25 +578,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AR",
     "countryName": "Argentina",
-    "name": "Jardín botánico de la municipalidad de Córdoba",
+    "name": "La municipalidad de Córdoba",
     "latitude": -31.38638889,
     "longitude": -64.24972222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AR",
-    "countryName": "Argentina",
-    "name": "Jardín Botánico Lorenzo Parodi",
-    "latitude": -31.5842478,
-    "longitude": -60.7073271
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AR",
-    "countryName": "Argentina",
-    "name": "Jardín Botánico Lucien Hauman",
-    "latitude": -34.59077,
-    "longitude": -58.481549722
   },
   {
     "parkType": "botanical_garden",
@@ -663,6 +631,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -65.65
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "AR",
+    "countryName": "Argentina",
+    "name": "Lorenzo Parodi",
+    "latitude": -31.5842478,
+    "longitude": -60.7073271
+  },
+  {
     "parkType": "national_park",
     "countryCode": "AR",
     "countryName": "Argentina",
@@ -693,6 +669,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Los Glaciares",
     "latitude": -50.330530387,
     "longitude": -73.234164314
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "AR",
+    "countryName": "Argentina",
+    "name": "Lucien Hauman",
+    "latitude": -34.59077,
+    "longitude": -58.481549722
   },
   {
     "parkType": "national_park",
@@ -757,54 +741,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Predelta",
     "latitude": -32.15,
     "longitude": -60.63333333
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "AR",
-    "countryName": "Argentina",
-    "name": "Q5701913",
-    "latitude": -37.8231876,
-    "longitude": -57.6214449
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AR",
-    "countryName": "Argentina",
-    "name": "Q5926737",
-    "latitude": -27.4085241,
-    "longitude": -55.8963747
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AR",
-    "countryName": "Argentina",
-    "name": "Q5926739",
-    "latitude": -34.613208333,
-    "longitude": -58.674558333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AR",
-    "countryName": "Argentina",
-    "name": "Q5926748",
-    "latitude": -31.38333333,
-    "longitude": -58.03333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AR",
-    "countryName": "Argentina",
-    "name": "Q5926758",
-    "latitude": -31.0768,
-    "longitude": -64.4919
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AR",
-    "countryName": "Argentina",
-    "name": "Q5926793",
-    "latitude": -38.064933,
-    "longitude": -61.97215
   },
   {
     "parkType": "national_park",
@@ -1050,7 +986,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Albury Botanic Gardens",
+    "name": "Albury",
     "latitude": -36.081,
     "longitude": 146.909
   },
@@ -1234,7 +1170,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Auburn Botanical Gardens",
+    "name": "Auburn",
     "latitude": -33.8588,
     "longitude": 151.017
   },
@@ -1266,7 +1202,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Australian Inland Botanic Gardens",
+    "name": "Australian Inland",
     "latitude": -34.136,
     "longitude": 142.139
   },
@@ -1274,7 +1210,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Australian National Botanic Gardens",
+    "name": "Australian National",
     "latitude": -35.278888888,
     "longitude": 149.109166666
   },
@@ -1338,7 +1274,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Ballarat Botanical Gardens",
+    "name": "Ballarat",
     "latitude": -37.5467,
     "longitude": 143.822
   },
@@ -1554,7 +1490,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Benalla Botanical Gardens",
+    "name": "Benalla",
     "latitude": -36.5533,
     "longitude": 145.978
   },
@@ -1594,7 +1530,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Bendigo Botanic Gardens",
+    "name": "Bendigo",
     "latitude": -36.723972222,
     "longitude": 144.310083333
   },
@@ -1874,7 +1810,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Booderee Botanic Gardens",
+    "name": "Booderee",
     "latitude": -35.1445908,
     "longitude": 150.6735325
   },
@@ -2082,7 +2018,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Brookvale Park Botanic Gardens",
+    "name": "Brookvale Park",
     "latitude": -27.4420062,
     "longitude": 151.6259638
   },
@@ -2170,7 +2106,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Bundaberg Botanic Gardens",
+    "name": "Bundaberg",
     "latitude": -24.8541085,
     "longitude": 152.3371065
   },
@@ -2202,7 +2138,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Buninyong botanic gardens",
+    "name": "Buninyong",
     "latitude": -37.65,
     "longitude": 143.884
   },
@@ -2266,7 +2202,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Burrendong Botanic Garden and Arboretum",
+    "name": "Burrendong and Arboretum",
     "latitude": -32.698611111,
     "longitude": 149.101111111
   },
@@ -2282,7 +2218,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Burringbar Botanic Gardens",
+    "name": "Burringbar",
     "latitude": -28.4486119,
     "longitude": 153.4440215
   },
@@ -2338,7 +2274,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Cairns Botanic Gardens",
+    "name": "Cairns",
     "latitude": -16.8994,
     "longitude": 145.74837
   },
@@ -2362,7 +2298,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Camperdown botanic gardens",
+    "name": "Camperdown",
     "latitude": -38.23695,
     "longitude": 143.11773
   },
@@ -2546,7 +2482,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Castlemaine botanic gardens",
+    "name": "Castlemaine",
     "latitude": -37.05262,
     "longitude": 144.21557
   },
@@ -2650,7 +2586,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "City Botanic Gardens",
+    "name": "City",
     "latitude": -27.4747,
     "longitude": 153.03
   },
@@ -2746,7 +2682,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Colac Botanic Gardens",
+    "name": "Colac",
     "latitude": -38.3329,
     "longitude": 143.591
   },
@@ -2810,7 +2746,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Cooktown Botanic Gardens",
+    "name": "Cooktown",
     "latitude": -15.4720391,
     "longitude": 145.260049
   },
@@ -3194,7 +3130,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Derby Botanic Gardens",
+    "name": "Derby",
     "latitude": -17.3035226,
     "longitude": 123.628317
   },
@@ -3530,7 +3466,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Emerald Botanic Gardens",
+    "name": "Emerald",
     "latitude": -23.5314446,
     "longitude": 148.1655102
   },
@@ -3682,7 +3618,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Fairhill Native Plants and Botanic Gardens",
+    "name": "Fairhill Native Plants and",
     "latitude": -26.5372594,
     "longitude": 152.9639093
   },
@@ -3802,7 +3738,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Flecker Botanical Gardens",
+    "name": "Flecker",
     "latitude": -16.8991,
     "longitude": 145.7476
   },
@@ -4026,7 +3962,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Gayndah Botanical Gardens and Pioneer Place",
+    "name": "Gayndah and Pioneer Place",
     "latitude": -25.6231672,
     "longitude": 151.637449
   },
@@ -4034,7 +3970,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Geelong Botanic Gardens",
+    "name": "Geelong",
     "latitude": -38.15,
     "longitude": 144.3781
   },
@@ -4058,7 +3994,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "George Brown Darwin Botanic Gardens",
+    "name": "George Brown Darwin",
     "latitude": -12.445,
     "longitude": 130.836
   },
@@ -4066,7 +4002,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "George Pentland Botanic Gardens",
+    "name": "George Pentland",
     "latitude": -38.1529499,
     "longitude": 145.1287975
   },
@@ -4146,7 +4082,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Gisborne Botanic Gardens",
+    "name": "Gisborne",
     "latitude": -37.48414,
     "longitude": 144.58824
   },
@@ -4218,7 +4154,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Gold Coast Regional Botanic Gardens",
+    "name": "Gold Coast Regional",
     "latitude": -28.0083,
     "longitude": 153.385
   },
@@ -4306,7 +4242,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Goondiwindi Botanic Gardens of the Western Woodlands",
+    "name": "Goondiwindi of the Western Woodlands",
     "latitude": -28.53184,
     "longitude": 150.27982
   },
@@ -4418,7 +4354,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Great Sandy Region Botanic Gardens",
+    "name": "Great Sandy Region",
     "latitude": -25.2900856,
     "longitude": 152.8945259
   },
@@ -4482,7 +4418,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Greenhills Adventure Park",
+    "name": "Greenhills",
     "latitude": -35.528371,
     "longitude": 138.624082
   },
@@ -4642,7 +4578,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Hamilton Botanic Gardens",
+    "name": "Hamilton",
     "latitude": -37.7468,
     "longitude": 142.024
   },
@@ -4842,7 +4778,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Horsham botanic gardens",
+    "name": "Horsham",
     "latitude": -36.7,
     "longitude": 142.2
   },
@@ -4890,7 +4826,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Hunter Region Botanic Gardens",
+    "name": "Hunter Region",
     "latitude": -32.8013609,
     "longitude": 151.7174078
   },
@@ -4954,7 +4890,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Ingham Memorial Botanic Gardens",
+    "name": "Ingham Memorial",
     "latitude": -18.6518139,
     "longitude": 146.159477
   },
@@ -5266,7 +5202,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Keilor Botanic Gardens",
+    "name": "Keilor",
     "latitude": -37.7129,
     "longitude": 144.857
   },
@@ -5346,7 +5282,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Kholo Botanic Gardens",
+    "name": "Kholo",
     "latitude": -27.5671072,
     "longitude": 152.7410994
   },
@@ -5466,7 +5402,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Koroit Botanic Gardens",
+    "name": "Koroit",
     "latitude": -38.2975,
     "longitude": 142.369
   },
@@ -5578,7 +5514,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Kyneton Botanic Gardens",
+    "name": "Kyneton",
     "latitude": -37.1403,
     "longitude": 144.5221998
   },
@@ -5882,7 +5818,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Lord Howe Island Botanic Gardens",
+    "name": "Lord Howe Island",
     "latitude": -31.5293022,
     "longitude": 159.0681466
   },
@@ -5946,7 +5882,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Mackay Regional Botanic Gardens",
+    "name": "Mackay Regional",
     "latitude": -21.1576185,
     "longitude": 149.1575786
   },
@@ -6042,7 +5978,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Maleny Botanic Gardens",
+    "name": "Maleny",
     "latitude": -26.7818372,
     "longitude": 152.8339893
   },
@@ -6074,7 +6010,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Malmsbury Botanic Gardens",
+    "name": "Malmsbury",
     "latitude": -37.189444444,
     "longitude": 144.381111111
   },
@@ -6130,7 +6066,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Maranoa Botanic Gardens",
+    "name": "Maranoa",
     "latitude": -37.8106,
     "longitude": 145.09
   },
@@ -7314,7 +7250,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Noosa Botanic Gardens",
+    "name": "Noosa",
     "latitude": -26.387822222,
     "longitude": 152.929786111
   },
@@ -7330,7 +7266,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Norfolk Island Botanic Gardens",
+    "name": "Norfolk Island",
     "latitude": -29.0260267,
     "longitude": 167.9403744
   },
@@ -7490,7 +7426,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Orange Botanic Gardens",
+    "name": "Orange",
     "latitude": -33.2569284,
     "longitude": 149.0974877
   },
@@ -7634,7 +7570,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Penshurst Botanic Gardens",
+    "name": "Penshurst",
     "latitude": -37.8729434,
     "longitude": 142.2911421
   },
@@ -7674,7 +7610,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Picton Botanical Gardens",
+    "name": "Picton",
     "latitude": -34.1614467,
     "longitude": 150.6115816
   },
@@ -7850,7 +7786,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Port Fairy Botanic Gardens",
+    "name": "Port Fairy",
     "latitude": -38.3795115,
     "longitude": 142.2416167
   },
@@ -7858,7 +7794,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Portland Botanical Gardens",
+    "name": "Portland",
     "latitude": -38.3537799,
     "longitude": 141.6110749
   },
@@ -7909,14 +7845,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Purnululu",
     "latitude": -17.448789,
     "longitude": 128.546055
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AU",
-    "countryName": "Australia",
-    "name": "Q5926614",
-    "latitude": -37.7218,
-    "longitude": 145.048
   },
   {
     "parkType": "botanical_garden",
@@ -8026,7 +7954,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Redcliffe Botanic Gardens",
+    "name": "Redcliffe",
     "latitude": -27.2315981,
     "longitude": 153.099182
   },
@@ -8082,7 +8010,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Rockhampton Botanic Gardens",
+    "name": "Rockhampton",
     "latitude": -23.4007,
     "longitude": 150.4915
   },
@@ -8138,22 +8066,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Royal Botanic Gardens Melbourne",
-    "latitude": -37.83036,
-    "longitude": 144.97961
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AU",
-    "countryName": "Australia",
-    "name": "Royal Botanic Gardens Victoria",
-    "latitude": -37.8334,
-    "longitude": 144.98033
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AU",
-    "countryName": "Australia",
     "name": "Royal Botanic Gardens, Cranbourne",
     "latitude": -38.129,
     "longitude": 145.282
@@ -8170,9 +8082,25 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Royal Tasmanian Botanical Gardens",
+    "name": "Royal Melbourne",
+    "latitude": -37.83036,
+    "longitude": 144.97961
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "AU",
+    "countryName": "Australia",
+    "name": "Royal Tasmanian",
     "latitude": -42.8652,
     "longitude": 147.3304
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "AU",
+    "countryName": "Australia",
+    "name": "Royal Victoria",
+    "latitude": -37.8334,
+    "longitude": 144.98033
   },
   {
     "parkType": "national_park",
@@ -8202,7 +8130,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Sale Botanic Gardens",
+    "name": "Sale",
     "latitude": -38.1140392,
     "longitude": 147.0796908
   },
@@ -8498,7 +8426,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "St Kilda Botanical Gardens",
+    "name": "St Kilda",
     "latitude": -37.8708,
     "longitude": 144.984
   },
@@ -8634,7 +8562,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Tamborine Mountain Botanic Gardens",
+    "name": "Tamborine Mountain",
     "latitude": -27.9144795,
     "longitude": 153.202845
   },
@@ -8842,7 +8770,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Tibooburra Outback Botanic Gardens",
+    "name": "Tibooburra Outback",
     "latitude": -29.4323929,
     "longitude": 142.0102868
   },
@@ -8930,7 +8858,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Tondoon Botanic Gardens",
+    "name": "Tondoon",
     "latitude": -23.8972657,
     "longitude": 151.2591322
   },
@@ -9186,7 +9114,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Wagga Wagga Botanic Gardens",
+    "name": "Wagga Wagga",
     "latitude": -35.1309,
     "longitude": 147.366
   },
@@ -9378,7 +9306,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Warrnambool Botanic Gardens",
+    "name": "Warrnambool",
     "latitude": -38.37393983,
     "longitude": 142.48454
   },
@@ -9642,7 +9570,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Williamstown Botanic Gardens",
+    "name": "Williamstown",
     "latitude": -37.868,
     "longitude": 144.897
   },
@@ -9786,7 +9714,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AU",
     "countryName": "Australia",
-    "name": "Wombat Hill Botanical Gardens",
+    "name": "Wombat Hill",
     "latitude": -37.3434,
     "longitude": 144.15088
   },
@@ -10159,54 +10087,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 16.3975
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "AT",
-    "countryName": "Austria",
-    "name": "Botanical garden in Frankenburg",
-    "latitude": 48.1012,
-    "longitude": 13.4831
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AT",
-    "countryName": "Austria",
-    "name": "botanical garden in Klagenfurt",
-    "latitude": 46.6294,
-    "longitude": 14.2936
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AT",
-    "countryName": "Austria",
-    "name": "Botanical Garden of the University of Graz",
-    "latitude": 47.081774,
-    "longitude": 15.45713
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AT",
-    "countryName": "Austria",
-    "name": "Botanical Garden of the University of Vienna",
-    "latitude": 48.191666666,
-    "longitude": 16.383888888
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AT",
-    "countryName": "Austria",
-    "name": "botanical garden, Linz",
-    "latitude": 48.2959,
-    "longitude": 14.2768
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AT",
-    "countryName": "Austria",
-    "name": "Botanischer Garten Universität Salzburg",
-    "latitude": 47.78663,
-    "longitude": 13.059584
-  },
-  {
     "parkType": "theme_park",
     "countryCode": "AT",
     "countryName": "Austria",
@@ -10306,6 +10186,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "AT",
     "countryName": "Austria",
+    "name": "In Frankenburg",
+    "latitude": 48.1012,
+    "longitude": 13.4831
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "AT",
+    "countryName": "Austria",
+    "name": "In Klagenfurt",
+    "latitude": 46.6294,
+    "longitude": 14.2936
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "AT",
+    "countryName": "Austria",
     "name": "Innsbruck University",
     "latitude": 47.2678,
     "longitude": 11.3798
@@ -10319,20 +10215,20 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 14.37361111
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "AT",
+    "countryName": "Austria",
+    "name": "Linz",
+    "latitude": 48.2959,
+    "longitude": 14.2768
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "AT",
     "countryName": "Austria",
     "name": "Lucky Town",
     "latitude": 47.2454,
     "longitude": 16.3031
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "AT",
-    "countryName": "Austria",
-    "name": "National Park Thayatal",
-    "latitude": 48.8522,
-    "longitude": 15.8633
   },
   {
     "parkType": "national_park",
@@ -10357,54 +10253,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "No Name City",
     "latitude": 47.852227,
     "longitude": 16.203557
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "AT",
-    "countryName": "Austria",
-    "name": "Q108837380",
-    "latitude": 46.677491,
-    "longitude": 13.993208
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "AT",
-    "countryName": "Austria",
-    "name": "Q123614565",
-    "latitude": 47.1465,
-    "longitude": 12.738
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "AT",
-    "countryName": "Austria",
-    "name": "Q123614608",
-    "latitude": 47.1807,
-    "longitude": 12.9113
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "AT",
-    "countryName": "Austria",
-    "name": "Q135976896",
-    "latitude": 47.497139,
-    "longitude": 12.55575
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "AT",
-    "countryName": "Austria",
-    "name": "Q2115433",
-    "latitude": 48.1667,
-    "longitude": 16.31
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "AT",
-    "countryName": "Austria",
-    "name": "Q62061998",
-    "latitude": 48.17851,
-    "longitude": 14.86427
   },
   {
     "parkType": "botanical_garden",
@@ -10471,12 +10319,44 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 15.8856
   },
   {
+    "parkType": "national_park",
+    "countryCode": "AT",
+    "countryName": "Austria",
+    "name": "Thayatal",
+    "latitude": 48.8522,
+    "longitude": 15.8633
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "AT",
     "countryName": "Austria",
     "name": "Tivoli",
     "latitude": 48.1778,
     "longitude": 16.3167
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "AT",
+    "countryName": "Austria",
+    "name": "Universität Salzburg",
+    "latitude": 47.78663,
+    "longitude": 13.059584
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "AT",
+    "countryName": "Austria",
+    "name": "University of Graz",
+    "latitude": 47.081774,
+    "longitude": 15.45713
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "AT",
+    "countryName": "Austria",
+    "name": "University of Vienna",
+    "latitude": 48.191666666,
+    "longitude": 16.383888888
   },
   {
     "parkType": "theme_park",
@@ -10557,14 +10437,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Mardakan Arboretum",
     "latitude": 40.49,
     "longitude": 50.159
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "AZ",
-    "countryName": "Azerbaijan",
-    "name": "Q131427041",
-    "latitude": 40.662931,
-    "longitude": 46.351233
   },
   {
     "parkType": "national_park",
@@ -10887,14 +10759,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 90.9998
   },
   {
-    "parkType": "theme_park",
-    "countryCode": "BD",
-    "countryName": "Bangladesh",
-    "name": "Q118591272",
-    "latitude": 22.3475918,
-    "longitude": 91.8240624
-  },
-  {
     "parkType": "national_park",
     "countryCode": "BD",
     "countryName": "Bangladesh",
@@ -10922,7 +10786,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "BD",
     "countryName": "Bangladesh",
-    "name": "Sitakunda Botanical Garden and Eco Park",
+    "name": "Sitakunda and Eco Park",
     "latitude": 22.6031,
     "longitude": 91.6774
   },
@@ -10938,7 +10802,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "BB",
     "countryName": "Barbados",
-    "name": "Andromeda Botanic Gardens",
+    "name": "Andromeda",
     "latitude": 13.20728,
     "longitude": -59.51809
   },
@@ -10951,20 +10815,20 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -59.6091
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "BY",
+    "countryName": "Belarus",
+    "name": "Belarusian State Agriculture Academy",
+    "latitude": 54.291511,
+    "longitude": 30.995679
+  },
+  {
     "parkType": "national_park",
     "countryCode": "BY",
     "countryName": "Belarus",
     "name": "Belavezhskaya Pushcha",
     "latitude": 52.44,
     "longitude": 23.82
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BY",
-    "countryName": "Belarus",
-    "name": "Botanical Garden of the Belarusian State Agriculture Academy",
-    "latitude": 54.291511,
-    "longitude": 30.995679
   },
   {
     "parkType": "national_park",
@@ -11018,46 +10882,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "BY",
     "countryName": "Belarus",
-    "name": "Q16735524",
-    "latitude": 53.83694444,
-    "longitude": 27.4675
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "BY",
-    "countryName": "Belarus",
-    "name": "Q18015628",
-    "latitude": 53.952895,
-    "longitude": 27.452229
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BY",
-    "countryName": "Belarus",
-    "name": "Q21074538",
-    "latitude": 55.20102,
-    "longitude": 30.21249
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BY",
-    "countryName": "Belarus",
-    "name": "Q22988761",
-    "latitude": 55.743747222,
-    "longitude": 27.967963888
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "BY",
-    "countryName": "Belarus",
-    "name": "Q94645242",
-    "latitude": 53.918554,
-    "longitude": 27.606027
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BY",
-    "countryName": "Belarus",
     "name": "Ščomyslickaja grove",
     "latitude": 53.834,
     "longitude": 27.473
@@ -11090,7 +10914,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "BE",
     "countryName": "Belgium",
-    "name": "arboretum Tervuren",
+    "name": "Arboretum Tervuren",
     "latitude": 50.807426,
     "longitude": 4.507484
   },
@@ -11151,12 +10975,12 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 4.905
   },
   {
-    "parkType": "botanical_garden",
+    "parkType": "national_park",
     "countryCode": "BE",
     "countryName": "Belgium",
-    "name": "Botanical Garden of Brussels",
-    "latitude": 50.854722,
-    "longitude": 4.365278
+    "name": "Bosland",
+    "latitude": 51.1861,
+    "longitude": 5.33833
   },
   {
     "parkType": "botanical_garden",
@@ -11181,6 +11005,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Bruparck",
     "latitude": 50.895035,
     "longitude": 4.339251
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "BE",
+    "countryName": "Belgium",
+    "name": "Brussels",
+    "latitude": 50.854722,
+    "longitude": 4.365278
   },
   {
     "parkType": "botanical_garden",
@@ -11213,6 +11045,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Earth Explorer",
     "latitude": 51.2378,
     "longitude": 2.93874
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "BE",
+    "countryName": "Belgium",
+    "name": "Entre-Sambre-et-Meuse",
+    "latitude": 50.075,
+    "longitude": 4.33
   },
   {
     "parkType": "botanical_garden",
@@ -11279,14 +11119,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 4.6901
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "BE",
-    "countryName": "Belgium",
-    "name": "Jardin botanique de Liège",
-    "latitude": 50.635,
-    "longitude": 5.56138
-  },
-  {
     "parkType": "theme_park",
     "countryCode": "BE",
     "countryName": "Belgium",
@@ -11301,6 +11133,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "LEGO Discovery Centre Brussels",
     "latitude": 50.878875,
     "longitude": 4.373008
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "BE",
+    "countryName": "Belgium",
+    "name": "Liège",
+    "latitude": 50.635,
+    "longitude": 5.56138
   },
   {
     "parkType": "botanical_garden",
@@ -11365,22 +11205,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Mont Mosan",
     "latitude": 50.5139,
     "longitude": 5.25129
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "BE",
-    "countryName": "Belgium",
-    "name": "National Park Bosland",
-    "latitude": 51.1861,
-    "longitude": 5.33833
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "BE",
-    "countryName": "Belgium",
-    "name": "National Park Entre-Sambre-et-Meuse",
-    "latitude": 50.075,
-    "longitude": 4.33
   },
   {
     "parkType": "theme_park",
@@ -11471,78 +11295,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 4.468471
   },
   {
-    "parkType": "theme_park",
-    "countryCode": "BE",
-    "countryName": "Belgium",
-    "name": "Q122459700",
-    "latitude": 50.940113,
-    "longitude": 5.34590274
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BE",
-    "countryName": "Belgium",
-    "name": "Q136220888",
-    "latitude": 51.349444444,
-    "longitude": 4.826666666
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "BE",
-    "countryName": "Belgium",
-    "name": "Q136271694",
-    "latitude": 50.587618,
-    "longitude": 3.889749
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "BE",
-    "countryName": "Belgium",
-    "name": "Q138644004",
-    "latitude": 50.859405,
-    "longitude": 4.34851
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "BE",
-    "countryName": "Belgium",
-    "name": "Q2020105",
-    "latitude": 50.14389,
-    "longitude": 5.2
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "BE",
-    "countryName": "Belgium",
-    "name": "Q2197655",
-    "latitude": 50.393889,
-    "longitude": 5.874444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BE",
-    "countryName": "Belgium",
-    "name": "Q2859699",
-    "latitude": 50.9621029,
-    "longitude": 5.4004669
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BE",
-    "countryName": "Belgium",
-    "name": "Q65555658",
-    "latitude": 51.068767,
-    "longitude": 2.960994
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "BE",
-    "countryName": "Belgium",
-    "name": "Q98735663",
-    "latitude": 51.156528,
-    "longitude": 5.172333
-  },
-  {
     "parkType": "botanical_garden",
     "countryCode": "BE",
     "countryName": "Belgium",
@@ -11594,7 +11346,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "BZ",
     "countryName": "Belize",
-    "name": "Belize Botanic Gardens",
+    "name": "Belize",
     "latitude": 17.083333333,
     "longitude": -89.066666666
   },
@@ -11674,54 +11426,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "BZ",
     "countryName": "Belize",
-    "name": "Q131136997",
-    "latitude": 16.22765246,
-    "longitude": -89.09362
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "BZ",
-    "countryName": "Belize",
-    "name": "Q131137075",
-    "latitude": 17.27607,
-    "longitude": -88.53745
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "BZ",
-    "countryName": "Belize",
-    "name": "Q131137770",
-    "latitude": 18.08385,
-    "longitude": -88.41402
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "BZ",
-    "countryName": "Belize",
-    "name": "Q131137811",
-    "latitude": 17.0519,
-    "longitude": -89.02923
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "BZ",
-    "countryName": "Belize",
-    "name": "Q131137855",
-    "latitude": 16.995818,
-    "longitude": -88.313545
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "BZ",
-    "countryName": "Belize",
-    "name": "Q84039340",
-    "latitude": 16.94327,
-    "longitude": -88.2403
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "BZ",
-    "countryName": "Belize",
     "name": "Sarstoon-Temash",
     "latitude": 15.942513,
     "longitude": -88.999
@@ -11757,14 +11461,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Pendjari",
     "latitude": 11.05,
     "longitude": 1.516666666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BJ",
-    "countryName": "Benin",
-    "name": "Q136148430",
-    "latitude": 6.367569,
-    "longitude": 2.125131
   },
   {
     "parkType": "national_park",
@@ -11879,22 +11575,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -66.66666667
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "BO",
-    "countryName": "Bolivia",
-    "name": "Jardín Botánico de Santa Cruz de la Sierra",
-    "latitude": -17.77,
-    "longitude": -63.069722222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BO",
-    "countryName": "Bolivia",
-    "name": "Jardín Botánico Martín Cárdenas",
-    "latitude": -17.3772163,
-    "longitude": -66.1396673
-  },
-  {
     "parkType": "national_park",
     "countryCode": "BO",
     "countryName": "Bolivia",
@@ -11909,6 +11589,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Madidi National Park and Integrated Management Natural Area",
     "latitude": -14.333333333,
     "longitude": -68.333333333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "BO",
+    "countryName": "Bolivia",
+    "name": "Martín Cárdenas",
+    "latitude": -17.3772163,
+    "longitude": -66.1396673
   },
   {
     "parkType": "national_park",
@@ -11927,22 +11615,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -58.75
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "BO",
-    "countryName": "Bolivia",
-    "name": "Q54853226",
-    "latitude": -16.5036,
-    "longitude": -68.11647
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BO",
-    "countryName": "Bolivia",
-    "name": "Q5926773",
-    "latitude": -16.538880555,
-    "longitude": -68.068788888
-  },
-  {
     "parkType": "national_park",
     "countryCode": "BO",
     "countryName": "Bolivia",
@@ -11957,6 +11629,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "San Matías Integrated management natural area",
     "latitude": -17.6428,
     "longitude": -58.66742
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "BO",
+    "countryName": "Bolivia",
+    "name": "Santa Cruz de la Sierra",
+    "latitude": -17.77,
+    "longitude": -63.069722222
   },
   {
     "parkType": "national_park",
@@ -11978,33 +11658,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "BA",
     "countryName": "Bosnia and Herzegovina",
-    "name": "Kozara",
-    "latitude": 45.00833333,
-    "longitude": 16.89166667
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "BA",
-    "countryName": "Bosnia and Herzegovina",
-    "name": "National park Drina",
+    "name": "Drina",
     "latitude": 44.000277777,
     "longitude": 19.35
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "BA",
-    "countryName": "Bosnia and Herzegovina",
-    "name": "Q25468966",
-    "latitude": 44.772987,
-    "longitude": 17.213339
-  },
-  {
     "parkType": "national_park",
     "countryCode": "BA",
     "countryName": "Bosnia and Herzegovina",
-    "name": "Q88823994",
-    "latitude": 43.323842,
-    "longitude": 18.715073
+    "name": "Kozara",
+    "latitude": 45.00833333,
+    "longitude": 16.89166667
   },
   {
     "parkType": "theme_park",
@@ -12143,6 +11807,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -51.9675
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "BR",
+    "countryName": "Brazil",
+    "name": "Bauru",
+    "latitude": -22.343333333,
+    "longitude": -49.0175
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -12194,41 +11866,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "BR",
     "countryName": "Brazil",
-    "name": "Botanical Garden of Bauru",
-    "latitude": -22.343333333,
-    "longitude": -49.0175
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "botanical garden of Botucatu",
+    "name": "Botucatu",
     "latitude": -22.887933,
     "longitude": -48.488184
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "Botanical Garden of Curitiba",
-    "latitude": -25.44277778,
-    "longitude": -49.23944444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "Botanical Garden of Instituto Plantarum",
-    "latitude": -22.7798,
-    "longitude": -47.31362
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "Botanical Garden of São Paulo",
-    "latitude": -23.639,
-    "longitude": -46.6203
   },
   {
     "parkType": "national_park",
@@ -12237,6 +11877,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Brasília",
     "latitude": -15.715555555,
     "longitude": -47.975555555
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "BR",
+    "countryName": "Brazil",
+    "name": "Brasília",
+    "latitude": -15.874444444,
+    "longitude": -47.835833333
   },
   {
     "parkType": "national_park",
@@ -12335,12 +11983,36 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -46.5572864
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "BR",
+    "countryName": "Brazil",
+    "name": "Curitiba",
+    "latitude": -25.44277778,
+    "longitude": -49.23944444
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "BR",
+    "countryName": "Brazil",
+    "name": "Da Serra do Teixeira",
+    "latitude": -7.249134,
+    "longitude": -37.379255
+  },
+  {
     "parkType": "national_park",
     "countryCode": "BR",
     "countryName": "Brazil",
     "name": "Discovery",
     "latitude": -17.069233,
     "longitude": -39.293317
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "BR",
+    "countryName": "Brazil",
+    "name": "Do Recife",
+    "latitude": -8.07722222,
+    "longitude": -34.96583333
   },
   {
     "parkType": "national_park",
@@ -12439,6 +12111,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -44.218785
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "BR",
+    "countryName": "Brazil",
+    "name": "Instituto Plantarum",
+    "latitude": -22.7798,
+    "longitude": -47.31362
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "BR",
+    "countryName": "Brazil",
+    "name": "Irmãos Villas-Bôas",
+    "latitude": -23.4651243,
+    "longitude": -47.4372758
+  },
+  {
     "parkType": "national_park",
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -12455,46 +12143,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -55.866417
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "Jardim Botânico de Brasília",
-    "latitude": -15.874444444,
-    "longitude": -47.835833333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "Jardim Botânico de Salvador",
-    "latitude": -12.9291682,
-    "longitude": -38.4368503
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "Jardim Botânico do Recife",
-    "latitude": -8.07722222,
-    "longitude": -34.96583333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "Jardim Botânico Irmãos Villas-Bôas",
-    "latitude": -23.4651243,
-    "longitude": -47.4372758
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "Jardim Botânico Jundiaí",
-    "latitude": -23.202753,
-    "longitude": -46.85135
-  },
-  {
     "parkType": "national_park",
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -12509,6 +12157,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Jericoacoara",
     "latitude": -2.8,
     "longitude": -40.5
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "BR",
+    "countryName": "Brazil",
+    "name": "Jundiaí",
+    "latitude": -23.202753,
+    "longitude": -46.85135
   },
   {
     "parkType": "national_park",
@@ -12647,14 +12303,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -47.31998
   },
   {
-    "parkType": "national_park",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "Parque Nacional da Serra do Teixeira",
-    "latitude": -7.249134,
-    "longitude": -37.379255
-  },
-  {
     "parkType": "botanical_garden",
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -12693,38 +12341,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Porto Alegre",
     "latitude": -30.05166667,
     "longitude": -51.17722222
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "Q10322670",
-    "latitude": -5.42636,
-    "longitude": -35.30367
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "Q113042250",
-    "latitude": -20.891616666,
-    "longitude": -51.352194444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "Q135682142",
-    "latitude": -27.26592947,
-    "longitude": -49.61199458
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BR",
-    "countryName": "Brazil",
-    "name": "Q56693656",
-    "latitude": -22.762609,
-    "longitude": -47.146571
   },
   {
     "parkType": "national_park",
@@ -12770,6 +12386,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "BR",
     "countryName": "Brazil",
+    "name": "Salvador",
+    "latitude": -12.9291682,
+    "longitude": -38.4368503
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "BR",
+    "countryName": "Brazil",
     "name": "Santos",
     "latitude": -23.938083333,
     "longitude": -46.372861111
@@ -12781,6 +12405,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "São Joaquim",
     "latitude": -28.1798,
     "longitude": -49.5193
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "BR",
+    "countryName": "Brazil",
+    "name": "São Paulo",
+    "latitude": -23.639,
+    "longitude": -46.6203
   },
   {
     "parkType": "national_park",
@@ -13034,6 +12666,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "BG",
     "countryName": "Bulgaria",
+    "name": "Balchik",
+    "latitude": 43.404672222,
+    "longitude": 28.147755555
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "BG",
+    "countryName": "Bulgaria",
     "name": "Borika Bothanical garden",
     "latitude": 42.48625,
     "longitude": 23.661666666
@@ -13042,25 +12682,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "BG",
     "countryName": "Bulgaria",
-    "name": "Botanical garden Margarita",
-    "latitude": 43.027159,
-    "longitude": 27.533727
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BG",
-    "countryName": "Bulgaria",
-    "name": "Botanical garden of the Bulgarian Academy of Sciences",
+    "name": "Bulgarian Academy of Sciences",
     "latitude": 42.643333333,
     "longitude": 23.299444444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BG",
-    "countryName": "Bulgaria",
-    "name": "Botanical garden, Balchik",
-    "latitude": 43.404672222,
-    "longitude": 28.147755555
   },
   {
     "parkType": "national_park",
@@ -13095,20 +12719,20 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 28.56698
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "BG",
+    "countryName": "Bulgaria",
+    "name": "Margarita",
+    "latitude": 43.027159,
+    "longitude": 27.533727
+  },
+  {
     "parkType": "national_park",
     "countryCode": "BG",
     "countryName": "Bulgaria",
     "name": "Pirin",
     "latitude": 41.672222222,
     "longitude": 23.487777777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "BG",
-    "countryName": "Bulgaria",
-    "name": "Q56850397",
-    "latitude": 42.145784,
-    "longitude": 24.792049
   },
   {
     "parkType": "national_park",
@@ -13173,14 +12797,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Kaboré Tambi",
     "latitude": 11.5335,
     "longitude": -1.3226
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "BF",
-    "countryName": "Burkina Faso",
-    "name": "Q21774231",
-    "latitude": 11.583333333,
-    "longitude": 1.466666666
   },
   {
     "parkType": "national_park",
@@ -13378,7 +12994,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CM",
     "countryName": "Cameroon",
-    "name": "Limbe Botanical Gardens",
+    "name": "Limbe",
     "latitude": 4.01297,
     "longitude": 9.20108
   },
@@ -13450,30 +13066,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "CM",
     "countryName": "Cameroon",
-    "name": "Q1647398",
-    "latitude": 10.95555556,
-    "longitude": 13.92555556
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "CM",
-    "countryName": "Cameroon",
-    "name": "Q1721928",
-    "latitude": 12.2,
-    "longitude": 14.85
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "CM",
-    "countryName": "Cameroon",
-    "name": "Q25378334",
-    "latitude": 4.616667,
-    "longitude": 8.716667
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "CM",
-    "countryName": "Cameroon",
     "name": "Takamanda",
     "latitude": 6.16666667,
     "longitude": 9.33333333
@@ -13530,7 +13122,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CA",
     "countryName": "Canada",
-    "name": "Arboretum – Jardin botanique de Montréal",
+    "name": "Arboretum – de Montréal",
     "latitude": 45.55987,
     "longitude": -73.56396
   },
@@ -13914,7 +13506,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CA",
     "countryName": "Canada",
-    "name": "Harriet Irving Botanical Gardens",
+    "name": "Harriet Irving",
     "latitude": 45.0874623,
     "longitude": -64.3680962
   },
@@ -13949,14 +13541,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Ivvavik",
     "latitude": 69.5197,
     "longitude": -139.525
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CA",
-    "countryName": "Canada",
-    "name": "Jardin botanique de Montréal’s Rose Garden",
-    "latitude": 45.5594,
-    "longitude": -73.55646
   },
   {
     "parkType": "botanical_garden",
@@ -14130,6 +13714,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CA",
     "countryName": "Canada",
+    "name": "Montréal’s Rose Garden",
+    "latitude": 45.5594,
+    "longitude": -73.55646
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CA",
+    "countryName": "Canada",
     "name": "Morgan Arboretum",
     "latitude": 45.4306,
     "longitude": -73.9523
@@ -14271,22 +13863,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -85.916666666
   },
   {
-    "parkType": "theme_park",
-    "countryCode": "CA",
-    "countryName": "Canada",
-    "name": "Q16678224",
-    "latitude": 45.5028,
-    "longitude": -73.9753
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CA",
-    "countryName": "Canada",
-    "name": "Q3332761",
-    "latitude": 47.4578,
-    "longitude": -71.3298
-  },
-  {
     "parkType": "national_park",
     "countryCode": "CA",
     "countryName": "Canada",
@@ -14338,7 +13914,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CA",
     "countryName": "Canada",
-    "name": "Royal Botanical Gardens",
+    "name": "Royal",
     "latitude": 43.291111111,
     "longitude": -79.875833333
   },
@@ -14490,7 +14066,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CA",
     "countryName": "Canada",
-    "name": "UBC Botanical Garden and Centre for Plant Research",
+    "name": "UBC and Centre for Plant Research",
     "latitude": 49.253333333,
     "longitude": -123.25
   },
@@ -14626,7 +14202,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CV",
     "countryName": "Cape Verde",
-    "name": "National Botanical Garden of Grandvaux Barbosa",
+    "name": "National of Grandvaux Barbosa",
     "latitude": 15.0542,
     "longitude": -23.6042
   },
@@ -14807,6 +14383,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -72.18333333
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "CL",
+    "countryName": "Chile",
+    "name": "Chagual",
+    "latitude": -33.4048,
+    "longitude": -70.6065
+  },
+  {
     "parkType": "national_park",
     "countryCode": "CL",
     "countryName": "Chile",
@@ -14879,30 +14463,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -73.13333333
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "CL",
-    "countryName": "Chile",
-    "name": "Jardín Botánico Chagual",
-    "latitude": -33.4048,
-    "longitude": -70.6065
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CL",
-    "countryName": "Chile",
-    "name": "Jardín Botánico de la Universidad Austral de Chile",
-    "latitude": -39.8045,
-    "longitude": -73.2502
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CL",
-    "countryName": "Chile",
-    "name": "Jardín Botánico Nacional de Viña del Mar",
-    "latitude": -33.043889,
-    "longitude": -71.501111
-  },
-  {
     "parkType": "national_park",
     "countryCode": "CL",
     "countryName": "Chile",
@@ -14917,6 +14477,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "La Campana",
     "latitude": -32.966666666,
     "longitude": -71.083333333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CL",
+    "countryName": "Chile",
+    "name": "La Universidad Austral de Chile",
+    "latitude": -39.8045,
+    "longitude": -73.2502
   },
   {
     "parkType": "national_park",
@@ -14983,6 +14551,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -70.56555556
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "CL",
+    "countryName": "Chile",
+    "name": "Nacional de Viña del Mar",
+    "latitude": -33.043889,
+    "longitude": -71.501111
+  },
+  {
     "parkType": "national_park",
     "countryCode": "CL",
     "countryName": "Chile",
@@ -15045,78 +14621,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Puyehue",
     "latitude": -40.64888889,
     "longitude": -72.08444444
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "CL",
-    "countryName": "Chile",
-    "name": "Q127379323",
-    "latitude": -27.5497,
-    "longitude": -70.5775
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CL",
-    "countryName": "Chile",
-    "name": "Q135687042",
-    "latitude": -33.092281406,
-    "longitude": -70.732539297
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CL",
-    "countryName": "Chile",
-    "name": "Q136788543",
-    "latitude": -33.414135,
-    "longitude": -70.620657
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CL",
-    "countryName": "Chile",
-    "name": "Q136798875",
-    "latitude": -23.609001,
-    "longitude": -70.388444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CL",
-    "countryName": "Chile",
-    "name": "Q136799309",
-    "latitude": -40.9888907,
-    "longitude": -72.9102701
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CL",
-    "countryName": "Chile",
-    "name": "Q139385834",
-    "latitude": -33.802389001,
-    "longitude": -70.849164739
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CL",
-    "countryName": "Chile",
-    "name": "Q17155077",
-    "latitude": -33.40319167,
-    "longitude": -70.57492778
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CL",
-    "countryName": "Chile",
-    "name": "Q5926872",
-    "latitude": -35.405285,
-    "longitude": -71.631005
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CL",
-    "countryName": "Chile",
-    "name": "Q6062468",
-    "latitude": -40.57307,
-    "longitude": -73.10349
   },
   {
     "parkType": "national_park",
@@ -15247,14 +14751,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -74.100198
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "CO",
-    "countryName": "Colombia",
-    "name": "Botanical Garden of Medellín",
-    "latitude": 6.27083333,
-    "longitude": -75.56416667
-  },
-  {
     "parkType": "national_park",
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -15327,6 +14823,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -68.3
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "CO",
+    "countryName": "Colombia",
+    "name": "Eloy Valenzuela",
+    "latitude": 7.068538049,
+    "longitude": -73.089915334
+  },
+  {
     "parkType": "national_park",
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -15370,17 +14874,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CO",
     "countryName": "Colombia",
-    "name": "Jardín Botánico de La Macarena",
+    "name": "La Macarena",
     "latitude": 2.182795115,
     "longitude": -73.788264064
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CO",
-    "countryName": "Colombia",
-    "name": "Jardín botánico Eloy Valenzuela",
-    "latitude": 7.068538049,
-    "longitude": -73.089915334
   },
   {
     "parkType": "national_park",
@@ -15423,12 +14919,28 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -71.3323
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "CO",
+    "countryName": "Colombia",
+    "name": "Medellín",
+    "latitude": 6.27083333,
+    "longitude": -75.56416667
+  },
+  {
     "parkType": "national_park",
     "countryCode": "CO",
     "countryName": "Colombia",
     "name": "Munchique National Natural Park",
     "latitude": 2.7,
     "longitude": -77.08333333
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "CO",
+    "countryName": "Colombia",
+    "name": "Natural Sierra de La Macarena",
+    "latitude": 2.633333333,
+    "longitude": -73.838611111
   },
   {
     "parkType": "national_park",
@@ -15466,41 +14978,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "CO",
     "countryName": "Colombia",
-    "name": "Parque Nacional Natural Sierra de La Macarena",
-    "latitude": 2.633333333,
-    "longitude": -73.838611111
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "CO",
-    "countryName": "Colombia",
     "name": "Puracé National Natural Park",
     "latitude": 2.246111111,
     "longitude": -76.421666666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CO",
-    "countryName": "Colombia",
-    "name": "Q5926770",
-    "latitude": 4.01666667,
-    "longitude": -77.43333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CO",
-    "countryName": "Colombia",
-    "name": "Q5926869",
-    "latitude": 5.05632,
-    "longitude": -75.49446
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CO",
-    "countryName": "Colombia",
-    "name": "Q5926882",
-    "latitude": 6.38333321,
-    "longitude": -77.40000153
   },
   {
     "parkType": "national_park",
@@ -15954,22 +15434,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "CI",
     "countryName": "Cote d'Ivoire",
-    "name": "Q134125733",
-    "latitude": 5.279374906,
-    "longitude": -3.601148567
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "CI",
-    "countryName": "Cote d'Ivoire",
-    "name": "Q3364511",
-    "latitude": 5.01833,
-    "longitude": -6.15
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "CI",
-    "countryName": "Cote d'Ivoire",
     "name": "Taï",
     "latitude": 5.75,
     "longitude": -7.12
@@ -15991,6 +15455,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 13.6052
   },
   {
+    "parkType": "national_park",
+    "countryCode": "HR",
+    "countryName": "Croatia",
+    "name": "Brijuni",
+    "latitude": 44.916667,
+    "longitude": 13.766667
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "HR",
     "countryName": "Croatia",
@@ -16005,6 +15477,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Istralandia",
     "latitude": 45.3467,
     "longitude": 13.6171
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "HR",
+    "countryName": "Croatia",
+    "name": "Kornati",
+    "latitude": 43.783333333,
+    "longitude": 15.333333333
   },
   {
     "parkType": "national_park",
@@ -16029,22 +15509,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Mljet Nacionalni Park",
     "latitude": 42.7817,
     "longitude": 17.3852
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "HR",
-    "countryName": "Croatia",
-    "name": "National Park Brijuni",
-    "latitude": 44.916667,
-    "longitude": 13.766667
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "HR",
-    "countryName": "Croatia",
-    "name": "National Park Kornati",
-    "latitude": 43.783333333,
-    "longitude": 15.333333333
   },
   {
     "parkType": "national_park",
@@ -16077,22 +15541,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Plitvice Lakes",
     "latitude": 44.880445,
     "longitude": 15.616035
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "HR",
-    "countryName": "Croatia",
-    "name": "Q20526330",
-    "latitude": 43.1734545,
-    "longitude": 16.6240328
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "HR",
-    "countryName": "Croatia",
-    "name": "Q31885139",
-    "latitude": 45.902417,
-    "longitude": 16.161976
   },
   {
     "parkType": "national_park",
@@ -16159,6 +15607,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -82.8
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "CU",
+    "countryName": "Cuba",
+    "name": "Cienfuegos",
+    "latitude": 22.12337,
+    "longitude": -80.32547
+  },
+  {
     "parkType": "national_park",
     "countryCode": "CU",
     "countryName": "Cuba",
@@ -16186,22 +15642,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CU",
     "countryName": "Cuba",
-    "name": "Jardín Botánico de Cienfuegos",
-    "latitude": 22.12337,
-    "longitude": -80.32547
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CU",
-    "countryName": "Cuba",
-    "name": "Jardín botánico Nacional de Cuba",
-    "latitude": 22.9915301,
-    "longitude": -82.3396254
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CU",
-    "countryName": "Cuba",
     "name": "Jardín de los Helechos de Santiago de Cuba",
     "latitude": 20.0166,
     "longitude": -75.8166
@@ -16218,9 +15658,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "CU",
     "countryName": "Cuba",
-    "name": "Parque Nacional La Güira",
+    "name": "La Güira",
     "latitude": 22.701,
     "longitude": -83.368
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CU",
+    "countryName": "Cuba",
+    "name": "Nacional de Cuba",
+    "latitude": 22.9915301,
+    "longitude": -82.3396254
   },
   {
     "parkType": "national_park",
@@ -16237,30 +15685,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Punta Francés Marine",
     "latitude": 21.5677,
     "longitude": -83.144
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "CU",
-    "countryName": "Cuba",
-    "name": "Q125588128",
-    "latitude": 21.975522222,
-    "longitude": -84.541855555
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CU",
-    "countryName": "Cuba",
-    "name": "Q5926790",
-    "latitude": 22.5833,
-    "longitude": -83.6666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CU",
-    "countryName": "Cuba",
-    "name": "Q5926841",
-    "latitude": 22.436219,
-    "longitude": -83.710252
   },
   {
     "parkType": "national_park",
@@ -16314,9 +15738,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "CZ",
     "countryName": "Czech Republic",
-    "name": "amusement park at Prague Fairground",
+    "name": "Amusement park at Prague Fairground",
     "latitude": 50.109278,
     "longitude": 14.426331
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CZ",
+    "countryName": "Czech Republic",
+    "name": "And arboretum in Štramberk",
+    "latitude": 49.5885053,
+    "longitude": 18.125615
   },
   {
     "parkType": "theme_park",
@@ -16530,78 +15962,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CZ",
     "countryName": "Czech Republic",
-    "name": "Botanic garden and arboretum in Štramberk",
-    "latitude": 49.5885053,
-    "longitude": 18.125615
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Botanic Garden of the Science Faculty, Charles University",
-    "latitude": 50.0711,
-    "longitude": 14.4213
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Botanical garden Brno",
-    "latitude": 49.2045,
-    "longitude": 16.5963
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Botanical Garden Flora Olomouc",
-    "latitude": 49.5933414,
-    "longitude": 17.2591794
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Botanical Garden in Bečov nad Teplou",
-    "latitude": 50.0813889,
-    "longitude": 12.8266667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Botanical Garden in Teplice",
-    "latitude": 50.6384,
-    "longitude": 13.8418
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Botanical Garden Liberec",
-    "latitude": 50.77886082,
-    "longitude": 15.07444382
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Botanical Garden of Czech University of Life Sciences Prague",
-    "latitude": 50.1312831,
-    "longitude": 14.3708539
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Botanical garden Tábor",
-    "latitude": 49.4144,
-    "longitude": 14.6682
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
     "name": "Botanická zahrada Dubiny",
     "latitude": 49.889248611,
     "longitude": 14.653948333
@@ -16623,6 +15983,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 17.249126
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "CZ",
+    "countryName": "Czech Republic",
+    "name": "Brno",
+    "latitude": 49.2045,
+    "longitude": 16.5963
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "CZ",
     "countryName": "Czech Republic",
@@ -16637,6 +16005,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "České Švýcarsko",
     "latitude": 50.8835,
     "longitude": 14.3893
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CZ",
+    "countryName": "Czech Republic",
+    "name": "Czech University of Life Sciences Prague",
+    "latitude": 50.1312831,
+    "longitude": 14.3708539
   },
   {
     "parkType": "botanical_garden",
@@ -16698,9 +16074,33 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CZ",
     "countryName": "Czech Republic",
+    "name": "Flora Olomouc",
+    "latitude": 49.5933414,
+    "longitude": 17.2591794
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CZ",
+    "countryName": "Czech Republic",
     "name": "Fritscheho arboretum",
     "latitude": 50.9203,
     "longitude": 14.4794
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CZ",
+    "countryName": "Czech Republic",
+    "name": "In Bečov nad Teplou",
+    "latitude": 50.0813889,
+    "longitude": 12.8266667
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CZ",
+    "countryName": "Czech Republic",
+    "name": "In Teplice",
+    "latitude": 50.6384,
+    "longitude": 13.8418
   },
   {
     "parkType": "botanical_garden",
@@ -16725,6 +16125,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Krokodýlek",
     "latitude": 49.607571166,
     "longitude": 17.254356166
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CZ",
+    "countryName": "Czech Republic",
+    "name": "Liberec",
+    "latitude": 50.77886082,
+    "longitude": 15.07444382
   },
   {
     "parkType": "theme_park",
@@ -16799,190 +16207,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 14.4154
   },
   {
-    "parkType": "theme_park",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q104699101",
-    "latitude": 50.1744039,
-    "longitude": 17.5128144
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q10854568",
-    "latitude": 50.4958,
-    "longitude": 13.6472
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q10854909",
-    "latitude": 50.0253,
-    "longitude": 15.7644
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q10854911",
-    "latitude": 50.1118,
-    "longitude": 15.9832
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q115389132",
-    "latitude": 50.0832611,
-    "longitude": 14.4282322
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q116740108",
-    "latitude": 50.2037019,
-    "longitude": 15.8388547
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q11727047",
-    "latitude": 49.9918828,
-    "longitude": 14.5679736
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q12037710",
-    "latitude": 49.68416667,
-    "longitude": 18.26666667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q122730218",
-    "latitude": 49.100124666,
-    "longitude": 15.9805125
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q130587687",
-    "latitude": 50.2581939,
-    "longitude": 14.3769069
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q134764868",
-    "latitude": 50.1003261,
-    "longitude": 13.7363753
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q134890390",
-    "latitude": 49.4676653,
-    "longitude": 17.09074
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q139669888",
-    "latitude": 49.1811706,
-    "longitude": 16.6684483
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q140067104",
-    "latitude": 50.734071,
-    "longitude": 15.609339
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q18745779",
-    "latitude": 49.5461111,
-    "longitude": 17.7391667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q18745818",
-    "latitude": 50.2496267,
-    "longitude": 12.8918553
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q19601768",
-    "latitude": 50.0999311,
-    "longitude": 13.7381672
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q21704525",
-    "latitude": 49.3263678,
-    "longitude": 16.7086347
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q31817183",
-    "latitude": 50.117231,
-    "longitude": 12.35732
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q37315317",
-    "latitude": 49.0182206,
-    "longitude": 15.5794108
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q55594753",
-    "latitude": 50.373833333,
-    "longitude": 12.504194444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q96058669",
-    "latitude": 50.042128,
-    "longitude": 14.389111
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CZ",
-    "countryName": "Czech Republic",
-    "name": "Q98967456",
-    "latitude": 49.6799889,
-    "longitude": 14.0026608
-  },
-  {
     "parkType": "botanical_garden",
     "countryCode": "CZ",
     "countryName": "Czech Republic",
@@ -17029,6 +16253,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Růžový sad",
     "latitude": 50.0816,
     "longitude": 14.3969
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CZ",
+    "countryName": "Czech Republic",
+    "name": "Science Faculty, Charles University",
+    "latitude": 50.0711,
+    "longitude": 14.4213
   },
   {
     "parkType": "theme_park",
@@ -17093,6 +16325,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Superland",
     "latitude": 50.0470306,
     "longitude": 14.3545747
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CZ",
+    "countryName": "Czech Republic",
+    "name": "Tábor",
+    "latitude": 49.4144,
+    "longitude": 14.6682
   },
   {
     "parkType": "theme_park",
@@ -17210,7 +16450,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DK",
     "countryName": "Denmark",
-    "name": "Aarhus Botanical Gardens",
+    "name": "Aarhus",
     "latitude": 56.16055556,
     "longitude": 10.19083333
   },
@@ -17431,14 +16671,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 10.512541666
   },
   {
-    "parkType": "national_park",
-    "countryCode": "DK",
-    "countryName": "Denmark",
-    "name": "National Park Skjoldungernes Land",
-    "latitude": 55.655,
-    "longitude": 11.98
-  },
-  {
     "parkType": "theme_park",
     "countryCode": "DK",
     "countryName": "Denmark",
@@ -17463,108 +16695,20 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 11.9226
   },
   {
-    "parkType": "national_park",
-    "countryCode": "DK",
-    "countryName": "Denmark",
-    "name": "Q115864779",
-    "latitude": 55.121666666,
-    "longitude": 14.927222222
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "DK",
-    "countryName": "Denmark",
-    "name": "Q115864780",
-    "latitude": 55.986111111,
-    "longitude": 12.323888888
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "DK",
-    "countryName": "Denmark",
-    "name": "Q116040098",
-    "latitude": 56.259444444,
-    "longitude": 8.455
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DK",
-    "countryName": "Denmark",
-    "name": "Q12302075",
-    "latitude": 55.1211,
-    "longitude": 14.8787
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DK",
-    "countryName": "Denmark",
-    "name": "Q12313234",
-    "latitude": 55.3785,
-    "longitude": 10.3714
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DK",
-    "countryName": "Denmark",
-    "name": "Q12323683",
-    "latitude": 55.5819,
-    "longitude": 12.5703
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DK",
-    "countryName": "Denmark",
-    "name": "Q12336409",
-    "latitude": 55.8963,
-    "longitude": 11.6106
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DK",
-    "countryName": "Denmark",
-    "name": "Q12341325",
-    "latitude": 56.1521,
-    "longitude": 9.5622
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DK",
-    "countryName": "Denmark",
-    "name": "Q133260078",
-    "latitude": 55.4941625,
-    "longitude": 9.471107
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DK",
-    "countryName": "Denmark",
-    "name": "Q140130291",
-    "latitude": 55.007031683,
-    "longitude": 11.910402269
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DK",
-    "countryName": "Denmark",
-    "name": "Q16325167",
-    "latitude": 56.02333333,
-    "longitude": 9.1025
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DK",
-    "countryName": "Denmark",
-    "name": "Q5617335",
-    "latitude": 54.7671,
-    "longitude": 11.8927
-  },
-  {
     "parkType": "botanical_garden",
     "countryCode": "DK",
     "countryName": "Denmark",
     "name": "Rold Skov",
     "latitude": 56.8,
     "longitude": 9.81666667
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "DK",
+    "countryName": "Denmark",
+    "name": "Skjoldungernes Land",
+    "latitude": 55.655,
+    "longitude": 11.98
   },
   {
     "parkType": "theme_park",
@@ -17658,7 +16802,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DM",
     "countryName": "Dominica",
-    "name": "Dominica Botanical Gardens",
+    "name": "Dominica",
     "latitude": 15.301245,
     "longitude": -61.381908
   },
@@ -17746,6 +16890,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "DO",
     "countryName": "Dominican Republic",
+    "name": "Lago Enriqillo e Isla Cabritos",
+    "latitude": 18.515,
+    "longitude": -71.660833
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "DO",
+    "countryName": "Dominican Republic",
     "name": "Los Haitises",
     "latitude": 19.02577,
     "longitude": -69.62997
@@ -17757,22 +16909,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Monte Cristi",
     "latitude": 19.777042,
     "longitude": -71.702271
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "DO",
-    "countryName": "Dominican Republic",
-    "name": "Nationalpark Lago Enriqillo e Isla Cabritos",
-    "latitude": 18.515,
-    "longitude": -71.660833
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "DO",
-    "countryName": "Dominican Republic",
-    "name": "Parque Nacional Submarino La Caleta",
-    "latitude": 18.4494,
-    "longitude": -69.6854
   },
   {
     "parkType": "national_park",
@@ -17792,6 +16928,14 @@ export const TOURIST_PARKS: TouristPark[] = [
   },
   {
     "parkType": "national_park",
+    "countryCode": "DO",
+    "countryName": "Dominican Republic",
+    "name": "Submarino La Caleta",
+    "latitude": 18.4494,
+    "longitude": -69.6854
+  },
+  {
+    "parkType": "national_park",
     "countryCode": "EC",
     "countryName": "Ecuador",
     "name": "Antisana",
@@ -17805,14 +16949,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Atocha-La Liria",
     "latitude": -1.241666666,
     "longitude": -78.619722222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "EC",
-    "countryName": "Ecuador",
-    "name": "Botanical garden of Portoviejo",
-    "latitude": -1.041583,
-    "longitude": -80.453547
   },
   {
     "parkType": "national_park",
@@ -17874,31 +17010,15 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "EC",
     "countryName": "Ecuador",
-    "name": "Q2919885",
-    "latitude": -2.0798505,
-    "longitude": -79.9087754
+    "name": "Portoviejo",
+    "latitude": -1.041583,
+    "longitude": -80.453547
   },
   {
     "parkType": "botanical_garden",
     "countryCode": "EC",
     "countryName": "Ecuador",
-    "name": "Q5926767",
-    "latitude": -0.254167,
-    "longitude": -79.171944
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "EC",
-    "countryName": "Ecuador",
-    "name": "Q6451242",
-    "latitude": -4.0345,
-    "longitude": -79.7874
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "EC",
-    "countryName": "Ecuador",
-    "name": "Quito Botanical Gardens",
+    "name": "Quito",
     "latitude": -0.186175,
     "longitude": -78.485112
   },
@@ -17970,7 +17090,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "EG",
     "countryName": "Egypt",
-    "name": "amusement attractions at Abu el-Abbas el-Mursi Mosque",
+    "name": "Amusement attractions at Abu el-Abbas el-Mursi Mosque",
     "latitude": 31.2051,
     "longitude": 29.8827
   },
@@ -17989,14 +17109,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Aswan",
     "latitude": 24.09366,
     "longitude": 32.88695
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "EG",
-    "countryName": "Egypt",
-    "name": "Botanical garden of Thutmosis III",
-    "latitude": 25.71776,
-    "longitude": 32.65977
   },
   {
     "parkType": "theme_park",
@@ -18106,14 +17218,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "EG",
     "countryName": "Egypt",
-    "name": "Q12186241",
-    "latitude": 31.178638888,
-    "longitude": 29.930694444
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "EG",
-    "countryName": "Egypt",
     "name": "Ras Muhammad",
     "latitude": 27.769444444,
     "longitude": 34.209722222
@@ -18125,6 +17229,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Saint Katherine Protectorate",
     "latitude": 28.55,
     "longitude": 33.96666667
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "EG",
+    "countryName": "Egypt",
+    "name": "Thutmosis III",
+    "latitude": 25.71776,
+    "longitude": 32.65977
   },
   {
     "parkType": "national_park",
@@ -18290,15 +17402,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "EE",
     "countryName": "Estonia",
-    "name": "Q16412797",
-    "latitude": 58.480845,
-    "longitude": 23.110356
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "EE",
-    "countryName": "Estonia",
-    "name": "University of Tartu Botanical Gardens",
+    "name": "University of Tartu",
     "latitude": 58.384663,
     "longitude": 26.721153
   },
@@ -18506,25 +17610,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FI",
     "countryName": "Finland",
-    "name": "Botanical Garden Botania",
+    "name": "Botania",
     "latitude": 62.60248,
     "longitude": 29.72369
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FI",
-    "countryName": "Finland",
-    "name": "Botanical garden of Savonlinna Campus",
-    "latitude": 61.868056,
-    "longitude": 28.886111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FI",
-    "countryName": "Finland",
-    "name": "Botanical Garden of Turku University",
-    "latitude": 60.433333333,
-    "longitude": 22.171944444
   },
   {
     "parkType": "national_park",
@@ -18903,94 +17991,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 26.97361111
   },
   {
-    "parkType": "theme_park",
-    "countryCode": "FI",
-    "countryName": "Finland",
-    "name": "Q11867836",
-    "latitude": 60.478468,
-    "longitude": 22.256688
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FI",
-    "countryName": "Finland",
-    "name": "Q11891236",
-    "latitude": 60.5619,
-    "longitude": 22.1049
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FI",
-    "countryName": "Finland",
-    "name": "Q129437643",
-    "latitude": 62.3025498,
-    "longitude": 21.6753324
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FI",
-    "countryName": "Finland",
-    "name": "Q18659863",
-    "latitude": 61.267768,
-    "longitude": 22.37237
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FI",
-    "countryName": "Finland",
-    "name": "Q18661870",
-    "latitude": 62.53272,
-    "longitude": 24.195813
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FI",
-    "countryName": "Finland",
-    "name": "Q18662511",
-    "latitude": 60.888305,
-    "longitude": 26.773993
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FI",
-    "countryName": "Finland",
-    "name": "Q31889998",
-    "latitude": 60.237065,
-    "longitude": 20.010509
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FI",
-    "countryName": "Finland",
-    "name": "Q5475266",
-    "latitude": 60.29055556,
-    "longitude": 24.96972222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FI",
-    "countryName": "Finland",
-    "name": "Q5926558",
-    "latitude": 61.13061,
-    "longitude": 21.49539
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FI",
-    "countryName": "Finland",
-    "name": "Q9017951",
-    "latitude": 63.675,
-    "longitude": 22.704167
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "FI",
-    "countryName": "Finland",
-    "name": "Q90979173",
-    "latitude": 61.202778,
-    "longitude": 26.031944
-  },
-  {
     "parkType": "national_park",
     "countryCode": "FI",
     "countryName": "Finland",
@@ -19053,6 +18053,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Särkänniemi",
     "latitude": 61.505277777,
     "longitude": 23.743888888
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FI",
+    "countryName": "Finland",
+    "name": "Savonlinna Campus",
+    "latitude": 61.868056,
+    "longitude": 28.886111
   },
   {
     "parkType": "national_park",
@@ -19127,6 +18135,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 21.586667
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "FI",
+    "countryName": "Finland",
+    "name": "Turku University",
+    "latitude": 60.433333333,
+    "longitude": 22.171944444
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "FI",
     "countryName": "Finland",
@@ -19146,7 +18162,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FI",
     "countryName": "Finland",
-    "name": "University of Kuopio Botanical Gardens",
+    "name": "University of Kuopio",
     "latitude": 62.8933,
     "longitude": 27.6793
   },
@@ -19154,7 +18170,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FI",
     "countryName": "Finland",
-    "name": "University of Oulu Botanical Gardens",
+    "name": "University of Oulu",
     "latitude": 65.0631,
     "longitude": 25.4653
   },
@@ -19229,6 +18245,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "AkOatys",
     "latitude": -21.263101,
     "longitude": 55.334239
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Alpin Daniella",
+    "latitude": 45.8213,
+    "longitude": 1.251
   },
   {
     "parkType": "theme_park",
@@ -20186,9 +19210,41 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FR",
     "countryName": "France",
+    "name": "Bayeux",
+    "latitude": 49.2855,
+    "longitude": -0.7176
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Bayonne",
+    "latitude": 43.4923,
+    "longitude": -1.4793
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Besançon",
+    "latitude": 47.2433,
+    "longitude": 6.0145
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
     "name": "Bois des Moutiers",
     "latitude": 49.91166667,
     "longitude": 0.98305556
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Bordeaux",
+    "latitude": 44.846483333,
+    "longitude": -0.563402777
   },
   {
     "parkType": "botanical_garden",
@@ -20207,28 +19263,20 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -4.4473
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Botanical garden of Metz",
-    "latitude": 49.104480833,
-    "longitude": 6.162610277
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Botanical garden of Upper Brittany",
-    "latitude": 48.42972222,
-    "longitude": -1.26083333
-  },
-  {
     "parkType": "theme_park",
     "countryCode": "FR",
     "countryName": "France",
     "name": "Bournat park",
     "latitude": 44.9129,
     "longitude": 0.933136
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Briollay",
+    "latitude": 47.565,
+    "longitude": -0.50722222
   },
   {
     "parkType": "botanical_garden",
@@ -20245,6 +19293,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Cactuseraie d'Escaïre-Figue",
     "latitude": 43.2966,
     "longitude": 2.2237
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Caen",
+    "latitude": 49.1891,
+    "longitude": -0.37159
   },
   {
     "parkType": "national_park",
@@ -20277,6 +19333,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Cardoland",
     "latitude": 47.457936,
     "longitude": 3.669162
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Causses",
+    "latitude": 44.09861111,
+    "longitude": 3.07833333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Cayenne",
+    "latitude": 4.939,
+    "longitude": -52.3203
   },
   {
     "parkType": "botanical_garden",
@@ -20319,6 +19391,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -0.430833333
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Château de Vauville",
+    "latitude": 49.635,
+    "longitude": -1.845277777
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "FR",
     "countryName": "France",
@@ -20333,6 +19413,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Cobac Parc",
     "latitude": 48.4492,
     "longitude": -1.83163
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Col de Saverne",
+    "latitude": 48.750893,
+    "longitude": 7.342065
   },
   {
     "parkType": "botanical_garden",
@@ -20359,12 +19447,60 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 2.361
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Cordeliers",
+    "latitude": 44.09333333,
+    "longitude": 6.23638889
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "D'Alaije",
+    "latitude": 45.365,
+    "longitude": 0.64972222
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "D'Aubrac",
+    "latitude": 44.59138889,
+    "longitude": 2.92194444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "D'Auvergne",
+    "latitude": 45.78055556,
+    "longitude": 3.0875
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "D'Èze",
+    "latitude": 43.72805556,
+    "longitude": 7.36111111
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "FR",
     "countryName": "France",
     "name": "Dennlys Park",
     "latitude": 50.57055556,
     "longitude": 2.15416667
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Deshaies",
+    "latitude": 16.2997,
+    "longitude": -61.7992
   },
   {
     "parkType": "theme_park",
@@ -20423,6 +19559,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 6.4806
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "E.M. Heckel",
+    "latitude": 43.2598,
+    "longitude": 5.3847
+  },
+  {
     "parkType": "national_park",
     "countryCode": "FR",
     "countryName": "France",
@@ -20450,6 +19594,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FR",
     "countryName": "France",
+    "name": "Et verger de La Bussière",
+    "latitude": 46.6353,
+    "longitude": 0.824444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
     "name": "Ethnobotanical Garden of Eyne",
     "latitude": 42.475555555,
     "longitude": 2.079444444
@@ -20469,6 +19621,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Exalto",
     "latitude": 45.78549,
     "longitude": 4.896305
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Exotique de Menton",
+    "latitude": 43.7847,
+    "longitude": 7.5112
   },
   {
     "parkType": "theme_park",
@@ -20495,12 +19655,28 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 1.9377
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Floralpina",
+    "latitude": 50.2852,
+    "longitude": 2.758
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "FR",
     "countryName": "France",
     "name": "Foire des Rameaux",
     "latitude": 45.1955,
     "longitude": 5.7175
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Foncaude",
+    "latitude": 42.939166,
+    "longitude": 2.914614
   },
   {
     "parkType": "national_park",
@@ -20541,6 +19717,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Futuroscope",
     "latitude": 46.669166666,
     "longitude": 0.368888888
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Gondremer",
+    "latitude": 48.2925,
+    "longitude": 6.7225
   },
   {
     "parkType": "national_park",
@@ -20586,6 +19770,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FR",
     "countryName": "France",
+    "name": "Henri Gaussen",
+    "latitude": 43.59333333,
+    "longitude": 1.44972222
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
     "name": "Herbarium at Saint-Valery-sur-Somme",
     "latitude": 50.1889,
     "longitude": 1.63056
@@ -20621,558 +19813,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Jardin aux Plantes la Bouichère",
     "latitude": 43.0692,
     "longitude": 2.223
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique \"Les Cèdres\"",
-    "latitude": 43.6916,
-    "longitude": 7.3262
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique alpin \"Daniella\"",
-    "latitude": 45.8213,
-    "longitude": 1.251
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique d'Alaije",
-    "latitude": 45.365,
-    "longitude": 0.64972222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique d'Aubrac",
-    "latitude": 44.59138889,
-    "longitude": 2.92194444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique d'Auvergne",
-    "latitude": 45.78055556,
-    "longitude": 3.0875
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique d'Èze",
-    "latitude": 43.72805556,
-    "longitude": 7.36111111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Bayeux",
-    "latitude": 49.2855,
-    "longitude": -0.7176
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Bayonne",
-    "latitude": 43.4923,
-    "longitude": -1.4793
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Besançon",
-    "latitude": 47.2433,
-    "longitude": 6.0145
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Bordeaux",
-    "latitude": 44.846483333,
-    "longitude": -0.563402777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Briollay",
-    "latitude": 47.565,
-    "longitude": -0.50722222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Caen",
-    "latitude": 49.1891,
-    "longitude": -0.37159
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Cayenne",
-    "latitude": 4.939,
-    "longitude": -52.3203
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Deshaies",
-    "latitude": 16.2997,
-    "longitude": -61.7992
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "jardin botanique de Foncaude",
-    "latitude": 42.939166,
-    "longitude": 2.914614
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Gondremer",
-    "latitude": 48.2925,
-    "longitude": 6.7225
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de l'Arquebuse",
-    "latitude": 47.3214,
-    "longitude": 5.0279
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de l'École nationale vétérinaire d'Alfort",
-    "latitude": 48.8126,
-    "longitude": 2.425
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de l'Evêché",
-    "latitude": 45.827304,
-    "longitude": 1.267118
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "jardin botanique de l'Hôpital d'Instruction des Armées Clermont-Tonnerre",
-    "latitude": 48.39239,
-    "longitude": -4.49444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de l'Institut National",
-    "latitude": 48.8471,
-    "longitude": 1.9428
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de l'Université de Rennes",
-    "latitude": 48.11777778,
-    "longitude": -1.64
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de l'Université de Strasbourg",
-    "latitude": 48.583611111,
-    "longitude": 7.766666666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de la Bastide",
-    "latitude": 44.846,
-    "longitude": -0.5623
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de la Charme",
-    "latitude": 45.800507,
-    "longitude": 3.123904
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de la Faculté de Pharmacie",
-    "latitude": 50.6058,
-    "longitude": 3.0419
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de la Faculté de Pharmacie d'Angers",
-    "latitude": 47.48,
-    "longitude": -0.5584
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de la Font de Bézombes",
-    "latitude": 43.65055556,
-    "longitude": 3.50416667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de la Presle",
-    "latitude": 49.148265,
-    "longitude": 3.923042
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de la Roche Fauconnière",
-    "latitude": 49.6235,
-    "longitude": -1.621771
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de la Villa Thuret",
-    "latitude": 43.56388889,
-    "longitude": 7.12444444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de la Ville de Nice",
-    "latitude": 43.6851,
-    "longitude": 7.2101
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Lyon",
-    "latitude": 45.7754,
-    "longitude": 4.8564
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Marnay-sur-Seine",
-    "latitude": 48.5,
-    "longitude": 3.55
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Mont Cenis",
-    "latitude": 45.239249,
-    "longitude": 6.95038
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Saint Xist",
-    "latitude": 43.83194444,
-    "longitude": 3.17333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Saint-Chamond",
-    "latitude": 45.4775,
-    "longitude": 4.51527778
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Saint-Vincent-de-Paul",
-    "latitude": 43.74777778,
-    "longitude": -0.9975
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Sannois des Plantes Médicinales",
-    "latitude": 48.97222222,
-    "longitude": 2.25777778
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Sedan",
-    "latitude": 49.6972,
-    "longitude": 4.9464
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Talence",
-    "latitude": 44.8099,
-    "longitude": -0.5905
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Tourcoing",
-    "latitude": 50.724457539,
-    "longitude": 3.168106223
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique de Tours",
-    "latitude": 47.38777778,
-    "longitude": 0.66666667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique des Causses",
-    "latitude": 44.09861111,
-    "longitude": 3.07833333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique des Cordeliers",
-    "latitude": 44.09333333,
-    "longitude": 6.23638889
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique des Montagnes Noires",
-    "latitude": 48.1757,
-    "longitude": -3.7274
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique des oiseaux",
-    "latitude": 45.6414,
-    "longitude": 0.756389
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique des Pyrénées occidentales",
-    "latitude": 43.358,
-    "longitude": -0.248
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique du Château de Vauville",
-    "latitude": 49.635,
-    "longitude": -1.845277777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique du col de Saverne",
-    "latitude": 48.750893,
-    "longitude": 7.342065
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique du Montet",
-    "latitude": 48.659444444,
-    "longitude": 6.153611111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique du Puech",
-    "latitude": 43.6953,
-    "longitude": 3.315
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique du Thabor",
-    "latitude": 48.1144,
-    "longitude": -1.6669
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique du Tourmalet",
-    "latitude": 42.90833333,
-    "longitude": 0.145
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique du Val d'Yser",
-    "latitude": 50.916805555,
-    "longitude": 2.547027777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique E.M. Heckel",
-    "latitude": 43.2598,
-    "longitude": 5.3847
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique et verger de La Bussière",
-    "latitude": 46.6353,
-    "longitude": 0.824444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique exotique de Menton",
-    "latitude": 43.7847,
-    "longitude": 7.5112
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique Floralpina",
-    "latitude": 50.2852,
-    "longitude": 2.758
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique Henri Gaussen",
-    "latitude": 43.59333333,
-    "longitude": 1.44972222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique littoral Paul Jovet",
-    "latitude": 43.4043,
-    "longitude": -1.6512
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin Botanique Montagnard",
-    "latitude": 45.0428,
-    "longitude": 4.2402
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique Nicolas Boulay",
-    "latitude": 50.6327,
-    "longitude": 3.0447
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique Pierre Fabre du Bosc dal Mas",
-    "latitude": 43.566666666,
-    "longitude": 2.116666666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique pyrénéen de Melles",
-    "latitude": 42.86888889,
-    "longitude": 0.75916667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique textile",
-    "latitude": 47.51277778,
-    "longitude": 4.53194444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique universitaire de Poitiers",
-    "latitude": 46.5565,
-    "longitude": 0.4092
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "jardin Botanique Yves Rocher",
-    "latitude": 47.773056,
-    "longitude": -2.132222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Jardin botanique Yves Rocher de La Gacilly",
-    "latitude": 47.76555556,
-    "longitude": -2.13111111
   },
   {
     "parkType": "theme_park",
@@ -21442,7 +20082,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FR",
     "countryName": "France",
-    "name": "jardin japonais de Toulouse",
+    "name": "Jardin japonais de Toulouse",
     "latitude": 43.611666666,
     "longitude": 1.431944444
   },
@@ -21466,7 +20106,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FR",
     "countryName": "France",
-    "name": "jardin Royal",
+    "name": "Jardin Royal",
     "latitude": 43.5956,
     "longitude": 1.45028
   },
@@ -21583,6 +20223,102 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 6.7265
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "L'Arquebuse",
+    "latitude": 47.3214,
+    "longitude": 5.0279
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "L'École nationale vétérinaire d'Alfort",
+    "latitude": 48.8126,
+    "longitude": 2.425
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "L'Evêché",
+    "latitude": 45.827304,
+    "longitude": 1.267118
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "L'Hôpital d'Instruction des Armées Clermont-Tonnerre",
+    "latitude": 48.39239,
+    "longitude": -4.49444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "L'Institut National",
+    "latitude": 48.8471,
+    "longitude": 1.9428
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "L'Université de Rennes",
+    "latitude": 48.11777778,
+    "longitude": -1.64
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "L'Université de Strasbourg",
+    "latitude": 48.583611111,
+    "longitude": 7.766666666
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "La Bastide",
+    "latitude": 44.846,
+    "longitude": -0.5623
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "La Charme",
+    "latitude": 45.800507,
+    "longitude": 3.123904
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "La Faculté de Pharmacie",
+    "latitude": 50.6058,
+    "longitude": 3.0419
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "La Faculté de Pharmacie d'Angers",
+    "latitude": 47.48,
+    "longitude": -0.5584
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "La Font de Bézombes",
+    "latitude": 43.65055556,
+    "longitude": 3.50416667
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "FR",
     "countryName": "France",
@@ -21599,12 +20335,44 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -0.9037
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "La Presle",
+    "latitude": 49.148265,
+    "longitude": 3.923042
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "FR",
     "countryName": "France",
     "name": "La Récré des 3 Curés",
     "latitude": 48.4729,
     "longitude": -4.52579
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "La Roche Fauconnière",
+    "latitude": 49.6235,
+    "longitude": -1.621771
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "La Villa Thuret",
+    "latitude": 43.56388889,
+    "longitude": 7.12444444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "La Ville de Nice",
+    "latitude": 43.6851,
+    "longitude": 7.2101
   },
   {
     "parkType": "botanical_garden",
@@ -21674,6 +20442,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FR",
     "countryName": "France",
+    "name": "Les Cèdres",
+    "latitude": 43.6916,
+    "longitude": 7.3262
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
     "name": "Les Chemins de la Rose",
     "latitude": 47.18656,
     "longitude": -0.31217
@@ -21703,6 +20479,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 2.982975
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Littoral Paul Jovet",
+    "latitude": 43.4043,
+    "longitude": -1.6512
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "FR",
     "countryName": "France",
@@ -21725,6 +20509,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Luna Park La Palmyre",
     "latitude": 45.72586,
     "longitude": -1.17334
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Lyon",
+    "latitude": 45.7754,
+    "longitude": 4.8564
   },
   {
     "parkType": "theme_park",
@@ -21762,7 +20554,15 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FR",
     "countryName": "France",
-    "name": "Mascarin jardin botanique de La Réunion",
+    "name": "Marnay-sur-Seine",
+    "latitude": 48.5,
+    "longitude": 3.55
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Mascarin de La Réunion",
     "latitude": -21.137531457,
     "longitude": 55.295686109
   },
@@ -21775,12 +20575,52 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 7.08333333
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Metz",
+    "latitude": 49.104480833,
+    "longitude": 6.162610277
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "FR",
     "countryName": "France",
     "name": "Mirapolis",
     "latitude": 49.055,
     "longitude": 1.99916667
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Mont Cenis",
+    "latitude": 45.239249,
+    "longitude": 6.95038
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Montagnard",
+    "latitude": 45.0428,
+    "longitude": 4.2402
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Montagnes Noires",
+    "latitude": 48.1757,
+    "longitude": -3.7274
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Montet",
+    "latitude": 48.659444444,
+    "longitude": 6.153611111
   },
   {
     "parkType": "botanical_garden",
@@ -21839,6 +20679,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 0.22937
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Nicolas Boulay",
+    "latitude": 50.6327,
+    "longitude": 3.0447
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "FR",
     "countryName": "France",
@@ -21853,6 +20701,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "O'Gliss Park",
     "latitude": 46.455522,
     "longitude": -1.420657
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Oiseaux",
+    "latitude": 45.6414,
+    "longitude": 0.756389
   },
   {
     "parkType": "theme_park",
@@ -22058,7 +20914,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "FR",
     "countryName": "France",
-    "name": "parc des Naudières",
+    "name": "Parc des Naudières",
     "latitude": 47.26815,
     "longitude": -1.697103
   },
@@ -22218,7 +21074,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FR",
     "countryName": "France",
-    "name": "Parcours botanique \"Au fil de l'Indre\"",
+    "name": "Parcours botanique Au fil de l'Indre",
     "latitude": 47.28833333,
     "longitude": 0.71444444
   },
@@ -22229,6 +21085,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Pépinières Arboretum Adeline",
     "latitude": 47.1725,
     "longitude": 2.98944444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Pierre Fabre du Bosc dal Mas",
+    "latitude": 43.566666666,
+    "longitude": 2.116666666
   },
   {
     "parkType": "theme_park",
@@ -22279,12 +21143,28 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 6.02732
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Puech",
+    "latitude": 43.6953,
+    "longitude": 3.315
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "FR",
     "countryName": "France",
     "name": "Puy du Fou",
     "latitude": 46.893333333,
     "longitude": -0.931944444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Pyrénéen de Melles",
+    "latitude": 42.86888889,
+    "longitude": 0.75916667
   },
   {
     "parkType": "national_park",
@@ -22295,396 +21175,12 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -0.175833333
   },
   {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q108155218",
-    "latitude": 42.837222222,
-    "longitude": 3.021666666
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q111488302",
-    "latitude": 48.1732803,
-    "longitude": 2.253367
-  },
-  {
     "parkType": "botanical_garden",
     "countryCode": "FR",
     "countryName": "France",
-    "name": "Q112671133",
-    "latitude": 15.998811064,
-    "longitude": -61.724002388
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q115325801",
-    "latitude": 46.063839,
-    "longitude": 6.069356
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q118369503",
-    "latitude": 45.77575,
-    "longitude": 4.85742
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q118369531",
-    "latitude": 45.77687,
-    "longitude": 4.85193
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q118541190",
-    "latitude": 46.99713,
-    "longitude": -0.34913
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q123221327",
-    "latitude": 44.870016162,
-    "longitude": 3.246236739
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q139888363",
-    "latitude": 16.168294,
-    "longitude": -61.631724
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q139888392",
-    "latitude": 16.380698,
-    "longitude": -61.488182
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q140031170",
-    "latitude": 48.401957,
-    "longitude": 2.662717
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q140122050",
-    "latitude": 43.615509,
-    "longitude": 7.124328
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q16010367",
-    "latitude": 43.27230806,
-    "longitude": 5.39383241
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q16508372",
-    "latitude": 50.0028,
-    "longitude": 2.65278
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q16645064",
-    "latitude": 43.4422,
-    "longitude": 3.6827
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q17633110",
-    "latitude": 46.71238,
-    "longitude": -0.14607
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q17636364",
-    "latitude": 47.7006,
-    "longitude": -2.31389
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q18515606",
-    "latitude": 45.297,
-    "longitude": 4.5653
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q20165600",
-    "latitude": 43.492876,
-    "longitude": 6.822166
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q20669792",
-    "latitude": 47.8905,
-    "longitude": -2.89262
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q21480872",
-    "latitude": 47.5889,
-    "longitude": 1.3379
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q24937791",
-    "latitude": 47.828611111,
-    "longitude": 1.698333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q28058155",
-    "latitude": 47.68639,
-    "longitude": 6.48815
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q2859688",
-    "latitude": 48.424409,
-    "longitude": 0.076636
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q3034611",
-    "latitude": 47.7272,
-    "longitude": 2.0237
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q3060716",
-    "latitude": 43.301352,
-    "longitude": 3.412457
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q30739409",
-    "latitude": 43.150023,
-    "longitude": 6.345174
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q3074820",
-    "latitude": 47.4764063,
-    "longitude": -0.5574876
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q3074856",
-    "latitude": 48.69617,
-    "longitude": 6.17545
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q3162563",
-    "latitude": 49.9017,
-    "longitude": 2.29644
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q3196370",
-    "latitude": 44.6228,
-    "longitude": -1.10591
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q3363873",
-    "latitude": 44.8605,
-    "longitude": -0.526893
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q3363918",
-    "latitude": 48.0117,
-    "longitude": 0.180995
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q3364174",
-    "latitude": 49.5382,
-    "longitude": 0.505489
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q3364222",
-    "latitude": 48.0008,
-    "longitude": 0.20028
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q3364808",
-    "latitude": 47.9817,
-    "longitude": 0.20667
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q3401561",
-    "latitude": 44.97892222,
-    "longitude": 1.05386944
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q3442575",
-    "latitude": 48.564,
-    "longitude": 3.294
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q36698368",
-    "latitude": 43.260565277,
-    "longitude": 6.580147222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q60850445",
-    "latitude": 47.61779,
-    "longitude": 1.517437
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q86661763",
-    "latitude": 47.978697,
-    "longitude": -1.609527
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q91328810",
-    "latitude": 44.5508,
-    "longitude": 4.253
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q96758069",
-    "latitude": 48.056706,
-    "longitude": -1.888736
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q96758070",
-    "latitude": 48.427727,
-    "longitude": -1.262934
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q96758071",
-    "latitude": 48.40255,
-    "longitude": -1.89617
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q96758073",
-    "latitude": 48.44293,
-    "longitude": -1.538158
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q96758074",
-    "latitude": 48.064572,
-    "longitude": -1.501415
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q96758075",
-    "latitude": 48.18743,
-    "longitude": -1.29265
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "FR",
-    "countryName": "France",
-    "name": "Q97011435",
-    "latitude": 49.89834,
-    "longitude": 2.278106
+    "name": "Pyrénées occidentales",
+    "latitude": 43.358,
+    "longitude": -0.248
   },
   {
     "parkType": "national_park",
@@ -22722,7 +21218,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FR",
     "countryName": "France",
-    "name": "roseraie de la Pépinière",
+    "name": "Roseraie de la Pépinière",
     "latitude": 48.69836,
     "longitude": 6.18319
   },
@@ -22778,6 +21274,46 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FR",
     "countryName": "France",
+    "name": "Saint Xist",
+    "latitude": 43.83194444,
+    "longitude": 3.17333333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Saint-Chamond",
+    "latitude": 45.4775,
+    "longitude": 4.51527778
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Saint-Vincent-de-Paul",
+    "latitude": 43.74777778,
+    "longitude": -0.9975
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Sannois des Plantes Médicinales",
+    "latitude": 48.97222222,
+    "longitude": 2.25777778
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Sedan",
+    "latitude": 49.6972,
+    "longitude": 4.9464
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
     "name": "Sentier botanique de Soyaux",
     "latitude": 45.6414,
     "longitude": 0.198611
@@ -22797,6 +21333,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Serres municipales de Sens",
     "latitude": 48.1858,
     "longitude": 3.279
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Talence",
+    "latitude": 44.8099,
+    "longitude": -0.5905
   },
   {
     "parkType": "theme_park",
@@ -22823,6 +21367,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -0.57
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Textile",
+    "latitude": 47.51277778,
+    "longitude": 4.53194444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Thabor",
+    "latitude": 48.1144,
+    "longitude": -1.6669
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "FR",
     "countryName": "France",
@@ -22831,12 +21391,60 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 2.570546
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Tourcoing",
+    "latitude": 50.724457539,
+    "longitude": 3.168106223
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Tourmalet",
+    "latitude": 42.90833333,
+    "longitude": 0.145
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Tours",
+    "latitude": 47.38777778,
+    "longitude": 0.66666667
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "FR",
     "countryName": "France",
     "name": "Ty' Bamboo",
     "latitude": 48.5175,
     "longitude": 2.62389
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Universitaire de Poitiers",
+    "latitude": 46.5565,
+    "longitude": 0.4092
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Upper Brittany",
+    "latitude": 48.42972222,
+    "longitude": -1.26083333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Val d'Yser",
+    "latitude": 50.916805555,
+    "longitude": 2.547027777
   },
   {
     "parkType": "national_park",
@@ -22898,7 +21506,23 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "FR",
     "countryName": "France",
-    "name": "Zoo and Botanical Garden of Branféré",
+    "name": "Yves Rocher",
+    "latitude": 47.773056,
+    "longitude": -2.132222
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Yves Rocher de La Gacilly",
+    "latitude": 47.76555556,
+    "longitude": -2.13111111
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "FR",
+    "countryName": "France",
+    "name": "Zoo and of Branféré",
     "latitude": 47.5951,
     "longitude": -2.39549
   },
@@ -23114,7 +21738,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GE",
     "countryName": "Georgia",
-    "name": "National Botanical Garden of Georgia",
+    "name": "National of Georgia",
     "latitude": 41.686111111,
     "longitude": 44.8075
   },
@@ -23175,12 +21799,28 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 41.878056
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Aachen",
+    "latitude": 50.778927,
+    "longitude": 6.0458914
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "DE",
     "countryName": "Germany",
     "name": "Aaseebad Ibbenbüren",
     "latitude": 52.26329,
     "longitude": 7.73155
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Adorf",
+    "latitude": 50.3062,
+    "longitude": 12.246
   },
   {
     "parkType": "theme_park",
@@ -23242,7 +21882,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "Alter Botanischer Garten",
+    "name": "Alter",
     "latitude": 48.141842066,
     "longitude": 11.564299402
   },
@@ -23250,7 +21890,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "Alter Botanischer Garten Hamburg",
+    "name": "Alter Hamburg",
     "latitude": 53.559888888,
     "longitude": 9.985222222
   },
@@ -23258,9 +21898,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "Alter Botanischer Garten Tübingen",
+    "name": "Alter Tübingen",
     "latitude": 48.5234,
     "longitude": 9.0571
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "And Botanical Museum Berlin",
+    "latitude": 52.455,
+    "longitude": 13.3036
   },
   {
     "parkType": "botanical_garden",
@@ -23386,7 +22034,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "arboretum of Mainau",
+    "name": "Arboretum of Mainau",
     "latitude": 47.704986,
     "longitude": 9.197102
   },
@@ -23469,6 +22117,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Atlantis Dorsten",
     "latitude": 51.666711,
     "longitude": 6.963682
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Augsburg",
+    "latitude": 48.349769511,
+    "longitude": 10.912423818
   },
   {
     "parkType": "theme_park",
@@ -23554,6 +22210,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
+    "name": "Bielefeld",
+    "latitude": 52.0147,
+    "longitude": 8.51
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
     "name": "Biosphere Prieros, Brandenburg, Germany.",
     "latitude": 52.22,
     "longitude": 13.773055555
@@ -23578,65 +22242,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "Botanic Garden and Botanical Museum Berlin",
-    "latitude": 52.455,
-    "longitude": 13.3036
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
     "name": "Botanical Garden",
     "latitude": 53.0663,
     "longitude": 8.85228
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "botanical garden at Schlechteberg",
-    "latitude": 50.999764,
-    "longitude": 14.589722
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "botanical garden for handicaped persons Radeberg",
-    "latitude": 51.105011,
-    "longitude": 13.922714
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanical Garden Karl-von-Frisch-Straße 6",
-    "latitude": 50.80214951,
-    "longitude": 8.80715531
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanical Garden of the KIT",
-    "latitude": 49.0129,
-    "longitude": 8.4191
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanical Garden of the University of Konstanz",
-    "latitude": 47.6921,
-    "longitude": 9.1788
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanical Garden Potsdam",
-    "latitude": 52.4041,
-    "longitude": 13.0252
   },
   {
     "parkType": "botanical_garden",
@@ -23669,390 +22277,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Botanischer Garten",
     "latitude": 52.3509,
     "longitude": 14.5298
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Aachen",
-    "latitude": 50.778927,
-    "longitude": 6.0458914
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Adorf",
-    "latitude": 50.3062,
-    "longitude": 12.246
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Augsburg",
-    "latitude": 48.349769511,
-    "longitude": 10.912423818
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Bielefeld",
-    "latitude": 52.0147,
-    "longitude": 8.51
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Johannes Gutenberg-Universität Mainz",
-    "latitude": 49.9923,
-    "longitude": 8.24369
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Martin-Luther-Universität Halle-Wittenberg",
-    "latitude": 51.4889,
-    "longitude": 11.9614
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Nationalpark Bayerischer Wald",
-    "latitude": 48.8898,
-    "longitude": 13.486
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Ruhr-Universität Bochum",
-    "latitude": 51.4419,
-    "longitude": 7.2675
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Stadt Hof",
-    "latitude": 50.329542,
-    "longitude": 11.922732
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Stadt Neuss",
-    "latitude": 51.1896,
-    "longitude": 6.69216
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Technischen Universität Braunschweig",
-    "latitude": 52.2708,
-    "longitude": 10.5331
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Technischen Universität Dresden",
-    "latitude": 51.04302,
-    "longitude": 13.75856
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der TU Darmstadt",
-    "latitude": 49.8692,
-    "longitude": 8.67861
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Universität des Saarlandes",
-    "latitude": 49.2545,
-    "longitude": 7.0378
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Universität Duisburg-Essen",
-    "latitude": 51.4281,
-    "longitude": 6.98139
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Universität Heidelberg",
-    "latitude": 49.4148,
-    "longitude": 8.66778
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Universität Regensburg",
-    "latitude": 48.9932,
-    "longitude": 12.0915
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Universität Tübingen",
-    "latitude": 48.5395,
-    "longitude": 9.0359
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Universität Ulm",
-    "latitude": 48.4194,
-    "longitude": 9.96667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten der Universität Würzburg",
-    "latitude": 49.7653,
-    "longitude": 9.9313
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Duisburg-Hamborn",
-    "latitude": 51.4869,
-    "longitude": 6.7665
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Erlangen",
-    "latitude": 49.5992,
-    "longitude": 11.0067
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Frankfurt am Main",
-    "latitude": 50.1272,
-    "longitude": 8.65833
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten für Arznei- und Gewürzpflanzen Oberholz",
-    "latitude": 51.2603892,
-    "longitude": 12.5002485
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Gera",
-    "latitude": 50.8758,
-    "longitude": 12.0878
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Gießen",
-    "latitude": 50.5864,
-    "longitude": 8.67889
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Griesbadgasse 30; Griesbadgasse 38 in Ingolstadt",
-    "latitude": 48.76277425,
-    "longitude": 11.419577091
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Grugapark",
-    "latitude": 51.4281,
-    "longitude": 6.9876
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten in Bad Langensalza",
-    "latitude": 51.113888888,
-    "longitude": 10.648611111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Jakobsplatz 15 in Bamberg",
-    "latitude": 49.890019579,
-    "longitude": 10.876687127
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Jena",
-    "latitude": 50.9311,
-    "longitude": 11.5861
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Karlsruhe",
-    "latitude": 49.0131,
-    "longitude": 8.40044
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Kassel",
-    "latitude": 51.2989,
-    "longitude": 9.47
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Kiel",
-    "latitude": 54.3481,
-    "longitude": 10.1167
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Krefeld",
-    "latitude": 51.3325,
-    "longitude": 6.60306
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Loismann",
-    "latitude": 52.237777777,
-    "longitude": 7.675
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Marburg",
-    "latitude": 50.803,
-    "longitude": 8.80938
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Maria-Ward-Straße 1i; Maria-Ward-Straße 1k; Menzinger Straße 61; Menzinger Straße 63; Menzinger Straße 65; Menzinger Straße 67 in München",
-    "latitude": 48.163110017,
-    "longitude": 11.499960819
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten München-Nymphenburg",
-    "latitude": 48.163131007,
-    "longitude": 11.499946012
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Oldenburg",
-    "latitude": 53.147488888,
-    "longitude": 8.197977777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Otto-Seeling-Promenade 31; Otto-Seeling-Promenade 33; Otto-Seeling-Promenade 37; Otto-Seeling-Promenade 39 in Fürth",
-    "latitude": 49.47205767,
-    "longitude": 11.000041616
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Rombergpark",
-    "latitude": 51.4807,
-    "longitude": 7.4684
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Schellerhau",
-    "latitude": 50.7678,
-    "longitude": 13.6997
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Solingen",
-    "latitude": 51.1845,
-    "longitude": 7.0647
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Universität Rostock",
-    "latitude": 54.0907,
-    "longitude": 12.0931
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Wilhelmshaven",
-    "latitude": 53.541666666,
-    "longitude": 8.108888888
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten Wuppertal",
-    "latitude": 51.26027778,
-    "longitude": 7.16055556
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Botanischer Garten, Duisburg-Hamborn",
-    "latitude": 51.487073,
-    "longitude": 6.766841
   },
   {
     "parkType": "botanical_garden",
@@ -24186,6 +22410,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
+    "name": "Duisburg-Hamborn",
+    "latitude": 51.4869,
+    "longitude": 6.7665
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
     "name": "Duissern",
     "latitude": 51.4358,
     "longitude": 6.79725
@@ -24261,6 +22493,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Ellerhoop-Thiensen Arboretum",
     "latitude": 53.7173,
     "longitude": 9.77642
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Erlangen",
+    "latitude": 49.5992,
+    "longitude": 11.0067
   },
   {
     "parkType": "theme_park",
@@ -24370,7 +22610,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "Experimenteller Botanischer Garten",
+    "name": "Experimenteller",
     "latitude": 51.5578,
     "longitude": 9.9623
   },
@@ -24410,9 +22650,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "Flora und Botanischer Garten Köln",
+    "name": "Flora und Köln",
     "latitude": 50.95932,
     "longitude": 6.97194
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "For handicaped persons Radeberg",
+    "latitude": 51.105011,
+    "longitude": 13.922714
   },
   {
     "parkType": "botanical_garden",
@@ -24487,6 +22735,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 6.96155
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Frankfurt am Main",
+    "latitude": 50.1272,
+    "longitude": 8.65833
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "DE",
     "countryName": "Germany",
@@ -24514,7 +22770,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "Freizeitbad \"Billy\" in Berggießhübel",
+    "name": "Freizeitbad Billy in Berggießhübel",
     "latitude": 50.877491,
     "longitude": 13.953157
   },
@@ -24567,6 +22823,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 7.73238
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Für Arznei- und Gewürzpflanzen Oberholz",
+    "latitude": 51.2603892,
+    "longitude": 12.5002485
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "DE",
     "countryName": "Germany",
@@ -24581,6 +22845,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Geibeltbad Pirna",
     "latitude": 50.946018,
     "longitude": 13.940674
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Gera",
+    "latitude": 50.8758,
+    "longitude": 12.0878
   },
   {
     "parkType": "theme_park",
@@ -24599,6 +22871,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 9.8605
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Gießen",
+    "latitude": 50.5864,
+    "longitude": 8.67889
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "DE",
     "countryName": "Germany",
@@ -24610,9 +22890,25 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "Greifswald Botanic Garden and Arboretum",
+    "name": "Greifswald and Arboretum",
     "latitude": 54.09361111,
     "longitude": 13.36694444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Griesbadgasse 30; Griesbadgasse 38 in Ingolstadt",
+    "latitude": 48.76277425,
+    "longitude": 11.419577091
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Grugapark",
+    "latitude": 51.4281,
+    "longitude": 6.9876
   },
   {
     "parkType": "botanical_garden",
@@ -24735,6 +23031,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 7.1037
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "In Bad Langensalza",
+    "latitude": 51.113888888,
+    "longitude": 10.648611111
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "DE",
     "countryName": "Germany",
@@ -24751,6 +23055,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 8.18833
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Jakobsplatz 15 in Bamberg",
+    "latitude": 49.890019579,
+    "longitude": 10.876687127
+  },
+  {
     "parkType": "national_park",
     "countryCode": "DE",
     "countryName": "Germany",
@@ -24759,12 +23071,36 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 13.65
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Jena",
+    "latitude": 50.9311,
+    "longitude": 11.5861
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "DE",
     "countryName": "Germany",
     "name": "Jochen Schweizer Arena",
     "latitude": 48.04266,
     "longitude": 11.65322
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Johannes Gutenberg-Universität Mainz",
+    "latitude": 49.9923,
+    "longitude": 8.24369
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Karl-von-Frisch-Straße 6",
+    "latitude": 50.80214951,
+    "longitude": 8.80715531
   },
   {
     "parkType": "theme_park",
@@ -24783,6 +23119,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 12.231
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Karlsruhe",
+    "latitude": 49.0131,
+    "longitude": 8.40044
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Kassel",
+    "latitude": 51.2989,
+    "longitude": 9.47
+  },
+  {
     "parkType": "national_park",
     "countryCode": "DE",
     "countryName": "Germany",
@@ -24797,6 +23149,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Ketteler Hof",
     "latitude": 51.7803,
     "longitude": 7.13083
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "KIT",
+    "latitude": 49.0129,
+    "longitude": 8.4191
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Kiel",
+    "latitude": 54.3481,
+    "longitude": 10.1167
   },
   {
     "parkType": "botanical_garden",
@@ -24821,6 +23189,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Kräuterpark Altenau",
     "latitude": 51.805012,
     "longitude": 10.45347
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Krefeld",
+    "latitude": 51.3325,
+    "longitude": 6.60306
   },
   {
     "parkType": "theme_park",
@@ -24890,9 +23266,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "little Vogtland, botanical garden Adorf",
+    "name": "Little Vogtland, Adorf",
     "latitude": 50.3085793,
     "longitude": 12.2501496
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Loismann",
+    "latitude": 52.237777777,
+    "longitude": 7.675
   },
   {
     "parkType": "botanical_garden",
@@ -24959,6 +23343,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 9.27111
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Marburg",
+    "latitude": 50.803,
+    "longitude": 8.80938
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "DE",
     "countryName": "Germany",
@@ -24989,6 +23381,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Märchenwald",
     "latitude": 47.910378,
     "longitude": 11.437604
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Maria-Ward-Straße 1i; Maria-Ward-Straße 1k; Menzinger Straße 61; Menzinger Straße 63; Menzinger Straße 65; Menzinger Straße 67 in München",
+    "latitude": 48.163110017,
+    "longitude": 11.499960819
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Martin-Luther-Universität Halle-Wittenberg",
+    "latitude": 51.4889,
+    "longitude": 11.9614
   },
   {
     "parkType": "theme_park",
@@ -25042,6 +23450,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
+    "name": "München-Nymphenburg",
+    "latitude": 48.163131007,
+    "longitude": 11.499946012
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
     "name": "Münster",
     "latitude": 51.9637,
     "longitude": 7.61056
@@ -25053,6 +23469,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Müritz",
     "latitude": 53.4364,
     "longitude": 12.8367
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Nationalpark Bayerischer Wald",
+    "latitude": 48.8898,
+    "longitude": 13.486
   },
   {
     "parkType": "theme_park",
@@ -25074,22 +23498,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "Old Botanical Garden Marburg",
-    "latitude": 50.8124,
-    "longitude": 8.77236
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Old Botanical Garden of Göttingen University",
-    "latitude": 51.5382,
-    "longitude": 9.9367
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
     "name": "Old Botanical Garden, Kiel",
     "latitude": 54.3308,
     "longitude": 10.1469
@@ -25098,9 +23506,41 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
+    "name": "Old Marburg",
+    "latitude": 50.8124,
+    "longitude": 8.77236
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Old of Göttingen University",
+    "latitude": 51.5382,
+    "longitude": 9.9367
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Oldenburg",
+    "latitude": 53.147488888,
+    "longitude": 8.197977777
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
     "name": "Osnabrück",
     "latitude": 52.2814,
     "longitude": 8.02793
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Otto-Seeling-Promenade 31; Otto-Seeling-Promenade 33; Otto-Seeling-Promenade 37; Otto-Seeling-Promenade 39 in Fürth",
+    "latitude": 49.47205767,
+    "longitude": 11.000041616
   },
   {
     "parkType": "botanical_garden",
@@ -25175,6 +23615,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 8.29472
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Potsdam",
+    "latitude": 52.4041,
+    "longitude": 13.0252
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "DE",
     "countryName": "Germany",
@@ -25197,334 +23645,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Pullman City Harz",
     "latitude": 51.702376,
     "longitude": 10.86953
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q105069972",
-    "latitude": 49.4102851,
-    "longitude": 9.454433
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q106477757",
-    "latitude": 52.399139,
-    "longitude": 10.774702
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q1089931",
-    "latitude": 49.1699,
-    "longitude": 12.639
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q113483135",
-    "latitude": 50.856033333,
-    "longitude": 12.7268
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q115206549",
-    "latitude": 49.790905,
-    "longitude": 6.811583
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q115265416",
-    "latitude": 50.91627,
-    "longitude": 12.9848
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q118235626",
-    "latitude": 51.004948,
-    "longitude": 13.664424
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q121301127",
-    "latitude": 49.436245069,
-    "longitude": 9.071181962
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q123124896",
-    "latitude": 51.33063,
-    "longitude": 12.35897
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q123439104",
-    "latitude": 47.769167,
-    "longitude": 9.153056
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q125055125",
-    "latitude": 48.75322,
-    "longitude": 8.26598
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q1256562",
-    "latitude": 48.0681,
-    "longitude": 7.67514
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q126891834",
-    "latitude": 48.0578105,
-    "longitude": 8.4531564
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q1302288",
-    "latitude": 51.3269,
-    "longitude": 6.56528
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q130434865",
-    "latitude": 47.740537,
-    "longitude": 12.617014
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q131836901",
-    "latitude": 48.996,
-    "longitude": 8.3764
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q133818059",
-    "latitude": 49.633304,
-    "longitude": 8.376673
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q134727810",
-    "latitude": 50.301284572,
-    "longitude": 8.0646081
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q135488699",
-    "latitude": 50.1014,
-    "longitude": 7.4221
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q1355404",
-    "latitude": 51.3708,
-    "longitude": 9.76472
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q1355419",
-    "latitude": 52.2158,
-    "longitude": 9.125
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q137049075",
-    "latitude": 51.69962946,
-    "longitude": 6.634625281
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q137802635",
-    "latitude": 53.7215,
-    "longitude": 9.67775
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q139665620",
-    "latitude": 52.794692,
-    "longitude": 7.201164
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q140046728",
-    "latitude": 48.652016,
-    "longitude": 9.207262
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q140050406",
-    "latitude": 50.296056,
-    "longitude": 9.486111
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q140160653",
-    "latitude": 53.612065,
-    "longitude": 7.157762
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q15713760",
-    "latitude": 52.134314,
-    "longitude": 11.6646
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q15782773",
-    "latitude": 52.289722222,
-    "longitude": 8.907222222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q1686812",
-    "latitude": 50.9235,
-    "longitude": 11.5802
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q1800377",
-    "latitude": 51.534818,
-    "longitude": 7.261201
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q18629465",
-    "latitude": 48.16997,
-    "longitude": 11.79951
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q25089735",
-    "latitude": 52.2810293,
-    "longitude": 10.5474296
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q30011675",
-    "latitude": 52.9314,
-    "longitude": 8.8278
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q56150630",
-    "latitude": 51.86194,
-    "longitude": 6.60974
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q630455",
-    "latitude": 47.981,
-    "longitude": 12.3074
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q63968137",
-    "latitude": 51.836424305,
-    "longitude": 6.862497243
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q66722676",
-    "latitude": 48.901805555,
-    "longitude": 9.198916666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q79965733",
-    "latitude": 50.04196,
-    "longitude": 10.24137
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q811604",
-    "latitude": 52.9598,
-    "longitude": 9.03338
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "DE",
-    "countryName": "Germany",
-    "name": "Q851581",
-    "latitude": 52.0361,
-    "longitude": 7.84484
   },
   {
     "parkType": "theme_park",
@@ -25594,6 +23714,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
+    "name": "Rombergpark",
+    "latitude": 51.4807,
+    "longitude": 7.4684
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
     "name": "Rosarium im Park von Schloss Friedrichshof",
     "latitude": 50.190597,
     "longitude": 8.507477
@@ -25634,7 +23762,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "rose garden at the Gardens of the World",
+    "name": "Rose garden at the Gardens of the World",
     "latitude": 52.538079,
     "longitude": 13.574172
   },
@@ -25775,6 +23903,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 8.745329
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Ruhr-Universität Bochum",
+    "latitude": 51.4419,
+    "longitude": 7.2675
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "DE",
     "countryName": "Germany",
@@ -25829,6 +23965,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Schau- und Sichtungsgarten Hermannshof",
     "latitude": 49.5477,
     "longitude": 8.6697
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Schellerhau",
+    "latitude": 50.7678,
+    "longitude": 13.6997
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Schlechteberg",
+    "latitude": 50.999764,
+    "longitude": 14.589722
   },
   {
     "parkType": "national_park",
@@ -25911,6 +24063,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 10.5914
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Solingen",
+    "latitude": 51.1845,
+    "longitude": 7.0647
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "DE",
     "countryName": "Germany",
@@ -25946,7 +24106,23 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "Stadtpark und Botanischer Garten Gütersloh",
+    "name": "Stadt Hof",
+    "latitude": 50.329542,
+    "longitude": 11.922732
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Stadt Neuss",
+    "latitude": 51.1896,
+    "longitude": 6.69216
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Stadtpark und Gütersloh",
     "latitude": 51.8979,
     "longitude": 8.391
   },
@@ -25997,6 +24173,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Tauris",
     "latitude": 50.39602778,
     "longitude": 7.49686111
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Technischen Universität Braunschweig",
+    "latitude": 52.2708,
+    "longitude": 10.5331
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Technischen Universität Dresden",
+    "latitude": 51.04302,
+    "longitude": 13.75856
   },
   {
     "parkType": "theme_park",
@@ -26114,7 +24306,87 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "DE",
     "countryName": "Germany",
-    "name": "Usedom Botanical Gardens",
+    "name": "TU Darmstadt",
+    "latitude": 49.8692,
+    "longitude": 8.67861
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Universität des Saarlandes",
+    "latitude": 49.2545,
+    "longitude": 7.0378
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Universität Duisburg-Essen",
+    "latitude": 51.4281,
+    "longitude": 6.98139
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Universität Heidelberg",
+    "latitude": 49.4148,
+    "longitude": 8.66778
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Universität Regensburg",
+    "latitude": 48.9932,
+    "longitude": 12.0915
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Universität Rostock",
+    "latitude": 54.0907,
+    "longitude": 12.0931
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Universität Tübingen",
+    "latitude": 48.5395,
+    "longitude": 9.0359
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Universität Ulm",
+    "latitude": 48.4194,
+    "longitude": 9.96667
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Universität Würzburg",
+    "latitude": 49.7653,
+    "longitude": 9.9313
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "University of Konstanz",
+    "latitude": 47.6921,
+    "longitude": 9.1788
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Usedom",
     "latitude": 53.916666666,
     "longitude": 14.016666666
   },
@@ -26183,12 +24455,28 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 9.205
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Wilhelmshaven",
+    "latitude": 53.541666666,
+    "longitude": 8.108888888
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "DE",
     "countryName": "Germany",
     "name": "Wunderland Kalkar",
     "latitude": 51.76417,
     "longitude": 6.32611
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "DE",
+    "countryName": "Germany",
+    "name": "Wuppertal",
+    "latitude": 51.26027778,
+    "longitude": 7.16055556
   },
   {
     "parkType": "theme_park",
@@ -26202,7 +24490,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GH",
     "countryName": "Ghana",
-    "name": "Aburi Botanical Gardens",
+    "name": "Aburi",
     "latitude": 5.866666666,
     "longitude": -0.183333333
   },
@@ -26266,7 +24554,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GH",
     "countryName": "Ghana",
-    "name": "Legon Botanical Gardens",
+    "name": "Legon",
     "latitude": 5.66,
     "longitude": -0.1875
   },
@@ -26314,7 +24602,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GR",
     "countryName": "Greece",
-    "name": "Balkan Botanic Garden of Kroussia",
+    "name": "Balkan of Kroussia",
     "latitude": 41.09,
     "longitude": 23.112
   },
@@ -26333,6 +24621,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Dadia-Lefkimi-Soufli Forest",
     "latitude": 41.13,
     "longitude": 26.216944444
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "GR",
+    "countryName": "Greece",
+    "name": "Eastern Macedonia and Thrace",
+    "latitude": 41.007861111,
+    "longitude": 25.105386111
   },
   {
     "parkType": "national_park",
@@ -26378,6 +24674,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "GR",
     "countryName": "Greece",
+    "name": "Lakes Koronia-Volvi and the Macedonian Tempe",
+    "latitude": 40.675833333,
+    "longitude": 23.328888888
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "GR",
+    "countryName": "Greece",
+    "name": "Messolonghi - Aitoliko lagoons",
+    "latitude": 38.434994,
+    "longitude": 21.354065
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "GR",
+    "countryName": "Greece",
     "name": "Missolonghi–Aitoliko Lagoons",
     "latitude": 38.387,
     "longitude": 21.358
@@ -26402,41 +24714,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "GR",
     "countryName": "Greece",
-    "name": "National Park of Eastern Macedonia and Thrace",
-    "latitude": 41.007861111,
-    "longitude": 25.105386111
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "GR",
-    "countryName": "Greece",
-    "name": "National Park of Lakes Koronia-Volvi and the Macedonian Tempe",
-    "latitude": 40.675833333,
-    "longitude": 23.328888888
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "GR",
-    "countryName": "Greece",
-    "name": "National Park of Messolonghi - Aitoliko lagoons",
-    "latitude": 38.434994,
-    "longitude": 21.354065
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "GR",
-    "countryName": "Greece",
-    "name": "National Park of Nestos Delta and lakes Vistonida-Ismarida",
+    "name": "Nestos Delta and lakes Vistonida-Ismarida",
     "latitude": 40.985,
     "longitude": 24.715
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "GR",
-    "countryName": "Greece",
-    "name": "National Park of Tzoumerka, Peristeri & Arachthos Gorge",
-    "latitude": 39.55,
-    "longitude": 21
   },
   {
     "parkType": "national_park",
@@ -26554,6 +24834,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "GR",
     "countryName": "Greece",
+    "name": "Tzoumerka, Peristeri & Arachthos Gorge",
+    "latitude": 39.55,
+    "longitude": 21
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "GR",
+    "countryName": "Greece",
     "name": "Vikos–Aoös",
     "latitude": 39.92472222,
     "longitude": 20.76194444
@@ -26594,17 +24882,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GD",
     "countryName": "Grenada",
-    "name": "Sir Eric Matthew Gairy Botanical Gardens",
+    "name": "Sir Eric Matthew Gairy",
     "latitude": 12.0469,
     "longitude": -61.7445
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "GT",
-    "countryName": "Guatemala",
-    "name": "Botanical Garden of Guatemala",
-    "latitude": 14.6146,
-    "longitude": -90.512305
   },
   {
     "parkType": "national_park",
@@ -26669,6 +24949,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Grutas de Lanquín",
     "latitude": 15.582222222,
     "longitude": -89.987777777
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "GT",
+    "countryName": "Guatemala",
+    "name": "Guatemala",
+    "latitude": 14.6146,
+    "longitude": -90.512305
   },
   {
     "parkType": "theme_park",
@@ -26741,14 +25029,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Pacaya",
     "latitude": 14.380833333,
     "longitude": -90.601111111
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "GT",
-    "countryName": "Guatemala",
-    "name": "Q16616244",
-    "latitude": 15.919074,
-    "longitude": -90.673084
   },
   {
     "parkType": "national_park",
@@ -26842,25 +25122,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "GN",
     "countryName": "Guinea",
-    "name": "National Park of Upper Niger",
+    "name": "Upper Niger",
     "latitude": 10.5,
     "longitude": -10.2
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "GN",
-    "countryName": "Guinea",
-    "name": "Q130619715",
-    "latitude": 10.691247,
-    "longitude": -12.241812
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "GN",
-    "countryName": "Guinea",
-    "name": "Q62391857",
-    "latitude": 11.7,
-    "longitude": -11.4
   },
   {
     "parkType": "national_park",
@@ -26890,7 +25154,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GY",
     "countryName": "Guyana",
-    "name": "Guyana Botanical Gardens",
+    "name": "Guyana",
     "latitude": 6.80547,
     "longitude": -58.14602
   },
@@ -26957,14 +25221,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Pic Macaya",
     "latitude": 18.37138889,
     "longitude": -74.02027778
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "HT",
-    "countryName": "Haiti",
-    "name": "Q75828301",
-    "latitude": 18.33498,
-    "longitude": -71.976353
   },
   {
     "parkType": "national_park",
@@ -27103,14 +25359,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -86.36666667
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "HN",
-    "countryName": "Honduras",
-    "name": "Q5820868",
-    "latitude": 15.3269,
-    "longitude": 87.60129983
-  },
-  {
     "parkType": "national_park",
     "countryCode": "HN",
     "countryName": "Honduras",
@@ -27189,38 +25437,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Botanical Garden",
     "latitude": 47.4839,
     "longitude": 19.0856
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "HU",
-    "countryName": "Hungary",
-    "name": "Botanical Garden Neszmély",
-    "latitude": 47.7083,
-    "longitude": 18.4133
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "HU",
-    "countryName": "Hungary",
-    "name": "Botanical Garden of Szeged",
-    "latitude": 46.23156,
-    "longitude": 20.158878
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "HU",
-    "countryName": "Hungary",
-    "name": "Botanical Garden of the University of Debrecen",
-    "latitude": 47.5583867,
-    "longitude": 21.6218644
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "HU",
-    "countryName": "Hungary",
-    "name": "Botanical Garden, Soroksár",
-    "latitude": 47.4019,
-    "longitude": 19.1551
   },
   {
     "parkType": "botanical_garden",
@@ -27335,6 +25551,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 20.5325
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "HU",
+    "countryName": "Hungary",
+    "name": "Neszmély",
+    "latitude": 47.7083,
+    "longitude": 18.4133
+  },
+  {
     "parkType": "national_park",
     "countryCode": "HU",
     "countryName": "Hungary",
@@ -27346,33 +25570,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "HU",
     "countryName": "Hungary",
-    "name": "Q104767052",
-    "latitude": 47.481365,
-    "longitude": 19.039422
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "HU",
-    "countryName": "Hungary",
-    "name": "Q1109635",
-    "latitude": 46.73805556,
-    "longitude": 19.58694444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "HU",
-    "countryName": "Hungary",
-    "name": "Q118626569",
-    "latitude": 46.552008,
-    "longitude": 20.655085
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "HU",
-    "countryName": "Hungary",
-    "name": "Q874944",
-    "latitude": 46.837305555,
-    "longitude": 16.894555555
+    "name": "Soroksár",
+    "latitude": 47.4019,
+    "longitude": 19.1551
   },
   {
     "parkType": "botanical_garden",
@@ -27386,9 +25586,25 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "HU",
     "countryName": "Hungary",
+    "name": "Szeged",
+    "latitude": 46.23156,
+    "longitude": 20.158878
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "HU",
+    "countryName": "Hungary",
     "name": "Tuzson Arboretum",
     "latitude": 47.93995,
     "longitude": 19.794331
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "HU",
+    "countryName": "Hungary",
+    "name": "University of Debrecen",
+    "latitude": 47.5583867,
+    "longitude": 21.6218644
   },
   {
     "parkType": "botanical_garden",
@@ -27562,7 +25778,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IN",
     "countryName": "India",
-    "name": "Auroville Botanical Gardens",
+    "name": "Auroville",
     "latitude": 11.986666666,
     "longitude": 79.807222222
   },
@@ -27653,14 +25869,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Blackbuck",
     "latitude": 22.03333333,
     "longitude": 72
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IN",
-    "countryName": "India",
-    "name": "Botanical Gardens Hyderabad",
-    "latitude": 17.385,
-    "longitude": 78.4866
   },
   {
     "parkType": "theme_park",
@@ -27962,9 +26170,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IN",
     "countryName": "India",
-    "name": "Hortus Malabaricus Botanical Garden and Research Institute",
+    "name": "Hortus Malabaricus and Research Institute",
     "latitude": 10.729491506,
     "longitude": 76.263402142
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IN",
+    "countryName": "India",
+    "name": "Hyderabad",
+    "latitude": 17.385,
+    "longitude": 78.4866
   },
   {
     "parkType": "theme_park",
@@ -28170,7 +26386,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IN",
     "countryName": "India",
-    "name": "Kotla Vijayabhaskara Reddy Botanical Gardens",
+    "name": "Kotla Vijayabhaskara Reddy",
     "latitude": 17.455,
     "longitude": 78.357
   },
@@ -28242,7 +26458,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IN",
     "countryName": "India",
-    "name": "Malabar Botanical Garden and Institute for Plant Sciences",
+    "name": "Malabar and Institute for Plant Sciences",
     "latitude": 11.2375,
     "longitude": 75.8275
   },
@@ -28874,7 +27090,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IN",
     "countryName": "India",
-    "name": "Tropical Botanical Garden and Research Institute",
+    "name": "Tropical and Research Institute",
     "latitude": 8.5036,
     "longitude": 76.9521
   },
@@ -29002,7 +27218,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "ID",
     "countryName": "Indonesia",
-    "name": "Banua Botanical Gardens",
+    "name": "Banua",
     "latitude": -3.489543439,
     "longitude": 114.816540449
   },
@@ -29058,7 +27274,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "ID",
     "countryName": "Indonesia",
-    "name": "Bogor Botanical Gardens",
+    "name": "Bogor",
     "latitude": -6.597937,
     "longitude": 106.799112
   },
@@ -29463,70 +27679,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 112.736805555
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "ID",
-    "countryName": "Indonesia",
-    "name": "Q109440417",
-    "latitude": -7.797808291,
-    "longitude": 112.736855301
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "ID",
-    "countryName": "Indonesia",
-    "name": "Q135649024",
-    "latitude": -5.130833333,
-    "longitude": 119.578333333
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "ID",
-    "countryName": "Indonesia",
-    "name": "Q135988987",
-    "latitude": -7.923323937,
-    "longitude": 112.658076673
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "ID",
-    "countryName": "Indonesia",
-    "name": "Q135989828",
-    "latitude": -7.887888158,
-    "longitude": 112.529533471
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "ID",
-    "countryName": "Indonesia",
-    "name": "Q136031305",
-    "latitude": -6.832694505,
-    "longitude": 107.604424684
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "ID",
-    "countryName": "Indonesia",
-    "name": "Q136206477",
-    "latitude": -7.395336208,
-    "longitude": 110.424894155
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ID",
-    "countryName": "Indonesia",
-    "name": "Q136653388",
-    "latitude": -3.7051978,
-    "longitude": 119.799283117
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "ID",
-    "countryName": "Indonesia",
-    "name": "Q138610142",
-    "latitude": -7.679987727,
-    "longitude": 112.640376993
-  },
-  {
     "parkType": "national_park",
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -29882,7 +28034,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IE",
     "countryName": "Ireland",
-    "name": "National Botanic Gardens",
+    "name": "National",
     "latitude": 53.372638888,
     "longitude": -6.271416666
   },
@@ -29890,7 +28042,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IE",
     "countryName": "Ireland",
-    "name": "National Botanic Gardens Kilmacurragh",
+    "name": "National Kilmacurragh",
     "latitude": 52.929327,
     "longitude": -6.147796
   },
@@ -29898,7 +28050,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "IE",
     "countryName": "Ireland",
-    "name": "Pirate Adventure Park",
+    "name": "Pirate",
     "latitude": 53.80619,
     "longitude": -9.53751
   },
@@ -30050,7 +28202,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IR",
     "countryName": "Islamic Republic of Iran",
-    "name": "National Botanical Garden of Iran",
+    "name": "National of Iran",
     "latitude": 35.738611111,
     "longitude": 51.174722222
   },
@@ -30077,118 +28229,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Ocean Water Park",
     "latitude": 26.497313367,
     "longitude": 53.980388271
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q1740754",
-    "latitude": 38.81333333,
-    "longitude": 45.8375
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q28712662",
-    "latitude": 32.8942573,
-    "longitude": 51.1787346
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q31068113",
-    "latitude": 33.7027572,
-    "longitude": 50.6939249
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q56361537",
-    "latitude": 32.7896437,
-    "longitude": 53.8741137
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q5705596",
-    "latitude": 29.5650257,
-    "longitude": 53.8638674
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q5709313",
-    "latitude": 37.4517804,
-    "longitude": 49.9148813
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q5710639",
-    "latitude": 38.8217221,
-    "longitude": 46.1509602
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q5711198",
-    "latitude": 37.0134902,
-    "longitude": 57.7100217
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q5727821",
-    "latitude": 32.339361,
-    "longitude": 51.904908
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q5775353",
-    "latitude": 36.199744,
-    "longitude": 53.433599
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q5905836",
-    "latitude": 27.821944444,
-    "longitude": 51.470833333
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q5907119",
-    "latitude": 37.2008014,
-    "longitude": 57.2669494
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q5926425",
-    "latitude": 35.7,
-    "longitude": 51.4167
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IR",
-    "countryName": "Islamic Republic of Iran",
-    "name": "Q5933828",
-    "latitude": 36.430897,
-    "longitude": 53.7702925
   },
   {
     "parkType": "theme_park",
@@ -30359,14 +28399,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 35.432357
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "IL",
-    "countryName": "Israel",
-    "name": "Botanical garden, Oranim",
-    "latitude": 32.711992,
-    "longitude": 35.107961
-  },
-  {
     "parkType": "national_park",
     "countryCode": "IL",
     "countryName": "Israel",
@@ -30458,7 +28490,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IL",
     "countryName": "Israel",
-    "name": "Ein Gedi Botanical Gardens",
+    "name": "Ein Gedi",
     "latitude": 31.45,
     "longitude": 35.3833
   },
@@ -30530,7 +28562,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IL",
     "countryName": "Israel",
-    "name": "Haifa Zoo and Botanical Gardens",
+    "name": "Haifa Zoo and",
     "latitude": 32.805794444,
     "longitude": 34.986130555
   },
@@ -30578,7 +28610,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IL",
     "countryName": "Israel",
-    "name": "Jerusalem Botanical Gardens",
+    "name": "Jerusalem",
     "latitude": 31.76873,
     "longitude": 35.200088
   },
@@ -30730,7 +28762,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IL",
     "countryName": "Israel",
-    "name": "National Botanical Garden of Israel",
+    "name": "National of Israel",
     "latitude": 31.793611111,
     "longitude": 35.244166666
   },
@@ -30751,100 +28783,20 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 34.434166666
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "IL",
+    "countryName": "Israel",
+    "name": "Oranim",
+    "latitude": 32.711992,
+    "longitude": 35.107961
+  },
+  {
     "parkType": "national_park",
     "countryCode": "IL",
     "countryName": "Israel",
     "name": "Palmachim beach",
     "latitude": 31.930277777,
     "longitude": 34.700833333
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IL",
-    "countryName": "Israel",
-    "name": "Q115664653",
-    "latitude": 32.643458321,
-    "longitude": 35.390921669
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IL",
-    "countryName": "Israel",
-    "name": "Q139565313",
-    "latitude": 32.886783716,
-    "longitude": 35.132647726
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IL",
-    "countryName": "Israel",
-    "name": "Q1584339",
-    "latitude": 32.74994444,
-    "longitude": 34.99959167
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IL",
-    "countryName": "Israel",
-    "name": "Q16132281",
-    "latitude": 31.73468889,
-    "longitude": 35.05281111
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IL",
-    "countryName": "Israel",
-    "name": "Q26768872",
-    "latitude": 31.316111111,
-    "longitude": 35.347777777
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IL",
-    "countryName": "Israel",
-    "name": "Q26771023",
-    "latitude": 31.82057,
-    "longitude": 35.09869
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IL",
-    "countryName": "Israel",
-    "name": "Q30527235",
-    "latitude": 29.601111111,
-    "longitude": 34.970555555
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IL",
-    "countryName": "Israel",
-    "name": "Q30527242",
-    "latitude": 29.526882785,
-    "longitude": 34.914005869
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IL",
-    "countryName": "Israel",
-    "name": "Q41792201",
-    "latitude": 32.101222222,
-    "longitude": 34.813972222
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IL",
-    "countryName": "Israel",
-    "name": "Q49004086",
-    "latitude": 32.048888888,
-    "longitude": 34.953888888
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IL",
-    "countryName": "Israel",
-    "name": "Q65252578",
-    "latitude": 31.929694444,
-    "longitude": 34.781722222
   },
   {
     "parkType": "national_park",
@@ -30946,7 +28898,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IL",
     "countryName": "Israel",
-    "name": "Tel Aviv University Botanical Gardens",
+    "name": "Tel Aviv University",
     "latitude": 32.11375,
     "longitude": 34.80875
   },
@@ -31039,14 +28991,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 35.6897023
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "\"Campanula morettiana\"",
-    "latitude": 46.187620103,
-    "longitude": 12.040838599
-  },
-  {
     "parkType": "national_park",
     "countryCode": "IT",
     "countryName": "Italy",
@@ -31074,17 +29018,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Alpin Botanical Garden Valderia",
-    "latitude": 44.27083333,
-    "longitude": 7.20333333
+    "name": "Alpi Orientali",
+    "latitude": 46.0835,
+    "longitude": 12.3002
   },
   {
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Alpine Botanical Garden of Campo Imperatore",
-    "latitude": 42.443759,
-    "longitude": 13.558272
+    "name": "Alpinia",
+    "latitude": 45.881451,
+    "longitude": 8.500669
   },
   {
     "parkType": "botanical_garden",
@@ -31117,6 +29061,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Appennino Tosco-Emiliano",
     "latitude": 44.31833333,
     "longitude": 10.24055556
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Apuan Alps Pellegrini - Ansaldi",
+    "latitude": 44.05789722,
+    "longitude": 10.19070278
   },
   {
     "parkType": "theme_park",
@@ -31226,7 +29178,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Bergamo Botanical Garden \"Lorenzo Rota\"",
+    "name": "Bergamo Lorenzo Rota",
     "latitude": 45.70777778,
     "longitude": 9.65777778
   },
@@ -31234,47 +29186,15 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "botanic garden Caplez",
-    "latitude": 44.942033,
-    "longitude": 9.334154
+    "name": "Brera",
+    "latitude": 45.471024283,
+    "longitude": 9.189242925
   },
   {
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Botanic Garden of the Malmerendi Museum of Natural Sciences",
-    "latitude": 44.28333333,
-    "longitude": 11.88333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Botanic Garden of the University of Salento",
-    "latitude": 40.3351,
-    "longitude": 18.122661111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Botanical Garden \"Maria Ansaldi\" Pania di Corfino",
-    "latitude": 44.17305556,
-    "longitude": 10.33416667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Botanical Garden at the Sorgenti del Cavuto",
-    "latitude": 41.995541,
-    "longitude": 13.803924
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "botanical garden of Cagliari",
+    "name": "Cagliari",
     "latitude": 39.2167,
     "longitude": 9.11667
   },
@@ -31282,65 +29202,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Botanical Garden of Florence",
-    "latitude": 43.778888888,
-    "longitude": 11.261388888
+    "name": "Campanula morettiana",
+    "latitude": 46.187620103,
+    "longitude": 12.040838599
   },
   {
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Botanical Garden of Naples",
-    "latitude": 40.861359,
-    "longitude": 14.262462
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Botanical Garden of Parma",
-    "latitude": 44.795930555,
-    "longitude": 10.327294444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Botanical Garden of the Apuan Alps \"Pellegrini - Ansaldi\"",
-    "latitude": 44.05789722,
-    "longitude": 10.19070278
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "botanical garden of the Villa Melzi",
-    "latitude": 45.97968,
-    "longitude": 9.25399
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "botanical garden of Villa Bricherasio",
-    "latitude": 44.65,
-    "longitude": 7.48333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Botanical garden of Villa De Ponti",
-    "latitude": 45.80322,
-    "longitude": 9.424303
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Botanical Garden, University of Bari",
-    "latitude": 41.10759,
-    "longitude": 16.883073
+    "name": "Campo Imperatore",
+    "latitude": 42.443759,
+    "longitude": 13.558272
   },
   {
     "parkType": "theme_park",
@@ -31351,12 +29223,28 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 10.72639
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Caplez",
+    "latitude": 44.942033,
+    "longitude": 9.334154
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "IT",
     "countryName": "Italy",
     "name": "Caribe Bay",
     "latitude": 45.49405556,
     "longitude": 12.60109722
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Carsiana",
+    "latitude": 45.7325,
+    "longitude": 13.7397
   },
   {
     "parkType": "botanical_garden",
@@ -31426,9 +29314,57 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Civico Botanical Garden \"Ulisse Aldrovandi\"",
+    "name": "Città Studi",
+    "latitude": 45.4744962,
+    "longitude": 9.2355381
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Civico Ulisse Aldrovandi",
     "latitude": 44.6333,
     "longitude": 11.1833
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Clelia Durazzo Grimaldi",
+    "latitude": 44.43055556,
+    "longitude": 8.81694444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Collepardo",
+    "latitude": 41.76666667,
+    "longitude": 13.36666667
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Comunale di Lucca",
+    "latitude": 43.84144722,
+    "longitude": 10.51143056
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Conservativo Carlo Spegazzini",
+    "latitude": 45.66666667,
+    "longitude": 12.25
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Conservativo Francesco Busnello",
+    "latitude": 45.66666667,
+    "longitude": 12.25
   },
   {
     "parkType": "theme_park",
@@ -31439,12 +29375,36 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 9.01316643
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Daniela Brescia",
+    "latitude": 42.120429,
+    "longitude": 14.026737
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Didattico Sperimentale dell'Università di Milano",
+    "latitude": 45.4749,
+    "longitude": 9.22642222
+  },
+  {
     "parkType": "national_park",
     "countryCode": "IT",
     "countryName": "Italy",
     "name": "Dolomiti Bellunesi",
     "latitude": 46.1699261,
     "longitude": 12.0366466
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "E Arboreto Appenninico del Parco Nazionale d'Abruzzo",
+    "latitude": 41.806064,
+    "longitude": 13.786861
   },
   {
     "parkType": "theme_park",
@@ -31458,7 +29418,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "educational arboretum",
+    "name": "Educational arboretum",
     "latitude": 45.71552,
     "longitude": 11.40737
   },
@@ -31495,12 +29455,52 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 12.60988
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Florence",
+    "latitude": 43.778888888,
+    "longitude": 11.261388888
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Fondazione André Heller",
+    "latitude": 45.620833333,
+    "longitude": 10.561944444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Forestale dell'Abetone",
+    "latitude": 44.144688,
+    "longitude": 10.663658
+  },
+  {
     "parkType": "national_park",
     "countryCode": "IT",
     "countryName": "Italy",
     "name": "Foreste Casentinesi, Monte Falterona, Campigna",
     "latitude": 43.843333,
     "longitude": 11.791111
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Frignoli",
+    "latitude": 44.23333333,
+    "longitude": 10.13333333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Friulano",
+    "latitude": 46.06754,
+    "longitude": 13.22217
   },
   {
     "parkType": "theme_park",
@@ -31554,6 +29554,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
+    "name": "Giangio Lorenzoni",
+    "latitude": 46.13722222,
+    "longitude": 12.36055556
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
     "name": "Giardini Botanici dell'Isola Madre",
     "latitude": 45.9117,
     "longitude": 8.5382
@@ -31586,7 +29594,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Giardino Alpino \"Antonio Segni\"",
+    "name": "Giardino Alpino Antonio Segni",
     "latitude": 46.38333333,
     "longitude": 12.05
   },
@@ -31597,254 +29605,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Giardino Alpino Dario Broglio del Monte Corno",
     "latitude": 45.807258,
     "longitude": 11.536849
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico \"Loreto Grande\"",
-    "latitude": 41.86622,
-    "longitude": 13.624342
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico \"Nuova Gussonea\"",
-    "latitude": 37.63333333,
-    "longitude": 14.93333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Alpinia",
-    "latitude": 45.881451,
-    "longitude": 8.500669
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Alpino \"Giangio Lorenzoni\"",
-    "latitude": 46.13722222,
-    "longitude": 12.36055556
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Alpino \"Rezia\"",
-    "latitude": 46.46666667,
-    "longitude": 10.36666667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Alpino alle Viotte di Monte Bondone",
-    "latitude": 46.021381,
-    "longitude": 11.038803
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Alpino di Passo Coe",
-    "latitude": 45.91666667,
-    "longitude": 11.18333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Alpino di Pietra Corva",
-    "latitude": 44.83333333,
-    "longitude": 9.33333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Alpino San Marco",
-    "latitude": 45.756111111,
-    "longitude": 11.186944444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Carsiana",
-    "latitude": 45.7325,
-    "longitude": 13.7397
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino botanico Clelia Durazzo Grimaldi",
-    "latitude": 44.43055556,
-    "longitude": 8.81694444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Daniela Brescia",
-    "latitude": 42.120429,
-    "longitude": 14.026737
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico della Majella",
-    "latitude": 42.046793,
-    "longitude": 14.190686
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico della Scuola Media Statale \"E.Toti\" di Musile di Piave",
-    "latitude": 45.61666667,
-    "longitude": 12.56666667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico delle Alpi Orientali",
-    "latitude": 46.0835,
-    "longitude": 12.3002
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico di Collepardo",
-    "latitude": 41.76666667,
-    "longitude": 13.36666667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico di Oropa",
-    "latitude": 45.629856,
-    "longitude": 7.975232
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico di Valbonella",
-    "latitude": 43.86,
-    "longitude": 11.78
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico e Arboreto Appenninico del Parco Nazionale d'Abruzzo",
-    "latitude": 41.806064,
-    "longitude": 13.786861
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Fondazione André Heller",
-    "latitude": 45.620833333,
-    "longitude": 10.561944444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Gole del Sagittario",
-    "latitude": 41.992293888,
-    "longitude": 13.804163888
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Litoraneo di Porto Caleri",
-    "latitude": 45.06666667,
-    "longitude": 12.23333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Mediterraneo",
-    "latitude": 42.078122,
-    "longitude": 14.752938
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Montano di Pratorondanino",
-    "latitude": 44.52824,
-    "longitude": 8.75082
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Ponziano",
-    "latitude": 40.9,
-    "longitude": 12.96666667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Preistorico di Molina di Ledro",
-    "latitude": 45.86666667,
-    "longitude": 10.78333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Rea",
-    "latitude": 45.03647,
-    "longitude": 7.391
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Santicelli",
-    "latitude": 38.68333333,
-    "longitude": 16.55
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Trebbo Trebbi",
-    "latitude": 45.53333333,
-    "longitude": 10.23333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico Tropicale dell'Istituto Agronomico per l'Oltremare",
-    "latitude": 43.76861111,
-    "longitude": 11.25694444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Giardino Botanico, Istituto Tecnico Agrario Statale \"Celso Ulpiani\"",
-    "latitude": 42.854218,
-    "longitude": 13.598093
   },
   {
     "parkType": "botanical_garden",
@@ -31890,7 +29650,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Giardino delle Erbe \"Augusto Rinaldi Ceroni\"",
+    "name": "Giardino delle Erbe Augusto Rinaldi Ceroni",
     "latitude": 44.22939,
     "longitude": 11.624225
   },
@@ -31938,7 +29698,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Giardino Montano per la Conservazione della Biodiversità \"Ruggero Tomaselli\"",
+    "name": "Giardino Montano per la Conservazione della Biodiversità Ruggero Tomaselli",
     "latitude": 45.8683,
     "longitude": 8.76981
   },
@@ -31957,6 +29717,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Giardino Torrigiani",
     "latitude": 43.76572222,
     "longitude": 11.241675
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Giordano Emilio Ghirardi",
+    "latitude": 45.638702763,
+    "longitude": 10.611612865
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Gole del Sagittario",
+    "latitude": 41.992293888,
+    "longitude": 13.804163888
   },
   {
     "parkType": "national_park",
@@ -31986,7 +29762,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Hanbury botanical gardens",
+    "name": "Hanbury",
     "latitude": 43.782967,
     "longitude": 7.554484
   },
@@ -31994,9 +29770,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Istituto ed orto botanico",
+    "name": "Istituto ed",
     "latitude": 45.63333333,
     "longitude": 13.8
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Istituto Tecnico Agrario Statale Celso Ulpiani",
+    "latitude": 42.854218,
+    "longitude": 13.598093
   },
   {
     "parkType": "botanical_garden",
@@ -32039,12 +29823,36 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 9.17527778
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Litoraneo di Porto Caleri",
+    "latitude": 45.06666667,
+    "longitude": 12.23333333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Locatelli",
+    "latitude": 45.501777,
+    "longitude": 12.266054
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "IT",
     "countryName": "Italy",
     "name": "Lodisplash",
     "latitude": 45.280562,
     "longitude": 9.474619
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Loreto Grande",
+    "latitude": 41.86622,
+    "longitude": 13.624342
   },
   {
     "parkType": "theme_park",
@@ -32071,12 +29879,44 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 14.06
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Majella",
+    "latitude": 42.046793,
+    "longitude": 14.190686
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Malmerendi Museum of Natural Sciences",
+    "latitude": 44.28333333,
+    "longitude": 11.88333333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Maria Ansaldi Pania di Corfino",
+    "latitude": 44.17305556,
+    "longitude": 10.33416667
+  },
+  {
     "parkType": "national_park",
     "countryCode": "IT",
     "countryName": "Italy",
     "name": "Matese",
     "latitude": 41.3814,
     "longitude": 14.4069
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Mediterraneo",
+    "latitude": 42.078122,
+    "longitude": 14.752938
   },
   {
     "parkType": "botanical_garden",
@@ -32151,6 +29991,30 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 12.332403
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Montano di Pratorondanino",
+    "latitude": 44.52824,
+    "longitude": 8.75082
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Monte Baldo",
+    "latitude": 45.69847,
+    "longitude": 10.85835
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Montemarcello",
+    "latitude": 44.06666667,
+    "longitude": 9.95
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "IT",
     "countryName": "Italy",
@@ -32178,9 +30042,25 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
+    "name": "Naples",
+    "latitude": 40.861359,
+    "longitude": 14.262462
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
     "name": "Niso Fumagalli Rose Garden",
     "latitude": 45.59383,
     "longitude": 9.27235
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Nuova Gussonea",
+    "latitude": 37.63333333,
+    "longitude": 14.93333333
   },
   {
     "parkType": "theme_park",
@@ -32202,281 +30082,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Orto Botanico \"Giordano Emilio Ghirardi\"",
-    "latitude": 45.638702763,
-    "longitude": 10.611612865
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico \"Pierina Scaramella\"",
-    "latitude": 43.72746,
-    "longitude": 12.63666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico \"Pietro Castelli\" dell'Università di Messina",
-    "latitude": 38.19241,
-    "longitude": 15.54615
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico Città Studi",
-    "latitude": 45.4744962,
-    "longitude": 9.2355381
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico Comunale di Lucca",
-    "latitude": 43.84144722,
-    "longitude": 10.51143056
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico Conservativo Carlo Spegazzini",
-    "latitude": 45.66666667,
-    "longitude": 12.25
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico Conservativo Francesco Busnello",
-    "latitude": 45.66666667,
-    "longitude": 12.25
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dei Frignoli",
-    "latitude": 44.23333333,
-    "longitude": 10.13333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico del Mediterraneo",
-    "latitude": 43.53578333,
-    "longitude": 10.31419167
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico del Monte Baldo",
-    "latitude": 45.69847,
-    "longitude": 10.85835
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università dell'Aquila",
-    "latitude": 42.342667,
-    "longitude": 13.406185
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università della Calabria",
-    "latitude": 39.29527778,
-    "longitude": 16.25361111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università della Tuscia",
-    "latitude": 42.44222222,
-    "longitude": 12.065
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "orto botanico dell'Università di Bologna",
-    "latitude": 44.500512844,
-    "longitude": 11.353464558
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università di Camerino",
-    "latitude": 43.13565,
-    "longitude": 13.068325
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università di Catania",
-    "latitude": 37.51573944,
-    "longitude": 15.0835762
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università di Modena e Reggio Emilia",
-    "latitude": 44.6482,
-    "longitude": 10.9331
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università di Perugia",
-    "latitude": 43.096981,
-    "longitude": 12.396739
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università di Roma \"La Sapienza\"",
-    "latitude": 41.892296,
-    "longitude": 12.465853
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università di Sassari",
-    "latitude": 40.72171667,
-    "longitude": 8.54902778
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università di Siena",
-    "latitude": 43.313918,
-    "longitude": 11.331362
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università di Tor Vergata",
-    "latitude": 41.85361111,
-    "longitude": 12.60333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università di Torino",
-    "latitude": 45.05666667,
-    "longitude": 7.68111111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università di Trieste",
-    "latitude": 45.69444444,
-    "longitude": 13.74722222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico dell'Università Politecnica delle Marche",
-    "latitude": 43.566247,
-    "longitude": 13.431174
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico di Brera",
-    "latitude": 45.471024283,
-    "longitude": 9.189242925
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico di Montemarcello",
-    "latitude": 44.06666667,
-    "longitude": 9.95
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto botanico di Palermo",
-    "latitude": 38.1125,
-    "longitude": 13.3725
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico di Portici",
-    "latitude": 40.811780555,
-    "longitude": 14.343938888
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico di Villa Beuca",
-    "latitude": 44.386254,
-    "longitude": 8.629814
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico Didattico Sperimentale dell'Università di Milano",
-    "latitude": 45.4749,
-    "longitude": 9.22642222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico Forestale dell'Abetone",
-    "latitude": 44.144688,
-    "longitude": 10.663658
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico Friulano",
-    "latitude": 46.06754,
-    "longitude": 13.22217
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico Locatelli",
-    "latitude": 45.501777,
-    "longitude": 12.266054
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Orto Botanico Riserva Lago di Penne",
-    "latitude": 42.442079,
-    "longitude": 13.903617
+    "name": "Oropa",
+    "latitude": 45.629856,
+    "longitude": 7.975232
   },
   {
     "parkType": "botanical_garden",
@@ -32501,6 +30109,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Palazzo Rocca",
     "latitude": 44.316914,
     "longitude": 9.327213
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Palermo",
+    "latitude": 38.1125,
+    "longitude": 13.3725
   },
   {
     "parkType": "botanical_garden",
@@ -32538,7 +30154,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Parco Botanico Friulano \"Cormor\"",
+    "name": "Parco Botanico Friulano Cormor",
     "latitude": 46.08361111,
     "longitude": 13.19027778
   },
@@ -32583,6 +30199,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 9.185643
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Parma",
+    "latitude": 44.795930555,
+    "longitude": 10.327294444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Passo Coe",
+    "latitude": 45.91666667,
+    "longitude": 11.18333333
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "IT",
     "countryName": "Italy",
@@ -32594,9 +30226,33 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "phenological garden \"Alessandro Marcello\"",
+    "name": "Phenological garden Alessandro Marcello",
     "latitude": 45.66666667,
     "longitude": 12.25
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Pierina Scaramella",
+    "latitude": 43.72746,
+    "longitude": 12.63666
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Pietra Corva",
+    "latitude": 44.83333333,
+    "longitude": 9.33333333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Pietro Castelli dell'Università di Messina",
+    "latitude": 38.19241,
+    "longitude": 15.54615
   },
   {
     "parkType": "botanical_garden",
@@ -32610,7 +30266,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Pisa Botanic Garden and Museum",
+    "name": "Pisa and Museum",
     "latitude": 43.71982,
     "longitude": 10.39619
   },
@@ -32634,201 +30290,25 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Q108028344",
-    "latitude": 42.402091152,
-    "longitude": 12.858001045
+    "name": "Ponziano",
+    "latitude": 40.9,
+    "longitude": 12.96666667
   },
   {
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Q108118415",
-    "latitude": 45.75543,
-    "longitude": 7.3058
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q111310216",
-    "latitude": 45.536274,
-    "longitude": 12.2421398
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q119454684",
-    "latitude": 44.091558738,
-    "longitude": 8.215987249
+    "name": "Portici",
+    "latitude": 40.811780555,
+    "longitude": 14.343938888
   },
   {
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Q121360156",
-    "latitude": 42.39138756,
-    "longitude": 11.205658659
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q123348450",
-    "latitude": 45.99761,
-    "longitude": 10.07983
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q125111491",
-    "latitude": 37.5398,
-    "longitude": 15.08998
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q126284650",
-    "latitude": 42.025194444,
-    "longitude": 13.403944444
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q138678971",
-    "latitude": 45.675613611,
-    "longitude": 13.100962222
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q140121776",
-    "latitude": 42.781995,
-    "longitude": 13.938306
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q140121914",
-    "latitude": 43.395661,
-    "longitude": 13.30209
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q16268128",
-    "latitude": 44.1596,
-    "longitude": 12.4463
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q16527947",
-    "latitude": 38.7108,
-    "longitude": 15.9711
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q3059351",
-    "latitude": 37.535764,
-    "longitude": 14.932158
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q3068102",
-    "latitude": 40.496097,
-    "longitude": 16.8803
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q3442571",
-    "latitude": 43.532945,
-    "longitude": 11.501613
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q3621087",
-    "latitude": 42.11475,
-    "longitude": 11.82763
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q3858692",
-    "latitude": 44.338,
-    "longitude": 12.2635
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q3895697",
-    "latitude": 39.142308314,
-    "longitude": 16.648877433
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q49478798",
-    "latitude": 41.01843,
-    "longitude": 14.29643
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q49527064",
-    "latitude": 45.48596,
-    "longitude": 12.11051
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q55677093",
-    "latitude": 46.00263,
-    "longitude": 11.24146
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q623008",
-    "latitude": 43.98694444,
-    "longitude": 12.64472222
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q97369783",
-    "latitude": 40.89193,
-    "longitude": 17.16013
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "IT",
-    "countryName": "Italy",
-    "name": "Q98659079",
-    "latitude": 44.6751915,
-    "longitude": 8.473239
+    "name": "Preistorico di Molina di Ledro",
+    "latitude": 45.86666667,
+    "longitude": 10.78333333
   },
   {
     "parkType": "botanical_garden",
@@ -32842,9 +30322,33 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
+    "name": "Rea",
+    "latitude": 45.03647,
+    "longitude": 7.391
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
     "name": "Resistenza Park",
     "latitude": 45.44764167,
     "longitude": 9.18305278
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Rezia",
+    "latitude": 46.46666667,
+    "longitude": 10.36666667
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Riserva Lago di Penne",
+    "latitude": 42.442079,
+    "longitude": 13.903617
   },
   {
     "parkType": "botanical_garden",
@@ -32871,6 +30375,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 9.277098
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "San Marco",
+    "latitude": 45.756111111,
+    "longitude": 11.186944444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Santicelli",
+    "latitude": 38.68333333,
+    "longitude": 16.55
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "IT",
     "countryName": "Italy",
@@ -32885,6 +30405,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Savoy Castle Alpine",
     "latitude": 45.763888888,
     "longitude": 7.826666666
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Scuola Media Statale E.Toti di Musile di Piave",
+    "latitude": 45.61666667,
+    "longitude": 12.56666667
   },
   {
     "parkType": "national_park",
@@ -32903,6 +30431,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 16.59194444
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Sorgenti del Cavuto",
+    "latitude": 41.995541,
+    "longitude": 13.803924
+  },
+  {
     "parkType": "national_park",
     "countryCode": "IT",
     "countryName": "Italy",
@@ -32914,7 +30450,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "Stigliano botanical gardens",
+    "name": "Stigliano",
     "latitude": 42.11607,
     "longitude": 12.04019
   },
@@ -32938,6 +30474,150 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
+    "name": "Trebbo Trebbi",
+    "latitude": 45.53333333,
+    "longitude": 10.23333333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Tropicale dell'Istituto Agronomico per l'Oltremare",
+    "latitude": 43.76861111,
+    "longitude": 11.25694444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università dell'Aquila",
+    "latitude": 42.342667,
+    "longitude": 13.406185
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università della Calabria",
+    "latitude": 39.29527778,
+    "longitude": 16.25361111
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università della Tuscia",
+    "latitude": 42.44222222,
+    "longitude": 12.065
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università di Bologna",
+    "latitude": 44.500512844,
+    "longitude": 11.353464558
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università di Camerino",
+    "latitude": 43.13565,
+    "longitude": 13.068325
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università di Catania",
+    "latitude": 37.51573944,
+    "longitude": 15.0835762
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università di Modena e Reggio Emilia",
+    "latitude": 44.6482,
+    "longitude": 10.9331
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università di Perugia",
+    "latitude": 43.096981,
+    "longitude": 12.396739
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università di Roma La Sapienza",
+    "latitude": 41.892296,
+    "longitude": 12.465853
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università di Sassari",
+    "latitude": 40.72171667,
+    "longitude": 8.54902778
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università di Siena",
+    "latitude": 43.313918,
+    "longitude": 11.331362
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università di Tor Vergata",
+    "latitude": 41.85361111,
+    "longitude": 12.60333333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università di Torino",
+    "latitude": 45.05666667,
+    "longitude": 7.68111111
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università di Trieste",
+    "latitude": 45.69444444,
+    "longitude": 13.74722222
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Università Politecnica delle Marche",
+    "latitude": 43.566247,
+    "longitude": 13.431174
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "University of Bari",
+    "latitude": 41.10759,
+    "longitude": 16.883073
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
     "name": "University of Ferrara",
     "latitude": 44.84227,
     "longitude": 11.622496
@@ -32951,12 +30631,36 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 8.927933
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "University of Salento",
+    "latitude": 40.3351,
+    "longitude": 18.122661111
+  },
+  {
     "parkType": "national_park",
     "countryCode": "IT",
     "countryName": "Italy",
     "name": "Val Grande",
     "latitude": 46.029167,
     "longitude": 8.459444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Valbonella",
+    "latitude": 43.86,
+    "longitude": 11.78
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Valderia",
+    "latitude": 44.27083333,
+    "longitude": 7.20333333
   },
   {
     "parkType": "national_park",
@@ -32981,6 +30685,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Villa Bertarelli",
     "latitude": 45.8179022,
     "longitude": 9.3711914
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Villa Beuca",
+    "latitude": 44.386254,
+    "longitude": 8.629814
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Villa Bricherasio",
+    "latitude": 44.65,
+    "longitude": 7.48333333
   },
   {
     "parkType": "botanical_garden",
@@ -33013,6 +30733,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Villa Commedia",
     "latitude": 45.957507177,
     "longitude": 9.301937712
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Villa De Ponti",
+    "latitude": 45.80322,
+    "longitude": 9.424303
   },
   {
     "parkType": "botanical_garden",
@@ -33051,8 +30779,8 @@ export const TOURIST_PARKS: TouristPark[] = [
     "countryCode": "IT",
     "countryName": "Italy",
     "name": "Villa Melzi",
-    "latitude": 45.97963,
-    "longitude": 9.25357
+    "latitude": 45.97968,
+    "longitude": 9.25399
   },
   {
     "parkType": "botanical_garden",
@@ -33074,7 +30802,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "IT",
     "countryName": "Italy",
-    "name": "villa Piercy",
+    "name": "Villa Piercy",
     "latitude": 40.350277777,
     "longitude": 8.88
   },
@@ -33093,6 +30821,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Villa Troubetzkoy",
     "latitude": 45.834413499,
     "longitude": 9.095408768
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "IT",
+    "countryName": "Italy",
+    "name": "Viotte di Monte Bondone",
+    "latitude": 46.021381,
+    "longitude": 11.038803
   },
   {
     "parkType": "theme_park",
@@ -33114,7 +30850,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JM",
     "countryName": "Jamaica",
-    "name": "Bath Botanical Gardens",
+    "name": "Bath",
     "latitude": 17.947404,
     "longitude": -76.348696
   },
@@ -33138,7 +30874,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JM",
     "countryName": "Jamaica",
-    "name": "Hope Botanical Gardens",
+    "name": "Hope",
     "latitude": 18.0225,
     "longitude": -76.7493
   },
@@ -33149,14 +30885,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "National Heroes Park",
     "latitude": 17.9825497,
     "longitude": -76.7887259
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JM",
-    "countryName": "Jamaica",
-    "name": "Q6113013",
-    "latitude": 17.99269983,
-    "longitude": -76.792
   },
   {
     "parkType": "theme_park",
@@ -33423,38 +31151,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 135.945889
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Botanic Garden, Faculty of Science, Kanazawa University",
-    "latitude": 36.54036111,
-    "longitude": 136.70188889
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Botanic Gardens of Toyama",
-    "latitude": 36.661916666,
-    "longitude": 137.181722222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Botanical Garden, Faculty of Agriculture, Iwate University",
-    "latitude": 39.712607,
-    "longitude": 141.139715
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Botanical Gardens, Osaka Metropolitan University",
-    "latitude": 34.76361111,
-    "longitude": 135.68166667
-  },
-  {
     "parkType": "theme_park",
     "countryCode": "JP",
     "countryName": "Japan",
@@ -33687,6 +31383,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 135.535
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "JP",
+    "countryName": "Japan",
+    "name": "Faculty of Agriculture, Iwate University",
+    "latitude": 39.712607,
+    "longitude": 141.139715
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "JP",
+    "countryName": "Japan",
+    "name": "Faculty of Science, Kanazawa University",
+    "latitude": 36.54036111,
+    "longitude": 136.70188889
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "JP",
     "countryName": "Japan",
@@ -33834,7 +31546,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "grimm forest",
+    "name": "Grimm forest",
     "latitude": 36.449027777,
     "longitude": 139.858722222
   },
@@ -33874,7 +31586,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Hakone Botanical Garden of Wetlands",
+    "name": "Hakone of Wetlands",
     "latitude": 35.266175,
     "longitude": 139.00707778
   },
@@ -34018,7 +31730,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Higashiyama Zoo and Botanical Gardens",
+    "name": "Higashiyama Zoo and",
     "latitude": 35.15833333,
     "longitude": 136.97777778
   },
@@ -34114,7 +31826,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Hokkaido University Botanical Gardens",
+    "name": "Hokkaido University",
     "latitude": 43.063892,
     "longitude": 141.3426479
   },
@@ -34746,7 +32458,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Kumamoto City Zoological and Botanical Gardens",
+    "name": "Kumamoto City Zoological and",
     "latitude": 32.77458333,
     "longitude": 130.74777778
   },
@@ -34874,7 +32586,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Man'yō Botanical Garden (Ichikawa)",
+    "name": "Man'yō (Ichikawa)",
     "latitude": 35.75266944,
     "longitude": 139.95308056
   },
@@ -34882,7 +32594,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Man'yō Botanical Garden (Kitakyūshū)",
+    "name": "Man'yō (Kitakyūshū)",
     "latitude": 33.902313,
     "longitude": 130.798913
   },
@@ -34890,7 +32602,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Man'yō Botanical Garden (Nara)",
+    "name": "Man'yō (Nara)",
     "latitude": 34.682305555,
     "longitude": 135.8445
   },
@@ -34898,7 +32610,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Man'yō Botanical Garden (Shimotsuke)",
+    "name": "Man'yō (Shimotsuke)",
     "latitude": 36.3808,
     "longitude": 139.808201
   },
@@ -34906,7 +32618,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Man'yō Botanical Garden (Tokorozawa)",
+    "name": "Man'yō (Tokorozawa)",
     "latitude": 35.798977,
     "longitude": 139.469723
   },
@@ -34914,7 +32626,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Man'yō Botanical Garden (Ueda)",
+    "name": "Man'yō (Ueda)",
     "latitude": 36.381466,
     "longitude": 138.268683
   },
@@ -34922,7 +32634,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Man'yō Botanical Garden (Wakayama)",
+    "name": "Man'yō (Wakayama)",
     "latitude": 34.226536,
     "longitude": 135.229092
   },
@@ -35434,7 +33146,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Nanto City Botanical Garden Floral Park",
+    "name": "Nanto City Floral Park",
     "latitude": 36.590564,
     "longitude": 136.913291
   },
@@ -35666,6 +33378,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
+    "name": "Osaka Metropolitan University",
+    "latitude": 34.76361111,
+    "longitude": 135.68166667
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "JP",
+    "countryName": "Japan",
     "name": "Osaka Prefectural Flowers Garden",
     "latitude": 34.43427778,
     "longitude": 135.55355556
@@ -35717,734 +33437,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Porto Europa",
     "latitude": 34.154167,
     "longitude": 135.176917
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q106140397",
-    "latitude": 43.5425,
-    "longitude": 142.439166666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q109359413",
-    "latitude": 35.747583333,
-    "longitude": 140.212666666
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q109603910",
-    "latitude": 43.7558101,
-    "longitude": 143.9188439
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11259842",
-    "latitude": 43.601944444,
-    "longitude": 144.353888888
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11259876",
-    "latitude": 35.61055556,
-    "longitude": 139.63055556
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11263435",
-    "latitude": 35.333233,
-    "longitude": 136.937244
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11272918",
-    "latitude": 39.036194444,
-    "longitude": 141.086472222
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11275410",
-    "latitude": 40.4765,
-    "longitude": 141.641527777
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11283301",
-    "latitude": 32.98806,
-    "longitude": 130.4725
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11303945",
-    "latitude": 31.7464519,
-    "longitude": 130.2837305
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11305067",
-    "latitude": 31.68972222,
-    "longitude": 131.46444444
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11310142",
-    "latitude": 31.57,
-    "longitude": 130.565
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11313110",
-    "latitude": 33.650222222,
-    "longitude": 130.436444444
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11317948",
-    "latitude": 34.308222222,
-    "longitude": 132.292472222
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11318121",
-    "latitude": 38.760747,
-    "longitude": 141.171678
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11319824",
-    "latitude": 36.585555555,
-    "longitude": 139.056944444
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11339218",
-    "latitude": 35.940417,
-    "longitude": 140.269694
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11350926",
-    "latitude": 43.774361,
-    "longitude": 141.978222
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11351569",
-    "latitude": 40.90025,
-    "longitude": 140.860194444
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11352956",
-    "latitude": 35.493194,
-    "longitude": 132.874028
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11356637",
-    "latitude": 33.40563333,
-    "longitude": 130.27379722
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11376349",
-    "latitude": 34.194166666,
-    "longitude": 133.644444444
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11395835",
-    "latitude": 35.386639,
-    "longitude": 132.874972
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11397314",
-    "latitude": 36.418833,
-    "longitude": 139.04925
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11399646",
-    "latitude": 36.325555555,
-    "longitude": 136.350944444
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11418454",
-    "latitude": 35.626306,
-    "longitude": 139.738056
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11419683",
-    "latitude": 34.172861,
-    "longitude": 133.835389
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11435149",
-    "latitude": 36.606861111,
-    "longitude": 137.309111111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11444056",
-    "latitude": 35.07666944,
-    "longitude": 140.09765278
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11466608",
-    "latitude": 34.117555555,
-    "longitude": 131.105638888
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11474399",
-    "latitude": 39.701111111,
-    "longitude": 141.190833333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11479135",
-    "latitude": 38.001972,
-    "longitude": 140.032361
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11482157",
-    "latitude": 42.68250638,
-    "longitude": 142.400359921
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11484430",
-    "latitude": 34.32313,
-    "longitude": 132.31731
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11489818",
-    "latitude": 34.013888888,
-    "longitude": 134.520833333
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11507277",
-    "latitude": 36.341472,
-    "longitude": 136.300389
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11516746",
-    "latitude": 34.80125,
-    "longitude": 135.252694
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11517752",
-    "latitude": 35.8088361,
-    "longitude": 139.5813833
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11521088",
-    "latitude": 43.0675,
-    "longitude": 141.352777777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11527576",
-    "latitude": 38.481556,
-    "longitude": 140.403917
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11546374",
-    "latitude": 35.844833,
-    "longitude": 139.646417
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11571173",
-    "latitude": 35.705333333,
-    "longitude": 140.853111111
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11577981",
-    "latitude": 34.953,
-    "longitude": 136.108527777
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11589749",
-    "latitude": 34.67916667,
-    "longitude": 135.18027778
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11589774",
-    "latitude": 34.66443,
-    "longitude": 135.21848
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11605806",
-    "latitude": 38.809464,
-    "longitude": 140.900567
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11615227",
-    "latitude": 34.642,
-    "longitude": 132.921638888
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11626052",
-    "latitude": 35.117694,
-    "longitude": 140.231278
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11635438",
-    "latitude": 34.4765,
-    "longitude": 133.305111111
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11639061",
-    "latitude": 34.700508,
-    "longitude": 135.759765
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q11642890",
-    "latitude": 37.063972,
-    "longitude": 139.964778
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q117864006",
-    "latitude": 34.7909677,
-    "longitude": 135.2445937
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q127698516",
-    "latitude": 30.41173,
-    "longitude": 130.54754
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q132359338",
-    "latitude": 36.321021,
-    "longitude": 139.632141
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q132459213",
-    "latitude": 35.152468,
-    "longitude": 136.525825
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q132460179",
-    "latitude": 34.766792,
-    "longitude": 137.174584
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q132531358",
-    "latitude": 35.578103,
-    "longitude": 139.447542
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q139836281",
-    "latitude": 35.522532,
-    "longitude": 137.489818
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q16580966",
-    "latitude": 36.0166,
-    "longitude": 140.097
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q17213039",
-    "latitude": 34.783333,
-    "longitude": 138.770278
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q17213377",
-    "latitude": 35.193417,
-    "longitude": 134.99375
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q17214706",
-    "latitude": 35.40152,
-    "longitude": 140.29423
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q17226252",
-    "latitude": 43.002444,
-    "longitude": 141.4515
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q17995372",
-    "latitude": 38.264278,
-    "longitude": 140.887444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q18337303",
-    "latitude": 35.2205,
-    "longitude": 134.389889
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q18701116",
-    "latitude": 35.655888888,
-    "longitude": 140.028943888
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q21654898",
-    "latitude": 35.83742,
-    "longitude": 139.47886
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q27016919",
-    "latitude": 34.748028,
-    "longitude": 136.899778
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q27824205",
-    "latitude": 34.816527777,
-    "longitude": 135.059638888
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q28682697",
-    "latitude": 38.066388888,
-    "longitude": 139.979444444
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q28687449",
-    "latitude": 32.774361111,
-    "longitude": 130.777666666
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q28693211",
-    "latitude": 36.675833333,
-    "longitude": 139.063416666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q2917341",
-    "latitude": 35.130639,
-    "longitude": 136.944167
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q49526168",
-    "latitude": 35.016111111,
-    "longitude": 138.521944444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q5397629",
-    "latitude": 38.2855,
-    "longitude": 140.884111111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q5926928",
-    "latitude": 34.937222,
-    "longitude": 135.8175
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q61988391",
-    "latitude": 36.948888888,
-    "longitude": 138.211666666
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q63170507",
-    "latitude": 37.210833333,
-    "longitude": 138.633055555
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q65231005",
-    "latitude": 34.689527777,
-    "longitude": 135.269111111
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q65249005",
-    "latitude": 36.717694444,
-    "longitude": 137.198222222
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q65249640",
-    "latitude": 34.492583333,
-    "longitude": 135.863166666
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q65268183",
-    "latitude": 33.893,
-    "longitude": 134.459694
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q68593755",
-    "latitude": 36.322305555,
-    "longitude": 137.916666666
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q80668281",
-    "latitude": 33.530138888,
-    "longitude": 132.567972222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q81720226",
-    "latitude": 35.154666666,
-    "longitude": 134.930805555
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q83199736",
-    "latitude": 33.940527777,
-    "longitude": 133.21075
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q85875921",
-    "latitude": 35.021527777,
-    "longitude": 135.77525
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q85880267",
-    "latitude": 34.052638888,
-    "longitude": 134.558611111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q85882230",
-    "latitude": 32.795166666,
-    "longitude": 130.722527777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q9010993",
-    "latitude": 35.781806,
-    "longitude": 139.505639
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "JP",
-    "countryName": "Japan",
-    "name": "Q97312067",
-    "latitude": 37.258333333,
-    "longitude": 140.061111111
   },
   {
     "parkType": "theme_park",
@@ -36706,7 +33698,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Shibuya City Botanical Garden FUREAI",
+    "name": "Shibuya City FUREAI",
     "latitude": 35.653333333,
     "longitude": 139.707777777
   },
@@ -36746,7 +33738,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Shimokamo Tropical Botanical Gardens",
+    "name": "Shimokamo",
     "latitude": 34.6493,
     "longitude": 138.863
   },
@@ -36794,7 +33786,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Shiranoe Botanical Gardens",
+    "name": "Shiranoe",
     "latitude": 33.936630069,
     "longitude": 131.001522626
   },
@@ -36874,7 +33866,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Southeast Botanical Gardens",
+    "name": "Southeast",
     "latitude": 26.3767,
     "longitude": 127.8067
   },
@@ -36978,7 +33970,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Tajima Plateau Botanical Gardens",
+    "name": "Tajima Plateau",
     "latitude": 35.4214,
     "longitude": 134.572
   },
@@ -37154,7 +34146,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "JP",
     "countryName": "Japan",
-    "name": "Tohoku University Botanical Gardens",
+    "name": "Tohoku University",
     "latitude": 38.2333,
     "longitude": 140
   },
@@ -37325,6 +34317,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Towada-Hachimantai",
     "latitude": 40.3333,
     "longitude": 140.833
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "JP",
+    "countryName": "Japan",
+    "name": "Toyama",
+    "latitude": 36.661916666,
+    "longitude": 137.181722222
   },
   {
     "parkType": "botanical_garden",
@@ -38042,14 +35042,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "KE",
     "countryName": "Kenya",
-    "name": "Q110541232",
-    "latitude": -2.89915,
-    "longitude": 38.45764
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "KE",
-    "countryName": "Kenya",
     "name": "Ruma",
     "latitude": -0.61666667,
     "longitude": 34.31666667
@@ -38114,7 +35106,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "XK",
     "countryName": "Kosovo",
-    "name": "National park Bjeshkët e Nemuna",
+    "name": "Bjeshkët e Nemuna",
     "latitude": 42.66666667,
     "longitude": 20.16666667
   },
@@ -38159,14 +35151,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 74.637
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "KG",
-    "countryName": "Kyrgyzstan",
-    "name": "Botanical garden of Kyrgyz National University",
-    "latitude": 42.88587,
-    "longitude": 74.588585
-  },
-  {
     "parkType": "national_park",
     "countryCode": "KG",
     "countryName": "Kyrgyzstan",
@@ -38181,6 +35165,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Kara-Buura State Nature Park",
     "latitude": 42.366666666,
     "longitude": 71.016666666
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "KG",
+    "countryName": "Kyrgyzstan",
+    "name": "Kyrgyz National University",
+    "latitude": 42.88587,
+    "longitude": 74.588585
   },
   {
     "parkType": "national_park",
@@ -38202,17 +35194,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "LV",
     "countryName": "Latvia",
-    "name": "Amusement theme park „ABpark”",
+    "name": "Amusement theme park ABpark",
     "latitude": 56.784163447,
     "longitude": 25.017992809
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "LV",
-    "countryName": "Latvia",
-    "name": "Botanical Garden of the University of Latvia",
-    "latitude": 56.9502,
-    "longitude": 24.0599
   },
   {
     "parkType": "national_park",
@@ -38258,7 +35242,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "LV",
     "countryName": "Latvia",
-    "name": "National Botanic Garden of Latvia",
+    "name": "National of Latvia",
     "latitude": 56.8654,
     "longitude": 24.3551
   },
@@ -38288,9 +35272,17 @@ export const TOURIST_PARKS: TouristPark[] = [
   },
   {
     "parkType": "botanical_garden",
+    "countryCode": "LV",
+    "countryName": "Latvia",
+    "name": "University of Latvia",
+    "latitude": 56.9502,
+    "longitude": 24.0599
+  },
+  {
+    "parkType": "botanical_garden",
     "countryCode": "LS",
     "countryName": "Lesotho",
-    "name": "Katse Botanical Gardens",
+    "name": "Katse",
     "latitude": -29.33472,
     "longitude": 28.48142
   },
@@ -38399,22 +35391,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 26.0067
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "LT",
-    "countryName": "Lithuania",
-    "name": "Botanical Garden of Klaipėda University",
-    "latitude": 55.750556,
-    "longitude": 21.134167
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "LT",
-    "countryName": "Lithuania",
-    "name": "Botanical Garden of Vilnius University",
-    "latitude": 54.73583333,
-    "longitude": 25.40277778
-  },
-  {
     "parkType": "national_park",
     "countryCode": "LT",
     "countryName": "Lithuania",
@@ -38463,20 +35439,20 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 24.37666667
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "LT",
+    "countryName": "Lithuania",
+    "name": "Klaipėda University",
+    "latitude": 55.750556,
+    "longitude": 21.134167
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "LT",
     "countryName": "Lithuania",
     "name": "Pasakų Park",
     "latitude": 54.6793,
     "longitude": 25.2013
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "LT",
-    "countryName": "Lithuania",
-    "name": "Q18737771",
-    "latitude": 54.71888889,
-    "longitude": 25.32361111
   },
   {
     "parkType": "botanical_garden",
@@ -38509,6 +35485,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Vichy Water Park",
     "latitude": 54.7161,
     "longitude": 25.2767
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "LT",
+    "countryName": "Lithuania",
+    "name": "Vilnius University",
+    "latitude": 54.73583333,
+    "longitude": 25.40277778
   },
   {
     "parkType": "botanical_garden",
@@ -38557,22 +35541,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Park Klosegrënnchen",
     "latitude": 49.6325,
     "longitude": 6.178917
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "LU",
-    "countryName": "Luxembourg",
-    "name": "Q81296059",
-    "latitude": 49.626222,
-    "longitude": 6.156167
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "LU",
-    "countryName": "Luxembourg",
-    "name": "Q81296532",
-    "latitude": 49.630361,
-    "longitude": 6.162333
   },
   {
     "parkType": "national_park",
@@ -38661,14 +35629,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Nosy Ve-Androka",
     "latitude": -25.666666666,
     "longitude": 45
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "MG",
-    "countryName": "Madagascar",
-    "name": "Q3541571",
-    "latitude": -18.9289,
-    "longitude": 47.5257
   },
   {
     "parkType": "national_park",
@@ -38762,7 +35722,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "MY",
     "countryName": "Malaysia",
-    "name": "Austin Heights Water and Adventure Park",
+    "name": "Austin Heights Water and",
     "latitude": 1.561416666,
     "longitude": 103.774972222
   },
@@ -38906,7 +35866,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "MY",
     "countryName": "Malaysia",
-    "name": "i-City",
+    "name": "I-City",
     "latitude": 3.065954,
     "longitude": 101.483355
   },
@@ -39034,7 +35994,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "MY",
     "countryName": "Malaysia",
-    "name": "National Botanical Garden Shah Alam",
+    "name": "National Shah Alam",
     "latitude": 3.0961469,
     "longitude": 101.5110537
   },
@@ -39050,7 +36010,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "MY",
     "countryName": "Malaysia",
-    "name": "Penang Botanic Gardens",
+    "name": "Penang",
     "latitude": 5.43995833,
     "longitude": 100.28833333
   },
@@ -39079,26 +36039,10 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 101.69647222
   },
   {
-    "parkType": "national_park",
-    "countryCode": "MY",
-    "countryName": "Malaysia",
-    "name": "Q14205573",
-    "latitude": 4.213,
-    "longitude": 114.03
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "MY",
-    "countryName": "Malaysia",
-    "name": "Q14214328",
-    "latitude": 3.77,
-    "longitude": 114.22
-  },
-  {
     "parkType": "botanical_garden",
     "countryCode": "MY",
     "countryName": "Malaysia",
-    "name": "Rimba Ilmu Botanical Gardens",
+    "name": "Rimba Ilmu",
     "latitude": 3.13107,
     "longitude": 101.658
   },
@@ -39226,7 +36170,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "MY",
     "countryName": "Malaysia",
-    "name": "Zaharah Botanic Gardens",
+    "name": "Zaharah",
     "latitude": 1.457944444,
     "longitude": 103.755416666
   },
@@ -39266,7 +36210,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "MT",
     "countryName": "Malta",
-    "name": "Argotti Botanic Gardens",
+    "name": "Argotti",
     "latitude": 35.8925,
     "longitude": 14.502222
   },
@@ -39330,7 +36274,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "MU",
     "countryName": "Mauritius",
-    "name": "Curepipe Botanic Gardens",
+    "name": "Curepipe",
     "latitude": -20.3291,
     "longitude": 57.5244
   },
@@ -39482,6 +36426,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "MX",
     "countryName": "Mexico",
+    "name": "Cofre de Perote",
+    "latitude": 19.48461,
+    "longitude": -97.15235
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "MX",
+    "countryName": "Mexico",
     "name": "Constitution 1857",
     "latitude": 32.01157,
     "longitude": -116.08154
@@ -39509,6 +36461,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Cumbres de Majalca",
     "latitude": 28.804166666,
     "longitude": -106.485
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "MX",
+    "countryName": "Mexico",
+    "name": "Cumbres de Monterrey",
+    "latitude": 25.23,
+    "longitude": -100.18
   },
   {
     "parkType": "national_park",
@@ -39623,6 +36583,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -93.107
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "MX",
+    "countryName": "Mexico",
+    "name": "Francisco J. Clavijero",
+    "latitude": 19.512222222,
+    "longitude": -96.943888888
+  },
+  {
     "parkType": "national_park",
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -39717,30 +36685,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Iztapasauria",
     "latitude": 19.344166666,
     "longitude": -99.048055555
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "MX",
-    "countryName": "Mexico",
-    "name": "Jardín Botánico Francisco J. Clavijero",
-    "latitude": 19.512222222,
-    "longitude": -96.943888888
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "MX",
-    "countryName": "Mexico",
-    "name": "Jardín Botánico Regional \"Roger Orellana\"",
-    "latitude": 21.0276894,
-    "longitude": -89.6420461
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "MX",
-    "countryName": "Mexico",
-    "name": "Jardín Botánico Rey Netzahualcoyotl",
-    "latitude": 21.911804838,
-    "longitude": -102.320345067
   },
   {
     "parkType": "botanical_garden",
@@ -39850,6 +36794,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "MX",
     "countryName": "Mexico",
+    "name": "Maderas del Carmen",
+    "latitude": 29.14924,
+    "longitude": -102.6735
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "MX",
+    "countryName": "Mexico",
     "name": "Molino de Flores Nezahualcóyotl",
     "latitude": 19.514,
     "longitude": -98.839
@@ -39874,30 +36826,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "MX",
     "countryName": "Mexico",
-    "name": "Parque Nacional Cofre de Perote",
-    "latitude": 19.48461,
-    "longitude": -97.15235
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "MX",
-    "countryName": "Mexico",
-    "name": "Parque Nacional Cumbres de Monterrey",
-    "latitude": 25.23,
-    "longitude": -100.18
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "MX",
-    "countryName": "Mexico",
-    "name": "Parque Nacional Maderas del Carmen",
-    "latitude": 29.14924,
-    "longitude": -102.6735
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "MX",
-    "countryName": "Mexico",
     "name": "Pico de Orizaba",
     "latitude": 18.9417,
     "longitude": -97.2083
@@ -39906,73 +36834,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "MX",
     "countryName": "Mexico",
-    "name": "Q110271099",
-    "latitude": 25.3291263,
-    "longitude": -103.7502426
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "MX",
-    "countryName": "Mexico",
-    "name": "Q136309755",
-    "latitude": 18.3325,
-    "longitude": -97.458055555
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "MX",
-    "countryName": "Mexico",
-    "name": "Q16580893",
-    "latitude": 18.684167,
-    "longitude": -99.500833
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "MX",
-    "countryName": "Mexico",
-    "name": "Q21481332",
-    "latitude": 20.592778,
-    "longitude": -87.125278
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "MX",
-    "countryName": "Mexico",
-    "name": "Q3020507",
-    "latitude": 19.3167,
-    "longitude": -98.2386
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "MX",
-    "countryName": "Mexico",
-    "name": "Q5926384",
-    "latitude": 24.82376,
-    "longitude": -107.384967
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "MX",
-    "countryName": "Mexico",
-    "name": "Q5926682",
-    "latitude": 22.916667,
-    "longitude": -99.033333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "MX",
-    "countryName": "Mexico",
-    "name": "Q9010907",
-    "latitude": 19.3731,
-    "longitude": -99.0342
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "MX",
-    "countryName": "Mexico",
     "name": "Rayón",
     "latitude": 19.800158,
     "longitude": -100.184401
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "MX",
+    "countryName": "Mexico",
+    "name": "Regional Roger Orellana",
+    "latitude": 21.0276894,
+    "longitude": -89.6420461
   },
   {
     "parkType": "theme_park",
@@ -39989,6 +36861,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Revillagigedo",
     "latitude": 18.821388888,
     "longitude": -112.763888888
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "MX",
+    "countryName": "Mexico",
+    "name": "Rey Netzahualcoyotl",
+    "latitude": 21.911804838,
+    "longitude": -102.320345067
   },
   {
     "parkType": "national_park",
@@ -40082,7 +36962,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "MX",
     "countryName": "Mexico",
-    "name": "Vallarta Botanical Gardens",
+    "name": "Vallarta",
     "latitude": 20.4658,
     "longitude": -105.293
   },
@@ -40157,14 +37037,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Orhei",
     "latitude": 47.3,
     "longitude": 28.966666666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "MD",
-    "countryName": "Moldova, Republic of",
-    "name": "Q108259135",
-    "latitude": 47.059968009,
-    "longitude": 29.135046827
   },
   {
     "parkType": "national_park",
@@ -40335,14 +37207,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 111.758055555
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "MN",
-    "countryName": "Mongolia",
-    "name": "Q5926577",
-    "latitude": 47.9138,
-    "longitude": 106.9219998
-  },
-  {
     "parkType": "national_park",
     "countryCode": "MN",
     "countryName": "Mongolia",
@@ -40402,14 +37266,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "ME",
     "countryName": "Montenegro",
-    "name": "Q1968953",
-    "latitude": 42.566667,
-    "longitude": 18.533333
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "ME",
-    "countryName": "Montenegro",
     "name": "Skadar Lake",
     "latitude": 42.24,
     "longitude": 19.209722222
@@ -40421,14 +37277,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Al Hoceima",
     "latitude": 35.180277777,
     "longitude": -4.121583333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "MA",
-    "countryName": "Morocco",
-    "name": "Botanical Garden of Rabat",
-    "latitude": 34.008263,
-    "longitude": -6.845872
   },
   {
     "parkType": "botanical_garden",
@@ -40490,7 +37338,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "MA",
     "countryName": "Morocco",
-    "name": "national parc of Dakhla",
+    "name": "National parc of Dakhla",
     "latitude": 22.304388888,
     "longitude": -14.8585
   },
@@ -40503,12 +37351,12 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -8.015181
   },
   {
-    "parkType": "national_park",
+    "parkType": "botanical_garden",
     "countryCode": "MA",
     "countryName": "Morocco",
-    "name": "Q120201530",
-    "latitude": 33.547747222,
-    "longitude": -5.110316944
+    "name": "Rabat",
+    "latitude": 34.008263,
+    "longitude": -6.845872
   },
   {
     "parkType": "national_park",
@@ -40682,7 +37530,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "MM",
     "countryName": "Myanmar",
-    "name": "National Kandawgyi Botanical Gardens",
+    "name": "National Kandawgyi",
     "latitude": 21.996027777,
     "longitude": 96.46775
   },
@@ -40738,7 +37586,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "NA",
     "countryName": "Namibia",
-    "name": "National Botanic Garden of Namibia",
+    "name": "National of Namibia",
     "latitude": -22.57166667,
     "longitude": 17.09472222
   },
@@ -40749,14 +37597,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Nkasa Rupara",
     "latitude": -18.4,
     "longitude": 23.65
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "NA",
-    "countryName": "Namibia",
-    "name": "Q14206299",
-    "latitude": -22.92785,
-    "longitude": 14.564438888
   },
   {
     "parkType": "national_park",
@@ -40906,7 +37746,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "NZ",
     "countryName": "New Zealand",
-    "name": "Auckland Botanic Gardens",
+    "name": "Auckland",
     "latitude": -37.013,
     "longitude": 174.908
   },
@@ -40930,7 +37770,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "NZ",
     "countryName": "New Zealand",
-    "name": "Bason Botanic Gardens",
+    "name": "Bason",
     "latitude": -39.9303,
     "longitude": 175.048
   },
@@ -40946,7 +37786,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "NZ",
     "countryName": "New Zealand",
-    "name": "Christchurch Botanic Gardens",
+    "name": "Christchurch",
     "latitude": -43.530417,
     "longitude": 172.621153
   },
@@ -41010,7 +37850,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "NZ",
     "countryName": "New Zealand",
-    "name": "Gisborne Botanical Gardens",
+    "name": "Gisborne",
     "latitude": -38.6569,
     "longitude": 178.021
   },
@@ -41226,7 +38066,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "NZ",
     "countryName": "New Zealand",
-    "name": "Timaru Botanic Gardens",
+    "name": "Timaru",
     "latitude": -44.4084751,
     "longitude": 171.249372
   },
@@ -41250,7 +38090,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "NZ",
     "countryName": "New Zealand",
-    "name": "Waipahihi Botanical Gardens",
+    "name": "Waipahihi",
     "latitude": -38.710705,
     "longitude": 176.10318
   },
@@ -41298,14 +38138,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "NI",
     "countryName": "Nicaragua",
-    "name": "Parque nacional Volcán Mombacho",
-    "latitude": 11.8375791,
-    "longitude": -85.9508923
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "NI",
-    "countryName": "Nicaragua",
     "name": "Saslaya",
     "latitude": 13.760474,
     "longitude": -84.977735
@@ -41317,6 +38149,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Volcán Maderas",
     "latitude": 11.4452535,
     "longitude": -85.5078535
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "NI",
+    "countryName": "Nicaragua",
+    "name": "Volcán Mombacho",
+    "latitude": 11.8375791,
+    "longitude": -85.9508923
   },
   {
     "parkType": "national_park",
@@ -41693,14 +38533,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Pyongyang Folklore Park",
     "latitude": 39.06,
     "longitude": 125.825
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "KP",
-    "countryName": "North Korea",
-    "name": "Q107455744",
-    "latitude": 39.035127914,
-    "longitude": 125.762676
   },
   {
     "parkType": "theme_park",
@@ -42133,62 +38965,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Pirbadet",
     "latitude": 63.4405,
     "longitude": 10.4004
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "NO",
-    "countryName": "Norway",
-    "name": "Q11684480",
-    "latitude": 58.9375,
-    "longitude": 5.6975
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "NO",
-    "countryName": "Norway",
-    "name": "Q118951778",
-    "latitude": 62.472819762,
-    "longitude": 6.165053116
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "NO",
-    "countryName": "Norway",
-    "name": "Q12004441",
-    "latitude": 62.852988888,
-    "longitude": 8.629419444
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "NO",
-    "countryName": "Norway",
-    "name": "Q12007204",
-    "latitude": 60.721666666,
-    "longitude": 10.5925
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "NO",
-    "countryName": "Norway",
-    "name": "Q31080139",
-    "latitude": 61.215061439,
-    "longitude": 6.551301412
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "NO",
-    "countryName": "Norway",
-    "name": "Q5005209",
-    "latitude": 59.447955555,
-    "longitude": 9.072905555
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "NO",
-    "countryName": "Norway",
-    "name": "Q5702469",
-    "latitude": 59.93171944,
-    "longitude": 10.56168056
   },
   {
     "parkType": "national_park",
@@ -42655,22 +39431,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 73.846664
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "PK",
-    "countryName": "Pakistan",
-    "name": "Q2836840",
-    "latitude": 31.41649983,
-    "longitude": 73.0772
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PK",
-    "countryName": "Pakistan",
-    "name": "Q5926612",
-    "latitude": 31.37999983,
-    "longitude": 73.37999983
-  },
-  {
     "parkType": "national_park",
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -42834,7 +39594,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "PG",
     "countryName": "Papua New Guinea",
-    "name": "Lae Botanic Gardens",
+    "name": "Lae",
     "latitude": -6.719509,
     "longitude": 146.995362
   },
@@ -42842,23 +39602,15 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "PG",
     "countryName": "Papua New Guinea",
-    "name": "National Capital Botanical Gardens",
+    "name": "National Capital",
     "latitude": -9.4655,
     "longitude": 147.1969
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "PG",
-    "countryName": "Papua New Guinea",
-    "name": "Q49523143",
-    "latitude": -7.26739,
-    "longitude": 146.62894
   },
   {
     "parkType": "botanical_garden",
     "countryCode": "PY",
     "countryName": "Paraguay",
-    "name": "Botanical Garden and Zoo of Asunción",
+    "name": "And Zoo of Asunción",
     "latitude": -25.24741,
     "longitude": -57.57076
   },
@@ -42909,14 +39661,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Nacunday",
     "latitude": -26.04861111,
     "longitude": -54.67083333
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "PY",
-    "countryName": "Paraguay",
-    "name": "Q20024756",
-    "latitude": -21.08333333,
-    "longitude": -61.13333333
   },
   {
     "parkType": "national_park",
@@ -42973,14 +39717,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Benxi Shuidong",
     "latitude": 41.298016805,
     "longitude": 124.099666305
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Botanical Garden of Xishuangbanna South Medicine",
-    "latitude": 22.002488888,
-    "longitude": 100.788861111
   },
   {
     "parkType": "botanical_garden",
@@ -43082,7 +39818,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CN",
     "countryName": "People's Republic of China",
-    "name": "China National Botanical Garden (North Garden)",
+    "name": "China National (North Garden)",
     "latitude": 39.992789,
     "longitude": 116.20934
   },
@@ -43090,7 +39826,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CN",
     "countryName": "People's Republic of China",
-    "name": "China National Botanical Garden (South Garden)",
+    "name": "China National (South Garden)",
     "latitude": 39.990017,
     "longitude": 116.207867
   },
@@ -43282,7 +40018,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CN",
     "countryName": "People's Republic of China",
-    "name": "Hong Kong Zoological and Botanical Gardens",
+    "name": "Hong Kong Zoological and",
     "latitude": 22.277777777,
     "longitude": 114.156388888
   },
@@ -43402,7 +40138,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "CN",
     "countryName": "People's Republic of China",
-    "name": "luo shan",
+    "name": "Luo shan",
     "latitude": 37.454001,
     "longitude": 120.463185
   },
@@ -43517,110 +40253,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Pudacuo",
     "latitude": 27.825,
     "longitude": 99.99527778
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Q109475330",
-    "latitude": 36.714444444,
-    "longitude": 119.154166666
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Q11103124",
-    "latitude": 22.27926,
-    "longitude": 114.18672
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Q11103446",
-    "latitude": 23.191211111,
-    "longitude": 113.273911111
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Q115929599",
-    "latitude": 31.731167,
-    "longitude": 104.704028
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Q18418721",
-    "latitude": 29.5527,
-    "longitude": 106.546
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Q18418724",
-    "latitude": 28.2083,
-    "longitude": 113.008
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Q18418728",
-    "latitude": 30.661,
-    "longitude": 104.082
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Q2278745",
-    "latitude": 39.8,
-    "longitude": 116
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Q28413783",
-    "latitude": 29.94505278,
-    "longitude": 121.61163333
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Q29638711",
-    "latitude": 40.5654,
-    "longitude": 116.7048
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Q32169382",
-    "latitude": 22.631352,
-    "longitude": 113.61508
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Q97349432",
-    "latitude": 23.005291894,
-    "longitude": 113.299965206
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CN",
-    "countryName": "People's Republic of China",
-    "name": "Q98539275",
-    "latitude": 30.597,
-    "longitude": 114.3904
   },
   {
     "parkType": "national_park",
@@ -43970,6 +40602,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CN",
     "countryName": "People's Republic of China",
+    "name": "Xishuangbanna South Medicine",
+    "latitude": 22.002488888,
+    "longitude": 100.788861111
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CN",
+    "countryName": "People's Republic of China",
     "name": "Xishuangbanna Tropical Flowers and Plants Garden",
     "latitude": 22.0142,
     "longitude": 100.78516
@@ -44090,14 +40730,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "PE",
     "countryName": "Peru",
-    "name": "Jardín botánico de Plantas Medicinales de Lima",
-    "latitude": -12.073611111,
-    "longitude": -77.041388888
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PE",
-    "countryName": "Peru",
     "name": "Lima",
     "latitude": -12.0558434,
     "longitude": -77.0226722
@@ -44111,6 +40743,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -71.66
   },
   {
+    "parkType": "national_park",
+    "countryCode": "PE",
+    "countryName": "Peru",
+    "name": "Otishi",
+    "latitude": -11.66666667,
+    "longitude": -73.08333333
+  },
+  {
     "parkType": "botanical_garden",
     "countryCode": "PE",
     "countryName": "Peru",
@@ -44119,108 +40759,12 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -77.086669
   },
   {
-    "parkType": "national_park",
-    "countryCode": "PE",
-    "countryName": "Peru",
-    "name": "Parque nacional Otishi",
-    "latitude": -11.66666667,
-    "longitude": -73.08333333
-  },
-  {
     "parkType": "botanical_garden",
     "countryCode": "PE",
     "countryName": "Peru",
-    "name": "Q130216908",
-    "latitude": -6.77126199,
-    "longitude": -79.847478824
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PE",
-    "countryName": "Peru",
-    "name": "Q130216913",
-    "latitude": -12.055778249,
-    "longitude": -77.02284365
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PE",
-    "countryName": "Peru",
-    "name": "Q130216920",
-    "latitude": -8.11155275,
-    "longitude": -79.038228902
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PE",
-    "countryName": "Peru",
-    "name": "Q130216949",
-    "latitude": -8.124429342,
-    "longitude": -79.036748158
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PE",
-    "countryName": "Peru",
-    "name": "Q130216956",
-    "latitude": -12.067194954,
-    "longitude": -77.087389214
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PE",
-    "countryName": "Peru",
-    "name": "Q130217002",
-    "latitude": -13.160227567,
-    "longitude": -72.539611176
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PE",
-    "countryName": "Peru",
-    "name": "Q130217034",
-    "latitude": -3.8261136,
-    "longitude": -73.4094982
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PE",
-    "countryName": "Peru",
-    "name": "Q130217050",
-    "latitude": -4.898569478,
-    "longitude": -73.650263327
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PE",
-    "countryName": "Peru",
-    "name": "Q140046509",
-    "latitude": -12.090143,
-    "longitude": -76.977865
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PE",
-    "countryName": "Peru",
-    "name": "Q5926787",
-    "latitude": -12.078747076,
-    "longitude": -76.944771218
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PE",
-    "countryName": "Peru",
-    "name": "Q5926857",
-    "latitude": -9.304919,
-    "longitude": -76.004684
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PE",
-    "countryName": "Peru",
-    "name": "Q9010975",
-    "latitude": -15.088474,
-    "longitude": -73.767191
+    "name": "Plantas Medicinales de Lima",
+    "latitude": -12.073611111,
+    "longitude": -77.041388888
   },
   {
     "parkType": "national_park",
@@ -44594,22 +41138,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "PH",
     "countryName": "Philippines",
-    "name": "Q1950916",
-    "latitude": 14.06666667,
-    "longitude": 121.48333333
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "PH",
-    "countryName": "Philippines",
-    "name": "Q2363309",
-    "latitude": 10.3788,
-    "longitude": 123.788
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "PH",
-    "countryName": "Philippines",
     "name": "Quezon Protected Landscape",
     "latitude": 14.03333333,
     "longitude": 121.75
@@ -44890,65 +41418,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "PL",
     "countryName": "Poland",
-    "name": "Botanic Garden of Casimir the Great University, Bydgoszcz",
+    "name": "Casimir the Great University, Bydgoszcz",
     "latitude": 53.1308,
     "longitude": 18.0175
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Botanic Garden of the Jagiellonian University",
-    "latitude": 50.062916666,
-    "longitude": 19.957916666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Botanical garden in Brynek",
-    "latitude": 50.514180555,
-    "longitude": 18.741486111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Botanical Garden in Gdańsk Oliwa",
-    "latitude": 54.4107,
-    "longitude": 18.5624
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Botanical garden in Łódź",
-    "latitude": 51.756388888,
-    "longitude": 19.406666666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Botanical Garden in Lublin",
-    "latitude": 51.2638,
-    "longitude": 22.5138
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Botanical garden in Poznań",
-    "latitude": 52.4201,
-    "longitude": 16.88088
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Botanical Garden in Zielona Góra",
-    "latitude": 51.9198,
-    "longitude": 15.5017
   },
   {
     "parkType": "botanical_garden",
@@ -44994,17 +41466,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "PL",
     "countryName": "Poland",
-    "name": "Forest arboretum in Stradomia Dolna",
-    "latitude": 51.266389,
-    "longitude": 17.677222
+    "name": "Forest 'Marszewo'",
+    "latitude": 54.5194,
+    "longitude": 18.4164
   },
   {
     "parkType": "botanical_garden",
     "countryCode": "PL",
     "countryName": "Poland",
-    "name": "Forest Botanical Garden 'Marszewo'",
-    "latitude": 54.5194,
-    "longitude": 18.4164
+    "name": "Forest arboretum in Stradomia Dolna",
+    "latitude": 51.266389,
+    "longitude": 17.677222
   },
   {
     "parkType": "botanical_garden",
@@ -45045,6 +41517,62 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Hossoland",
     "latitude": 53.950483201,
     "longitude": 15.387346618
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "PL",
+    "countryName": "Poland",
+    "name": "In Brynek",
+    "latitude": 50.514180555,
+    "longitude": 18.741486111
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "PL",
+    "countryName": "Poland",
+    "name": "In Gdańsk Oliwa",
+    "latitude": 54.4107,
+    "longitude": 18.5624
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "PL",
+    "countryName": "Poland",
+    "name": "In Łódź",
+    "latitude": 51.756388888,
+    "longitude": 19.406666666
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "PL",
+    "countryName": "Poland",
+    "name": "In Lublin",
+    "latitude": 51.2638,
+    "longitude": 22.5138
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "PL",
+    "countryName": "Poland",
+    "name": "In Poznań",
+    "latitude": 52.4201,
+    "longitude": 16.88088
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "PL",
+    "countryName": "Poland",
+    "name": "In Zielona Góra",
+    "latitude": 51.9198,
+    "longitude": 15.5017
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "PL",
+    "countryName": "Poland",
+    "name": "Jagiellonian University",
+    "latitude": 50.062916666,
+    "longitude": 19.957916666
   },
   {
     "parkType": "theme_park",
@@ -45146,7 +41674,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "PL",
     "countryName": "Poland",
-    "name": "Mountain Botanical Garden in Zakopane",
+    "name": "Mountain in Zakopane",
     "latitude": 49.2994,
     "longitude": 19.9496
   },
@@ -45239,238 +41767,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 17.5934569
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q10966248",
-    "latitude": 54.2203,
-    "longitude": 17.9606
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q11796743",
-    "latitude": 53.1617,
-    "longitude": 18.0361
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q11796745",
-    "latitude": 53.494722,
-    "longitude": 18.763667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q11796747",
-    "latitude": 53.4542,
-    "longitude": 14.5179
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q11796761",
-    "latitude": 54.3833,
-    "longitude": 18.6167
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q11811313",
-    "latitude": 54.194444,
-    "longitude": 16.180167
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q125651075",
-    "latitude": 51.7974147,
-    "longitude": 15.7225647
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q135214241",
-    "latitude": 51.175472222,
-    "longitude": 15.596861111
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q135234077",
-    "latitude": 50.103155,
-    "longitude": 18.977602
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q136221966",
-    "latitude": 49.463888888,
-    "longitude": 19.152194444
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q136783590",
-    "latitude": 53.930314445,
-    "longitude": 14.445971141
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q136795353",
-    "latitude": 49.9550378,
-    "longitude": 18.3755133
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q139801103",
-    "latitude": 49.6725,
-    "longitude": 19.144166666
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q140067013",
-    "latitude": 51.756169,
-    "longitude": 18.101983
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q140067023",
-    "latitude": 51.504928,
-    "longitude": 16.064113
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q16484872",
-    "latitude": 50.784994,
-    "longitude": 16.252544
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q16529902",
-    "latitude": 50.8124,
-    "longitude": 19.9223
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q16538026",
-    "latitude": 52.414532,
-    "longitude": 16.91316
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q16540080",
-    "latitude": 50.6639,
-    "longitude": 18.2708
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q16612463",
-    "latitude": 52.4271,
-    "longitude": 16.9035
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q17385415",
-    "latitude": 52.2962,
-    "longitude": 16.7567
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q19401053",
-    "latitude": 49.8543,
-    "longitude": 18.7598
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q2367192",
-    "latitude": 54.204738888,
-    "longitude": 18.107147222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q60862502",
-    "latitude": 51.855556,
-    "longitude": 17.931944
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q76410712",
-    "latitude": 54.793555555,
-    "longitude": 18.409861111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q86672214",
-    "latitude": 50.866806,
-    "longitude": 20.598083
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q9158902",
-    "latitude": 53.25,
-    "longitude": 23.4808
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q9158904",
-    "latitude": 50.336667,
-    "longitude": 16.893889
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PL",
-    "countryName": "Poland",
-    "name": "Q9158908",
-    "latitude": 52.031111,
-    "longitude": 15.33
-  },
-  {
     "parkType": "theme_park",
     "countryCode": "PL",
     "countryName": "Poland",
@@ -45490,7 +41786,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "PL",
     "countryName": "Poland",
-    "name": "rose collection of Warsaw University",
+    "name": "Rose collection of Warsaw University",
     "latitude": 52.217472222,
     "longitude": 21.027730555
   },
@@ -45658,17 +41954,25 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "PT",
     "countryName": "Portugal",
-    "name": "Botanical Garden of Faial",
-    "latitude": 38.5507,
-    "longitude": -28.6395
+    "name": "Da Ajuda",
+    "latitude": 38.706206,
+    "longitude": -9.200806
   },
   {
     "parkType": "botanical_garden",
     "countryCode": "PT",
     "countryName": "Portugal",
-    "name": "Botanical Garden of the University of Coimbra",
-    "latitude": 40.205609,
-    "longitude": -8.42274
+    "name": "Do Porto",
+    "latitude": 41.153335,
+    "longitude": -8.643079
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "PT",
+    "countryName": "Portugal",
+    "name": "Faial",
+    "latitude": 38.5507,
+    "longitude": -28.6395
   },
   {
     "parkType": "botanical_garden",
@@ -45682,33 +41986,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "PT",
     "countryName": "Portugal",
-    "name": "Jardim Botânico da Ajuda",
-    "latitude": 38.706206,
-    "longitude": -9.200806
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PT",
-    "countryName": "Portugal",
-    "name": "Jardim Botânico de Lisboa",
+    "name": "Lisboa",
     "latitude": 38.7181,
     "longitude": -9.14895
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PT",
-    "countryName": "Portugal",
-    "name": "Jardim Botânico do Porto",
-    "latitude": 41.153335,
-    "longitude": -8.643079
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PT",
-    "countryName": "Portugal",
-    "name": "Jardim Botânico Tropical",
-    "latitude": 38.699322,
-    "longitude": -9.202488
   },
   {
     "parkType": "theme_park",
@@ -45794,73 +42074,25 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "PT",
     "countryName": "Portugal",
-    "name": "Q10305540",
-    "latitude": 41.289994444,
-    "longitude": -7.737516666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PT",
-    "countryName": "Portugal",
-    "name": "Q127986440",
-    "latitude": 39.474166666,
-    "longitude": -8.340277777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PT",
-    "countryName": "Portugal",
-    "name": "Q134978967",
-    "latitude": 38.748184,
-    "longitude": -9.26002
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PT",
-    "countryName": "Portugal",
-    "name": "Q136436938",
-    "latitude": 38.7956828,
-    "longitude": -9.3765451
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PT",
-    "countryName": "Portugal",
-    "name": "Q140067322",
-    "latitude": 37.136043,
-    "longitude": -8.364891
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PT",
-    "countryName": "Portugal",
-    "name": "Q17318782",
-    "latitude": 37.835205486,
-    "longitude": -25.155930575
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PT",
-    "countryName": "Portugal",
-    "name": "Q47527952",
-    "latitude": 41.24994444,
-    "longitude": -8.10788889
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "PT",
-    "countryName": "Portugal",
-    "name": "Q9626783",
-    "latitude": 37.093894,
-    "longitude": -8.072367
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "PT",
-    "countryName": "Portugal",
     "name": "Rose garden of Serralves",
     "latitude": 41.159137,
     "longitude": -8.658112
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "PT",
+    "countryName": "Portugal",
+    "name": "Tropical",
+    "latitude": 38.699322,
+    "longitude": -9.202488
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "PT",
+    "countryName": "Portugal",
+    "name": "University of Coimbra",
+    "latitude": 40.205609,
+    "longitude": -8.42274
   },
   {
     "parkType": "theme_park",
@@ -45874,7 +42106,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "QA",
     "countryName": "Qatar",
-    "name": "Desert Falls Water & Adventure Park",
+    "name": "Desert Falls Water &",
     "latitude": 24.8495,
     "longitude": 50.8621
   },
@@ -45933,14 +42165,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Ogooué-Leketi",
     "latitude": 2,
     "longitude": 13.61667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CG",
-    "countryName": "Republic of the Congo",
-    "name": "Q138967041",
-    "latitude": -4.2720058,
-    "longitude": 15.2410187
   },
   {
     "parkType": "theme_park",
@@ -46122,7 +42346,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "RO",
     "countryName": "Romania",
-    "name": "National Park Munții Măcinului",
+    "name": "Munții Măcinului",
     "latitude": 45.166667,
     "longitude": 28.3
   },
@@ -46133,30 +42357,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Piatra Craiului",
     "latitude": 45.526944444,
     "longitude": 25.211666666
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "RO",
-    "countryName": "Romania",
-    "name": "Q140130586",
-    "latitude": 44.061888,
-    "longitude": 28.638508
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RO",
-    "countryName": "Romania",
-    "name": "Q43124596",
-    "latitude": 47.683967,
-    "longitude": 22.466869
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RO",
-    "countryName": "Romania",
-    "name": "Q876118",
-    "latitude": 46.73194444,
-    "longitude": 25.61608333
   },
   {
     "parkType": "national_park",
@@ -46205,6 +42405,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Therme București",
     "latitude": 44.60567,
     "longitude": 26.08583
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "(PetrSU)",
+    "latitude": 61.842369,
+    "longitude": 34.381168
   },
   {
     "parkType": "national_park",
@@ -46271,6 +42479,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 39.2277521
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Baltic Federal University Kant",
+    "latitude": 54.737222222,
+    "longitude": 20.517777777
+  },
+  {
     "parkType": "national_park",
     "countryCode": "RU",
     "countryName": "Russian Federation",
@@ -46311,190 +42527,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 49.246638
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanic Garden of the Irkutsk State University",
-    "latitude": 52.261944444,
-    "longitude": 104.248333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical Garden (PetrSU)",
-    "latitude": 61.842369,
-    "longitude": 34.381168
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical garden in Solovki",
-    "latitude": 65.052927777,
-    "longitude": 35.665627777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical garden named after Boris Keller",
-    "latitude": 51.7120599,
-    "longitude": 39.2244315
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical Garden named after I.S. Kosenko",
-    "latitude": 45.033,
-    "longitude": 38.967
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical Garden named after Rostovtsev",
-    "latitude": 55.834263,
-    "longitude": 37.54502
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical garden named Ivan Sprygin",
-    "latitude": 53.186633333,
-    "longitude": 45.003127777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical garden of Ivanovo State University",
-    "latitude": 57.034342918,
-    "longitude": 41.008905538
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical Garden of Lobachevsky State University of Nizhny Novgorod",
-    "latitude": 56.25484,
-    "longitude": 44.00767
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical Garden of Moscow State University",
-    "latitude": 55.7075,
-    "longitude": 37.527222222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical garden of Perm State University",
-    "latitude": 57.951111111,
-    "longitude": 56.340833333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical garden of Saint Petersburg State University",
-    "latitude": 59.941519,
-    "longitude": 30.296984
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical garden of Samara State University",
-    "latitude": 53.216667,
-    "longitude": 50.179167
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical Garden of the Baltic Federal University Kant",
-    "latitude": 54.737222222,
-    "longitude": 20.517777777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical Garden of the Chelyabinsk State University",
-    "latitude": 55.1768,
-    "longitude": 61.3206
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical Garden of the First Moscow State Medical University named after Sechenov",
-    "latitude": 55.746928,
-    "longitude": 37.530171
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical garden of the Pyatigorsk State Pharmaceutical Academy",
-    "latitude": 44.04814,
-    "longitude": 42.98212
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical Garden of the Syktyvkar State University",
-    "latitude": 61.64505,
-    "longitude": 50.74947
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical Garden of the Urals Branch of the Russian Academy of Sciences",
-    "latitude": 56.795012,
-    "longitude": 60.601
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical Garden of Tver State University",
-    "latitude": 56.869444444,
-    "longitude": 35.916666666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical Garden of Volga State University of Technology",
-    "latitude": 56.624194444,
-    "longitude": 47.959547222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical Garden-Institute of the Far Eastern Branch of the Russian Academy of Sciences",
-    "latitude": 43.21772,
-    "longitude": 131.98747
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Botanical garden, Simferopol",
-    "latitude": 44.943197,
-    "longitude": 34.130449
-  },
-  {
     "parkType": "national_park",
     "countryCode": "RU",
     "countryName": "Russian Federation",
@@ -46525,6 +42557,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Cheboksary",
     "latitude": 56.087062,
     "longitude": 47.254456
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Chelyabinsk State University",
+    "latitude": 55.1768,
+    "longitude": 61.3206
   },
   {
     "parkType": "theme_park",
@@ -46610,9 +42650,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "RU",
     "countryName": "Russian Federation",
-    "name": "Federal Research Center \"N.I. Vavilov All-Russian Institute of Plant Genetic Resources\"",
+    "name": "Federal Research Center N.I. Vavilov All-Russian Institute of Plant Genetic Resources",
     "latitude": 59.931944,
     "longitude": 30.308611
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "First Moscow State Medical University named after Sechenov",
+    "latitude": 55.746928,
+    "longitude": 37.530171
   },
   {
     "parkType": "theme_park",
@@ -46669,6 +42717,38 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Gydansky",
     "latitude": 72.142098,
     "longitude": 77.851156
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "In Solovki",
+    "latitude": 65.052927777,
+    "longitude": 35.665627777
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Institute of the Far Eastern Branch of the Russian Academy of Sciences",
+    "latitude": 43.21772,
+    "longitude": 131.98747
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Irkutsk State University",
+    "latitude": 52.261944444,
+    "longitude": 104.248333333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Ivanovo State University",
+    "latitude": 57.034342918,
+    "longitude": 41.008905538
   },
   {
     "parkType": "theme_park",
@@ -46807,6 +42887,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 131.483333333
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Lobachevsky State University of Nizhny Novgorod",
+    "latitude": 56.25484,
+    "longitude": 44.00767
+  },
+  {
     "parkType": "national_park",
     "countryCode": "RU",
     "countryName": "Russian Federation",
@@ -46850,6 +42938,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "RU",
     "countryName": "Russian Federation",
+    "name": "Moscow State University",
+    "latitude": 55.7075,
+    "longitude": 37.527222222
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
     "name": "Mountain",
     "latitude": 42.98778,
     "longitude": 47.48983
@@ -46877,6 +42973,38 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "N.V. Tsitsin Main",
     "latitude": 55.839166666,
     "longitude": 37.600833333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Named after Boris Keller",
+    "latitude": 51.7120599,
+    "longitude": 39.2244315
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Named after I.S. Kosenko",
+    "latitude": 45.033,
+    "longitude": 38.967
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Named after Rostovtsev",
+    "latitude": 55.834263,
+    "longitude": 37.54502
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Named Ivan Sprygin",
+    "latitude": 53.186633333,
+    "longitude": 45.003127777
   },
   {
     "parkType": "national_park",
@@ -46986,6 +43114,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "RU",
     "countryName": "Russian Federation",
+    "name": "Perm State University",
+    "latitude": 57.951111111,
+    "longitude": 56.340833333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
     "name": "Peter the Great",
     "latitude": 59.97009,
     "longitude": 30.32709
@@ -47034,193 +43170,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "RU",
     "countryName": "Russian Federation",
-    "name": "Q101787922",
-    "latitude": 56.215813,
-    "longitude": 43.418246
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q104373894",
-    "latitude": 64.52944,
-    "longitude": 40.5524
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q105885814",
-    "latitude": 59.2741,
-    "longitude": 39.6732
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q105971514",
-    "latitude": 56.8793,
-    "longitude": 60.2965
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q113712315",
-    "latitude": 56.848178,
-    "longitude": 60.651463
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q12080764",
-    "latitude": 45.15111111,
-    "longitude": 33.4925
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q123693986",
-    "latitude": 44.9227,
-    "longitude": 34.1675
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q125125986",
-    "latitude": 45.012691,
-    "longitude": 39.104101
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q126953060",
-    "latitude": 43.404959571,
-    "longitude": 39.969734517
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q130297912",
-    "latitude": 57.8177194,
-    "longitude": 40.9688653
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q137215492",
-    "latitude": 54.387511,
-    "longitude": 22.522359
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q138782158",
-    "latitude": 59.926076,
-    "longitude": 30.288376
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q138870418",
-    "latitude": 57.4529273,
-    "longitude": 41.5295514
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q138874285",
-    "latitude": 62.118,
-    "longitude": 149.318
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q16533160",
-    "latitude": 55.597222222,
-    "longitude": 37.5275
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q28602808",
-    "latitude": 43.25,
-    "longitude": 45.67
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q28666421",
-    "latitude": 59.6626,
-    "longitude": 56.7883
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q4126784",
-    "latitude": 59.93833333,
-    "longitude": 30.2125
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q4318676",
-    "latitude": 56.32229,
-    "longitude": 44.00076
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q5702495",
-    "latitude": 46.96119983,
-    "longitude": 142.7318998
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q5926640",
-    "latitude": 56.8155,
-    "longitude": 60.6668
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q59914886",
-    "latitude": 55.97657,
-    "longitude": 37.897224
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q65126382",
-    "latitude": 57.009444444,
-    "longitude": 63.733888888
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RU",
-    "countryName": "Russian Federation",
-    "name": "Q65166737",
-    "latitude": 52.045306,
-    "longitude": 113.476043
+    "name": "Pyatigorsk State Pharmaceutical Academy",
+    "latitude": 44.04814,
+    "longitude": 42.98212
   },
   {
     "parkType": "theme_park",
@@ -47247,6 +43199,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 38.5675
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Saint Petersburg State University",
+    "latitude": 59.941519,
+    "longitude": 30.296984
+  },
+  {
     "parkType": "national_park",
     "countryCode": "RU",
     "countryName": "Russian Federation",
@@ -47258,9 +43218,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "RU",
     "countryName": "Russian Federation",
-    "name": "Samara state university",
-    "latitude": 53.02,
-    "longitude": 50.183
+    "name": "Samara State University",
+    "latitude": 53.216667,
+    "longitude": 50.179167
   },
   {
     "parkType": "national_park",
@@ -47343,6 +43303,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 84.945833333
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Simferopol",
+    "latitude": 44.943197,
+    "longitude": 34.130449
+  },
+  {
     "parkType": "national_park",
     "countryCode": "RU",
     "countryName": "Russian Federation",
@@ -47399,6 +43367,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 39.659632
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Syktyvkar State University",
+    "latitude": 61.64505,
+    "longitude": 50.74947
+  },
+  {
     "parkType": "national_park",
     "countryCode": "RU",
     "countryName": "Russian Federation",
@@ -47447,6 +43423,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 52.32333333
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Tver State University",
+    "latitude": 56.869444444,
+    "longitude": 35.916666666
+  },
+  {
     "parkType": "national_park",
     "countryCode": "RU",
     "countryName": "Russian Federation",
@@ -47469,6 +43453,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Universal Studios Moscow",
     "latitude": 55.577775,
     "longitude": 37.593176
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Urals Branch of the Russian Academy of Sciences",
+    "latitude": 56.795012,
+    "longitude": 60.601
   },
   {
     "parkType": "theme_park",
@@ -47509,6 +43501,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Vodlozersky",
     "latitude": 62.51,
     "longitude": 36.52
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "RU",
+    "countryName": "Russian Federation",
+    "name": "Volga State University of Technology",
+    "latitude": 56.624194444,
+    "longitude": 47.959547222
   },
   {
     "parkType": "botanical_garden",
@@ -47586,7 +43586,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "RU",
     "countryName": "Russian Federation",
-    "name": "Национальный парк \"Смоленское Поозерье\"",
+    "name": "Национальный парк Смоленское Поозерье",
     "latitude": 55.5418,
     "longitude": 31.962
   },
@@ -47634,7 +43634,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "LC",
     "countryName": "Saint Lucia",
-    "name": "St. Lucia Botanical Gardens",
+    "name": "St. Lucia",
     "latitude": 13.8525,
     "longitude": -61.0483
   },
@@ -47642,7 +43642,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "VC",
     "countryName": "Saint Vincent and the Grenadines",
-    "name": "Botanic Gardens St. Vincent",
+    "name": "St. Vincent",
     "latitude": 13.166666666,
     "longitude": -61.233333333
   },
@@ -47666,7 +43666,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "ST",
     "countryName": "Sao Tome and Principe",
-    "name": "Jardim Botânico do Bom Sucesso",
+    "name": "Do Bom Sucesso",
     "latitude": 0.288969,
     "longitude": 6.612257
   },
@@ -47709,14 +43709,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "King Abdullah International Gardens",
     "latitude": 25.08,
     "longitude": 46.45
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "SA",
-    "countryName": "Saudi Arabia",
-    "name": "Q5926619",
-    "latitude": 24.722,
-    "longitude": 46.627
   },
   {
     "parkType": "theme_park",
@@ -47783,14 +43775,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -16.757232934
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "RS",
-    "countryName": "Serbia",
-    "name": "Botanical Garden Kragujevac",
-    "latitude": 44.023611111,
-    "longitude": 20.886666666
-  },
-  {
     "parkType": "national_park",
     "countryCode": "RS",
     "countryName": "Serbia",
@@ -47823,6 +43807,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 20.81250001
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "RS",
+    "countryName": "Serbia",
+    "name": "Kragujevac",
+    "latitude": 44.023611111,
+    "longitude": 20.886666666
+  },
+  {
     "parkType": "national_park",
     "countryCode": "RS",
     "countryName": "Serbia",
@@ -47837,30 +43829,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Prokletije",
     "latitude": 42.5327,
     "longitude": 20.1402
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "RS",
-    "countryName": "Serbia",
-    "name": "Q140077797",
-    "latitude": 44.309124,
-    "longitude": 20.549435
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "RS",
-    "countryName": "Serbia",
-    "name": "Q140077802",
-    "latitude": 43.967004,
-    "longitude": 21.267504
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "RS",
-    "countryName": "Serbia",
-    "name": "Q29043318",
-    "latitude": 44.660939,
-    "longitude": 20.548689
   },
   {
     "parkType": "national_park",
@@ -47930,7 +43898,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "SC",
     "countryName": "Seychelles",
-    "name": "Victoria Botanical Gardens",
+    "name": "Victoria",
     "latitude": -4.631,
     "longitude": 55.4512
   },
@@ -48010,7 +43978,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "SG",
     "countryName": "Singapore",
-    "name": "MegaZip Adventure Park",
+    "name": "MegaZip",
     "latitude": 1.256430555,
     "longitude": 103.815530555
   },
@@ -48034,7 +44002,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "SG",
     "countryName": "Singapore",
-    "name": "Singapore Botanic Gardens",
+    "name": "Singapore",
     "latitude": 1.3151,
     "longitude": 103.8162
   },
@@ -48106,17 +44074,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "SK",
     "countryName": "Slovakia",
-    "name": "Botanical Garden of the Comenius University",
+    "name": "Comenius University",
     "latitude": 48.14833333,
     "longitude": 17.10722222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "SK",
-    "countryName": "Slovakia",
-    "name": "botanical garden UPJŠ Košice",
-    "latitude": 48.73573,
-    "longitude": 21.23839
   },
   {
     "parkType": "national_park",
@@ -48167,62 +44127,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 22.53361111
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "SK",
-    "countryName": "Slovakia",
-    "name": "Q112091117",
-    "latitude": 48.35616,
-    "longitude": 19.57577
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "SK",
-    "countryName": "Slovakia",
-    "name": "Q112092886",
-    "latitude": 48.35868,
-    "longitude": 19.65246
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "SK",
-    "countryName": "Slovakia",
-    "name": "Q112105259",
-    "latitude": 49.0414,
-    "longitude": 19.7249
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SK",
-    "countryName": "Slovakia",
-    "name": "Q12764668",
-    "latitude": 48.163178,
-    "longitude": 17.071595
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SK",
-    "countryName": "Slovakia",
-    "name": "Q15987312",
-    "latitude": 48.95946,
-    "longitude": 21.265154
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SK",
-    "countryName": "Slovakia",
-    "name": "Q20977313",
-    "latitude": 48.606,
-    "longitude": 19.098
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SK",
-    "countryName": "Slovakia",
-    "name": "Q37813516",
-    "latitude": 48.157331,
-    "longitude": 17.145346
-  },
-  {
     "parkType": "national_park",
     "countryCode": "SK",
     "countryName": "Slovakia",
@@ -48245,6 +44149,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Tatra",
     "latitude": 49.18027778,
     "longitude": 19.91944444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "SK",
+    "countryName": "Slovakia",
+    "name": "UPJŠ Košice",
+    "latitude": 48.73573,
+    "longitude": 21.23839
   },
   {
     "parkType": "national_park",
@@ -48394,7 +44306,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "ZA",
     "countryName": "South Africa",
-    "name": "Durban Botanic Gardens",
+    "name": "Durban",
     "latitude": -29.8467,
     "longitude": 31.0067
   },
@@ -48538,7 +44450,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "ZA",
     "countryName": "South Africa",
-    "name": "Makana Botanical Gardens",
+    "name": "Makana",
     "latitude": -33.3156,
     "longitude": 26.5209
   },
@@ -48613,14 +44525,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Pretoria National",
     "latitude": -25.7386,
     "longitude": 28.2733
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ZA",
-    "countryName": "South Africa",
-    "name": "Q5926434",
-    "latitude": -33.6,
-    "longitude": 19.46666667
   },
   {
     "parkType": "national_park",
@@ -48706,7 +44610,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "ZA",
     "countryName": "South Africa",
-    "name": "uShaka Marine World",
+    "name": "UShaka Marine World",
     "latitude": -29.86666667,
     "longitude": 31.04333333
   },
@@ -49146,38 +45050,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "KR",
     "countryName": "South Korea",
-    "name": "Q12583012",
-    "latitude": 37.923297222,
-    "longitude": 127.725419444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "KR",
-    "countryName": "South Korea",
-    "name": "Q3162391",
-    "latitude": 37.7034,
-    "longitude": 128.613
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "KR",
-    "countryName": "South Korea",
-    "name": "Q55734734",
-    "latitude": 37.583055555,
-    "longitude": 126.993888888
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "KR",
-    "countryName": "South Korea",
-    "name": "Q5691540",
-    "latitude": 37.75,
-    "longitude": 127.1666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "KR",
-    "countryName": "South Korea",
     "name": "Samcheok Rose Park",
     "latitude": 37.433284,
     "longitude": 129.177337
@@ -49399,6 +45271,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 0.94777778
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Albardinal",
+    "latitude": 36.849458333,
+    "longitude": -2.043416666
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "ES",
     "countryName": "Spain",
@@ -49522,6 +45402,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "ES",
     "countryName": "Spain",
+    "name": "Barakaldo",
+    "latitude": 43.292743,
+    "longitude": -3.000544
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
     "name": "Betty Molesworth Botanic Park",
     "latitude": 36.179,
     "longitude": -5.4843
@@ -49533,70 +45421,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Botanicactus",
     "latitude": 39.3423,
     "longitude": 3.06466389
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Botanical Garden of Barakaldo",
-    "latitude": 43.292743,
-    "longitude": -3.000544
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "botanical garden of Lluc",
-    "latitude": 39.82347,
-    "longitude": 2.88486
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Botanical Garden of Lourizán",
-    "latitude": 42.41,
-    "longitude": -8.665
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Botanical Garden of Olarizu",
-    "latitude": 42.8276337,
-    "longitude": -2.6633777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Botanical Garden of Santa Catalina",
-    "latitude": 42.84944444,
-    "longitude": -2.8075
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Botanical Garden of the University of Granada",
-    "latitude": 37.17777778,
-    "longitude": -3.6025
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Botanical Garden of Zaragoza",
-    "latitude": 41.6344,
-    "longitude": -0.8956
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Botanical Garden Ría do Burgo",
-    "latitude": 43.316,
-    "longitude": -8.36281
   },
   {
     "parkType": "national_park",
@@ -49631,6 +45455,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -17.884719444
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Canario Viera y Clavijo",
+    "latitude": 28.06361,
+    "longitude": -15.46333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Castilla-La Mancha",
+    "latitude": 38.975175,
+    "longitude": -1.86001667
+  },
+  {
     "parkType": "national_park",
     "countryCode": "ES",
     "countryName": "Spain",
@@ -49661,6 +45501,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Dehesa Boyal de Puertollano",
     "latitude": 38.6833,
     "longitude": -4.1
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Descubrimiento de Vallehermoso",
+    "latitude": 28.185897222,
+    "longitude": -17.265577777
   },
   {
     "parkType": "botanical_garden",
@@ -49714,9 +45562,25 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "ES",
     "countryName": "Spain",
+    "name": "El Aljibe",
+    "latitude": 36.443944444,
+    "longitude": -5.747888888
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
     "name": "El Arboreto de El Carambolo",
     "latitude": 37.387279688,
     "longitude": -6.03746033
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "El Castillejo",
+    "latitude": 36.764857064,
+    "longitude": -5.498554333
   },
   {
     "parkType": "botanical_garden",
@@ -49727,10 +45591,26 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -16.415500838
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "El Robledo",
+    "latitude": 37.866667,
+    "longitude": -5.616667
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Endemismos de Sierra Nevada",
+    "latitude": 37.09587,
+    "longitude": -3.38777
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "ES",
     "countryName": "Spain",
-    "name": "fairground of Montjuic",
+    "name": "Fairground of Montjuic",
     "latitude": 41.36803333,
     "longitude": 2.16553056
   },
@@ -49789,6 +45669,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Hidropark",
     "latitude": 39.84147,
     "longitude": 3.1149
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Histórico de Barcelona",
+    "latitude": 41.367207,
+    "longitude": 2.15273
   },
   {
     "parkType": "botanical_garden",
@@ -49874,142 +45762,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "ES",
     "countryName": "Spain",
-    "name": "Jardín Botánico Canario Viera y Clavijo",
-    "latitude": 28.06361,
-    "longitude": -15.46333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico de Castilla-La Mancha",
-    "latitude": 38.975175,
-    "longitude": -1.86001667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico de Endemismos de Sierra Nevada",
-    "latitude": 37.09587,
-    "longitude": -3.38777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico de la Universidad de Málaga",
-    "latitude": 36.71563,
-    "longitude": -4.47166
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico de la Universidad de Valencia",
-    "latitude": 39.477,
-    "longitude": -0.386689
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico de Miranda de Ebro",
-    "latitude": 42.68225,
-    "longitude": -2.952333333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico de San Fernando",
-    "latitude": 36.473305555,
-    "longitude": -6.200888888
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico del Albardinal",
-    "latitude": 36.849458333,
-    "longitude": -2.043416666
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico del Descubrimiento de Vallehermoso",
-    "latitude": 28.185897222,
-    "longitude": -17.265577777
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico El Aljibe",
-    "latitude": 36.443944444,
-    "longitude": -5.747888888
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico El Castillejo",
-    "latitude": 36.764857064,
-    "longitude": -5.498554333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico El Robledo",
-    "latitude": 37.866667,
-    "longitude": -5.616667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico Histórico de Barcelona",
-    "latitude": 41.367207,
-    "longitude": 2.15273
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín botánico La Almunya del Sur",
-    "latitude": 36.757524253,
-    "longitude": -2.863192428
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico La Concepción",
-    "latitude": 36.76170351,
-    "longitude": -4.426413977
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico Molino de Inca",
-    "latitude": 36.631169,
-    "longitude": -4.511127
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Jardín Botánico Mora i Bravard",
-    "latitude": 36.780481,
-    "longitude": -4.834022
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
     "name": "Jardín de Aclimatación de la Orotava",
     "latitude": 28.411388888,
     "longitude": -16.535833333
@@ -50066,9 +45818,41 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "ES",
     "countryName": "Spain",
+    "name": "La Almunya del Sur",
+    "latitude": 36.757524253,
+    "longitude": -2.863192428
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "La Concepción",
+    "latitude": 36.76170351,
+    "longitude": -4.426413977
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
     "name": "La Rosaleda del Retiro, Madrid",
     "latitude": 40.410792,
     "longitude": -3.680325
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "La Universidad de Málaga",
+    "latitude": 36.71563,
+    "longitude": -4.47166
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "La Universidad de Valencia",
+    "latitude": 39.477,
+    "longitude": -0.386689
   },
   {
     "parkType": "theme_park",
@@ -50077,6 +45861,22 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Lago Martiánez",
     "latitude": 28.41944444,
     "longitude": -16.54361111
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Lluc",
+    "latitude": 39.82347,
+    "longitude": 2.88486
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Lourizán",
+    "latitude": 42.41,
+    "longitude": -8.665
   },
   {
     "parkType": "theme_park",
@@ -50111,12 +45911,36 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 2.747539
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Miranda de Ebro",
+    "latitude": 42.68225,
+    "longitude": -2.952333333
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Molino de Inca",
+    "latitude": 36.631169,
+    "longitude": -4.511127
+  },
+  {
     "parkType": "national_park",
     "countryCode": "ES",
     "countryName": "Spain",
     "name": "Monfragüe",
     "latitude": 39.82,
     "longitude": -5.97
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Mora i Bravard",
+    "latitude": 36.780481,
+    "longitude": -4.834022
   },
   {
     "parkType": "botanical_garden",
@@ -50157,6 +45981,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Oasys MiniHollywood",
     "latitude": 37.020382,
     "longitude": -2.432244
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Olarizu",
+    "latitude": 42.8276337,
+    "longitude": -2.6633777
   },
   {
     "parkType": "botanical_garden",
@@ -50298,335 +46130,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "ES",
     "countryName": "Spain",
-    "name": "Q104816531",
-    "latitude": 36.831894535,
-    "longitude": -2.400329186
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q118487851",
-    "latitude": 40.942914488,
-    "longitude": -4.117069816
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q123701157",
-    "latitude": 38.9652296,
-    "longitude": 1.3855568
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q125406823",
-    "latitude": 36.357083333,
-    "longitude": -5.80775
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q125885917",
-    "latitude": 43.28167306,
-    "longitude": -1.872564362
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q135451338",
-    "latitude": 40.251671522,
-    "longitude": 0.279644731
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q138835658",
-    "latitude": 36.766626,
-    "longitude": -2.110941
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q140066944",
-    "latitude": 39.495685,
-    "longitude": 2.760263
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q17057828",
-    "latitude": 40.631388888,
-    "longitude": -3.17825
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q17154973",
-    "latitude": 40.482925,
-    "longitude": -3.36313056
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q17279812",
-    "latitude": 40.566066666,
-    "longitude": -3.504438888
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q17279813",
-    "latitude": 42.7386,
-    "longitude": -8.65833
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q17279814",
-    "latitude": 41.99655,
-    "longitude": -5.6826
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q17279815",
-    "latitude": 38.4028,
-    "longitude": -0.415
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q17279816",
-    "latitude": 37.258128863,
-    "longitude": -6.958827903
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q17374433",
-    "latitude": 39.4806,
-    "longitude": -0.368211
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q2721720",
-    "latitude": 43.13944444,
-    "longitude": -1.61222222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q2840327",
-    "latitude": 37.7,
-    "longitude": -2.2
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q3162383",
-    "latitude": 43.24,
-    "longitude": -2.16055556
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5572905",
-    "latitude": 40.5961,
-    "longitude": -4.16622
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5690719",
-    "latitude": 42.883333,
-    "longitude": -8.533333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5702439",
-    "latitude": 38.26961,
-    "longitude": -0.69836
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5702453",
-    "latitude": 43.39477222,
-    "longitude": -3.36098056
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5702476",
-    "latitude": 40.442222,
-    "longitude": -3.728056
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5702489",
-    "latitude": 38.98333333,
-    "longitude": -3.91666667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5799270",
-    "latitude": 42.60361111,
-    "longitude": -8.63888889
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5820936",
-    "latitude": 37.406361903,
-    "longitude": -5.99761896
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5849100",
-    "latitude": 38.683056,
-    "longitude": -6.409167
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q58931389",
-    "latitude": 43.560383333,
-    "longitude": -7.301969444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5926397",
-    "latitude": 36.511128,
-    "longitude": -4.953391
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5926438",
-    "latitude": 39.7,
-    "longitude": -0.531667
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5926451",
-    "latitude": 41.683333,
-    "longitude": 2.833333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5926514",
-    "latitude": 42.431369444,
-    "longitude": -2.786294444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5926532",
-    "latitude": 40.260556,
-    "longitude": -3.852222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5926678",
-    "latitude": 37.78425278,
-    "longitude": -2.90140833
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5926802",
-    "latitude": 40.8639,
-    "longitude": -3.61333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q5937864",
-    "latitude": 38.402778,
-    "longitude": -0.415
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q6171737",
-    "latitude": 40.042672,
-    "longitude": -4.359589
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q8203268",
-    "latitude": 41.869881,
-    "longitude": 2.411114
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Q9010931",
-    "latitude": 42.171821,
-    "longitude": 2.480303
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Real Botanic Garden of Madrid",
-    "latitude": 40.41087,
-    "longitude": -3.691398
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "ES",
-    "countryName": "Spain",
-    "name": "Real Jardín Botánico Alfonso XIII",
+    "name": "Real Alfonso XIII",
     "latitude": 40.447466666,
     "longitude": -3.726130555
   },
@@ -50634,9 +46138,25 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "ES",
     "countryName": "Spain",
-    "name": "Real Jardín Botánico Juan Carlos I",
+    "name": "Real Juan Carlos I",
     "latitude": 40.50608333,
     "longitude": -3.34205556
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Real of Madrid",
+    "latitude": 40.41087,
+    "longitude": -3.691398
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Ría do Burgo",
+    "latitude": 43.316,
+    "longitude": -8.36281
   },
   {
     "parkType": "theme_park",
@@ -50674,9 +46194,25 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "ES",
     "countryName": "Spain",
-    "name": "Royal Botanical Garden of Cordoba",
+    "name": "Royal of Cordoba",
     "latitude": 37.869944444,
     "longitude": -4.785472222
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "San Fernando",
+    "latitude": 36.473305555,
+    "longitude": -6.200888888
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Santa Catalina",
+    "latitude": 42.84944444,
+    "longitude": -2.8075
   },
   {
     "parkType": "botanical_garden",
@@ -50783,6 +46319,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -4.54059
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "University of Granada",
+    "latitude": 37.17777778,
+    "longitude": -3.6025
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "ES",
     "countryName": "Spain",
@@ -50813,6 +46357,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Xardín botánico Fundación Sales",
     "latitude": 42.214932812,
     "longitude": -8.762822653
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "ES",
+    "countryName": "Spain",
+    "name": "Zaragoza",
+    "latitude": 41.6344,
+    "longitude": -0.8956
   },
   {
     "parkType": "theme_park",
@@ -51183,6 +46735,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 18.763888888
   },
   {
+    "parkType": "national_park",
+    "countryCode": "SE",
+    "countryName": "Sweden",
+    "name": "Åsnen",
+    "latitude": 56.610352381,
+    "longitude": 14.661289399
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "SE",
     "countryName": "Sweden",
@@ -51322,7 +46882,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "SE",
     "countryName": "Sweden",
-    "name": "Halmstad Adventure Park",
+    "name": "Halmstad",
     "latitude": 56.66638889,
     "longitude": 12.81722222
   },
@@ -51447,14 +47007,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 18.855555555
   },
   {
-    "parkType": "national_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "National Park Åsnen",
-    "latitude": 56.610352381,
-    "longitude": 14.661289399
-  },
-  {
     "parkType": "botanical_garden",
     "countryCode": "SE",
     "countryName": "Sweden",
@@ -51501,118 +47053,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Pieljekaise",
     "latitude": 66.354300785,
     "longitude": 16.768257591
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q10500070",
-    "latitude": 57.06583333,
-    "longitude": 12.34333333
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q10602213",
-    "latitude": 65.82388889,
-    "longitude": 21.7
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q10605542",
-    "latitude": 59.32472222,
-    "longitude": 18.095
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q10617519",
-    "latitude": 63.29041,
-    "longitude": 18.70931
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q10726132",
-    "latitude": 58.54006389,
-    "longitude": 13.50878056
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q124034234",
-    "latitude": 56.667805555,
-    "longitude": 16.349138888
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q124034258",
-    "latitude": 57.044027777,
-    "longitude": 16.438944444
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q125406650",
-    "latitude": 56.8725,
-    "longitude": 14.816
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q139676976",
-    "latitude": 60.75838869,
-    "longitude": 14.970577759
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q18333595",
-    "latitude": 59.1899,
-    "longitude": 17.6351
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q29840291",
-    "latitude": 63.1608,
-    "longitude": 14.6746
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q49100895",
-    "latitude": 59.607,
-    "longitude": 16.56702778
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q63980959",
-    "latitude": 57.93275719,
-    "longitude": 12.521146217
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "SE",
-    "countryName": "Sweden",
-    "name": "Q96631877",
-    "latitude": 58.386788888,
-    "longitude": 13.444930555
   },
   {
     "parkType": "national_park",
@@ -51791,14 +47231,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 8.79083
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "CH",
-    "countryName": "Switzerland",
-    "name": "alpine botanical garden of Meyrin",
-    "latitude": 46.226845765,
-    "longitude": 6.08041599
-  },
-  {
     "parkType": "theme_park",
     "countryCode": "CH",
     "countryName": "Switzerland",
@@ -51818,15 +47250,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CH",
     "countryName": "Switzerland",
-    "name": "Botanical garden \"La Thomasia\"",
-    "latitude": 46.25096,
-    "longitude": 7.11066
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CH",
-    "countryName": "Switzerland",
-    "name": "Botanical Garden Bern",
+    "name": "Bern",
     "latitude": 46.9527,
     "longitude": 7.44491
   },
@@ -51834,25 +47258,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CH",
     "countryName": "Switzerland",
-    "name": "Botanical Garden of Brissago",
+    "name": "Brissago",
     "latitude": 46.132,
     "longitude": 8.7356
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CH",
-    "countryName": "Switzerland",
-    "name": "Botanical Garden of the University of Zurich",
-    "latitude": 47.358647222,
-    "longitude": 8.561105555
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CH",
-    "countryName": "Switzerland",
-    "name": "Botanical Garden St. Gallen",
-    "latitude": 47.439876,
-    "longitude": 9.407532
   },
   {
     "parkType": "botanical_garden",
@@ -51874,7 +47282,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CH",
     "countryName": "Switzerland",
-    "name": "Conservatory and Botanical Garden of the City of Geneva",
+    "name": "Conservatory and of the City of Geneva",
     "latitude": 46.226118,
     "longitude": 6.146168
   },
@@ -51938,41 +47346,25 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CH",
     "countryName": "Switzerland",
+    "name": "La Thomasia",
+    "latitude": 46.25096,
+    "longitude": 7.11066
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CH",
+    "countryName": "Switzerland",
+    "name": "Meyrin",
+    "latitude": 46.226845765,
+    "longitude": 6.08041599
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CH",
+    "countryName": "Switzerland",
     "name": "Old Botanical Garden, Zurich",
     "latitude": 47.371111111,
     "longitude": 8.533611111
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "CH",
-    "countryName": "Switzerland",
-    "name": "Q123258732",
-    "latitude": 47.4067,
-    "longitude": 8.499497
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CH",
-    "countryName": "Switzerland",
-    "name": "Q2859722",
-    "latitude": 46.511049,
-    "longitude": 6.36681
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CH",
-    "countryName": "Switzerland",
-    "name": "Q56876733",
-    "latitude": 45.95015,
-    "longitude": 8.93143
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "CH",
-    "countryName": "Switzerland",
-    "name": "Q56876735",
-    "latitude": 45.92876,
-    "longitude": 8.92118
   },
   {
     "parkType": "botanical_garden",
@@ -52010,6 +47402,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "CH",
     "countryName": "Switzerland",
+    "name": "St. Gallen",
+    "latitude": 47.439876,
+    "longitude": 9.407532
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CH",
+    "countryName": "Switzerland",
     "name": "Sukkulenten-Sammlung Zürich",
     "latitude": 47.356111111,
     "longitude": 8.535
@@ -52037,6 +47437,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "University of Basel",
     "latitude": 47.558611111,
     "longitude": 7.581666666
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "CH",
+    "countryName": "Switzerland",
+    "name": "University of Zurich",
+    "latitude": 47.358647222,
+    "longitude": 8.561105555
   },
   {
     "parkType": "botanical_garden",
@@ -52402,7 +47810,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "TJ",
     "countryName": "Tajikistan",
-    "name": "Botanical garden Dushanbe",
+    "name": "Dushanbe",
     "latitude": 38.603753,
     "longitude": 68.780521
   },
@@ -53394,7 +48802,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "TH",
     "countryName": "Thailand",
-    "name": "Phu Laen Kha National  Park",
+    "name": "Phu Laen Kha",
     "latitude": 16.010093,
     "longitude": 101.890619
   },
@@ -53783,14 +49191,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 22.175981284
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "MK",
-    "countryName": "The Republic of North Macedonia",
-    "name": "Botanical Garden Skopje",
-    "latitude": 42.000593643,
-    "longitude": 21.452973534
-  },
-  {
     "parkType": "national_park",
     "countryCode": "MK",
     "countryName": "The Republic of North Macedonia",
@@ -53810,17 +49210,25 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "MK",
     "countryName": "The Republic of North Macedonia",
-    "name": "National park Šar Planina",
-    "latitude": 42,
-    "longitude": 20.75
+    "name": "Pelister",
+    "latitude": 40.981,
+    "longitude": 21.191
   },
   {
     "parkType": "national_park",
     "countryCode": "MK",
     "countryName": "The Republic of North Macedonia",
-    "name": "Pelister",
-    "latitude": 40.981,
-    "longitude": 21.191
+    "name": "Šar Planina",
+    "latitude": 42,
+    "longitude": 20.75
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "MK",
+    "countryName": "The Republic of North Macedonia",
+    "name": "Skopje",
+    "latitude": 42.000593643,
+    "longitude": 21.452973534
   },
   {
     "parkType": "botanical_garden",
@@ -53893,14 +49301,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Royal Botanic Gardens, Trinidad",
     "latitude": 10.6744,
     "longitude": -61.5143
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "TN",
-    "countryName": "Tunisia",
-    "name": "Botanical garden of Tunis",
-    "latitude": 36.845889,
-    "longitude": 10.192533
   },
   {
     "parkType": "national_park",
@@ -54045,6 +49445,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Sidi Toui",
     "latitude": 32.8,
     "longitude": 11.35
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "TN",
+    "countryName": "Tunisia",
+    "name": "Tunis",
+    "latitude": 36.845889,
+    "longitude": 10.192533
   },
   {
     "parkType": "national_park",
@@ -54458,30 +49866,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "TR",
     "countryName": "Türkiye",
-    "name": "Q139430195",
-    "latitude": 39.9160194,
-    "longitude": 41.3026581
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "TR",
-    "countryName": "Türkiye",
-    "name": "Q139435432",
-    "latitude": 39.3883057,
-    "longitude": 32.1713181
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "TR",
-    "countryName": "Türkiye",
-    "name": "Q139437005",
-    "latitude": 39.624808,
-    "longitude": 44.423135
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "TR",
-    "countryName": "Türkiye",
     "name": "Saklıkent Canyon",
     "latitude": 36.4687843,
     "longitude": 29.4034195
@@ -54666,7 +50050,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "UG",
     "countryName": "Uganda",
-    "name": "National Botanical Gardens (Uganda)",
+    "name": "National (Uganda)",
     "latitude": 0.0620109,
     "longitude": 32.4792744
   },
@@ -54765,62 +50149,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Boikivshchyna National Nature Park",
     "latitude": 49.077222,
     "longitude": 22.954722
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Botanical garden in Kryvyi Rih",
-    "latitude": 48.148787,
-    "longitude": 33.576974
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Botanical Garden Kharkiv",
-    "latitude": 49.999836,
-    "longitude": 36.228014
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Botanical Garden of Kherson State University",
-    "latitude": 46.658247,
-    "longitude": 32.589995
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Botanical Garden of Lviv Forestry Institute",
-    "latitude": 49.825833333,
-    "longitude": 24.003611111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Botanical garden of Lviv University",
-    "latitude": 49.830277777,
-    "longitude": 24.065555555
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Botanical garden of Zhytomyr Agrarian University",
-    "latitude": 50.2525,
-    "longitude": 28.7
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Botanical garden, Simferopol",
-    "latitude": 44.943197,
-    "longitude": 34.130449
   },
   {
     "parkType": "national_park",
@@ -54999,6 +50327,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 32.291666666
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "UA",
+    "countryName": "Ukraine",
+    "name": "In Kryvyi Rih",
+    "latitude": 48.148787,
+    "longitude": 33.576974
+  },
+  {
     "parkType": "national_park",
     "countryCode": "UA",
     "countryName": "Ukraine",
@@ -55023,12 +50359,28 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 29.2837
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "UA",
+    "countryName": "Ukraine",
+    "name": "Kharkiv",
+    "latitude": 49.999836,
+    "longitude": 36.228014
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "UA",
     "countryName": "Ukraine",
     "name": "Kharkiv Dolphinarium",
     "latitude": 50.0007,
     "longitude": 36.2281
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "UA",
+    "countryName": "Ukraine",
+    "name": "Kherson State University",
+    "latitude": 46.658247,
+    "longitude": 32.589995
   },
   {
     "parkType": "national_park",
@@ -55122,9 +50474,25 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "UA",
     "countryName": "Ukraine",
+    "name": "Lviv Forestry Institute",
+    "latitude": 49.825833333,
+    "longitude": 24.003611111
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "UA",
+    "countryName": "Ukraine",
     "name": "Lviv National Medical University",
     "latitude": 49.835555555,
     "longitude": 24.049444444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "UA",
+    "countryName": "Ukraine",
+    "name": "Lviv University",
+    "latitude": 49.830277777,
+    "longitude": 24.065555555
   },
   {
     "parkType": "theme_park",
@@ -55242,7 +50610,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "UA",
     "countryName": "Ukraine",
-    "name": "Odesa Botanical Gardens",
+    "name": "Odesa",
     "latitude": 46.441944,
     "longitude": 30.768889
   },
@@ -55279,62 +50647,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 32.501111111
   },
   {
-    "parkType": "theme_park",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Q12080764",
-    "latitude": 45.15111111,
-    "longitude": 33.4925
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Q12084357",
-    "latitude": 50.90398,
-    "longitude": 34.814751
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Q123693986",
-    "latitude": 44.9227,
-    "longitude": 34.1675
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Q16689333",
-    "latitude": 45.17948421,
-    "longitude": 33.353399681
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Q20092833",
-    "latitude": 44.61472222,
-    "longitude": 33.52111111
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Q4530694",
-    "latitude": 47.12194444,
-    "longitude": 37.55722222
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "UA",
-    "countryName": "Ukraine",
-    "name": "Q55488753",
-    "latitude": 51.6545538,
-    "longitude": 33.9140385
-  },
-  {
     "parkType": "national_park",
     "countryCode": "UA",
     "countryName": "Ukraine",
@@ -55357,6 +50669,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Shkurativskyy (Dendrological Park)",
     "latitude": 51.1307094,
     "longitude": 34.1815178
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "UA",
+    "countryName": "Ukraine",
+    "name": "Simferopol",
+    "latitude": 44.943197,
+    "longitude": 34.130449
   },
   {
     "parkType": "national_park",
@@ -55485,6 +50805,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Zacharovany Krai National Nature Park",
     "latitude": 48.35277778,
     "longitude": 23.07361111
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "UA",
+    "countryName": "Ukraine",
+    "name": "Zhytomyr Agrarian University",
+    "latitude": 50.2525,
+    "longitude": 28.7
   },
   {
     "parkType": "theme_park",
@@ -55834,17 +51162,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Bermuda Arboretum",
-    "latitude": 32.29819,
-    "longitude": -64.76683
+    "name": "Bermuda",
+    "latitude": 32.2935,
+    "longitude": -64.761
   },
   {
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Bermuda Botanical Gardens",
-    "latitude": 32.2935,
-    "longitude": -64.761
+    "name": "Bermuda Arboretum",
+    "latitude": 32.29819,
+    "longitude": -64.76683
   },
   {
     "parkType": "theme_park",
@@ -55866,7 +51194,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Birmingham Botanical Gardens",
+    "name": "Birmingham",
     "latitude": 52.4665,
     "longitude": -1.9293
   },
@@ -55946,7 +51274,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Brocklands Adventure Park",
+    "name": "Brocklands",
     "latitude": 50.8755,
     "longitude": -4.48785
   },
@@ -55978,7 +51306,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Camel Creek Adventure Park",
+    "name": "Camel Creek",
     "latitude": 50.4899485,
     "longitude": -4.9308183
   },
@@ -56034,7 +51362,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "City of Bath Botanical Gardens",
+    "name": "City of Bath",
     "latitude": 51.3858,
     "longitude": -2.3704
   },
@@ -56210,7 +51538,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Dobwalls Adventure Park",
+    "name": "Dobwalls",
     "latitude": 50.4655,
     "longitude": -4.51882
   },
@@ -56346,7 +51674,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Gibraltar Botanic Gardens",
+    "name": "Gibraltar",
     "latitude": 36.1313,
     "longitude": -5.3511
   },
@@ -56354,7 +51682,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Glasgow Botanic Gardens",
+    "name": "Glasgow",
     "latitude": 55.880139,
     "longitude": -4.2906442
   },
@@ -56498,7 +51826,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Hull Botanical Gardens",
+    "name": "Hull",
     "latitude": 53.7479,
     "longitude": -0.3651
   },
@@ -56514,7 +51842,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Inverness Botanic Gardens",
+    "name": "Inverness",
     "latitude": 57.4628,
     "longitude": -4.2402
   },
@@ -56578,7 +51906,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Landmark Forest Adventure Park",
+    "name": "Landmark Forest",
     "latitude": 57.2786,
     "longitude": -3.812
   },
@@ -56602,7 +51930,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Leeds Zoological and Botanical Gardens",
+    "name": "Leeds Zoological and",
     "latitude": 53.815194444,
     "longitude": -1.575138888
   },
@@ -56634,7 +51962,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Lightwater Valley Family Adventure Park",
+    "name": "Lightwater Valley Family",
     "latitude": 54.178492411,
     "longitude": -1.565737463
   },
@@ -56650,7 +51978,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Linn Botanic Gardens",
+    "name": "Linn",
     "latitude": 56.003706,
     "longitude": -4.8508564
   },
@@ -56722,17 +52050,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Moorbank Botanic Gardens",
+    "name": "Moorbank",
     "latitude": 54.987,
     "longitude": -1.635
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "GB",
-    "countryName": "United Kingdom",
-    "name": "National Botanic Garden of Wales",
-    "latitude": 51.8376,
-    "longitude": -4.15176
   },
   {
     "parkType": "botanical_garden",
@@ -56754,7 +52074,15 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Ness Botanic Gardens",
+    "name": "National of Wales",
+    "latitude": 51.8376,
+    "longitude": -4.15176
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "GB",
+    "countryName": "United Kingdom",
+    "name": "Ness",
     "latitude": 53.2724,
     "longitude": -3.043
   },
@@ -56858,7 +52186,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Pettitts Adventure Park",
+    "name": "Pettitts",
     "latitude": 52.56674249,
     "longitude": 1.578417045
   },
@@ -56933,54 +52261,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Puxton Park",
     "latitude": 51.3621,
     "longitude": -2.8673
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "GB",
-    "countryName": "United Kingdom",
-    "name": "Q137041413",
-    "latitude": 50.949321,
-    "longitude": -1.549369
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "GB",
-    "countryName": "United Kingdom",
-    "name": "Q138351117",
-    "latitude": 53.646757,
-    "longitude": -3.01719
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "GB",
-    "countryName": "United Kingdom",
-    "name": "Q16902166",
-    "latitude": 52.7835,
-    "longitude": -0.8582
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "GB",
-    "countryName": "United Kingdom",
-    "name": "Q18349395",
-    "latitude": 50.6369,
-    "longitude": -4.43533
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "GB",
-    "countryName": "United Kingdom",
-    "name": "Q7416048",
-    "latitude": 53.7941,
-    "longitude": -3.0574
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "GB",
-    "countryName": "United Kingdom",
-    "name": "Q8032938",
-    "latitude": 50.3563,
-    "longitude": -3.67158
   },
   {
     "parkType": "botanical_garden",
@@ -57066,17 +52346,9 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Rose gardens, Belfast Botanic Gardens",
+    "name": "Rose gardens, Belfast",
     "latitude": 54.581592,
     "longitude": -5.932046
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "GB",
-    "countryName": "United Kingdom",
-    "name": "Royal Botanic Garden Edinburgh",
-    "latitude": 55.96507,
-    "longitude": -3.2085295
   },
   {
     "parkType": "botanical_garden",
@@ -57085,6 +52357,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Royal Botanic Gardens, Kew",
     "latitude": 51.478694444,
     "longitude": -0.295611111
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "GB",
+    "countryName": "United Kingdom",
+    "name": "Royal Edinburgh",
+    "latitude": 55.96507,
+    "longitude": -3.2085295
   },
   {
     "parkType": "botanical_garden",
@@ -57138,7 +52418,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Sheffield Botanical Gardens",
+    "name": "Sheffield",
     "latitude": 53.3725,
     "longitude": -1.4975
   },
@@ -57170,7 +52450,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Southport Botanic Gardens",
+    "name": "Southport",
     "latitude": 53.6625,
     "longitude": -2.95833
   },
@@ -57290,7 +52570,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "The Milky Way Adventure Park",
+    "name": "The Milky Way",
     "latitude": 50.9804,
     "longitude": -4.384
   },
@@ -57474,7 +52754,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "GB",
     "countryName": "United Kingdom",
-    "name": "Wavertree Botanic Gardens",
+    "name": "Wavertree",
     "latitude": 53.4058,
     "longitude": -2.94159
   },
@@ -57653,14 +52933,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Nyerere",
     "latitude": -9,
     "longitude": 37.4
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "TZ",
-    "countryName": "United Republic of Tanzania",
-    "name": "Q105071428",
-    "latitude": -1.190983,
-    "longitude": 30.775792
   },
   {
     "parkType": "national_park",
@@ -57874,7 +53146,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Aldridge Botanical Gardens",
+    "name": "Aldridge",
     "latitude": 33.3867,
     "longitude": -86.7921
   },
@@ -57941,6 +53213,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "American Orchid Society Visitors Center and",
     "latitude": 26.4288,
     "longitude": -80.1535
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "US",
+    "countryName": "United States of America",
+    "name": "American Samoa",
+    "latitude": -14.25833333,
+    "longitude": -170.68333333
   },
   {
     "parkType": "botanical_garden",
@@ -58026,7 +53306,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Arboreto y jardín botánico de la universidad de Rhode Island",
+    "name": "Arboreto y de la universidad de Rhode Island",
     "latitude": 41.4889,
     "longitude": -71.5255
   },
@@ -58175,6 +53455,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -79.9769
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "US",
+    "countryName": "United States of America",
+    "name": "Asheville",
+    "latitude": 35.613,
+    "longitude": -82.567
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "US",
     "countryName": "United States of America",
@@ -58194,7 +53482,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Augusta Botanical Gardens",
+    "name": "Augusta",
     "latitude": 33.47,
     "longitude": -81.975
   },
@@ -58346,7 +53634,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Beaumont Botanical Gardens",
+    "name": "Beaumont",
     "latitude": 30.0233,
     "longitude": -94.1465
   },
@@ -58386,7 +53674,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Bellagio Conservatory & Botanical Gardens",
+    "name": "Bellagio Conservatory &",
     "latitude": 36.111981708,
     "longitude": -115.176562646
   },
@@ -58474,7 +53762,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Bernheim Forest and  Arboretum",
+    "name": "Bernheim Forest and Arboretum",
     "latitude": 37.917033,
     "longitude": -85.667491
   },
@@ -58586,7 +53874,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Birmingham Botanical Gardens",
+    "name": "Birmingham",
     "latitude": 33.4917,
     "longitude": -86.7745
   },
@@ -58674,7 +53962,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Boerner Botanical Gardens",
+    "name": "Boerner",
     "latitude": 42.9363,
     "longitude": -88.0313
   },
@@ -58698,7 +53986,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Bonhoeffer Botanical Gardens",
+    "name": "Bonhoeffer",
     "latitude": 48.2668,
     "longitude": -122.2652
   },
@@ -58749,22 +54037,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Botanica, The Wichita Gardens",
     "latitude": 37.6961,
     "longitude": -97.3638
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Botanical Garden of the Ozarks",
-    "latitude": 36.1367,
-    "longitude": -94.1183
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Botanical Gardens at Asheville",
-    "latitude": 35.613,
-    "longitude": -82.567
   },
   {
     "parkType": "botanical_garden",
@@ -58874,7 +54146,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Buffalo and Erie County Botanical Gardens",
+    "name": "Buffalo and Erie County",
     "latitude": 42.8281,
     "longitude": -78.8258
   },
@@ -59010,7 +54282,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Cann Memorial Botanical Gardens",
+    "name": "Cann Memorial",
     "latitude": 36.7028,
     "longitude": -97.0653
   },
@@ -59050,7 +54322,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Carl S. English, Jr., Botanical Gardens",
+    "name": "Carl S. English, Jr.,",
     "latitude": 47.6668,
     "longitude": -122.398
   },
@@ -59194,7 +54466,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Cedar Valley Arboretum & Botanic Gardens",
+    "name": "Cedar Valley Arboretum &",
     "latitude": 42.4307,
     "longitude": -92.325
   },
@@ -59282,9 +54554,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Cheekwood Botanical Garden and Museum of Art",
+    "name": "Cheekwood and Museum of Art",
     "latitude": 36.086667,
     "longitude": -86.873889
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "US",
+    "countryName": "United States of America",
+    "name": "Cherokee and Nature Trail",
+    "latitude": 35.486766666,
+    "longitude": -83.322652777
   },
   {
     "parkType": "botanical_garden",
@@ -59293,14 +54573,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Cherokee Arboretum at Audubon Acres",
     "latitude": 34.9994,
     "longitude": -85.1803
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Cherokee Botanical Garden and Nature Trail",
-    "latitude": 35.486766666,
-    "longitude": -83.322652777
   },
   {
     "parkType": "botanical_garden",
@@ -59338,7 +54610,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Cheyenne Botanic Gardens",
+    "name": "Cheyenne",
     "latitude": 41.159,
     "longitude": -104.831
   },
@@ -59354,7 +54626,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Chihuahuan Desert Nature Center and Botanical Gardens",
+    "name": "Chihuahuan Desert Nature Center and",
     "latitude": 30.5404,
     "longitude": -103.8373
   },
@@ -59482,7 +54754,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Coastal Maine Botanical Gardens",
+    "name": "Coastal Maine",
     "latitude": 43.875,
     "longitude": -69.6617
   },
@@ -59626,7 +54898,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Cornell Botanic Gardens",
+    "name": "Cornell",
     "latitude": 42.45,
     "longitude": -76.472
   },
@@ -59754,7 +55026,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "D. A. \"Andy\" Anderson Arboretum",
+    "name": "D. A. Andy Anderson Arboretum",
     "latitude": 30.6024,
     "longitude": -96.3061
   },
@@ -59914,7 +55186,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Denver Botanic Gardens",
+    "name": "Denver",
     "latitude": 39.732265514,
     "longitude": -104.960619226
   },
@@ -60170,7 +55442,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Dubuque Arboretum and Botanical Gardens",
+    "name": "Dubuque Arboretum and",
     "latitude": 42.5323,
     "longitude": -90.7177
   },
@@ -60194,7 +55466,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Dunsmuir Botanical Gardens",
+    "name": "Dunsmuir",
     "latitude": 41.14,
     "longitude": -122.16
   },
@@ -60586,7 +55858,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Fernwood Botanical Garden and Nature Preserve",
+    "name": "Fernwood and Nature Preserve",
     "latitude": 41.8653,
     "longitude": -86.3466
   },
@@ -60610,7 +55882,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Florida Botanical Gardens",
+    "name": "Florida",
     "latitude": 27.883333333,
     "longitude": -82.808333333
   },
@@ -60714,7 +55986,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Foxfire Botanical Gardens",
+    "name": "Foxfire",
     "latitude": 44.7343,
     "longitude": -90.1696
   },
@@ -60722,7 +55994,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Foxfire Mountain Themed Adventure Park",
+    "name": "Foxfire Mountain Themed",
     "latitude": 35.83,
     "longitude": -83.392
   },
@@ -61346,7 +56618,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Hambrick Botanical Gardens",
+    "name": "Hambrick",
     "latitude": 35.5356,
     "longitude": -97.4831
   },
@@ -61418,7 +56690,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Hauck Botanic Gardens",
+    "name": "Hauck",
     "latitude": 39.1296,
     "longitude": -84.5003
   },
@@ -61458,7 +56730,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Hearthstone Botanical Gardens",
+    "name": "Hearthstone",
     "latitude": 30.209085141,
     "longitude": -82.813571748
   },
@@ -61466,7 +56738,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Heathcote Botanical Gardens",
+    "name": "Heathcote",
     "latitude": 27.418277777,
     "longitude": -80.324
   },
@@ -61746,7 +57018,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Howard Peters Rawlings Conservatory and Botanic Gardens of Baltimore",
+    "name": "Howard Peters Rawlings Conservatory and of Baltimore",
     "latitude": 39.3186,
     "longitude": -76.6461
   },
@@ -61802,7 +57074,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Humboldt Botanical Gardens",
+    "name": "Humboldt",
     "latitude": 40.697,
     "longitude": -124.2
   },
@@ -61826,7 +57098,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Huntington Botanical Gardens",
+    "name": "Huntington",
     "latitude": 34.13095,
     "longitude": -118.11405
   },
@@ -61890,9 +57162,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Independence Park Botanic Gardens",
+    "name": "Independence Park",
     "latitude": 30.4446,
     "longitude": -91.1059
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "US",
+    "countryName": "United States of America",
+    "name": "Indiana",
+    "latitude": 41.5497,
+    "longitude": -87.3006
   },
   {
     "parkType": "theme_park",
@@ -61901,14 +57181,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Indiana Beach",
     "latitude": 40.79,
     "longitude": -86.77
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Indiana Botanic Gardens",
-    "latitude": 41.5497,
-    "longitude": -87.3006
   },
   {
     "parkType": "national_park",
@@ -61946,7 +57218,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Inniswood Botanical Garden and Nature Preserve",
+    "name": "Inniswood and Nature Preserve",
     "latitude": 40.10312,
     "longitude": -82.8974
   },
@@ -62122,7 +57394,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Jensen Botanical Gardens",
+    "name": "Jensen",
     "latitude": 38.6394,
     "longitude": -121.321
   },
@@ -62202,7 +57474,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Jones Arboretum and Botanical Gardens",
+    "name": "Jones Arboretum and",
     "latitude": 43.4655,
     "longitude": -90.818417
   },
@@ -62258,7 +57530,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Kaia Ranch Tropical Botanical Gardens",
+    "name": "Kaia Ranch",
     "latitude": 20.7953,
     "longitude": -156.032
   },
@@ -62290,7 +57562,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Kanapaha Botanical Gardens",
+    "name": "Kanapaha",
     "latitude": 29.6122,
     "longitude": -82.4089
   },
@@ -63314,7 +58586,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Manito Park and Botanical Gardens",
+    "name": "Manito Park and",
     "latitude": 47.6357,
     "longitude": -117.412
   },
@@ -63346,7 +58618,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Marie Selby Botanical Gardens",
+    "name": "Marie Selby",
     "latitude": 27.327778,
     "longitude": -82.540278
   },
@@ -63354,7 +58626,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Marin-Bolinas Botanical Gardens",
+    "name": "Marin-Bolinas",
     "latitude": 37.9094,
     "longitude": -122.686
   },
@@ -63466,7 +58738,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Mattel Adventure Park",
+    "name": "Mattel",
     "latitude": 33.521784856,
     "longitude": -112.264610467
   },
@@ -63474,7 +58746,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Matthaei Botanical Gardens",
+    "name": "Matthaei",
     "latitude": 42.3012,
     "longitude": -83.664
   },
@@ -63482,7 +58754,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Maui Nui Botanical Gardens",
+    "name": "Maui Nui",
     "latitude": 20.8931,
     "longitude": -156.486
   },
@@ -63522,7 +58794,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "McAllen Botanical Gardens",
+    "name": "McAllen",
     "latitude": 26.2164,
     "longitude": -98.2364
   },
@@ -63538,7 +58810,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "McConnell Arboretum & Botanical Gardens",
+    "name": "McConnell Arboretum &",
     "latitude": 40.594,
     "longitude": -122.382
   },
@@ -63594,7 +58866,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Meadowlark Botanical Gardens",
+    "name": "Meadowlark",
     "latitude": 38.9378,
     "longitude": -77.281
   },
@@ -63626,7 +58898,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Mendocino Coast Botanical Gardens",
+    "name": "Mendocino Coast",
     "latitude": 39.409166666,
     "longitude": -123.809722222
   },
@@ -63642,7 +58914,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Mercer Arboretum and Botanic Gardens",
+    "name": "Mercer Arboretum and",
     "latitude": 30.038,
     "longitude": -95.3812
   },
@@ -63794,7 +59066,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Mobile Botanical Gardens",
+    "name": "Mobile",
     "latitude": 30.6996,
     "longitude": -88.1615
   },
@@ -63834,7 +59106,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Montrose Botanic Gardens",
+    "name": "Montrose",
     "latitude": 38.4649,
     "longitude": -107.852
   },
@@ -63858,7 +59130,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Moorten Botanical Garden and Cactarium",
+    "name": "Moorten and Cactarium",
     "latitude": 33.8003,
     "longitude": -116.546
   },
@@ -64026,7 +59298,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Myriad Botanical Gardens",
+    "name": "Myriad",
     "latitude": 35.465027,
     "longitude": -97.517932
   },
@@ -64058,7 +59330,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Na 'Aina Kai Botanical Gardens",
+    "name": "Na 'Aina Kai",
     "latitude": 22.2112,
     "longitude": -159.3816
   },
@@ -64109,14 +59381,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "National",
     "latitude": 21.9067,
     "longitude": -159.511
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "National Park of American Samoa",
-    "latitude": -14.25833333,
-    "longitude": -170.68333333
   },
   {
     "parkType": "national_park",
@@ -64186,7 +59450,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Newton Arboretum and Botanical Gardens",
+    "name": "Newton Arboretum and",
     "latitude": 41.703,
     "longitude": -93.016
   },
@@ -64306,7 +59570,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "North Oklahoma Botanical Garden and Arboretum",
+    "name": "North Oklahoma and Arboretum",
     "latitude": 36.6784,
     "longitude": -97.2978
   },
@@ -64402,7 +59666,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Oklahoma Botanical Garden and Arboretum",
+    "name": "Oklahoma and Arboretum",
     "latitude": 36.1207,
     "longitude": -97.1026
   },
@@ -64418,7 +59682,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Olbrich Botanical Gardens",
+    "name": "Olbrich",
     "latitude": 43.0925,
     "longitude": -89.335
   },
@@ -64490,7 +59754,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Olu Pua Botanical Garden and Plantation",
+    "name": "Olu Pua and Plantation",
     "latitude": 21.95972222,
     "longitude": -159.51694444
   },
@@ -64562,9 +59826,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Overland Park Arboretum and Botanical Gardens",
+    "name": "Overland Park Arboretum and",
     "latitude": 38.8,
     "longitude": -94.691944444
+  },
+  {
+    "parkType": "botanical_garden",
+    "countryCode": "US",
+    "countryName": "United States of America",
+    "name": "Ozarks",
+    "latitude": 36.1367,
+    "longitude": -94.1183
   },
   {
     "parkType": "theme_park",
@@ -64746,7 +60018,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Phipps Conservatory and Botanical Gardens",
+    "name": "Phipps Conservatory and",
     "latitude": 40.4389,
     "longitude": -79.9477
   },
@@ -64866,7 +60138,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Port St. Lucie Botanical Gardens",
+    "name": "Port St. Lucie",
     "latitude": 27.27006,
     "longitude": -80.31846
   },
@@ -64906,7 +60178,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Princeville Botanical Gardens",
+    "name": "Princeville",
     "latitude": 22.1975,
     "longitude": -159.455
   },
@@ -64933,134 +60205,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Puritas Springs Park",
     "latitude": 41.43672,
     "longitude": -81.83708
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q10856753",
-    "latitude": 40.0668,
-    "longitude": -79.8848
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q11679923",
-    "latitude": 45.6588,
-    "longitude": -111.046
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q16532044",
-    "latitude": 40.9678,
-    "longitude": -74.1318
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q16580816",
-    "latitude": 34.127222,
-    "longitude": -118.11
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q16580929",
-    "latitude": 35.5925,
-    "longitude": -106.109
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q16606516",
-    "latitude": 20.9005,
-    "longitude": -156.258
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q18418506",
-    "latitude": 38.5597,
-    "longitude": -120.984
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q5702447",
-    "latitude": 39.59972222,
-    "longitude": -105.0108333
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q5702482",
-    "latitude": 36.813333,
-    "longitude": -119.75
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q5760668",
-    "latitude": 39.7325,
-    "longitude": -104.961
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q5926555",
-    "latitude": 38.063333,
-    "longitude": -122.156111
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q61750488",
-    "latitude": 26.795155555,
-    "longitude": -80.107575
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q6387556",
-    "latitude": 34.2347,
-    "longitude": -117.141
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q6387574",
-    "latitude": 39.731667,
-    "longitude": -121.849444
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q8203246",
-    "latitude": 40.511,
-    "longitude": -75.783
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "Q8960637",
-    "latitude": 42.452,
-    "longitude": -76.455
   },
   {
     "parkType": "botanical_garden",
@@ -65482,7 +60626,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Rotary Botanical Gardens",
+    "name": "Rotary",
     "latitude": 42.6839,
     "longitude": -89.0164
   },
@@ -65490,7 +60634,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Rusch Botanical Gardens",
+    "name": "Rusch",
     "latitude": 38.7083,
     "longitude": -121.299
   },
@@ -65514,7 +60658,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Sadie Seymour Botanical Gardens",
+    "name": "Sadie Seymour",
     "latitude": 19.6138,
     "longitude": -155.968
   },
@@ -65746,7 +60890,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Savannah Botanical Gardens",
+    "name": "Savannah",
     "latitude": 32.00467,
     "longitude": -81.091319
   },
@@ -65978,7 +61122,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Shambhala Botanic Gardens",
+    "name": "Shambhala",
     "latitude": 40.8078,
     "longitude": -105.579
   },
@@ -65986,7 +61130,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Shangri La Botanical Gardens and Nature Center",
+    "name": "Shangri La and Nature Center",
     "latitude": 30.1092,
     "longitude": -93.7592
   },
@@ -66295,6 +61439,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -84.628
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "US",
+    "countryName": "United States of America",
+    "name": "Smith College",
+    "latitude": 42.3189,
+    "longitude": -72.6401
+  },
+  {
     "parkType": "theme_park",
     "countryCode": "US",
     "countryName": "United States of America",
@@ -66346,7 +61498,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "South Bay Botanic Gardens",
+    "name": "South Bay",
     "latitude": 32.6424543,
     "longitude": -116.995192
   },
@@ -66402,7 +61554,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "South Texas Botanical Gardens & Nature Center",
+    "name": "South Texas & Nature Center",
     "latitude": 27.6526,
     "longitude": -97.407
   },
@@ -66895,14 +62047,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -79.8388
   },
   {
-    "parkType": "botanical_garden",
-    "countryCode": "US",
-    "countryName": "United States of America",
-    "name": "The Botanic Garden of Smith College",
-    "latitude": 42.3189,
-    "longitude": -72.6401
-  },
-  {
     "parkType": "theme_park",
     "countryCode": "US",
     "countryName": "United States of America",
@@ -66914,7 +62058,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "The Forge: Lemont Quarries Adventure Park",
+    "name": "The Forge: Lemont Quarries",
     "latitude": 41.6825,
     "longitude": -87.98
   },
@@ -66962,7 +62106,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "The Huntington Library, Art Museum, and Botanical Gardens",
+    "name": "The Huntington Library, Art Museum, and",
     "latitude": 34.129166666,
     "longitude": -118.1125
   },
@@ -67026,7 +62170,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "The State Botanical Garden of Georgia",
+    "name": "The State of Georgia",
     "latitude": 33.901389,
     "longitude": -83.379472
   },
@@ -67186,7 +62330,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Tucson Botanical Gardens",
+    "name": "Tucson",
     "latitude": 32.2217,
     "longitude": -110.926
   },
@@ -67218,7 +62362,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Unbelievable Acres Botanic Gardens",
+    "name": "Unbelievable Acres",
     "latitude": 26.6843,
     "longitude": -80.1428
   },
@@ -67330,7 +62474,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "University of California, Riverside Botanic Gardens",
+    "name": "University of California, Riverside",
     "latitude": 33.9715,
     "longitude": -117.32
   },
@@ -67338,7 +62482,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "University of Delaware Botanic Gardens",
+    "name": "University of Delaware",
     "latitude": 39.666,
     "longitude": -75.7519
   },
@@ -67354,7 +62498,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "University of Hawaii at Hilo Botanical Gardens",
+    "name": "University of Hawaii at Hilo",
     "latitude": 19.6996,
     "longitude": -155.0816
   },
@@ -67426,7 +62570,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "University of North Carolina at Charlotte Botanical Gardens",
+    "name": "University of North Carolina at Charlotte",
     "latitude": 35.308,
     "longitude": -80.7285
   },
@@ -67442,7 +62586,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "University of Rhode Island Botanical Gardens and Everett P. Christopher Arboretum",
+    "name": "University of Rhode Island and Everett P. Christopher Arboretum",
     "latitude": 41.489608,
     "longitude": -71.5257232
   },
@@ -67458,7 +62602,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "University of South Florida Botanical Gardens",
+    "name": "University of South Florida",
     "latitude": 28.0544,
     "longitude": -82.4131
   },
@@ -67546,7 +62690,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Ventura Botanical Gardens",
+    "name": "Ventura",
     "latitude": 34.28203,
     "longitude": -119.29197
   },
@@ -67578,7 +62722,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Vines Botanical Gardens",
+    "name": "Vines",
     "latitude": 33.8632,
     "longitude": -83.9223
   },
@@ -67642,7 +62786,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "theme_park",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Wacky Waters Adventure Park",
+    "name": "Wacky Waters",
     "latitude": 41.604,
     "longitude": -90.63
   },
@@ -67650,7 +62794,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Waddell Barnes Botanical Gardens",
+    "name": "Waddell Barnes",
     "latitude": 32.80716,
     "longitude": -83.732226
   },
@@ -67722,7 +62866,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Ward-Meade Park Botanical Gardens",
+    "name": "Ward-Meade Park",
     "latitude": 39.0631,
     "longitude": -95.6819
   },
@@ -67810,7 +62954,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Waterfront Botanical Gardens",
+    "name": "Waterfront",
     "latitude": 38.263369,
     "longitude": -85.723958
   },
@@ -67882,7 +63026,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Wellesley College Botanic Gardens",
+    "name": "Wellesley College",
     "latitude": 42.295,
     "longitude": -71.304
   },
@@ -67914,7 +63058,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Western Colorado Botanical Gardens",
+    "name": "Western Colorado",
     "latitude": 39.055277777,
     "longitude": -108.561388888
   },
@@ -68210,7 +63354,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "William Joseph McInnes Botanic Garden and Campus Arboretum",
+    "name": "William Joseph McInnes and Campus Arboretum",
     "latitude": 37.7807,
     "longitude": -122.18
   },
@@ -68362,7 +63506,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "World Botanical Gardens",
+    "name": "World",
     "latitude": 19.903807,
     "longitude": -155.136641
   },
@@ -68394,7 +63538,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "US",
     "countryName": "United States of America",
-    "name": "Wrigley Botanical Gardens",
+    "name": "Wrigley",
     "latitude": 33.3289,
     "longitude": -118.341
   },
@@ -68506,17 +63650,17 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "national_park",
     "countryCode": "UY",
     "countryName": "Uruguay",
-    "name": "Esteros de Farrapos e Islas del Río Uruguay National  Park",
-    "latitude": -32.778888888,
-    "longitude": -58.108611111
+    "name": "Cabo Polonio",
+    "latitude": -34.383333333,
+    "longitude": -53.8
   },
   {
     "parkType": "national_park",
     "countryCode": "UY",
     "countryName": "Uruguay",
-    "name": "Parque nacional Cabo Polonio",
-    "latitude": -34.383333333,
-    "longitude": -53.8
+    "name": "Esteros de Farrapos e Islas del Río Uruguay",
+    "latitude": -32.778888888,
+    "longitude": -58.108611111
   },
   {
     "parkType": "theme_park",
@@ -68533,22 +63677,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Prof. Atilio Lombardo Museum and",
     "latitude": -34.859679,
     "longitude": -56.19945
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "UY",
-    "countryName": "Uruguay",
-    "name": "Q131456747",
-    "latitude": -34.2908,
-    "longitude": -55.2669
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "UY",
-    "countryName": "Uruguay",
-    "name": "Q18224919",
-    "latitude": -34.00375,
-    "longitude": -53.547361111
   },
   {
     "parkType": "botanical_garden",
@@ -68717,14 +63845,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Archipiélago de Los Roques",
     "latitude": 11.8628,
     "longitude": -66.7826
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "VE",
-    "countryName": "Venezuela",
-    "name": "Botanical Garden of Mérida",
-    "latitude": 8.623694444,
-    "longitude": -71.144111111
   },
   {
     "parkType": "national_park",
@@ -68919,6 +64039,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -69.737630555
   },
   {
+    "parkType": "botanical_garden",
+    "countryCode": "VE",
+    "countryName": "Venezuela",
+    "name": "Mérida",
+    "latitude": 8.623694444,
+    "longitude": -71.144111111
+  },
+  {
     "parkType": "national_park",
     "countryCode": "VE",
     "countryName": "Venezuela",
@@ -68965,38 +64093,6 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Peninsula de Paria",
     "latitude": 10.6657111,
     "longitude": -62.2971583
-  },
-  {
-    "parkType": "national_park",
-    "countryCode": "VE",
-    "countryName": "Venezuela",
-    "name": "Q110103820",
-    "latitude": 8.966111,
-    "longitude": -70.446111
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "VE",
-    "countryName": "Venezuela",
-    "name": "Q43008193",
-    "latitude": 10.4947963,
-    "longitude": -66.8472825
-  },
-  {
-    "parkType": "botanical_garden",
-    "countryCode": "VE",
-    "countryName": "Venezuela",
-    "name": "Q5847326",
-    "latitude": 10.51388889,
-    "longitude": -66.93944444
-  },
-  {
-    "parkType": "theme_park",
-    "countryCode": "VE",
-    "countryName": "Venezuela",
-    "name": "Q97165811",
-    "latitude": 10.227445323,
-    "longitude": -67.570936205
   },
   {
     "parkType": "national_park",
@@ -69354,7 +64450,7 @@ export const TOURIST_PARKS: TouristPark[] = [
     "parkType": "botanical_garden",
     "countryCode": "VN",
     "countryName": "Vietnam",
-    "name": "Saigon Zoo and Botanical Gardens",
+    "name": "Saigon Zoo and",
     "latitude": 10.78805556,
     "longitude": 106.70472222
   },

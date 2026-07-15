@@ -9,7 +9,7 @@ export function HomeHero() {
   const t = translateHome;
 
   return (
-    <div className="min-w-0 max-sm:flex max-sm:flex-col max-sm:items-center max-sm:text-center">
+    <div className="min-w-0 max-sm:flex max-sm:flex-col max-sm:items-center max-sm:pt-3 max-sm:text-center">
       <div className="mb-[18px] inline-flex items-center gap-2 rounded-full border border-[#bfdbfe] bg-[#dbeafe] px-[13px] py-2 text-sm font-extrabold text-[#2563eb] max-sm:hidden">
         <span aria-hidden>🌍</span>
         {t("eyebrow")}

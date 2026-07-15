@@ -20,7 +20,7 @@ SELECT ?parkLabel ?coord ?countryCode WHERE {
   ?park wdt:P625 ?coord.
   ?park wdt:P17 ?country.
   ?country wdt:P297 ?countryCode.
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en,tr,de,fr,es,it,mul". }
 }`,
   theme_park: `
 SELECT ?parkLabel ?coord ?countryCode WHERE {
@@ -28,7 +28,7 @@ SELECT ?parkLabel ?coord ?countryCode WHERE {
   ?park wdt:P625 ?coord.
   ?park wdt:P17 ?country.
   ?country wdt:P297 ?countryCode.
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en,tr,de,fr,es,it,mul". }
 }`,
   botanical_garden: `
 SELECT ?parkLabel ?coord ?countryCode WHERE {
@@ -36,7 +36,7 @@ SELECT ?parkLabel ?coord ?countryCode WHERE {
   ?park wdt:P625 ?coord.
   ?park wdt:P17 ?country.
   ?country wdt:P297 ?countryCode.
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en,tr,de,fr,es,it,mul". }
 }`,
 };
 
@@ -49,22 +49,122 @@ function parsePoint(wkt) {
   return { latitude, longitude };
 }
 
-function cleanName(name, parkType) {
-  let cleaned = name
-    .replace(/\s+National Park$/i, "")
-    .replace(/\s+Theme Park$/i, "")
-    .replace(/\s+Amusement Park$/i, "")
-    .trim();
+/** Wikidata falls back to the entity id when no human label exists. */
+function isWikidataIdLabel(name) {
+  return /^Q\d+$/i.test(String(name ?? "").trim());
+}
 
-  if (parkType === "botanical_garden") {
-    cleaned = cleaned
-      .replace(/\s+Tropical Botanical Garden$/i, "")
-      .replace(/\s+Botanical Garden$/i, "")
-      .replace(/\s+Botanic Garden$/i, "")
-      .trim();
+function stripQuotes(name) {
+  // Only strip quotation marks — keep apostrophes (dell'Università, King's…).
+  return name
+    .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036«»]/g, "")
+    .replace(/"/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Shorten catalog park names: drop type labels and quotes so lists stay scannable
+ * and slugs stay clean (e.g. Giardino Botanico Alpino "rezia" → Rezia).
+ */
+function cleanName(name, parkType) {
+  const original = stripQuotes(String(name ?? ""));
+  if (!original) return original;
+
+  let cleaned = original;
+
+  // Longest phrases first.
+  const sharedSuffixes = [
+    /\s+National Park$/i,
+    /\s+Theme Park$/i,
+    /\s+Amusement Park$/i,
+    /\s+Adventure Park$/i,
+    /\s+Parco Nazionale$/i,
+    /\s+Parc National$/i,
+    /\s+Parque Nacional$/i,
+    /\s+Nationalpark$/i,
+  ];
+
+  const botanicalPrefixes = [
+    /^Giardino\s+Botanico\s+Alpino(?:\s+|[,:\-–—]\s*)/i,
+    /^Giardino\s+Botanico(?:\s+|[,:\-–—]\s*)/i,
+    /^Orto\s+Botanico(?:\s+|[,:\-–—]\s*)/i,
+    /^Horto\s+Botanico(?:\s+|[,:\-–—]\s*)/i,
+    /^Jardin\s+Botanique\s+Tropical(?:\s+|[,:\-–—]\s*)/i,
+    /^Jardin\s+Botanique(?:\s+|[,:\-–—]\s*)/i,
+    /^Jard[ií]n\s+Bot[aá]nico(?:\s+|[,:\-–—]\s*)/i,
+    /^Jardim\s+Bot[aâ]nico(?:\s+|[,:\-–—]\s*)/i,
+    /^Botanischer\s+Garten(?:\s+|[,:\-–—]\s*)/i,
+    /^Tropischer\s+Botanischer\s+Garten(?:\s+|[,:\-–—]\s*)/i,
+    /^Alpin(?:e|o)?\s+Botanical\s+Gardens?\s+(?:of\s+)?/i,
+    /^(?:The\s+)?Botanical\s+Gardens?\s+at\s+(?:the\s+)?/i,
+    /^(?:The\s+)?Botanical\s+Gardens?(?:\s+(?:of\s+)|[,:\-–—]\s*|\s+)/i,
+    /^(?:The\s+)?Botanic\s+Gardens?(?:\s+(?:of\s+)|[,:\-–—]\s*|\s+)/i,
+  ];
+
+  const botanicalSuffixes = [
+    /\s+Tropical\s+Botanical\s+Gardens?$/i,
+    /\s+Botanical\s+Gardens?$/i,
+    /\s+Botanic\s+Gardens?$/i,
+    /\s+Giardino\s+Botanico(?:\s+Alpino)?$/i,
+    /\s+Orto\s+Botanico$/i,
+    /\s+Jardin\s+Botanique(?:\s+Tropical)?$/i,
+    /\s+Jard[ií]n\s+Bot[aá]nico$/i,
+    /\s+Jardim\s+Bot[aâ]nico$/i,
+    /\s+Botanischer\s+Garten$/i,
+    /\s+Alpine\s+Botanical\s+Gardens?$/i,
+  ];
+
+  const nationalPrefixes = [
+    /^Parco\s+Nazionale\s+(?:del(?:la|lo|l')?\s+)?/i,
+    /^Parc\s+National\s+(?:du\s+|de\s+la\s+|de\s+l'|des\s+|de\s+)?/i,
+    /^Parque\s+Nacional\s+(?:de\s+la\s+|del?\s+|de\s+)?/i,
+    /^National\s+Park\s+(?:of\s+)?/i,
+    /^Nationalpark\s+/i,
+  ];
+
+  for (const pattern of sharedSuffixes) {
+    cleaned = cleaned.replace(pattern, "");
   }
 
-  return cleaned;
+  if (parkType === "botanical_garden") {
+    for (const pattern of botanicalPrefixes) {
+      cleaned = cleaned.replace(pattern, "");
+    }
+    for (const pattern of botanicalSuffixes) {
+      cleaned = cleaned.replace(pattern, "");
+    }
+    // Mid-label type words: "Bergamo Botanical Garden Lorenzo Rota" → "Bergamo Lorenzo Rota"
+    cleaned = cleaned
+      .replace(/\s+Botanical\s+Gardens?\s+/gi, " ")
+      .replace(/\s+Botanic\s+Gardens?\s+/gi, " ")
+      .replace(/\s+Giardino\s+Botanico(?:\s+Alpino)?\s+/gi, " ")
+      .replace(/\s+Orto\s+Botanico\s+/gi, " ")
+      .replace(/\s+Jardin\s+Botanique\s+/gi, " ")
+      .replace(/\s+Jard[ií]n\s+Bot[aá]nico\s+/gi, " ")
+      .replace(/\s+Botanischer\s+Garten\s+/gi, " ");
+  }
+
+  if (parkType === "national_park") {
+    for (const pattern of nationalPrefixes) {
+      cleaned = cleaned.replace(pattern, "");
+    }
+  }
+
+  // Longer Italian articles first. Use Unicode uppercase lookahead (not /i) so
+  // "Dell'Università" / fused "DellUniversità" do not match only "del".
+  const leadingNoise =
+    /^(?:dell['’]?|della|delle|dello|dei|degli|di|del|alle|of|de|du|des|der|das|die|den|at|the)(?:\s+|(?=\p{Lu}))/u;
+  while (leadingNoise.test(cleaned)) {
+    cleaned = cleaned.replace(leadingNoise, "");
+  }
+  cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+  // Keep original (sans quotes) if stripping emptied the label.
+  if (!cleaned) return original;
+
+  // Title-ish case for leading character after aggressive lowercase Wikidata labels.
+  return cleaned.replace(/^(\S)/u, (char) => char.toLocaleUpperCase("en-US"));
 }
 
 async function fetchParks(parkType) {
@@ -91,6 +191,7 @@ async function fetchParks(parkType) {
 
     const point = parsePoint(coord);
     if (!point) continue;
+    if (isWikidataIdLabel(name)) continue;
 
     const countryName = countriesLib.getName(countryCode, "en") ?? countryCode;
     parks.push({
@@ -103,7 +204,7 @@ async function fetchParks(parkType) {
     });
   }
 
-  return parks;
+  return parks.filter((park) => park.name && !isWikidataIdLabel(park.name));
 }
 
 function dedupeParks(parks) {
@@ -140,7 +241,7 @@ function loadParkSupplements() {
       parkType,
       countryCode: countryCode.toUpperCase(),
       countryName,
-      name,
+      name: cleanName(name, parkType),
       latitude: Number.parseFloat(latitude),
       longitude: Number.parseFloat(longitude),
     });
@@ -149,6 +250,7 @@ function loadParkSupplements() {
   return parks.filter(
     (park) =>
       park.name &&
+      !isWikidataIdLabel(park.name) &&
       Number.isFinite(park.latitude) &&
       Number.isFinite(park.longitude)
   );
@@ -165,11 +267,13 @@ function loadParksFromCsv(csvPath) {
       );
       if (!match) return null;
       const [, parkType, countryCode, countryNameRaw, nameRaw, latitude, longitude] = match;
+      const name = cleanName(nameRaw.replace(/""/g, '"'), parkType);
+      if (!name || isWikidataIdLabel(name)) return null;
       return {
         parkType,
         countryCode,
         countryName: countryNameRaw.replace(/""/g, '"'),
-        name: nameRaw.replace(/""/g, '"'),
+        name,
         latitude: Number.parseFloat(latitude),
         longitude: Number.parseFloat(longitude),
       };

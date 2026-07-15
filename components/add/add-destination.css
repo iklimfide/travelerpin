@@ -612,6 +612,31 @@ button.add-destination-back--on-header:hover {
   text-overflow: ellipsis;
 }
 
+.add-destination-type-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.add-destination-type-filter {
+  border: 1px solid #d8e1ef;
+  border-radius: 999px;
+  background: #fff;
+  color: #64748b;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.add-destination-type-filter.is-active {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
 .add-destination-city-hint {
   display: flex;
   align-items: center;
@@ -685,18 +710,24 @@ button.add-destination-back--on-header:hover {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .add-destination-city-row__name {
   font-size: 0.95rem;
   font-weight: 700;
   color: #0f172a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .add-destination-city-row__badge {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   border-radius: 999px;
   background: #1e96f3;
   color: #fff;

@@ -5,6 +5,11 @@ import { createPortal } from "react-dom";
 import { CountryPickerStep } from "@/components/add/CountryPickerStep";
 import { CityPickerStep, citySelectionKey } from "@/components/add/CityPickerStep";
 import {
+  ParkPickerStep,
+  parkSelectionKey,
+  type CatalogPark,
+} from "@/components/add/ParkPickerStep";
+import {
   PROFILE_DATA_STALE_EVENT,
   TRAVEL_STATE_UPDATED_EVENT,
   notifyTravelStateUpdated,
@@ -15,7 +20,9 @@ import {
   fetchTravelState,
   refreshTravelStateAfterSave,
   savePendingDestinations,
+  savePendingParks,
   type PendingCitySelection,
+  type PendingParkSelection,
 } from "@/lib/client/travel-state";
 import {
   getAddRegionForCountryCode,
@@ -26,31 +33,38 @@ import type { CountryOption } from "@/lib/data/countries";
 import { isUkNationCode, isUkNationVisited, matchesUkCityCountry } from "@/lib/data/uk-nations";
 import { canonicalCityName, citiesAreSame } from "@/lib/utils/city-aliases";
 import { formatKnownPlaceName } from "@/lib/utils/city-name";
-import type { VisitedCity } from "@/types/database";
+import { isNaturaParkType, isThemeParkType } from "@/lib/utils/park-type";
+import type { VisitedCity, VisitedPark } from "@/types/database";
 import { AddDestinationCountryPickerSkeleton } from "@/components/skeletons/AddDestinationModalSkeleton";
 import { useToast } from "@/components/ui/ToastProvider";
 import "./add-destination.css";
 
+export type AddDestinationMode = "places" | "parks";
+
 type AddDestinationModalProps = {
   onClose: () => void;
+  mode?: AddDestinationMode;
 };
 
 type Step =
   | { kind: "countries" }
-  | { kind: "cities"; countryCode: string; countryName: string };
+  | { kind: "cities"; countryCode: string; countryName: string }
+  | { kind: "parks"; countryCode: string; countryName: string };
 
 function applyTravelState(
   data: TravelStateData,
   setVisitedCodes: (codes: Set<string>) => void,
-  setVisitedCities: (cities: VisitedCity[]) => void
+  setVisitedCities: (cities: VisitedCity[]) => void,
+  setVisitedParks: (parks: VisitedPark[]) => void
 ) {
   setVisitedCodes(
     new Set(data.visitedCodes.map((code) => code.toUpperCase()))
   );
   setVisitedCities(data.visitedCities);
+  setVisitedParks(data.visitedParks);
 }
 
-function applyOptimisticSave(params: {
+function applyOptimisticPlacesSave(params: {
   pendingCountryCodes: Set<string>;
   pendingCities: Map<string, PendingCitySelection>;
   visitedCodes: Set<string>;
@@ -98,13 +112,60 @@ function applyOptimisticSave(params: {
   return { visitedCodes: nextCodes, visitedCities: nextCities };
 }
 
-export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
+function applyOptimisticParksSave(params: {
+  pendingParks: Map<string, PendingParkSelection>;
+  visitedCodes: Set<string>;
+  visitedParks: VisitedPark[];
+}): { visitedCodes: Set<string>; visitedParks: VisitedPark[] } {
+  const nextCodes = new Set(params.visitedCodes);
+  const nextParks = [...params.visitedParks];
+
+  for (const park of params.pendingParks.values()) {
+    const countryCode = park.countryCode.toUpperCase();
+    nextCodes.add(countryCode);
+    const alreadyOnMap = nextParks.some(
+      (visited) =>
+        visited.country_code.toUpperCase() === countryCode &&
+        visited.park_type === park.parkType &&
+        visited.park_name.trim().toLowerCase() === park.parkName.trim().toLowerCase()
+    );
+    if (alreadyOnMap) continue;
+
+    nextParks.push({
+      id: `optimistic-${countryCode}-${park.parkType}-${park.parkName}`,
+      user_id: "",
+      park_name: park.parkName,
+      park_type: park.parkType,
+      country_code: countryCode,
+      country_name: park.countryName,
+      latitude: park.latitude ?? null,
+      longitude: park.longitude ?? null,
+      note: null,
+      photo_url: null,
+      instagram_urls: [],
+      media_type: null,
+      media_url: null,
+      visit_dates: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+  }
+
+  return { visitedCodes: nextCodes, visitedParks: nextParks };
+}
+
+export function AddDestinationModal({ onClose, mode = "places" }: AddDestinationModalProps) {
   const toast = useToast();
+  const isParksMode = mode === "parks";
   const [step, setStep] = useState<Step>({ kind: "countries" });
   const [visitedCodes, setVisitedCodes] = useState<Set<string>>(new Set());
   const [visitedCities, setVisitedCities] = useState<VisitedCity[]>([]);
+  const [visitedParks, setVisitedParks] = useState<VisitedPark[]>([]);
   const [pendingCountryCodes, setPendingCountryCodes] = useState<Set<string>>(new Set());
   const [pendingCities, setPendingCities] = useState<Map<string, PendingCitySelection>>(
+    () => new Map()
+  );
+  const [pendingParks, setPendingParks] = useState<Map<string, PendingParkSelection>>(
     () => new Map()
   );
   const [returnExpandedRegion, setReturnExpandedRegion] = useState<AddRegionId | null>(null);
@@ -130,7 +191,7 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
     });
 
     if (result.ok) {
-      applyTravelState(result.data, setVisitedCodes, setVisitedCities);
+      applyTravelState(result.data, setVisitedCodes, setVisitedCities, setVisitedParks);
       hasTravelStateRef.current = true;
     }
 
@@ -144,10 +205,11 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
     setStep({ kind: "countries" });
     setPendingCountryCodes(new Set());
     setPendingCities(new Map());
+    setPendingParks(new Map());
     setReturnExpandedRegion(null);
     setSaveError(null);
     void loadTravelState({ background: false });
-  }, [loadTravelState]);
+  }, [loadTravelState, mode]);
 
   useEffect(() => {
     function onProfileStale() {
@@ -157,7 +219,7 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
     function onTravelStateUpdated(event: Event) {
       const detail = (event as CustomEvent<{ data: TravelStateData }>).detail;
       if (!detail?.data) return;
-      applyTravelState(detail.data, setVisitedCodes, setVisitedCities);
+      applyTravelState(detail.data, setVisitedCodes, setVisitedCities, setVisitedParks);
       hasTravelStateRef.current = true;
     }
 
@@ -178,6 +240,14 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onClose, saving]);
 
+  const parkCountryCodes = useMemo(() => {
+    const codes = new Set<string>();
+    for (const park of visitedParks) {
+      codes.add(park.country_code.toUpperCase());
+    }
+    return codes;
+  }, [visitedParks]);
+
   const existingCityNames = useMemo(() => {
     if (step.kind !== "cities") return [];
     const code = step.countryCode.toUpperCase();
@@ -186,9 +256,30 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
       .map((city) => city.city_name);
   }, [step, visitedCities]);
 
+  const existingParkKeys = useMemo(() => {
+    if (step.kind !== "parks") return [];
+    const code = step.countryCode.toUpperCase();
+    return visitedParks
+      .filter((park) => park.country_code.toUpperCase() === code)
+      .map((park) => parkSelectionKey(park.park_type, park.park_name));
+  }, [step, visitedParks]);
+
   const pendingCityKeys = useMemo(() => new Set(pendingCities.keys()), [pendingCities]);
+  const pendingParkKeys = useMemo(() => new Set(pendingParks.keys()), [pendingParks]);
 
   const pendingSelectionCount = useMemo(() => {
+    if (isParksMode) {
+      return [...pendingParks.values()].filter((park) => {
+        const alreadyOnMap = visitedParks.some(
+          (visited) =>
+            visited.country_code.toUpperCase() === park.countryCode.toUpperCase() &&
+            visited.park_type === park.parkType &&
+            visited.park_name.trim().toLowerCase() === park.parkName.trim().toLowerCase()
+        );
+        return !alreadyOnMap;
+      }).length;
+    }
+
     const newCountries = [...pendingCountryCodes].filter((code) => {
       const normalized = code.toUpperCase();
       return isUkNationCode(normalized)
@@ -205,9 +296,19 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
     }).length;
 
     return newCountries + newCities;
-  }, [pendingCities, pendingCountryCodes, visitedCities, visitedCodes]);
+  }, [
+    isParksMode,
+    pendingCities,
+    pendingCountryCodes,
+    pendingParks,
+    visitedCities,
+    visitedCodes,
+    visitedParks,
+  ]);
 
   function handleToggleCountry(country: CountryOption) {
+    if (isParksMode) return;
+
     const code = country.code.toUpperCase();
     if (isUkNationCode(code) ? isUkNationVisited(code, visitedCodes) : visitedCodes.has(code)) {
       return;
@@ -224,7 +325,7 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
   function handleOpenCountry(country: CountryOption) {
     setReturnExpandedRegion(getAddRegionForCountryCode(country.code));
     setStep({
-      kind: "cities",
+      kind: isParksMode ? "parks" : "cities",
       countryCode: country.code,
       countryName: formatKnownPlaceName(country.name),
     });
@@ -253,16 +354,105 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
     });
   }
 
+  function handleTogglePark(park: CatalogPark) {
+    const key = parkSelectionKey(park.parkType, park.name);
+    const alreadyOnMap = visitedParks.some(
+      (visited) =>
+        visited.country_code.toUpperCase() === park.countryCode.toUpperCase() &&
+        visited.park_type === park.parkType &&
+        visited.park_name.trim().toLowerCase() === park.name.trim().toLowerCase()
+    );
+    if (alreadyOnMap) return;
+
+    setPendingParks((prev) => {
+      const next = new Map(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.set(key, {
+          countryCode: park.countryCode.toUpperCase(),
+          countryName: step.kind === "parks" ? step.countryName : "",
+          parkName: park.name,
+          parkType: park.parkType,
+          latitude: park.latitude,
+          longitude: park.longitude,
+        });
+      }
+      return next;
+    });
+  }
+
   function handleSave() {
     if (pendingSelectionCount === 0 || saving) return;
 
     setSaving(true);
     setSaveError(null);
 
+    if (isParksMode) {
+      const pendingParksSnapshot = new Map(pendingParks);
+      const optimistic = applyOptimisticParksSave({
+        pendingParks: pendingParksSnapshot,
+        visitedCodes,
+        visitedParks,
+      });
+      setVisitedCodes(optimistic.visitedCodes);
+      setVisitedParks(optimistic.visitedParks);
+
+      const cached = readTravelStateCache();
+      const nationalParks = optimistic.visitedParks.filter((park) =>
+        isNaturaParkType(park.park_type)
+      ).length;
+      const themeParks = optimistic.visitedParks.filter((park) =>
+        isThemeParkType(park.park_type)
+      ).length;
+      const nextData: TravelStateData = {
+        visitedCountries: cached?.visitedCountries ?? [],
+        visitedCities: cached?.visitedCities ?? [],
+        visitedParks: optimistic.visitedParks,
+        wishlistCountries: cached?.wishlistCountries ?? [],
+        visitedCodes: [...optimistic.visitedCodes],
+        stats: {
+          countries: optimistic.visitedCodes.size,
+          cities: cached?.stats.cities ?? 0,
+          nationalParks,
+          themeParks,
+        },
+      };
+      notifyTravelStateUpdated(nextData);
+
+      setPendingParks(new Map());
+      onClose();
+
+      void (async () => {
+        try {
+          const result = await savePendingParks({
+            pendingParks: pendingParksSnapshot.values(),
+            visitedParks,
+          });
+
+          if (!result.ok) {
+            toast.show(
+              result.error.toLowerCase().includes("unauthorized")
+                ? addDestinationMessages.loginRequired
+                : result.error
+            );
+            refreshTravelStateAfterSave();
+            return;
+          }
+
+          refreshTravelStateAfterSave();
+        } catch {
+          toast.show(addDestinationMessages.saveFailed);
+          refreshTravelStateAfterSave();
+        }
+      })();
+      return;
+    }
+
     const pendingCountrySnapshot = new Set(pendingCountryCodes);
     const pendingCitiesSnapshot = new Map(pendingCities);
 
-    const optimistic = applyOptimisticSave({
+    const optimistic = applyOptimisticPlacesSave({
       pendingCountryCodes: pendingCountrySnapshot,
       pendingCities: pendingCitiesSnapshot,
       visitedCodes,
@@ -320,6 +510,8 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
 
   if (!mounted) return null;
 
+  const isDetailStep = step.kind === "cities" || step.kind === "parks";
+
   return createPortal(
     <div className="add-destination-modal" role="presentation">
       <button
@@ -337,12 +529,14 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
       >
         <div
           className={`add-destination-modal__header${
-            step.kind === "cities" ? " add-destination-modal__header--cities" : ""
+            isDetailStep ? " add-destination-modal__header--cities" : ""
           }`}
         >
           {step.kind === "countries" ? (
             <h2 id="add-destination-title" className="add-destination-modal__title">
-              {addDestinationMessages.selectCountryTitle}
+              {isParksMode
+                ? addDestinationMessages.selectCountryForParksTitle
+                : addDestinationMessages.selectCountryTitle}
             </h2>
           ) : (
             <>
@@ -377,12 +571,27 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
             <AddDestinationCountryPickerSkeleton />
           ) : step.kind === "countries" ? (
             <CountryPickerStep
-              visitedCodes={visitedCodes}
+              visitedCodes={isParksMode ? new Set() : visitedCodes}
+              countedCodes={isParksMode ? parkCountryCodes : undefined}
               pendingCountryCodes={pendingCountryCodes}
               onToggleCountry={handleToggleCountry}
               onOpenCountry={handleOpenCountry}
-              listHint={addDestinationMessages.saveHint}
+              hideCountryCheckbox={isParksMode}
+              listHint={
+                isParksMode
+                  ? addDestinationMessages.parkSaveHint
+                  : addDestinationMessages.saveHint
+              }
+              regionProgressSuffix={isParksMode ? "with parks" : "visited"}
               initialExpandedRegion={returnExpandedRegion}
+            />
+          ) : step.kind === "parks" ? (
+            <ParkPickerStep
+              countryCode={step.countryCode}
+              countryName={step.countryName}
+              existingParkKeys={existingParkKeys}
+              pendingParkKeys={pendingParkKeys}
+              onTogglePark={handleTogglePark}
             />
           ) : (
             <CityPickerStep

@@ -27,6 +27,8 @@ type CountryPickerStepProps = {
   onToggleCountry: (country: CountryOption) => void;
   onOpenCountry: (country: CountryOption) => void;
   countriesOnly?: boolean;
+  /** Hide checkboxes and open the country drill-down on tile click (e.g. parks flow). */
+  hideCountryCheckbox?: boolean;
   searchPlaceholder?: string;
   regionProgressSuffix?: string;
   listHint?: string;
@@ -44,6 +46,7 @@ function CountryTile({
   onToggle,
   onOpen,
   countriesOnly = false,
+  hideCountryCheckbox = false,
 }: {
   country: CountryOption;
   locked: boolean;
@@ -52,17 +55,25 @@ function CountryTile({
   onToggle: () => void;
   onOpen: () => void;
   countriesOnly?: boolean;
+  hideCountryCheckbox?: boolean;
 }) {
   const displayName = formatKnownPlaceName(country.name);
+  const showVisited = locked && !hideCountryCheckbox;
 
   return (
-    <div className={`add-destination-country-tile${locked ? " is-visited" : ""}`}>
-      <AddDestinationCheckbox
-        checked={checked}
-        disabled={locked}
-        onChange={onToggle}
-        label={displayName}
-      />
+    <div
+      className={`add-destination-country-tile${showVisited ? " is-visited" : ""}${
+        pending && !hideCountryCheckbox ? " is-pending" : ""
+      }`}
+    >
+      {!hideCountryCheckbox ? (
+        <AddDestinationCheckbox
+          checked={checked}
+          disabled={locked}
+          onChange={onToggle}
+          label={displayName}
+        />
+      ) : null}
       <button
         type="button"
         className="add-destination-country-tile__main"
@@ -90,6 +101,7 @@ export function CountryPickerStep({
   onToggleCountry,
   onOpenCountry,
   countriesOnly = false,
+  hideCountryCheckbox = false,
   searchPlaceholder,
   regionProgressSuffix = "visited",
   listHint,
@@ -154,6 +166,7 @@ export function CountryPickerStep({
         onToggle={() => onToggleCountry(country)}
         onOpen={() => onOpenCountry(country)}
         countriesOnly={countriesOnly}
+        hideCountryCheckbox={hideCountryCheckbox}
       />
     );
   }

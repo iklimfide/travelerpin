@@ -12,10 +12,13 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { AddDestinationModal } from "@/components/add/AddDestinationModal";
+import {
+  AddDestinationModal,
+  type AddDestinationMode,
+} from "@/components/add/AddDestinationModal";
 
 type AddDestinationContextValue = {
-  open: () => void;
+  open: (mode?: AddDestinationMode) => void;
   close: () => void;
   isOpen: boolean;
 };
@@ -54,6 +57,7 @@ function AddDestinationProviderInner({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams();
 
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<AddDestinationMode>("places");
   const nextFromUrl = sanitizeNext(searchParams?.get("next") ?? null);
   const routeOpen = pathname === "/c/add";
   const wasRouteOpen = useRef(false);
@@ -63,6 +67,7 @@ function AddDestinationProviderInner({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (routeOpen) {
       wasRouteOpen.current = true;
+      setMode("places");
       setOpen(true);
       return;
     }
@@ -82,7 +87,8 @@ function AddDestinationProviderInner({ children }: { children: ReactNode }) {
     });
   }, [router, pathname, nextFromUrl]);
 
-  const openModal = useCallback(() => {
+  const openModal = useCallback((nextMode: AddDestinationMode = "places") => {
+    setMode(nextMode);
     setOpen(true);
   }, []);
 
@@ -94,7 +100,7 @@ function AddDestinationProviderInner({ children }: { children: ReactNode }) {
   return (
     <AddDestinationContext.Provider value={ctxValue}>
       {children}
-      {open ? <AddDestinationModal onClose={close} /> : null}
+      {open ? <AddDestinationModal mode={mode} onClose={close} /> : null}
     </AddDestinationContext.Provider>
   );
 }

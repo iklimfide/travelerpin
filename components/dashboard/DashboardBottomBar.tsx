@@ -149,6 +149,14 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
     router.push(`/c/wishlist?next=${encodeURIComponent(currentPath)}`);
   }
 
+  function handleMyParksClick() {
+    if (!username) {
+      router.push(loginHrefFor(currentPath));
+      return;
+    }
+    openAddDestination("parks");
+  }
+
   const profileNav = (
     <BottomBarProfileNav
       ownProfile={ownProfile}
@@ -159,6 +167,7 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
       mapActive={mapItem.isActive(pathname)}
       onNextRouteClick={handleNextRouteClick}
       onWishlistClick={handleWishlistClick}
+      onMyParksClick={handleMyParksClick}
     />
   );
 

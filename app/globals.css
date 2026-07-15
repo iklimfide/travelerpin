@@ -4285,9 +4285,14 @@ html[data-tp-mobile-preview-embed] body {
   color: #2563eb;
 }
 
+.dashboard-profile-menu__item--logout {
+  background: #dc2626;
+  color: #fff;
+}
+
 .dashboard-profile-menu__item--logout:hover {
-  background: #fef2f2;
-  color: #dc2626;
+  background: #b91c1c;
+  color: #fff;
 }
 
 .dashboard-profile-menu__divider {

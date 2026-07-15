@@ -19,6 +19,7 @@ type BottomBarProfileNavProps = {
   mapActive?: boolean;
   onNextRouteClick?: () => void;
   onWishlistClick?: () => void;
+  onMyParksClick?: () => void;
 };
 
 function ProfileIcon() {
@@ -82,6 +83,27 @@ function MapPinIcon() {
   );
 }
 
+function ParksIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path d="M4 20h16" strokeLinecap="round" />
+      <path d="M6.5 20V11.5" strokeLinecap="round" />
+      <path d="M12 20V8" strokeLinecap="round" />
+      <path d="M17.5 20v-6" strokeLinecap="round" />
+      <path
+        d="M6.5 11.5c-1.8-1.2-2.4-3.4-1.4-5.1C6.3 4.4 8.4 4 9.8 5.2L12 8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 8c1.2-2.2 3.6-3.2 5.6-2.4 1.8.7 2.8 2.7 2.3 4.6L17.5 14"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function LogOutIcon() {
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
@@ -119,6 +141,7 @@ export function BottomBarProfileNav({
   mapActive = false,
   onNextRouteClick,
   onWishlistClick,
+  onMyParksClick,
 }: BottomBarProfileNavProps) {
   const pathname = usePathname();
   const menuId = useId();
@@ -289,6 +312,22 @@ export function BottomBarProfileNav({
                       {dashboardNavMessages.wishlist}
                     </button>
                   ) : null}
+                  {showBarDestinationsInMenu && onMyParksClick ? (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="dashboard-profile-menu__item"
+                      onClick={() => {
+                        setOpen(false);
+                        onMyParksClick();
+                      }}
+                    >
+                      <span className="dashboard-profile-menu__icon" aria-hidden>
+                        <ParksIcon />
+                      </span>
+                      {dashboardNavMessages.myParks}
+                    </button>
+                  ) : null}
                   <Link
                     href="/settings"
                     role="menuitem"
@@ -370,6 +409,22 @@ export function BottomBarProfileNav({
                         <WishlistIcon />
                       </span>
                       {dashboardNavMessages.wishlist}
+                    </button>
+                  ) : null}
+                  {onMyParksClick ? (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="dashboard-profile-menu__item"
+                      onClick={() => {
+                        setOpen(false);
+                        onMyParksClick();
+                      }}
+                    >
+                      <span className="dashboard-profile-menu__icon" aria-hidden>
+                        <ParksIcon />
+                      </span>
+                      {dashboardNavMessages.myParks}
                     </button>
                   ) : null}
                   <Link

@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useAddDestination } from "@/components/add/AddDestinationProvider";
 import { CountryManager } from "@/components/dashboard/CountryManager";
 import { CityList } from "@/components/dashboard/CityList";
 import { ParkList } from "@/components/dashboard/ParkList";
-import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
 import {
   ProfileOwnerSection,
   type ProfileOwnerPanelMode,
@@ -27,7 +27,7 @@ export function ProfileOwnerTools({
   wishlistCountries,
   visitedCodes,
 }: ProfileOwnerToolsProps) {
-  const { openAddModal } = useDashboardAdd();
+  const { open: openAddDestination } = useAddDestination();
   const [countriesPanel, setCountriesPanel] = useState<ProfileOwnerPanelMode>("closed");
   const [citiesPanel, setCitiesPanel] = useState<ProfileOwnerPanelMode>("closed");
   const [parksPanel, setParksPanel] = useState<ProfileOwnerPanelMode>("closed");
@@ -55,7 +55,7 @@ export function ProfileOwnerTools({
         )}
         panel={countriesPanel}
         onPanelChange={setCountriesPanel}
-        onAdd={() => openAddModal("countries")}
+        onAdd={() => openAddDestination("places")}
         editContent={
           <CountryManager
             embedded
@@ -77,7 +77,7 @@ export function ProfileOwnerTools({
           setCitiesPanel(mode);
           if (mode === "closed") setCitiesCountryFilter(null);
         }}
-        onAdd={() => openAddModal("cities")}
+        onAdd={() => openAddDestination("places")}
         editContent={
           <CityList
             embedded
@@ -93,7 +93,7 @@ export function ProfileOwnerTools({
         countLabel={profileMessages.ownerCountParks.replace("{count}", String(visitedParks.length))}
         panel={parksPanel}
         onPanelChange={setParksPanel}
-        onAdd={() => openAddModal("parks")}
+        onAdd={() => openAddDestination("parks")}
         editContent={<ParkList embedded parks={visitedParks} countries={visitedCountries} />}
       />
     </div>

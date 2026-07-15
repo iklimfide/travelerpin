@@ -2,6 +2,7 @@ import {
   addCitiesBatch,
 } from "@/lib/client/city-actions";
 import { addVisitedCountry } from "@/lib/client/country-actions";
+import { addParksBatch } from "@/lib/client/park-actions";
 import { getCountryName } from "@/lib/data/countries";
 import { canonicalCityName, citiesAreSame } from "@/lib/utils/city-aliases";
 import {
@@ -9,13 +10,22 @@ import {
   readTravelStateCache,
   type TravelStateData,
 } from "@/lib/client/session-page-cache";
-import type { VisitedCity } from "@/types/database";
+import type { ParkType, VisitedCity, VisitedPark } from "@/types/database";
 
 export type { TravelStateData };
 
 export type PendingCitySelection = {
   countryCode: string;
   cityName: string;
+};
+
+export type PendingParkSelection = {
+  countryCode: string;
+  countryName: string;
+  parkName: string;
+  parkType: ParkType;
+  latitude?: number;
+  longitude?: number;
 };
 
 type FetchTravelStateResult =
@@ -148,6 +158,83 @@ export async function savePendingDestinations(params: {
         country_code: countryCode,
         country_name: countryName,
         cities: chunk,
+      });
+      if (!result.ok) return result;
+      savedCount += result.added;
+    }
+  }
+
+  return { ok: true, savedCount };
+}
+
+function isParkOnMap(
+  visitedParks: VisitedPark[],
+  countryCode: string,
+  parkName: string,
+  parkType: ParkType
+): boolean {
+  const code = countryCode.toUpperCase();
+  const name = parkName.trim().toLowerCase();
+  return visitedParks.some(
+    (park) =>
+      park.country_code.toUpperCase() === code &&
+      park.park_type === parkType &&
+      park.park_name.trim().toLowerCase() === name
+  );
+}
+
+export async function savePendingParks(params: {
+  pendingParks: Iterable<PendingParkSelection>;
+  visitedParks: VisitedPark[];
+}): Promise<{ ok: true; savedCount: number } | { ok: false; error: string }> {
+  const pendingParks = [...params.pendingParks];
+  if (pendingParks.length === 0) {
+    return { ok: true, savedCount: 0 };
+  }
+
+  const parksByCountry = new Map<
+    string,
+    {
+      countryName: string;
+      parks: {
+        park_name: string;
+        park_type: ParkType;
+        latitude?: number;
+        longitude?: number;
+      }[];
+    }
+  >();
+
+  for (const park of pendingParks) {
+    const countryCode = park.countryCode.toUpperCase();
+    if (
+      isParkOnMap(params.visitedParks, countryCode, park.parkName, park.parkType)
+    ) {
+      continue;
+    }
+
+    const entry = parksByCountry.get(countryCode) ?? {
+      countryName: park.countryName || getCountryName(countryCode),
+      parks: [],
+    };
+    entry.parks.push({
+      park_name: park.parkName,
+      park_type: park.parkType,
+      latitude: park.latitude,
+      longitude: park.longitude,
+    });
+    parksByCountry.set(countryCode, entry);
+  }
+
+  let savedCount = 0;
+
+  for (const [countryCode, { countryName, parks }] of parksByCountry) {
+    for (let index = 0; index < parks.length; index += 50) {
+      const chunk = parks.slice(index, index + 50);
+      const result = await addParksBatch({
+        country_code: countryCode,
+        country_name: countryName,
+        parks: chunk,
       });
       if (!result.ok) return result;
       savedCount += result.added;

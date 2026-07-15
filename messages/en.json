@@ -38,7 +38,8 @@
     "add": "Add place",
     "addVisited": "Visited",
     "nextRoute": "Next Route",
-    "wishlist": "Wishlist"
+    "wishlist": "Wishlist",
+    "myParks": "My parks"
   },
   "notifications": {
     "title": "Notifications",
@@ -834,9 +835,11 @@
   },
   "addDestination": {
     "selectCountryTitle": "Select the country you've visited",
+    "selectCountryForParksTitle": "Select a country to add parks",
     "searchCountries": "Start typing country name",
     "noCountryResults": "No countries match your search.",
     "cityTickHint": "Tick visited places. Search by name to find smaller towns or add a missing city.",
+    "parkTickHint": "Tick parks you've visited. Search by name or filter by type.",
     "popular": "Popular",
     "capitalLabel": "Capital",
     "cityTierMajor": "Major cities & highlights",
@@ -847,6 +850,7 @@
     "close": "Close",
     "loading": "Loading...",
     "saveHint": "Selections are saved to your map only when you tap Save.",
+    "parkSaveHint": "Open a country, tick parks, then tap Save to pin them.",
     "saveFailed": "Could not save your selections. Please try again.",
     "loginRequired": "Sign in to save places to your map.",
     "missingPlacePrompt": "Can't find your city or park in the list? Email us at",
