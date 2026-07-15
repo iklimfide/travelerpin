@@ -430,12 +430,6 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "AR",
-    "name": "Puerto Iguazu",
-    "latitude": -25.7373,
-    "longitude": -54.4734
-  },
-  {
-    "countryCode": "AR",
     "name": "Puerto Iguazú",
     "latitude": -25.6953,
     "longitude": -54.4367
@@ -1987,12 +1981,6 @@ export const TOURIST_CITIES: TouristCity[] = [
     "name": "Fernando de Noronha",
     "latitude": -3.8545,
     "longitude": -32.423
-  },
-  {
-    "countryCode": "BR",
-    "name": "Florianopolis",
-    "latitude": -27.5954,
-    "longitude": -48.548
   },
   {
     "countryCode": "BR",
@@ -4888,12 +4876,6 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "CN",
-    "name": "Lüliang",
-    "latitude": 37.6833,
-    "longitude": 111.1428
-  },
-  {
-    "countryCode": "CN",
     "name": "Luoyang",
     "latitude": 34.7411,
     "longitude": 112.388
@@ -4903,6 +4885,12 @@ export const TOURIST_CITIES: TouristCity[] = [
     "name": "Luzhou",
     "latitude": 29.0304,
     "longitude": 105.4684
+  },
+  {
+    "countryCode": "CN",
+    "name": "Lüliang",
+    "latitude": 37.6833,
+    "longitude": 111.1428
   },
   {
     "countryCode": "CN",
@@ -5560,12 +5548,6 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "CO",
-    "name": "Bogota",
-    "latitude": 4.7016,
-    "longitude": -74.1469
-  },
-  {
-    "countryCode": "CO",
     "name": "Bogotá",
     "latitude": 4.711,
     "longitude": -74.0721
@@ -5677,12 +5659,6 @@ export const TOURIST_CITIES: TouristCity[] = [
     "name": "Manizales",
     "latitude": 5.0296,
     "longitude": -75.4647
-  },
-  {
-    "countryCode": "CO",
-    "name": "Medellin",
-    "latitude": 6.2476,
-    "longitude": -75.5658
   },
   {
     "countryCode": "CO",
@@ -5917,12 +5893,6 @@ export const TOURIST_CITIES: TouristCity[] = [
     "name": "San Carlos",
     "latitude": 10.4712,
     "longitude": -84.6454
-  },
-  {
-    "countryCode": "CR",
-    "name": "San Jose",
-    "latitude": 9.9571,
-    "longitude": -84.1398
   },
   {
     "countryCode": "CR",
@@ -7141,12 +7111,6 @@ export const TOURIST_CITIES: TouristCity[] = [
     "name": "Mahón",
     "latitude": 39.8626,
     "longitude": 4.2187
-  },
-  {
-    "countryCode": "ES",
-    "name": "Malaga",
-    "latitude": 36.7213,
-    "longitude": -4.4214
   },
   {
     "countryCode": "ES",
@@ -10822,12 +10786,6 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "IS",
-    "name": "Reykjavik",
-    "latitude": 64.1291,
-    "longitude": -21.9581
-  },
-  {
-    "countryCode": "IS",
     "name": "Reykjavík",
     "latitude": 63.985,
     "longitude": -22.6056
@@ -13570,12 +13528,6 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "MX",
-    "name": "Cancun",
-    "latitude": 21.1619,
-    "longitude": -86.8515
-  },
-  {
-    "countryCode": "MX",
     "name": "Cancún",
     "latitude": 21.1322,
     "longitude": -86.7456
@@ -15277,12 +15229,6 @@ export const TOURIST_CITIES: TouristCity[] = [
     "name": "Waitomo Caves",
     "latitude": -38.2607,
     "longitude": 175.1036
-  },
-  {
-    "countryCode": "NZ",
-    "name": "Wanaka",
-    "latitude": -44.7221,
-    "longitude": 169.2463
   },
   {
     "countryCode": "NZ",
@@ -18832,12 +18778,6 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TL",
-    "name": "Dili",
-    "latitude": -8.5466,
-    "longitude": 125.5245
-  },
-  {
-    "countryCode": "TL",
     "name": "Díli",
     "latitude": -8.5205,
     "longitude": 125.6084
@@ -18880,15 +18820,15 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TM",
-    "name": "Türkmenabat",
-    "latitude": 38.9307,
-    "longitude": 63.564
-  },
-  {
-    "countryCode": "TM",
     "name": "Turkmenbaşy",
     "latitude": 40.0628,
     "longitude": 53.0051
+  },
+  {
+    "countryCode": "TM",
+    "name": "Türkmenabat",
+    "latitude": 38.9307,
+    "longitude": 63.564
   },
   {
     "countryCode": "TN",
@@ -18964,9 +18904,21 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
+    "name": "Adana",
+    "latitude": 36.98615,
+    "longitude": 35.32531
+  },
+  {
+    "countryCode": "TR",
     "name": "Adıyaman",
     "latitude": 37.7314,
     "longitude": 38.4689
+  },
+  {
+    "countryCode": "TR",
+    "name": "Afyonkarahisar",
+    "latitude": 38.75667,
+    "longitude": 30.54333
   },
   {
     "countryCode": "TR",
@@ -18976,9 +18928,21 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
+    "name": "Aksaray",
+    "latitude": 38.37255,
+    "longitude": 34.02537
+  },
+  {
+    "countryCode": "TR",
     "name": "Alanya",
     "latitude": 36.5444,
     "longitude": 31.9954
+  },
+  {
+    "countryCode": "TR",
+    "name": "Amasya",
+    "latitude": 40.6533,
+    "longitude": 35.8331
   },
   {
     "countryCode": "TR",
@@ -19000,9 +18964,33 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
+    "name": "Ardahan",
+    "latitude": 41.1105,
+    "longitude": 42.7022
+  },
+  {
+    "countryCode": "TR",
+    "name": "Artvin",
+    "latitude": 41.1828,
+    "longitude": 41.8183
+  },
+  {
+    "countryCode": "TR",
+    "name": "Aydın",
+    "latitude": 37.84501,
+    "longitude": 27.83963
+  },
+  {
+    "countryCode": "TR",
     "name": "Balıkesir",
     "latitude": 39.6193,
     "longitude": 27.926
+  },
+  {
+    "countryCode": "TR",
+    "name": "Bartın",
+    "latitude": 41.6358,
+    "longitude": 32.3375
   },
   {
     "countryCode": "TR",
@@ -19012,9 +19000,45 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
+    "name": "Bayburt",
+    "latitude": 40.2552,
+    "longitude": 40.2249
+  },
+  {
+    "countryCode": "TR",
+    "name": "Bilecik",
+    "latitude": 40.1501,
+    "longitude": 29.9831
+  },
+  {
+    "countryCode": "TR",
+    "name": "Bingöl",
+    "latitude": 38.8847,
+    "longitude": 40.4981
+  },
+  {
+    "countryCode": "TR",
+    "name": "Bitlis",
+    "latitude": 38.4006,
+    "longitude": 42.1095
+  },
+  {
+    "countryCode": "TR",
     "name": "Bodrum",
     "latitude": 37.0344,
     "longitude": 27.4305
+  },
+  {
+    "countryCode": "TR",
+    "name": "Bolu",
+    "latitude": 40.7358,
+    "longitude": 31.6061
+  },
+  {
+    "countryCode": "TR",
+    "name": "Burdur",
+    "latitude": 37.7203,
+    "longitude": 30.2908
   },
   {
     "countryCode": "TR",
@@ -19024,9 +19048,9 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
-    "name": "Canakkale",
-    "latitude": 40.1553,
-    "longitude": 26.4142
+    "name": "Cappadocia",
+    "latitude": 38.6431,
+    "longitude": 34.8289
   },
   {
     "countryCode": "TR",
@@ -19036,13 +19060,13 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
-    "name": "Cappadocia",
-    "latitude": 38.6431,
-    "longitude": 34.8289
+    "name": "Çankırı",
+    "latitude": 40.6013,
+    "longitude": 33.6135
   },
   {
     "countryCode": "TR",
-    "name": "Cesme",
+    "name": "Çeşme",
     "latitude": 38.3228,
     "longitude": 26.3065
   },
@@ -19051,6 +19075,12 @@ export const TOURIST_CITIES: TouristCity[] = [
     "name": "Çorlu",
     "latitude": 41.1382,
     "longitude": 27.9191
+  },
+  {
+    "countryCode": "TR",
+    "name": "Çorum",
+    "latitude": 40.54889,
+    "longitude": 34.95333
   },
   {
     "countryCode": "TR",
@@ -19069,6 +19099,18 @@ export const TOURIST_CITIES: TouristCity[] = [
     "name": "Diyarbakır",
     "latitude": 37.8939,
     "longitude": 40.201
+  },
+  {
+    "countryCode": "TR",
+    "name": "Düzce",
+    "latitude": 40.8438,
+    "longitude": 31.1565
+  },
+  {
+    "countryCode": "TR",
+    "name": "Edirne",
+    "latitude": 41.67719,
+    "longitude": 26.55597
   },
   {
     "countryCode": "TR",
@@ -19132,9 +19174,9 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
-    "name": "Goreme",
-    "latitude": 38.6431,
-    "longitude": 34.8289
+    "name": "Giresun",
+    "latitude": 40.9128,
+    "longitude": 38.3895
   },
   {
     "countryCode": "TR",
@@ -19144,9 +19186,21 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
+    "name": "Gümüşhane",
+    "latitude": 40.4603,
+    "longitude": 39.4814
+  },
+  {
+    "countryCode": "TR",
     "name": "Hakkari",
     "latitude": 37.5497,
     "longitude": 44.2381
+  },
+  {
+    "countryCode": "TR",
+    "name": "Hatay",
+    "latitude": 36.20655,
+    "longitude": 36.15722
   },
   {
     "countryCode": "TR",
@@ -19180,9 +19234,27 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
+    "name": "Karabük",
+    "latitude": 41.2048,
+    "longitude": 32.6277
+  },
+  {
+    "countryCode": "TR",
+    "name": "Karaman",
+    "latitude": 37.18111,
+    "longitude": 33.215
+  },
+  {
+    "countryCode": "TR",
     "name": "Kars",
     "latitude": 40.5622,
     "longitude": 43.115
+  },
+  {
+    "countryCode": "TR",
+    "name": "Kastamonu",
+    "latitude": 41.3887,
+    "longitude": 33.7827
   },
   {
     "countryCode": "TR",
@@ -19204,21 +19276,63 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
+    "name": "Kırıkkale",
+    "latitude": 39.84528,
+    "longitude": 33.50639
+  },
+  {
+    "countryCode": "TR",
+    "name": "Kırklareli",
+    "latitude": 41.7351,
+    "longitude": 27.2252
+  },
+  {
+    "countryCode": "TR",
+    "name": "Kırşehir",
+    "latitude": 39.1461,
+    "longitude": 34.1595
+  },
+  {
+    "countryCode": "TR",
+    "name": "Kilis",
+    "latitude": 36.7184,
+    "longitude": 37.1212
+  },
+  {
+    "countryCode": "TR",
+    "name": "Kocaeli",
+    "latitude": 40.76499,
+    "longitude": 29.92928
+  },
+  {
+    "countryCode": "TR",
     "name": "Konya",
     "latitude": 37.8746,
     "longitude": 32.4932
   },
   {
     "countryCode": "TR",
-    "name": "Kusadasi",
+    "name": "Kuşadası",
     "latitude": 37.8575,
     "longitude": 27.261
+  },
+  {
+    "countryCode": "TR",
+    "name": "Kütahya",
+    "latitude": 39.42417,
+    "longitude": 29.98333
   },
   {
     "countryCode": "TR",
     "name": "Malatya",
     "latitude": 38.4353,
     "longitude": 38.091
+  },
+  {
+    "countryCode": "TR",
+    "name": "Manisa",
+    "latitude": 38.61202,
+    "longitude": 27.42647
   },
   {
     "countryCode": "TR",
@@ -19234,6 +19348,18 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
+    "name": "Mersin",
+    "latitude": 36.81196,
+    "longitude": 34.63886
+  },
+  {
+    "countryCode": "TR",
+    "name": "Muğla",
+    "latitude": 37.2153,
+    "longitude": 28.3636
+  },
+  {
+    "countryCode": "TR",
     "name": "Muş",
     "latitude": 38.7478,
     "longitude": 41.6612
@@ -19246,9 +19372,21 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
+    "name": "Niğde",
+    "latitude": 37.9667,
+    "longitude": 34.6833
+  },
+  {
+    "countryCode": "TR",
     "name": "Ordu",
     "latitude": 40.9669,
     "longitude": 38.086
+  },
+  {
+    "countryCode": "TR",
+    "name": "Osmaniye",
+    "latitude": 37.07417,
+    "longitude": 36.24778
   },
   {
     "countryCode": "TR",
@@ -19270,21 +19408,15 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
+    "name": "Sakarya",
+    "latitude": 40.78056,
+    "longitude": 30.40333
+  },
+  {
+    "countryCode": "TR",
     "name": "Samsun",
     "latitude": 41.254,
     "longitude": 36.5675
-  },
-  {
-    "countryCode": "TR",
-    "name": "Sanliurfa",
-    "latitude": 37.1591,
-    "longitude": 38.7969
-  },
-  {
-    "countryCode": "TR",
-    "name": "Şanlıurfa",
-    "latitude": 37.4457,
-    "longitude": 38.8956
   },
   {
     "countryCode": "TR",
@@ -19300,9 +19432,27 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
+    "name": "Siirt",
+    "latitude": 37.9293,
+    "longitude": 41.94134
+  },
+  {
+    "countryCode": "TR",
     "name": "Sinop",
     "latitude": 42.0183,
     "longitude": 35.0718
+  },
+  {
+    "countryCode": "TR",
+    "name": "Sivas",
+    "latitude": 39.74833,
+    "longitude": 37.01611
+  },
+  {
+    "countryCode": "TR",
+    "name": "Şanlıurfa",
+    "latitude": 37.4457,
+    "longitude": 38.8956
   },
   {
     "countryCode": "TR",
@@ -19318,6 +19468,12 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
+    "name": "Tekirdağ",
+    "latitude": 40.9781,
+    "longitude": 27.51101
+  },
+  {
+    "countryCode": "TR",
     "name": "Tokat",
     "latitude": 40.3247,
     "longitude": 36.3906
@@ -19330,15 +19486,39 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "TR",
+    "name": "Tunceli",
+    "latitude": 39.1061,
+    "longitude": 39.5481
+  },
+  {
+    "countryCode": "TR",
+    "name": "Uşak",
+    "latitude": 38.67351,
+    "longitude": 29.4058
+  },
+  {
+    "countryCode": "TR",
     "name": "Van",
     "latitude": 38.4682,
     "longitude": 43.3323
   },
   {
     "countryCode": "TR",
+    "name": "Yalova",
+    "latitude": 40.655,
+    "longitude": 29.2769
+  },
+  {
+    "countryCode": "TR",
     "name": "Yenişehir",
     "latitude": 40.2552,
     "longitude": 29.5626
+  },
+  {
+    "countryCode": "TR",
+    "name": "Yozgat",
+    "latitude": 39.82,
+    "longitude": 34.8044
   },
   {
     "countryCode": "TR",
@@ -23540,6 +23720,22 @@ function compareCityNames(a: string, b: string): number {
   return a.localeCompare(b, "tr", { sensitivity: "base" });
 }
 
+/** Fold Turkish / Latin diacritics for identity checks (Goreme ≈ Göreme). */
+function foldCityKey(value: string): string {
+  return value
+    .trim()
+    .toLocaleLowerCase("tr")
+    .replaceAll("ı", "i")
+    .replaceAll("İ", "i")
+    .replaceAll("ş", "s")
+    .replaceAll("ğ", "g")
+    .replaceAll("ü", "u")
+    .replaceAll("ö", "o")
+    .replaceAll("ç", "c")
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "");
+}
+
 export function getTouristCitiesByCountry(countryCode: string): TouristCity[] {
   const code = countryCode.toUpperCase();
   return TOURIST_CITIES.filter((city) => city.countryCode === code).sort((a, b) =>
@@ -23551,25 +23747,14 @@ export function findTouristCitiesByExactName(
   cityName: string,
   countryCode?: string | null
 ): TouristCity[] {
-  // Inline fold (avoid importing app utils into this generated data module).
-  const needle = cityName
-    .trim()
-    .toLocaleLowerCase("tr")
-    .replaceAll("ı", "i")
-    .replaceAll("İ", "i");
+  const needle = foldCityKey(cityName);
   if (!needle) return [];
 
   const pool = countryCode
     ? TOURIST_CITIES.filter((city) => city.countryCode === countryCode.toUpperCase())
     : TOURIST_CITIES;
 
-  return pool.filter((city) => {
-    const name = city.name
-      .toLocaleLowerCase("tr")
-      .replaceAll("ı", "i")
-      .replaceAll("İ", "i");
-    return name === needle;
-  });
+  return pool.filter((city) => foldCityKey(city.name) === needle);
 }
 
 export function searchTouristCities(

@@ -222,7 +222,7 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
           return;
         }
 
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email: parsed.data.email,
           password: parsed.data.password,
         });
@@ -239,6 +239,21 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
             )
           );
           return;
+        }
+
+        const signedInId = signInData.user?.id;
+        if (signedInId) {
+          const { data: banProfile } = await supabase
+            .from("profiles")
+            .select("banned_at")
+            .eq("id", signedInId)
+            .maybeSingle();
+
+          if (banProfile?.banned_at) {
+            await supabase.auth.signOut();
+            setSubmitError(t("loginAccountBanned"));
+            return;
+          }
         }
 
         const safeNext = sanitizeNext(next);

@@ -7,6 +7,7 @@ import { addDestinationMessages, mapMessages } from "@/lib/i18n/client-messages"
 import { catalogCountryCode, flagCountryCode } from "@/lib/data/uk-nations";
 import { CONTACT_EMAIL } from "@/lib/legal/contact";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
+import { compareCitiesForAddModal } from "@/lib/add/city-list-sort";
 import { canonicalCityKey, citiesAreSame } from "@/lib/utils/city-aliases";
 import { formatKnownPlaceName } from "@/lib/utils/city-name";
 import { AddDestinationCityListSkeleton } from "@/components/skeletons/AddDestinationModalSkeleton";
@@ -113,9 +114,26 @@ export function CityPickerStep({
   }, [countryCode, filter, isFiltering]);
 
   const displayTiers = useMemo(() => {
-    if (!isFiltering) return tiers;
-    return tiers;
-  }, [isFiltering, tiers]);
+    const flat = tiers.flatMap((tier) => tier.cities);
+    if (flat.length === 0) return tiers;
+
+    const sorted = [...flat].sort(compareCitiesForAddModal);
+
+    // Keep the same tier chunking the API used (first page + "more cities").
+    const perTier = tiers[0]?.cities.length || sorted.length;
+    if (sorted.length <= perTier || tiers.length <= 1) {
+      return [{ level: 1, cities: sorted }];
+    }
+
+    const next: CityTier[] = [];
+    for (let index = 0; index < sorted.length; index += perTier) {
+      next.push({
+        level: next.length + 1,
+        cities: sorted.slice(index, index + perTier),
+      });
+    }
+    return next;
+  }, [tiers]);
 
   const totalCityCount = displayTiers.reduce((sum, tier) => sum + tier.cities.length, 0);
   const primaryTier = displayTiers[0];

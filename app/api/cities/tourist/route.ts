@@ -1,5 +1,13 @@
 import { NextResponse } from "next/server";
 import { getCityCatalog } from "@/lib/add/city-catalog";
+import {
+  applyCityOverlayToCatalogCities,
+  buildCityTiers,
+  getCatalogOverlayFresh,
+  sortCitiesForAddModal,
+} from "@/lib/kamikaze/catalog-overlay";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -11,5 +19,20 @@ export async function GET(request: Request) {
   }
 
   const catalog = getCityCatalog(country, q);
-  return NextResponse.json({ cities: catalog.allCities, tiers: catalog.tiers });
+  const overlay = await getCatalogOverlayFresh();
+  const allCities = sortCitiesForAddModal(
+    applyCityOverlayToCatalogCities(catalog.allCities, overlay, country, q)
+  );
+
+  const tiers =
+    q.length >= 2
+      ? allCities.length > 0
+        ? [{ level: 1, cities: allCities }]
+        : []
+      : buildCityTiers(allCities);
+
+  return NextResponse.json(
+    { cities: allCities, tiers },
+    { headers: { "Cache-Control": "no-store" } }
+  );
 }

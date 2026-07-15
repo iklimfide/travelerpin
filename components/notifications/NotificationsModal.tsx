@@ -27,7 +27,9 @@ export function NotificationsModal({
   const notifications = useContext(NotificationsContext);
   const isDesktopNav = useIsDesktopDashboardNav();
   const [sheetPosition, setSheetPosition] = useState<FixedMenuPosition | null>(null);
+  const [anchorMissing, setAnchorMissing] = useState(false);
   const useAnchoredDesktopSheet = isDesktopNav && Boolean(notifications?.triggerRef);
+  const useAnchoredLayout = useAnchoredDesktopSheet && !anchorMissing;
 
   useEffect(() => {
     if (!open) return;
@@ -43,17 +45,24 @@ export function NotificationsModal({
   useLayoutEffect(() => {
     if (!open || !useAnchoredDesktopSheet) {
       setSheetPosition(null);
+      setAnchorMissing(false);
       return;
     }
 
     const anchor = notifications?.triggerRef.current;
-    if (!anchor) return;
+    if (!anchor) {
+      // Bottom bar may not be mounted yet (or /notifications deep-link) — show centered sheet.
+      setSheetPosition(null);
+      setAnchorMissing(true);
+      return;
+    }
 
+    setAnchorMissing(false);
     setSheetPosition(getFixedMenuBelowPosition(anchor));
   }, [notifications?.triggerRef, open, useAnchoredDesktopSheet]);
 
   useEffect(() => {
-    if (!open || !useAnchoredDesktopSheet) return;
+    if (!open || !useAnchoredLayout) return;
 
     const anchor = notifications?.triggerRef.current;
     if (!anchor) return;
@@ -74,15 +83,12 @@ export function NotificationsModal({
       viewport?.removeEventListener("resize", syncPosition);
       viewport?.removeEventListener("scroll", syncPosition);
     };
-  }, [notifications?.triggerRef, open, useAnchoredDesktopSheet]);
+  }, [notifications?.triggerRef, open, useAnchoredLayout]);
 
   if (!open) return null;
 
-  const isAnchoredReady = !useAnchoredDesktopSheet || sheetPosition !== null;
-  if (!isAnchoredReady) return null;
-
   const sheetStyle: CSSProperties | undefined =
-    useAnchoredDesktopSheet && sheetPosition
+    useAnchoredLayout && sheetPosition
       ? {
           top: sheetPosition.top,
           right: sheetPosition.right,
@@ -92,7 +98,7 @@ export function NotificationsModal({
   return (
     <div
       className={`notifications-modal${
-        useAnchoredDesktopSheet ? " notifications-modal--anchored" : ""
+        useAnchoredLayout && sheetPosition ? " notifications-modal--anchored" : ""
       }`}
       role="presentation"
     >
@@ -107,7 +113,7 @@ export function NotificationsModal({
         aria-modal="true"
         aria-labelledby="notifications-modal-title"
         className={`notifications-modal__sheet${
-          useAnchoredDesktopSheet ? " notifications-modal__sheet--anchored" : ""
+          useAnchoredLayout && sheetPosition ? " notifications-modal__sheet--anchored" : ""
         }`}
         style={sheetStyle}
       >

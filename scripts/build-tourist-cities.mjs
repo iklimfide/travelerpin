@@ -109,21 +109,21 @@ TR,Pamukkale,37.9137,29.1187
 TR,Bodrum,37.0344,27.4305
 TR,Fethiye,36.6213,29.1164
 TR,Antalya,36.8969,30.7133
-TR,Goreme,38.6431,34.8289
+TR,Göreme,38.6431,34.8289
 TR,Izmir,38.4237,27.1428
 TR,Bursa,40.1885,29.0610
 TR,Marmaris,36.8550,28.2742
-TR,Kusadasi,37.8575,27.2610
+TR,Kuşadası,37.8575,27.2610
 TR,Ephesus,37.9390,27.3410
 TR,Alanya,36.5444,31.9954
-TR,Cesme,38.3228,26.3065
+TR,Çeşme,38.3228,26.3065
 TR,Safranbolu,41.2508,32.6942
 TR,Mardin,37.3122,40.7350
 TR,Gaziantep,37.0662,37.3833
-TR,Sanliurfa,37.1591,38.7969
+TR,Şanlıurfa,37.1591,38.7969
 TR,Trabzon,41.0027,39.7168
 TR,Rize,41.0255,40.5177
-TR,Canakkale,40.1553,26.4142
+TR,Çanakkale,40.1553,26.4142
 TR,Ankara,39.9334,32.8597
 TR,Konya,37.8746,32.4932
 TR,Kemer,36.5978,30.5604
@@ -478,7 +478,7 @@ function cityNameFromAirport(row) {
 
 function rowKey(code, name) {
   const canonical = canonicalCityName(code, name);
-  return `${code.toUpperCase()}:${canonical.toLocaleLowerCase("en")}`;
+  return `${code.toUpperCase()}:${foldAsciiKey(canonical)}`;
 }
 
 function loadCityExclusions() {
@@ -534,6 +534,22 @@ const CITY_NAMES_KEEP_SUFFIX = new Set([
   "ho chi minh city",
 ]);
 
+/** Fold Turkish / Latin diacritics so Goreme ≈ Göreme. */
+function foldAsciiKey(value) {
+  return String(value)
+    .trim()
+    .toLocaleLowerCase("tr")
+    .replaceAll("ı", "i")
+    .replaceAll("İ", "i")
+    .replaceAll("ş", "s")
+    .replaceAll("ğ", "g")
+    .replaceAll("ü", "u")
+    .replaceAll("ö", "o")
+    .replaceAll("ç", "c")
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "");
+}
+
 function normalizeForDedupe(countryCode, name) {
   let n = normalizeName(name);
   n = n.replace(/^Condado de /i, "");
@@ -580,7 +596,14 @@ function isLowQualityPlaceName(countryCode, name) {
 }
 
 function dedupeKey(countryCode, name) {
-  return `${countryCode}:${normalizeForDedupe(countryCode, name).toLocaleLowerCase("en")}`;
+  return `${countryCode}:${foldAsciiKey(normalizeForDedupe(countryCode, name))}`;
+}
+
+function diacriticScore(name) {
+  return [...String(name)].filter((ch) => {
+    const base = ch.normalize("NFD").replace(/\p{M}/gu, "");
+    return base !== ch || /[ışğüöçİŞĞÜÖÇ]/u.test(ch);
+  }).length;
 }
 
 function isBareProvinceDuplicate(name, group) {
@@ -601,9 +624,13 @@ function pickPreferredPlace(candidates) {
     const bBare = isBareProvinceDuplicate(b.name, candidates);
     if (aBare !== bBare) return aBare ? 1 : -1;
 
+    const aDia = diacriticScore(a.name);
+    const bDia = diacriticScore(b.name);
+    if (aDia !== bDia) return bDia - aDia;
+
     if (b.reelCount !== a.reelCount) return b.reelCount - a.reelCount;
     if (a.name.length !== b.name.length) return a.name.length - b.name.length;
-    return a.name.localeCompare(b.name, "en");
+    return a.name.localeCompare(b.name, "tr");
   })[0];
 }
 
@@ -767,6 +794,9 @@ function writeCityOutputs(output) {
 // Exclusions: lib/data/sources/city-exclusions.csv
 // https://bestroadtrip.com/data · https://ourairports.com/data/
 
+import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
+import { buildCitySlug } from "@/lib/utils/city-slug";
+
 export type TouristCity = {
   countryCode: string;
   name: string;
@@ -789,11 +819,41 @@ function compareCityNames(a: string, b: string): number {
   return a.localeCompare(b, "tr", { sensitivity: "base" });
 }
 
+/** Fold Turkish / Latin diacritics for identity checks (Goreme ≈ Göreme). */
+function foldCityKey(value: string): string {
+  return value
+    .trim()
+    .toLocaleLowerCase("tr")
+    .replaceAll("ı", "i")
+    .replaceAll("İ", "i")
+    .replaceAll("ş", "s")
+    .replaceAll("ğ", "g")
+    .replaceAll("ü", "u")
+    .replaceAll("ö", "o")
+    .replaceAll("ç", "c")
+    .normalize("NFD")
+    .replace(/\\p{M}/gu, "");
+}
+
 export function getTouristCitiesByCountry(countryCode: string): TouristCity[] {
   const code = countryCode.toUpperCase();
   return TOURIST_CITIES.filter((city) => city.countryCode === code).sort((a, b) =>
     compareCityNames(a.name, b.name)
   );
+}
+
+export function findTouristCitiesByExactName(
+  cityName: string,
+  countryCode?: string | null
+): TouristCity[] {
+  const needle = foldCityKey(cityName);
+  if (!needle) return [];
+
+  const pool = countryCode
+    ? TOURIST_CITIES.filter((city) => city.countryCode === countryCode.toUpperCase())
+    : TOURIST_CITIES;
+
+  return pool.filter((city) => foldCityKey(city.name) === needle);
 }
 
 export function searchTouristCities(
@@ -807,13 +867,35 @@ export function searchTouristCities(
   let results = TOURIST_CITIES.filter((city) => city.countryCode === code);
 
   if (q.length >= 2) {
-    results = results.filter((city) => {
-      const name = city.name.toLocaleLowerCase("tr");
-      return name.includes(q) || name.split(/\\s+/).some((word) => word.startsWith(q));
-    });
+    results = results.filter((city) => matchesPlaceNameSearch(city.name, q));
   }
 
   return results.sort((a, b) => compareCityNames(a.name, b.name)).slice(0, limit);
+}
+
+export function searchTouristCitiesInCountries(
+  countryCodes: string[],
+  query: string,
+  limit = 80
+): TouristCity[] {
+  const allowed = new Set(countryCodes.map((code) => code.toUpperCase()));
+  const q = query.trim().toLocaleLowerCase("tr");
+  if (q.length < 2 || allowed.size === 0) {
+    return [];
+  }
+
+  const results = TOURIST_CITIES.filter(
+    (city) => allowed.has(city.countryCode) && matchesPlaceNameSearch(city.name, q)
+  );
+
+  return results.sort((a, b) => compareCityNames(a.name, b.name)).slice(0, limit);
+}
+
+export function findTouristCitiesBySlug(slug: string): TouristCity[] {
+  const target = slug.trim().toLowerCase();
+  if (!target) return [];
+
+  return TOURIST_CITIES.filter((city) => buildCitySlug(city.name) === target);
 }
 `;
   fs.writeFileSync(tsPath, tsContent, "utf8");
@@ -827,13 +909,17 @@ if (process.argv.includes("--from-csv")) {
   const csvPath = path.join(root, "lib/data/tourist-cities.csv");
   const exclusions = getCityExclusions();
   const before = loadCitiesFromCsv(csvPath);
-  const output = before
-    .filter((city) => !exclusions.has(rowKey(city.countryCode, city.name)))
-    .sort((a, b) => {
-      if (a.countryCode !== b.countryCode) return a.countryCode.localeCompare(b.countryCode);
-      return a.name.localeCompare(b.name, "en");
-    });
-  console.log(`Removed ${before.length - output.length} excluded cities`);
+  const filtered = before.filter(
+    (city) => !exclusions.has(rowKey(city.countryCode, city.name))
+  );
+  const output = dedupeNearDuplicatePlaces(
+    filtered.map((city) => ({ ...city, reelCount: city.reelCount ?? 0 }))
+  ).sort((a, b) => {
+    if (a.countryCode !== b.countryCode) return a.countryCode.localeCompare(b.countryCode);
+    return a.name.localeCompare(b.name, "tr");
+  });
+  console.log(`Removed ${before.length - filtered.length} excluded cities`);
+  console.log(`Collapsed ${filtered.length - output.length} diacritic/alias duplicates`);
   writeCityOutputs(output);
   return;
 }

@@ -37,6 +37,10 @@ const CANONICAL_DISPLAY: Record<string, Record<string, string>> = {
     [normalizeCityKey("Göreme")]: "Göreme",
     [normalizeCityKey("Şanlıurfa")]: "Şanlıurfa",
     [normalizeCityKey("Çanakkale")]: "Çanakkale",
+    [normalizeCityKey("Çeşme")]: "Çeşme",
+    [normalizeCityKey("Kuşadası")]: "Kuşadası",
+    [normalizeCityKey("Istanbul")]: "İstanbul",
+    [normalizeCityKey("Izmir")]: "İzmir",
   },
   TH: {
     [normalizeCityKey("Pattaya")]: "Pattaya",
@@ -44,7 +48,7 @@ const CANONICAL_DISPLAY: Record<string, Record<string, string>> = {
   },
 };
 
-function resolveCanonicalNormalizedKey(countryCode: string, cityName: string): string {
+export function resolveCanonicalNormalizedKey(countryCode: string, cityName: string): string {
   const code = countryCode.toUpperCase();
   const normalized = normalizeCityKey(cityName);
 

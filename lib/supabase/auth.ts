@@ -15,6 +15,29 @@ export const getAuthUser = cache(async (): Promise<User | null> => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    // Ban check is best-effort: timeouts / missing columns must not drop valid sessions
+    // (otherwise /kamikaze and chrome intermittently redirect to login).
+    try {
+      const { data: profile, error: banError } = await supabase
+        .from("profiles")
+        .select("banned_at")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!banError && profile?.banned_at) {
+        try {
+          await supabase.auth.signOut();
+        } catch {
+          /* ignore */
+        }
+        return null;
+      }
+    } catch {
+      /* fail open */
+    }
+
     return user;
   } catch {
     return null;

@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { useContext, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { NotificationsContext } from "@/components/notifications/NotificationsProvider";
 import { commonMessages, dashboardNavMessages, shareMessages, wishlistMessages } from "@/lib/i18n/client-messages";
+import { isKamikazeMasterProfile } from "@/lib/kamikaze/master";
 import { profilePath } from "@/lib/seo/site";
 import { clearAllSessionPageCaches } from "@/lib/client/session-page-cache";
 
@@ -114,6 +116,27 @@ function LogOutIcon() {
   );
 }
 
+function YpIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <rect x="4" y="4" width="16" height="16" rx="2.5" />
+      <path d="M8 9h8M8 12.5h5M8 16h3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function BellMenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path
+        d="M12 3a5 5 0 0 0-5 5v2.2c0 .7-.2 1.4-.6 2L5 14.5h14l-1.4-2.3c-.4-.6-.6-1.3-.6-2V8a5 5 0 0 0-5-5Z"
+        strokeLinejoin="round"
+      />
+      <path d="M10 17.5a2 2 0 0 0 4 0" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 type MenuPosition = {
   top: number;
   right: number;
@@ -144,6 +167,7 @@ export function BottomBarProfileNav({
   onMyParksClick,
 }: BottomBarProfileNavProps) {
   const pathname = usePathname();
+  const notifications = useContext(NotificationsContext);
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
@@ -156,6 +180,11 @@ export function BottomBarProfileNav({
   const active = Boolean(username) && pathname === profileHref;
   const profileSharesMapHref = showBarDestinationsInMenu && mapHref === profileHref;
   const profileMenuActive = active && !profileSharesMapHref;
+  const showYpMenu = Boolean(
+    ownProfile &&
+      isKamikazeMasterProfile({ id: ownProfile.id, username: ownProfile.username })
+  );
+  const ypActive = pathname.startsWith("/kamikaze");
 
   useEffect(() => {
     setMounted(true);
@@ -328,6 +357,55 @@ export function BottomBarProfileNav({
                       {dashboardNavMessages.myParks}
                     </button>
                   ) : null}
+                  {showYpMenu ? (
+                    <Link
+                      href="/kamikaze"
+                      role="menuitem"
+                      className={`dashboard-profile-menu__item${
+                        ypActive ? " dashboard-profile-menu__item--active" : ""
+                      }`}
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="dashboard-profile-menu__icon" aria-hidden>
+                        <YpIcon />
+                      </span>
+                      {dashboardNavMessages.yp}
+                    </Link>
+                  ) : null}
+                  {notifications ? (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className={`dashboard-profile-menu__item${
+                        notifications.isOpen ? " dashboard-profile-menu__item--active" : ""
+                      }`}
+                      onClick={() => {
+                        setOpen(false);
+                        notifications.openNotifications();
+                      }}
+                    >
+                      <span className="dashboard-profile-menu__icon" aria-hidden>
+                        <BellMenuIcon />
+                      </span>
+                      {dashboardNavMessages.notifications}
+                    </button>
+                  ) : (
+                    <Link
+                      href="/notifications"
+                      role="menuitem"
+                      className={`dashboard-profile-menu__item${
+                        pathname.startsWith("/notifications")
+                          ? " dashboard-profile-menu__item--active"
+                          : ""
+                      }`}
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="dashboard-profile-menu__icon" aria-hidden>
+                        <BellMenuIcon />
+                      </span>
+                      {dashboardNavMessages.notifications}
+                    </Link>
+                  )}
                   <Link
                     href="/settings"
                     role="menuitem"
@@ -427,6 +505,55 @@ export function BottomBarProfileNav({
                       {dashboardNavMessages.myParks}
                     </button>
                   ) : null}
+                  {showYpMenu ? (
+                    <Link
+                      href="/kamikaze"
+                      role="menuitem"
+                      className={`dashboard-profile-menu__item${
+                        ypActive ? " dashboard-profile-menu__item--active" : ""
+                      }`}
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="dashboard-profile-menu__icon" aria-hidden>
+                        <YpIcon />
+                      </span>
+                      {dashboardNavMessages.yp}
+                    </Link>
+                  ) : null}
+                  {notifications ? (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className={`dashboard-profile-menu__item${
+                        notifications.isOpen ? " dashboard-profile-menu__item--active" : ""
+                      }`}
+                      onClick={() => {
+                        setOpen(false);
+                        notifications.openNotifications();
+                      }}
+                    >
+                      <span className="dashboard-profile-menu__icon" aria-hidden>
+                        <BellMenuIcon />
+                      </span>
+                      {dashboardNavMessages.notifications}
+                    </button>
+                  ) : (
+                    <Link
+                      href="/notifications"
+                      role="menuitem"
+                      className={`dashboard-profile-menu__item${
+                        pathname.startsWith("/notifications")
+                          ? " dashboard-profile-menu__item--active"
+                          : ""
+                      }`}
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="dashboard-profile-menu__icon" aria-hidden>
+                        <BellMenuIcon />
+                      </span>
+                      {dashboardNavMessages.notifications}
+                    </Link>
+                  )}
                   <Link
                     href="/settings"
                     role="menuitem"

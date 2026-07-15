@@ -140,12 +140,6 @@ function loadCountries() {
   return JSON.parse(fs.readFileSync(path.join(root, "data/countries.json"), "utf8")).countries;
 }
 
-function loadHomeBestCityHubs() {
-  const filePath = path.join(root, "data/home-best-city-hubs.json");
-  if (!fs.existsSync(filePath)) return [];
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
-}
-
 function main() {
   const countries = loadCountries();
   const cities = {};
@@ -173,10 +167,6 @@ function main() {
     }
 
     cities[slug] = entry;
-  }
-
-  for (const hub of loadHomeBestCityHubs()) {
-    cities[hub.slug] = hub;
   }
 
   const output = {

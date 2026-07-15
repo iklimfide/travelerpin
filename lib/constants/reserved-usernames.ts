@@ -4,6 +4,7 @@ export const RESERVED_USERNAMES = new Set([
   "auth",
   "country",
   "dashboard",
+  "kamikaze",
   "login",
   "og",
   "register",

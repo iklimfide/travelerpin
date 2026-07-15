@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { compareCitiesForAddModal } from "@/lib/add/city-list-sort";
 import { addCitiesBatch, addCity } from "@/lib/client/city-actions";
 import { cityMessages, commonMessages, formatMessage, mapMessages } from "@/lib/i18n/client-messages";
 import { canonicalCityKey, citiesAreSame } from "@/lib/utils/city-aliases";
@@ -13,6 +14,8 @@ type TouristCity = {
   name: string;
   latitude: number;
   longitude: number;
+  highlighted?: boolean;
+  isCapital?: boolean;
 };
 
 type CountryCityPickerProps = {
@@ -83,9 +86,7 @@ export function CountryCityPicker({
             return name.includes(q) || name.split(/\s+/).some((word) => word.startsWith(q));
           });
 
-    return [...cities].sort((a, b) =>
-      a.name.localeCompare(b.name, "tr", { sensitivity: "base" })
-    );
+    return [...cities].sort(compareCitiesForAddModal);
   }, [allCities, filter]);
 
   const selectableCities = useMemo(() => {

@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { searchTouristParksInCountries } from "@/lib/data/tourist-park-search";
+import {
+  applyParkOverlay,
+  getCatalogOverlay,
+} from "@/lib/kamikaze/catalog-overlay";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import { createClient } from "@/lib/supabase/server";
 import type { ParkType } from "@/types/database";
@@ -58,10 +62,19 @@ export async function GET(request: Request) {
   const showCountry = countries.length > 1;
   const seen = new Set<string>();
 
-  const parks = searchTouristParksInCountries(
-    countries.map((c) => c.code),
-    q,
-    100
+  const overlay = await getCatalogOverlay();
+  const parks = applyParkOverlay(
+    searchTouristParksInCountries(
+      countries.map((c) => c.code),
+      q,
+      100
+    ),
+    overlay,
+    {
+      countryCodes: countries.map((c) => c.code),
+      query: q,
+      limit: 100,
+    }
   )
     .filter((park) => {
       const key = `${park.countryCode}:${park.parkType}:${park.name.toLocaleLowerCase("tr")}`;

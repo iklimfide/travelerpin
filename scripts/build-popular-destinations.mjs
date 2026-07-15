@@ -140,12 +140,6 @@ export type PopularDestination = {
 };
 
 export const POPULAR_DESTINATIONS: PopularDestination[] = ${JSON.stringify(destinations, null, 2)};
-
-/** @deprecated Use POPULAR_DESTINATIONS — kept for import compatibility */
-export const FEATURED_DESTINATIONS: PopularDestination[] = POPULAR_DESTINATIONS;
-
-/** @deprecated Capitals list removed — popular list is a single curated ranking */
-export const CAPITAL_DESTINATIONS: PopularDestination[] = [];
 `;
 
 const outPath = path.join(root, "lib/data/popular-destinations.ts");

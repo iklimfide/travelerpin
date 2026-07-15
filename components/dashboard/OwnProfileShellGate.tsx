@@ -6,6 +6,7 @@ import { setOwnUsername } from "@/lib/client/session-page-cache";
 import { createClient } from "@/lib/supabase/client";
 
 export type BottomBarOwnProfile = {
+  id: string;
   username: string;
   avatarUrl: string | null;
   displayName: string | null;
@@ -50,6 +51,7 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
         setOwnProfile(
           profile?.username
             ? {
+                id: user.id,
                 username: profile.username,
                 avatarUrl: profile.avatar_url ?? null,
                 displayName: profile.display_name ?? null,

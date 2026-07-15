@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import { COUNTRY_LIST, searchCountries, getCountryName } from "@/lib/data/countries";
 import { searchTouristCitiesInCountries } from "@/lib/data/tourist-cities";
 import { searchTouristParksInCountries } from "@/lib/data/tourist-park-search";
+import {
+  applyParkOverlay,
+  exclusionSet,
+  getCatalogOverlay,
+} from "@/lib/kamikaze/catalog-overlay";
+import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
+import { canonicalCityName } from "@/lib/utils/city-aliases";
+import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
 import { createClient } from "@/lib/supabase/server";
 
 const COUNTRY_CODES = COUNTRY_LIST.map((country) => country.code);
@@ -32,7 +40,49 @@ export async function GET(request: Request) {
     name: country.name,
   }));
 
-  const cities = searchTouristCitiesInCountries(COUNTRY_CODES, q, 24).map((city) => ({
+  const overlay = await getCatalogOverlay();
+  const cityExcluded = exclusionSet(overlay, "city");
+
+  const baseCities = searchTouristCitiesInCountries(COUNTRY_CODES, q, 40).filter(
+    (city) =>
+      !cityExcluded.has(
+        `${city.countryCode}:${catalogNameKey(city.name, city.countryCode)}`
+      )
+  );
+
+  const cityKeys = new Set(
+    baseCities.map(
+      (city) => `${city.countryCode}:${catalogNameKey(city.name, city.countryCode)}`
+    )
+  );
+  for (const row of overlay.cities) {
+    const code = row.country_code.toUpperCase();
+    const key = `${code}:${catalogNameKey(row.name, code)}`;
+    if (cityKeys.has(key) || cityExcluded.has(key)) continue;
+    if (!matchesPlaceNameSearch(row.name, q)) continue;
+    baseCities.push({
+      countryCode: code,
+      name: row.name,
+      latitude: row.latitude ?? 0,
+      longitude: row.longitude ?? 0,
+    });
+    cityKeys.add(key);
+    if (baseCities.length >= 40) break;
+  }
+
+  const deduped = new Map<string, (typeof baseCities)[number]>();
+  for (const city of baseCities) {
+    const code = city.countryCode.toUpperCase();
+    const key = `${code}:${catalogNameKey(city.name, code)}`;
+    if (deduped.has(key)) continue;
+    deduped.set(key, {
+      ...city,
+      countryCode: code,
+      name: canonicalCityName(code, city.name),
+    });
+  }
+
+  const cities = [...deduped.values()].slice(0, 24).map((city) => ({
     cityName: city.name,
     countryCode: city.countryCode,
     countryName: getCountryName(city.countryCode),
@@ -40,7 +90,11 @@ export async function GET(request: Request) {
     longitude: city.longitude,
   }));
 
-  const parks = searchTouristParksInCountries(COUNTRY_CODES, q, 24).map((park) => ({
+  const parks = applyParkOverlay(
+    searchTouristParksInCountries(COUNTRY_CODES, q, 24),
+    overlay,
+    { countryCodes: COUNTRY_CODES, query: q, limit: 24 }
+  ).map((park) => ({
     parkName: park.name,
     parkType: park.parkType,
     countryCode: park.countryCode,
@@ -51,3 +105,4 @@ export async function GET(request: Request) {
 
   return NextResponse.json({ countries, cities, parks });
 }
+

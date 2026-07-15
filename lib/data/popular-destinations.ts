@@ -867,9 +867,3 @@ export const POPULAR_DESTINATIONS: PopularDestination[] = [
     "longitude": -46.6333
   }
 ];
-
-/** @deprecated Use POPULAR_DESTINATIONS — kept for import compatibility */
-export const FEATURED_DESTINATIONS: PopularDestination[] = POPULAR_DESTINATIONS;
-
-/** @deprecated Capitals list removed — popular list is a single curated ranking */
-export const CAPITAL_DESTINATIONS: PopularDestination[] = [];

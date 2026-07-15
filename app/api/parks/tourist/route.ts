@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { searchTouristParks } from "@/lib/data/tourist-park-search";
+import {
+  applyParkOverlay,
+  getCatalogOverlay,
+} from "@/lib/kamikaze/catalog-overlay";
 import { PARK_TYPES, type ParkType } from "@/types/database";
 
 export async function GET(request: Request) {
@@ -16,7 +20,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Invalid park type" }, { status: 400 });
   }
 
-  const parks = searchTouristParks(country, q, 100, type ?? undefined);
+  const base = searchTouristParks(country, q, 100, type ?? undefined);
+  const overlay = await getCatalogOverlay();
+  const parks = applyParkOverlay(base, overlay, {
+    countryCode: country,
+    query: q,
+    parkType: type ?? undefined,
+    limit: 100,
+  });
 
   return NextResponse.json({ parks });
 }

@@ -32,6 +32,8 @@ export interface Profile {
   wishlist_public: boolean;
   share_prompt_mode: SharePromptMode;
   next_route?: NextRouteStop[];
+  banned_at?: string | null;
+  ban_reason?: string | null;
   created_at: string;
 }
 

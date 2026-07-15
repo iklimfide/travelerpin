@@ -1,10 +1,18 @@
-/** Fold Turkish I variants so "İstanbul" and "Istanbul" compare equal. */
+/**
+ * Fold Turkish letters so ASCII and accented spellings compare equal
+ * ("Goreme" / "Göreme", "Cesme" / "Çeşme", "Istanbul" / "İstanbul").
+ */
 export function normalizeCityKey(value: string): string {
   return value
     .trim()
     .toLocaleLowerCase("tr")
     .replaceAll("ı", "i")
-    .replaceAll("İ", "i");
+    .replaceAll("İ", "i")
+    .replaceAll("ş", "s")
+    .replaceAll("ğ", "g")
+    .replaceAll("ü", "u")
+    .replaceAll("ö", "o")
+    .replaceAll("ç", "c");
 }
 
 /** "rust" → "Rust", "new york" → "New York", "(ko tapu)" → "(Ko Tapu)" */
