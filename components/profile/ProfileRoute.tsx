@@ -93,7 +93,8 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
       }
 
       if (!res.ok) {
-        setMissing(true);
+        // Transient 5xx / cache failures — keep trying, do not convert to notFound.
+        setMissing(false);
         return;
       }
 

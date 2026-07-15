@@ -31,7 +31,6 @@ type CityPickerStepProps = {
   existingCityNames: string[];
   pendingCityKeys: Set<string>;
   onToggleCity: (city: CatalogCity) => void;
-  onBack: () => void;
   existingCityHint?: string;
 };
 
@@ -63,7 +62,6 @@ export function CityPickerStep({
   existingCityNames,
   pendingCityKeys,
   onToggleCity,
-  onBack,
   existingCityHint,
 }: CityPickerStepProps) {
   const [tiers, setTiers] = useState<CityTier[]>([]);
@@ -209,9 +207,6 @@ export function CityPickerStep({
     <div className="add-destination-step add-destination-step--city">
       <div className="add-destination-city-toolbar">
         <div className="add-destination-city-header">
-          <button type="button" className="add-destination-back" onClick={onBack}>
-            {addDestinationMessages.back}
-          </button>
           <div className="add-destination-city-header__title-row">
             <Image
               src={countryCodeToFlagUrl(flagCountryCode(countryCode))}

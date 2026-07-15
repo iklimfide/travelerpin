@@ -84,6 +84,18 @@ function countrySearchScore(country: CountryOption, query: string): number {
   return 0;
 }
 
+/** Same rules as region grouping — used to re-open the right continent after Back. */
+export function getAddRegionForCountryCode(countryCode: string): AddRegionId | null {
+  const code = countryCode.trim().toUpperCase();
+  if (!code) return null;
+
+  if (isUkNationCode(code)) return "europe";
+  if (!isUnMemberCountry(code)) return "special";
+
+  const continent = getCountryContinent(code);
+  return continent ? CONTINENT_TO_REGION[continent] : "special";
+}
+
 export function groupCountriesByRegion(): Record<AddRegionId, CountryOption[]> {
   const groups: Record<AddRegionId, CountryOption[]> = {
     africa: [],
@@ -96,18 +108,7 @@ export function groupCountriesByRegion(): Record<AddRegionId, CountryOption[]> {
   };
 
   for (const country of getAddDestinationCountryList()) {
-    if (isUkNationCode(country.code)) {
-      groups.europe.push(country);
-      continue;
-    }
-
-    if (!isUnMemberCountry(country.code)) {
-      groups.special.push(country);
-      continue;
-    }
-
-    const continent = getCountryContinent(country.code);
-    const region = continent ? CONTINENT_TO_REGION[continent] : null;
+    const region = getAddRegionForCountryCode(country.code);
     if (region) {
       groups[region].push(country);
     } else {

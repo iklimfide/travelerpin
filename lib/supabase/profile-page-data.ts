@@ -116,31 +116,29 @@ export function getCachedPublicProfileBundle(
 
   return unstable_cache(
     async () => {
-      try {
-        const supabase = createPublicSupabaseClient();
-        if (!supabase) return null;
-
-        const profile = await fetchPublicProfile(supabase, key);
-        if (!profile) return null;
-
-        const rows = await loadProfileRows(supabase, profile);
-        const publicWishlistCountries = await loadWishlistCountries(
-          supabase,
-          profile,
-          false
-        );
-
-        return {
-          profile,
-          ...rows,
-          publicWishlistCountries,
-        };
-      } catch (error) {
-        console.error("getCachedPublicProfileBundle failed:", error);
-        return null;
+      const supabase = createPublicSupabaseClient();
+      if (!supabase) {
+        // Do not cache infra misses as "profile not found".
+        throw new Error("getCachedPublicProfileBundle: Supabase not configured");
       }
+
+      const profile = await fetchPublicProfile(supabase, key);
+      if (!profile) return null;
+
+      const rows = await loadProfileRows(supabase, profile);
+      const publicWishlistCountries = await loadWishlistCountries(
+        supabase,
+        profile,
+        false
+      );
+
+      return {
+        profile,
+        ...rows,
+        publicWishlistCountries,
+      };
     },
-    ["public-profile-bundle-v4", key],
+    ["public-profile-bundle-v5", key],
     // Indefinite until pin/profile write calls revalidateProfileForPin.
     { revalidate: false, tags: [profileCacheTag(key)] }
   )();

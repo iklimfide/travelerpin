@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { loadPublicProfilePage } from "@/lib/supabase/profile-page-data";
 
+export const dynamic = "force-dynamic";
+
 type RouteContext = {
   params: Promise<{ username: string }>;
 };

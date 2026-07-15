@@ -17,6 +17,10 @@ import {
   savePendingDestinations,
   type PendingCitySelection,
 } from "@/lib/client/travel-state";
+import {
+  getAddRegionForCountryCode,
+  type AddRegionId,
+} from "@/lib/add/countries-by-region";
 import { addDestinationMessages, commonMessages } from "@/lib/i18n/client-messages";
 import type { CountryOption } from "@/lib/data/countries";
 import { isUkNationCode, isUkNationVisited, matchesUkCityCountry } from "@/lib/data/uk-nations";
@@ -103,6 +107,7 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
   const [pendingCities, setPendingCities] = useState<Map<string, PendingCitySelection>>(
     () => new Map()
   );
+  const [returnExpandedRegion, setReturnExpandedRegion] = useState<AddRegionId | null>(null);
   const [loadingState, setLoadingState] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -139,6 +144,7 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
     setStep({ kind: "countries" });
     setPendingCountryCodes(new Set());
     setPendingCities(new Map());
+    setReturnExpandedRegion(null);
     setSaveError(null);
     void loadTravelState({ background: false });
   }, [loadTravelState]);
@@ -216,6 +222,7 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
   }
 
   function handleOpenCountry(country: CountryOption) {
+    setReturnExpandedRegion(getAddRegionForCountryCode(country.code));
     setStep({
       kind: "cities",
       countryCode: country.code,
@@ -330,7 +337,7 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
       >
         <div
           className={`add-destination-modal__header${
-            step.kind === "cities" ? " add-destination-modal__header--compact" : ""
+            step.kind === "cities" ? " add-destination-modal__header--cities" : ""
           }`}
         >
           {step.kind === "countries" ? (
@@ -338,9 +345,21 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
               {addDestinationMessages.selectCountryTitle}
             </h2>
           ) : (
-            <h2 id="add-destination-title" className="sr-only">
-              {step.countryName}
-            </h2>
+            <>
+              <button
+                type="button"
+                className="add-destination-back add-destination-back--on-header"
+                onClick={() => setStep({ kind: "countries" })}
+              >
+                <span className="add-destination-back__chevron" aria-hidden>
+                  &lt;
+                </span>
+                {addDestinationMessages.back}
+              </button>
+              <h2 id="add-destination-title" className="sr-only">
+                {step.countryName}
+              </h2>
+            </>
           )}
           <button
             type="button"
@@ -363,6 +382,7 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
               onToggleCountry={handleToggleCountry}
               onOpenCountry={handleOpenCountry}
               listHint={addDestinationMessages.saveHint}
+              initialExpandedRegion={returnExpandedRegion}
             />
           ) : (
             <CityPickerStep
@@ -371,7 +391,6 @@ export function AddDestinationModal({ onClose }: AddDestinationModalProps) {
               existingCityNames={existingCityNames}
               pendingCityKeys={pendingCityKeys}
               onToggleCity={handleToggleCity}
-              onBack={() => setStep({ kind: "countries" })}
             />
           )}
         </div>

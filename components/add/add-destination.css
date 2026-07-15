@@ -90,10 +90,9 @@
   color: #fff;
 }
 
-.add-destination-modal__header--compact {
-  min-height: 44px;
-  justify-content: flex-end;
-  padding: 8px 10px;
+.add-destination-modal__header--cities {
+  justify-content: flex-start;
+  padding: 12px 52px 12px 14px;
 }
 
 .add-destination-modal__title {
@@ -119,11 +118,6 @@
   color: #fff;
   font-size: 15px;
   cursor: pointer;
-}
-
-.add-destination-modal__header--compact .add-destination-modal__close {
-  position: static;
-  transform: none;
 }
 
 .add-destination-modal__close:hover:not(:disabled) {
@@ -552,25 +546,43 @@ button.add-destination-country-tile__main:hover {
 }
 
 .add-destination-city-header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  display: flex;
   align-items: center;
-  column-gap: 8px;
+  justify-content: center;
   margin-bottom: 12px;
+  min-width: 0;
 }
 
 button.add-destination-back {
   display: inline-flex;
+  align-items: center;
+  gap: 5px;
   border: none;
   background: transparent;
   color: #1e96f3;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
+  line-height: 1;
   padding: 0;
-  margin-bottom: 0;
+  margin: 0;
   cursor: pointer;
-  grid-column: 1;
-  justify-self: start;
+  flex-shrink: 0;
+}
+
+button.add-destination-back--on-header {
+  color: #fff;
+}
+
+button.add-destination-back--on-header:hover {
+  opacity: 0.9;
+}
+
+.add-destination-back__chevron {
+  display: inline-block;
+  font-size: 1.05em;
+  font-weight: 700;
+  line-height: 1;
+  transform: translateY(-0.5px);
 }
 
 .add-destination-city-header__title-row {
@@ -578,8 +590,6 @@ button.add-destination-back {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  grid-column: 2;
-  justify-self: center;
   min-width: 0;
 }
 

@@ -14,7 +14,11 @@ import {
   routeCountryCodes,
   savePendingNextRouteStops,
 } from "@/lib/client/next-route-state";
-import { commonMessages, nextRouteDestinationMessages } from "@/lib/i18n/client-messages";
+import {
+  getAddRegionForCountryCode,
+  type AddRegionId,
+} from "@/lib/add/countries-by-region";
+import { addDestinationMessages, commonMessages, nextRouteDestinationMessages } from "@/lib/i18n/client-messages";
 import type { CountryOption } from "@/lib/data/countries";
 import { isUkNationCode, isUkNationVisited, matchesUkCityCountry } from "@/lib/data/uk-nations";
 import { citiesAreSame } from "@/lib/utils/city-aliases";
@@ -38,6 +42,7 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
   const [routeCityKeySet, setRouteCityKeySet] = useState<Set<string>>(new Set());
   const [pendingCountryCodes, setPendingCountryCodes] = useState<Set<string>>(new Set());
   const [pendingCityKeys, setPendingCityKeys] = useState<Set<string>>(new Set());
+  const [returnExpandedRegion, setReturnExpandedRegion] = useState<AddRegionId | null>(null);
   const [loadingState, setLoadingState] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -80,6 +85,7 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
     setStep({ kind: "countries" });
     setPendingCountryCodes(new Set());
     setPendingCityKeys(new Set());
+    setReturnExpandedRegion(null);
     setSaveError(null);
     void loadRouteState({ background: false });
   }, [loadRouteState]);
@@ -158,6 +164,7 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
   }
 
   function handleOpenCountry(country: CountryOption) {
+    setReturnExpandedRegion(getAddRegionForCountryCode(country.code));
     setStep({
       kind: "cities",
       countryCode: country.code,
@@ -239,7 +246,7 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
       >
         <div
           className={`add-destination-modal__header${
-            step.kind === "cities" ? " add-destination-modal__header--compact" : ""
+            step.kind === "cities" ? " add-destination-modal__header--cities" : ""
           }`}
         >
           {step.kind === "countries" ? (
@@ -247,9 +254,21 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
               {nextRouteDestinationMessages.selectCountryTitle}
             </h2>
           ) : (
-            <h2 id="next-route-destination-title" className="sr-only">
-              {step.countryName}
-            </h2>
+            <>
+              <button
+                type="button"
+                className="add-destination-back add-destination-back--on-header"
+                onClick={() => setStep({ kind: "countries" })}
+              >
+                <span className="add-destination-back__chevron" aria-hidden>
+                  &lt;
+                </span>
+                {addDestinationMessages.back}
+              </button>
+              <h2 id="next-route-destination-title" className="sr-only">
+                {step.countryName}
+              </h2>
+            </>
           )}
           <button
             type="button"
@@ -271,6 +290,7 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
               pendingCountryCodes={pendingCountryCodes}
               onToggleCountry={handleToggleCountry}
               onOpenCountry={handleOpenCountry}
+              initialExpandedRegion={returnExpandedRegion}
             />
           ) : (
             <CityPickerStep
@@ -279,7 +299,6 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
               existingCityNames={existingCityNames}
               pendingCityKeys={pendingCityKeys}
               onToggleCity={handleToggleCity}
-              onBack={() => setStep({ kind: "countries" })}
               existingCityHint={nextRouteDestinationMessages.cityOnRoute}
             />
           )}

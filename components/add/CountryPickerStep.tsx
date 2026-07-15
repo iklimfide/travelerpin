@@ -30,6 +30,8 @@ type CountryPickerStepProps = {
   searchPlaceholder?: string;
   regionProgressSuffix?: string;
   listHint?: string;
+  /** Re-open this continent when returning from the city step. */
+  initialExpandedRegion?: AddRegionId | null;
 };
 
 const MIN_SEARCH_LENGTH = 2;
@@ -91,6 +93,7 @@ export function CountryPickerStep({
   searchPlaceholder,
   regionProgressSuffix = "visited",
   listHint,
+  initialExpandedRegion = null,
 }: CountryPickerStepProps) {
   const progressCodes = countedCodes ?? visitedCodes;
 
@@ -119,7 +122,9 @@ export function CountryPickerStep({
     };
   }
   const [query, setQuery] = useState("");
-  const [expandedRegion, setExpandedRegion] = useState<AddRegionId | null>(null);
+  const [expandedRegion, setExpandedRegion] = useState<AddRegionId | null>(
+    initialExpandedRegion
+  );
 
   const groups = useMemo(() => groupCountriesByRegion(), []);
 
