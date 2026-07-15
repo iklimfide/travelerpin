@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { BRAND } from "@/lib/constants";
@@ -34,6 +35,7 @@ const geistSans = Geist({
 });
 
 const siteUrl = getSiteUrl();
+const GA_MEASUREMENT_ID = "G-5GZPZZ0GB0";
 
 export const metadata: Metadata = {
   title: {
@@ -89,6 +91,18 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full min-w-0 flex-col overflow-x-hidden bg-background text-foreground">
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}');
+          `}
+        </Script>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider>
             <ClearPwaArtifacts />
