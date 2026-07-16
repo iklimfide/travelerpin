@@ -133,6 +133,12 @@ export async function GET(request: Request) {
   }
 
   const overlay = await getCatalogOverlay();
+  const offsetRaw = Number(searchParams.get("offset") ?? "0");
+  const limitRaw = Number(searchParams.get("limit") ?? "80");
+  const offset = Number.isFinite(offsetRaw) && offsetRaw > 0 ? Math.floor(offsetRaw) : 0;
+  const limit = Number.isFinite(limitRaw)
+    ? Math.min(200, Math.max(1, Math.floor(limitRaw)))
+    : 80;
 
   if (kind === "city") {
     const excludedKeys = new Set(
@@ -168,18 +174,16 @@ export async function GET(request: Request) {
         if (country && city.countryCode !== country) return false;
         if (q.length >= 2 && !matchesPlaceNameSearch(city.name, q)) return false;
         return true;
-      })
-        .slice(0, 120)
-        .map((city) => ({
-          name: city.name,
-          countryCode: city.countryCode,
-          countryName: getCountryName(city.countryCode),
-          latitude: city.latitude,
-          longitude: city.longitude,
-          source: "static" as const,
-          popular: resolveCityPopular(city.countryCode, city.name, overrides),
-          capital: resolveCityCapital(city.countryCode, city.name),
-        }));
+      }).map((city) => ({
+        name: city.name,
+        countryCode: city.countryCode,
+        countryName: getCountryName(city.countryCode),
+        latitude: city.latitude,
+        longitude: city.longitude,
+        source: "static" as const,
+        popular: resolveCityPopular(city.countryCode, city.name, overrides),
+        capital: resolveCityCapital(city.countryCode, city.name),
+      }));
     }
 
     const additionRows: CityListRow[] = additions.map((row) => ({
@@ -194,10 +198,17 @@ export async function GET(request: Request) {
       capital: resolveCityCapital(row.country_code, row.name),
     }));
 
+    const all = dedupeCityListRows([...additionRows, ...staticMatches]);
+    const page = all.slice(offset, offset + limit);
+    const nextOffset = offset + page.length;
+
     return NextResponse.json({
       kind: "city",
-      results: dedupeCityListRows([...additionRows, ...staticMatches]).slice(0, 80),
+      results: page,
       additions,
+      total: all.length,
+      hasMore: nextOffset < all.length,
+      nextOffset,
     });
   }
 
@@ -233,17 +244,15 @@ export async function GET(request: Request) {
       if (country && park.countryCode !== country) return false;
       if (q.length >= 2 && !matchesPlaceNameSearch(park.name, q)) return false;
       return true;
-    })
-      .slice(0, 80)
-      .map((park) => ({
-        name: park.name,
-        parkType: park.parkType,
-        countryCode: park.countryCode,
-        countryName: park.countryName,
-        latitude: park.latitude,
-        longitude: park.longitude,
-        source: "static" as const,
-      }));
+    }).map((park) => ({
+      name: park.name,
+      parkType: park.parkType,
+      countryCode: park.countryCode,
+      countryName: park.countryName,
+      latitude: park.latitude,
+      longitude: park.longitude,
+      source: "static" as const,
+    }));
   }
 
   const additionRows = additions.map((row) => ({
@@ -257,10 +266,17 @@ export async function GET(request: Request) {
     source: "yp" as const,
   }));
 
+  const all = [...additionRows, ...staticMatches];
+  const page = all.slice(offset, offset + limit);
+  const nextOffset = offset + page.length;
+
   return NextResponse.json({
     kind: "park",
-    results: [...additionRows, ...staticMatches],
+    results: page,
     additions,
+    total: all.length,
+    hasMore: nextOffset < all.length,
+    nextOffset,
   });
 }
 

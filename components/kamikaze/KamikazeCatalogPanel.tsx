@@ -25,6 +25,9 @@ type CatalogResult = {
 
 type CatalogCachePayload = {
   results: CatalogResult[];
+  hasMore: boolean;
+  nextOffset: number;
+  total: number;
 };
 
 const PARK_TYPE_LABELS: Record<ParkType, string> = {
@@ -35,6 +38,7 @@ const PARK_TYPE_LABELS: Record<ParkType, string> = {
 
 const ADD_CITY_SEARCH_DEBOUNCE_MS = 300;
 const ADD_CITY_MIN_QUERY = 2;
+const CATALOG_PAGE_SIZE = 80;
 
 /** TR first, then the rest in alphabetical order. */
 const YP_COUNTRY_LIST = [
@@ -48,7 +52,11 @@ export function KamikazeCatalogPanel() {
   const [country, setCountry] = useState("");
   const [q, setQ] = useState("");
   const [results, setResults] = useState<CatalogResult[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [nextOffset, setNextOffset] = useState(0);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set());
@@ -111,13 +119,21 @@ export function KamikazeCatalogPanel() {
   );
 
   const load = useCallback(
-    async (options?: { force?: boolean }) => {
+    async (
+      mode: "replace" | "append" = "replace",
+      options?: { force?: boolean; offset?: number }
+    ) => {
       if (!isManageTab) return;
       const cacheKey = YP_CACHE_KEYS.catalog(kind, country, q);
-      if (!options?.force) {
+      const offset = options?.offset ?? 0;
+
+      if (mode === "replace" && !options?.force) {
         const cached = ypCacheGet<CatalogCachePayload>(cacheKey);
         if (cached) {
           setResults(cached.results);
+          setHasMore(cached.hasMore);
+          setNextOffset(cached.nextOffset);
+          setTotal(cached.total);
           setSelectedKeys(new Set());
           setLoading(false);
           setError(null);
@@ -125,34 +141,63 @@ export function KamikazeCatalogPanel() {
         }
       }
 
-      setLoading(true);
+      if (mode === "replace") setLoading(true);
+      else setLoadingMore(true);
       setError(null);
       try {
-        const params = new URLSearchParams({ kind });
+        const params = new URLSearchParams({
+          kind,
+          offset: String(offset),
+          limit: String(CATALOG_PAGE_SIZE),
+        });
         if (country) params.set("country", country);
         if (q.trim()) params.set("q", q.trim());
         const res = await fetch(`/api/kamikaze/catalog?${params}`);
         const data = (await res.json()) as {
           results?: CatalogResult[];
+          hasMore?: boolean;
+          nextOffset?: number;
+          total?: number;
           error?: string;
         };
         if (!res.ok) throw new Error(data.error ?? "Katalog yüklenemedi");
-        const nextResults = data.results ?? [];
-        setResults(nextResults);
-        setSelectedKeys(new Set());
-        ypCacheSet(cacheKey, { results: nextResults } satisfies CatalogCachePayload);
+        const page = data.results ?? [];
+        const nextHasMore = Boolean(data.hasMore);
+        const nextOff = data.nextOffset ?? offset + page.length;
+        const nextTotal = typeof data.total === "number" ? data.total : offset + page.length;
+
+        setResults((prev) => {
+          const nextResults = mode === "append" ? [...prev, ...page] : page;
+          ypCacheSet(cacheKey, {
+            results: nextResults,
+            hasMore: nextHasMore,
+            nextOffset: nextOff,
+            total: nextTotal,
+          } satisfies CatalogCachePayload);
+          return nextResults;
+        });
+        setHasMore(nextHasMore);
+        setNextOffset(nextOff);
+        setTotal(nextTotal);
+        if (mode === "replace") setSelectedKeys(new Set());
       } catch (err) {
         setError(err instanceof Error ? err.message : "Katalog yüklenemedi");
       } finally {
         setLoading(false);
+        setLoadingMore(false);
       }
     },
     [kind, country, q, isManageTab]
   );
 
   useEffect(() => {
-    void load();
+    void load("replace");
   }, [load]);
+
+  async function loadMore() {
+    if (!hasMore || loadingMore || loading) return;
+    await load("append", { force: true, offset: nextOffset });
+  }
 
   useEffect(() => {
     void loadAdditions();
@@ -254,7 +299,7 @@ export function KamikazeCatalogPanel() {
       if (isAddTab) {
         await loadAdditions({ force: true });
       } else {
-        await load({ force: true });
+        await load("replace", { force: true });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "İşlem başarısız");
@@ -908,7 +953,7 @@ export function KamikazeCatalogPanel() {
             <button
               type="button"
               className="yp-btn"
-              onClick={() => void load({ force: true })}
+              onClick={() => void load("replace", { force: true })}
               disabled={loading}
             >
               {loading ? "Yükleniyor…" : "Yenile"}
@@ -952,8 +997,12 @@ export function KamikazeCatalogPanel() {
               ) : (
                 <span className="yp-muted" style={{ fontWeight: 500, fontSize: "0.78rem" }}>
                   {kind === "city"
-                    ? `${results.length} şehir`
-                    : `${results.length} park`}
+                    ? total > results.length
+                      ? `${results.length} / ${total} şehir`
+                      : `${results.length} şehir`
+                    : total > results.length
+                      ? `${results.length} / ${total} park`
+                      : `${results.length} park`}
                 </span>
               )}
             </div>
@@ -1066,6 +1115,20 @@ export function KamikazeCatalogPanel() {
                 </tbody>
               </table>
             )}
+            {hasMore ? (
+              <div style={{ padding: "0.75rem 0.9rem" }}>
+                <button
+                  type="button"
+                  className="yp-btn"
+                  disabled={loadingMore || loading}
+                  onClick={() => void loadMore()}
+                >
+                  {loadingMore
+                    ? "Yükleniyor…"
+                    : `Daha fazla yükle (+${CATALOG_PAGE_SIZE})`}
+                </button>
+              </div>
+            ) : null}
           </div>
         </>
       ) : null}
