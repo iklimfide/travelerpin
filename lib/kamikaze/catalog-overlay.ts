@@ -232,7 +232,9 @@ export function applyCityOverlayToCatalogCities(
   for (const row of overlay.cities) {
     if (row.country_code.toUpperCase() !== code) continue;
     const key = `${code}:${catalogNameKey(row.name, code)}`;
-    if (existingKeys.has(key) || isExcluded(excluded, code, row.name)) continue;
+    // YP rows always win over exclusions. Exclusions only hide static twins;
+    // applying them here created invisible DB remnants that blocked re-adds.
+    if (existingKeys.has(key)) continue;
     if (q.length >= 2 && !matchesPlaceNameSearch(row.name, q)) continue;
 
     const override = overrides.get(key);
@@ -282,8 +284,8 @@ export function applyParkOverlay(
     const code = row.country_code.toUpperCase();
     if (allowedSet && !allowedSet.has(code)) continue;
     if (!matchesParkTypeFilter(row.park_type, options?.parkType)) continue;
-    if (isExcluded(excluded, code, row.name)) continue;
     const key = `${code}:${catalogNameKey(row.name)}`;
+    // YP park rows are not suppressed by exclusions (same ghost-row rule as cities).
     if (existingKeys.has(key)) continue;
     if (q.length >= 2 && !matchesPlaceNameSearch(row.name, q)) continue;
 

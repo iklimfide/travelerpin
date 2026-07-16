@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getCountryCapitalName, matchesCapitalCity } from "@/lib/data/country-capitals";
 import { getCountryName } from "@/lib/data/countries";
 import { TOURIST_CITIES } from "@/lib/data/tourist-cities";
 import { TOURIST_PARKS } from "@/lib/data/tourist-parks";
@@ -16,6 +17,7 @@ import {
   type YpCatalogParkRow,
 } from "@/lib/kamikaze/catalog-overlay";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
+import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
 import { PARK_TYPES, type ParkType } from "@/types/database";
 
@@ -27,6 +29,7 @@ type CityListRow = {
   longitude: number | null;
   source: "static" | "yp";
   popular: boolean;
+  capital: boolean;
   id?: string;
 };
 
@@ -37,6 +40,11 @@ function resolveCityPopular(
 ): boolean {
   const key = `${countryCode.toUpperCase()}:${catalogNameKey(name, countryCode)}`;
   return overrides.get(key) === true;
+}
+
+function resolveCityCapital(countryCode: string, name: string): boolean {
+  const capitalName = getCountryCapitalName(countryCode);
+  return capitalName ? matchesCapitalCity(name, capitalName) : false;
 }
 
 function dedupeCityListRows(rows: CityListRow[]): CityListRow[] {
@@ -58,11 +66,18 @@ function dedupeCityListRows(rows: CityListRow[]): CityListRow[] {
     byKey.set(
       key,
       score(next) >= score(existing)
-        ? { ...existing, ...next, name: canonicalName }
+        ? {
+            ...existing,
+            ...next,
+            name: canonicalName,
+            capital: existing.capital || next.capital,
+            popular: existing.popular || next.popular,
+          }
         : {
             ...existing,
             name: canonicalName,
             popular: existing.popular || next.popular,
+            capital: existing.capital || next.capital,
           }
     );
   }
@@ -80,58 +95,40 @@ export async function GET(request: Request) {
   const q = searchParams.get("q")?.trim() ?? "";
 
   // YP additions only (newest first) — used by Şehir ekle / Park ekle tabs.
+  // Do not hide YP rows via exclusions: exclusions only suppress static catalog
+  // twins. Filtering YP here created "ghost" rows (in DB, invisible in UI, blocks insert).
   if (searchParams.get("ypOnly") === "1") {
     const overlayFresh = await getCatalogOverlayFresh();
-    const excludedKeys = new Set(
-      overlayFresh.exclusions
-        .filter((row) => row.kind === kind)
-        .map((row) => {
-          const code = row.country_code.toUpperCase();
-          return `${code}:${catalogNameKey(
-            row.name_key,
-            kind === "city" ? code : undefined
-          )}`;
-        })
-    );
 
     if (kind === "city") {
       const overrides = popularityOverrideMap(overlayFresh);
-      const results = overlayFresh.cities
-        .filter((row) => {
-          const code = row.country_code.toUpperCase();
-          return !excludedKeys.has(`${code}:${catalogNameKey(row.name, code)}`);
-        })
-        .map((row) => ({
-          id: row.id,
-          name: row.name,
-          countryCode: row.country_code.toUpperCase(),
-          countryName: row.country_name,
-          latitude: row.latitude,
-          longitude: row.longitude,
-          source: "yp" as const,
-          popular: resolveCityPopular(row.country_code, row.name, overrides),
-          createdAt: row.created_at,
-        }));
-      // overlay.cities is already created_at desc.
-      return NextResponse.json({ kind: "city", results, ypOnly: true });
-    }
-
-    const results = overlayFresh.parks
-      .filter((row) => {
-        const code = row.country_code.toUpperCase();
-        return !excludedKeys.has(`${code}:${catalogNameKey(row.name)}`);
-      })
-      .map((row) => ({
+      const results = overlayFresh.cities.map((row) => ({
         id: row.id,
         name: row.name,
-        parkType: row.park_type,
         countryCode: row.country_code.toUpperCase(),
         countryName: row.country_name,
         latitude: row.latitude,
         longitude: row.longitude,
         source: "yp" as const,
+        popular: resolveCityPopular(row.country_code, row.name, overrides),
+        capital: resolveCityCapital(row.country_code, row.name),
         createdAt: row.created_at,
       }));
+      // overlay.cities is already created_at desc.
+      return NextResponse.json({ kind: "city", results, ypOnly: true });
+    }
+
+    const results = overlayFresh.parks.map((row) => ({
+      id: row.id,
+      name: row.name,
+      parkType: row.park_type,
+      countryCode: row.country_code.toUpperCase(),
+      countryName: row.country_name,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      source: "yp" as const,
+      createdAt: row.created_at,
+    }));
     return NextResponse.json({ kind: "park", results, ypOnly: true });
   }
 
@@ -148,9 +145,10 @@ export async function GET(request: Request) {
     );
     const overrides = popularityOverrideMap(overlay);
 
+    // YP additions always listed when they match filters (even if an exclusion
+    // remnant exists — that remnant only affects static twins).
     const additions = overlay.cities.filter((row) => {
       const code = row.country_code.toUpperCase();
-      if (excludedKeys.has(`${code}:${catalogNameKey(row.name, code)}`)) return false;
       if (country && code !== country) return false;
       if (q.length >= 2 && !matchesPlaceNameSearch(row.name, q)) return false;
       return true;
@@ -180,6 +178,7 @@ export async function GET(request: Request) {
           longitude: city.longitude,
           source: "static" as const,
           popular: resolveCityPopular(city.countryCode, city.name, overrides),
+          capital: resolveCityCapital(city.countryCode, city.name),
         }));
     }
 
@@ -192,6 +191,7 @@ export async function GET(request: Request) {
       longitude: row.longitude,
       source: "yp" as const,
       popular: resolveCityPopular(row.country_code, row.name, overrides),
+      capital: resolveCityCapital(row.country_code, row.name),
     }));
 
     return NextResponse.json({
@@ -209,7 +209,6 @@ export async function GET(request: Request) {
 
   const additions = overlay.parks.filter((row) => {
     const code = row.country_code.toUpperCase();
-    if (excludedKeys.has(`${code}:${catalogNameKey(row.name)}`)) return false;
     if (country && code !== country) return false;
     if (q.length >= 2 && !matchesPlaceNameSearch(row.name, q)) return false;
     return true;
@@ -305,6 +304,7 @@ type CatalogBody =
       countryCode: string;
       latitude?: number | string | null;
       longitude?: number | string | null;
+      isPopular?: boolean;
     }
   | {
       action: "add_park";
@@ -377,7 +377,7 @@ export async function POST(request: Request) {
   }
 
   if (body.action === "add_city") {
-    const name = body.name?.trim();
+    const name = formatCityDisplayName(body.name ?? "");
     const countryCode = body.countryCode?.trim().toUpperCase();
     if (!name || !countryCode || countryCode.length !== 2) {
       return NextResponse.json({ error: "Invalid city payload" }, { status: 400 });
@@ -385,6 +385,53 @@ export async function POST(request: Request) {
     const coords = parseOptionalCoords(body);
     if ("error" in coords) {
       return NextResponse.json({ error: coords.error }, { status: 400 });
+    }
+
+    const nameKey = catalogNameKey(name, countryCode);
+
+    // Clear exclusion remnants first so a healed/existing row becomes visible.
+    await admin
+      .from("yp_catalog_exclusions")
+      .delete()
+      .eq("kind", "city")
+      .eq("country_code", countryCode)
+      .eq("name_key", nameKey);
+
+    const { data: existingRows } = await admin
+      .from("yp_catalog_cities")
+      .select("*")
+      .eq("country_code", countryCode);
+
+    let existing = (existingRows as YpCatalogCityRow[] | null)?.find(
+      (row) => catalogNameKey(row.name, countryCode) === nameKey
+    );
+
+    if (existing) {
+      // Fix legacy lowercase display names ("hua hin" → "Hua Hin").
+      if (existing.name !== name) {
+        const { data: updated, error: updateError } = await admin
+          .from("yp_catalog_cities")
+          .update({ name })
+          .eq("id", existing.id)
+          .select("*")
+          .single();
+        if (updateError) {
+          return NextResponse.json({ error: updateError.message }, { status: 400 });
+        }
+        existing = updated as YpCatalogCityRow;
+      }
+
+      if (body.isPopular) {
+        const popularError = await upsertCityPopular(countryCode, existing.name, true);
+        if (popularError) {
+          return NextResponse.json(
+            { error: popularError, city: existing },
+            { status: 400 }
+          );
+        }
+      }
+      await revalidateCatalogOverlay();
+      return NextResponse.json({ city: existing, alreadyExisted: true });
     }
 
     const row: Omit<YpCatalogCityRow, "id" | "created_at"> = {
@@ -402,23 +449,50 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
+      const msg = error.message.toLowerCase();
+      if (
+        msg.includes("yp_catalog_cities_country_name_uidx") ||
+        msg.includes("duplicate key")
+      ) {
+        // Race / case-fold miss: surface existing row instead of raw Postgres error.
+        const { data: again } = await admin
+          .from("yp_catalog_cities")
+          .select("*")
+          .eq("country_code", countryCode);
+        const found = (again as YpCatalogCityRow[] | null)?.find(
+          (r) => catalogNameKey(r.name, countryCode) === nameKey
+        );
+        if (found) {
+          await revalidateCatalogOverlay();
+          return NextResponse.json({ city: found, alreadyExisted: true });
+        }
+        return NextResponse.json(
+          {
+            error:
+              "Bu şehir bu ülkede zaten YP kataloğunda. Eklenen şehirler listesinden silip tekrar dene.",
+          },
+          { status: 409 }
+        );
+      }
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    // Re-add after delete: clear any permanent exclusion for this name.
-    await admin
-      .from("yp_catalog_exclusions")
-      .delete()
-      .eq("kind", "city")
-      .eq("country_code", countryCode)
-      .eq("name_key", catalogNameKey(name, countryCode));
+    if (body.isPopular) {
+      const popularError = await upsertCityPopular(countryCode, name, true);
+      if (popularError) {
+        return NextResponse.json(
+          { error: popularError, city: data },
+          { status: 400 }
+        );
+      }
+    }
 
     await revalidateCatalogOverlay();
     return NextResponse.json({ city: data });
   }
 
   if (body.action === "add_park") {
-    const name = body.name?.trim();
+    const name = formatCityDisplayName(body.name ?? "");
     const countryCode = body.countryCode?.trim().toUpperCase();
     if (!name || !countryCode || countryCode.length !== 2) {
       return NextResponse.json({ error: "Invalid park payload" }, { status: 400 });
@@ -491,11 +565,58 @@ export async function POST(request: Request) {
     if (input.source === "yp") {
       if (!input.id) return "YP kaydı id gerekli";
       const table = input.kind === "city" ? "yp_catalog_cities" : "yp_catalog_parks";
-      const { error } = await admin.from(table).delete().eq("id", input.id);
+      const { error, count } = await admin
+        .from(table)
+        .delete({ count: "exact" })
+        .eq("id", input.id);
       if (error) return error.message;
+
+      // Id miss (stale UI): also drop any same country+name remnant.
+      if (!count) {
+        const { data: remnants } = await admin
+          .from(table)
+          .select("id, name, country_code");
+        const matches = (remnants ?? []).filter((row) => {
+          const code = String(row.country_code ?? "").toUpperCase();
+          if (code !== countryCode) return false;
+          const rowKey = catalogNameKey(
+            String(row.name ?? ""),
+            input.kind === "city" ? countryCode : undefined
+          );
+          return rowKey === nameKey;
+        });
+        for (const row of matches) {
+          await admin.from(table).delete().eq("id", row.id);
+        }
+      }
+
+      // Exclusion only needed when a static twin would otherwise reappear.
+      const hasStaticTwin =
+        input.kind === "city"
+          ? TOURIST_CITIES.some(
+              (city) =>
+                city.countryCode === countryCode &&
+                catalogNameKey(city.name, countryCode) === nameKey
+            )
+          : TOURIST_PARKS.some(
+              (park) =>
+                park.countryCode === countryCode &&
+                catalogNameKey(park.name) === nameKey
+            );
+
+      if (!hasStaticTwin) {
+        // YP-only place: drop any leftover exclusion so re-add is clean.
+        await admin
+          .from("yp_catalog_exclusions")
+          .delete()
+          .eq("kind", input.kind)
+          .eq("country_code", countryCode)
+          .eq("name_key", nameKey);
+        return null;
+      }
     }
 
-    // Permanent catalog removal (also blocks a static twin from reappearing).
+    // Permanent catalog removal (blocks a static twin from reappearing).
     const { error: insertError } = await admin.from("yp_catalog_exclusions").insert({
       kind: input.kind,
       country_code: countryCode,
@@ -556,7 +677,7 @@ export async function POST(request: Request) {
   if (body.action === "rename") {
     const countryCode = body.countryCode?.trim().toUpperCase();
     const oldName = body.oldName?.trim();
-    const newName = body.newName?.trim();
+    const newName = formatCityDisplayName(body.newName ?? "");
     if (!countryCode || !oldName || !newName) {
       return NextResponse.json({ error: "Eski ve yeni ad gerekli" }, { status: 400 });
     }

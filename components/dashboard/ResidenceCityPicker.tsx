@@ -249,7 +249,7 @@ export function ResidenceCityPicker({
         className={
           isLight
             ? "w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-wbs-blue focus:ring-1 focus:ring-wbs-blue/20"
-            : "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-blue-500"
+            : "w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2.5 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] outline-none transition-[border-color,box-shadow] focus:border-blue-500 focus:ring-1 focus:ring-blue-500/25"
         }
         maxLength={100}
         placeholder={t("residencePlaceholder")}
@@ -325,7 +325,7 @@ export function ResidenceCityPicker({
                   className={
                     isLight
                       ? "min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-wbs-blue focus:ring-1 focus:ring-wbs-blue/20"
-                      : "min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+                      : "min-w-0 flex-1 rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] outline-none transition-[border-color,box-shadow] focus:border-blue-500 focus:ring-1 focus:ring-blue-500/25"
                   }
                 >
                   {COUNTRY_LIST.map((country) => (

@@ -53,8 +53,12 @@ function resolveSharePromptMode(value: SharePromptMode | null | undefined): Shar
 
 const sectionClass = "rounded-xl border border-slate-700 bg-slate-900/60 p-5";
 
+/** Same fill as before — only a clearer edge + soft focus ring for depth. */
 const inputClass =
-  "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-white outline-none focus:border-blue-500";
+  "w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2.5 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] outline-none transition-[border-color,box-shadow] focus:border-blue-500 focus:ring-1 focus:ring-blue-500/25";
+
+const inputGroupClass =
+  "flex overflow-hidden rounded-lg border border-slate-600 bg-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[border-color,box-shadow] focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/25";
 
 export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps) {
   const t = translateSettings;
@@ -187,7 +191,7 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
             <label htmlFor="instagramUsername" className="mb-1 block text-sm text-slate-400">
               {t("instagramProfile")}
             </label>
-            <div className="flex overflow-hidden rounded-lg border border-slate-700 bg-slate-950 focus-within:border-blue-500">
+            <div className={inputGroupClass}>
               <span
                 className="flex shrink-0 items-center justify-center border-r border-slate-700 px-3 py-2.5"
                 aria-hidden

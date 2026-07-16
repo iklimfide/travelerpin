@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useModal } from "@/components/ui/ModalProvider";
 import { COUNTRY_LIST } from "@/lib/data/countries";
 import { YP_CACHE_KEYS, ypCacheGet, ypCacheInvalidate, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
+import { citiesAreSame } from "@/lib/utils/city-aliases";
 import { PARK_TYPES, type ParkType } from "@/types/database";
 
 type Kind = "city" | "park";
@@ -19,6 +20,7 @@ type CatalogResult = {
   parkType?: ParkType;
   source: "static" | "yp";
   popular?: boolean;
+  capital?: boolean;
 };
 
 type CatalogCachePayload = {
@@ -30,6 +32,9 @@ const PARK_TYPE_LABELS: Record<ParkType, string> = {
   theme_park: "Tema parkı",
   botanical_garden: "Botanik bahçesi",
 };
+
+const ADD_CITY_SEARCH_DEBOUNCE_MS = 300;
+const ADD_CITY_MIN_QUERY = 2;
 
 /** TR first, then the rest in alphabetical order. */
 const YP_COUNTRY_LIST = [
@@ -51,12 +56,16 @@ export function KamikazeCatalogPanel() {
   const [renameValue, setRenameValue] = useState("");
 
   const [formName, setFormName] = useState("");
-  const [formCountry, setFormCountry] = useState("TR");
+  const [formCountry, setFormCountry] = useState("");
   const [formLat, setFormLat] = useState("");
   const [formLng, setFormLng] = useState("");
   const [formParkType, setFormParkType] = useState<ParkType>("national_park");
+  const [formPopular, setFormPopular] = useState(false);
   const [ypAdditions, setYpAdditions] = useState<CatalogResult[]>([]);
   const [additionsLoading, setAdditionsLoading] = useState(false);
+  const [addSearchResults, setAddSearchResults] = useState<CatalogResult[]>([]);
+  const [addSearchLoading, setAddSearchLoading] = useState(false);
+  const [addSearchDone, setAddSearchDone] = useState(false);
 
   const kind: Kind = tab === "parks" || tab === "add-park" ? "park" : "city";
   const isManageTab = tab === "cities" || tab === "parks";
@@ -148,6 +157,80 @@ export function KamikazeCatalogPanel() {
   useEffect(() => {
     void loadAdditions();
   }, [loadAdditions]);
+
+  useEffect(() => {
+    if (tab !== "add-city") {
+      setAddSearchResults([]);
+      setAddSearchLoading(false);
+      setAddSearchDone(false);
+      return;
+    }
+
+    const query = formName.trim();
+    if (query.length < ADD_CITY_MIN_QUERY) {
+      setAddSearchResults([]);
+      setAddSearchLoading(false);
+      setAddSearchDone(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    setAddSearchLoading(true);
+    setAddSearchDone(false);
+
+    const timer = window.setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({
+          kind: "city",
+          q: query,
+        });
+        if (formCountry) params.set("country", formCountry);
+        const res = await fetch(`/api/kamikaze/catalog?${params}`, {
+          signal: controller.signal,
+        });
+        const data = (await res.json()) as {
+          results?: CatalogResult[];
+          error?: string;
+        };
+        if (!res.ok) throw new Error(data.error ?? "Arama başarısız");
+        setAddSearchResults(data.results ?? []);
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setAddSearchResults([]);
+        setError(err instanceof Error ? err.message : "Arama başarısız");
+      } finally {
+        if (!controller.signal.aborted) {
+          setAddSearchLoading(false);
+          setAddSearchDone(true);
+        }
+      }
+    }, ADD_CITY_SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [tab, formName, formCountry]);
+
+  const exactCityMatch = useMemo(() => {
+    const query = formName.trim();
+    if (!query || tab !== "add-city" || !formCountry) return null;
+    return (
+      addSearchResults.find(
+        (row) =>
+          row.countryCode.toUpperCase() === formCountry.toUpperCase() &&
+          citiesAreSame(formCountry, row.name, query)
+      ) ?? null
+    );
+  }, [tab, formName, formCountry, addSearchResults]);
+
+  const canAddCity =
+    tab === "add-city" &&
+    Boolean(formCountry) &&
+    formName.trim().length >= ADD_CITY_MIN_QUERY &&
+    addSearchDone &&
+    !addSearchLoading &&
+    !exactCityMatch;
 
   function selectTab(next: CatalogTab) {
     setTab(next);
@@ -358,6 +441,18 @@ export function KamikazeCatalogPanel() {
     }
 
     if (tab === "add-city") {
+      if (!formCountry) {
+        setError("Ülke seçmelisin");
+        return;
+      }
+      if (!canAddCity) {
+        setError(
+          exactCityMatch
+            ? "Bu şehir zaten katalogda"
+            : "Eklemeden önce şehir adını yazıp aramanın bitmesini bekle"
+        );
+        return;
+      }
       await postAction(
         {
           action: "add_city",
@@ -365,10 +460,17 @@ export function KamikazeCatalogPanel() {
           countryCode: formCountry,
           latitude,
           longitude,
+          isPopular: formPopular,
         },
         "add"
       );
+      setFormPopular(false);
+      setFormCountry("");
     } else {
+      if (!formCountry) {
+        setError("Ülke seçmelisin");
+        return;
+      }
       await postAction(
         {
           action: "add_park",
@@ -380,10 +482,13 @@ export function KamikazeCatalogPanel() {
         },
         "add"
       );
+      setFormCountry("");
     }
     setFormName("");
     setFormLat("");
     setFormLng("");
+    setAddSearchResults([]);
+    setAddSearchDone(false);
   }
 
   return (
@@ -433,76 +538,270 @@ export function KamikazeCatalogPanel() {
               {tab === "add-city" ? "Şehir ekle" : "Park ekle"}
             </div>
             <form onSubmit={(e) => void handleAdd(e)}>
-              <div className="yp-form-grid">
-                <div className="yp-field yp-field--wide">
-                  <label htmlFor="yp-add-name">Ad</label>
-                  <input
-                    id="yp-add-name"
-                    required
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                  />
-                </div>
-                <div className="yp-field">
-                  <label htmlFor="yp-add-country">Ülke</label>
-                  <select
-                    id="yp-add-country"
-                    value={formCountry}
-                    onChange={(e) => setFormCountry(e.target.value)}
-                  >
-                    {YP_COUNTRY_LIST.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {tab === "add-park" ? (
-                  <div className="yp-field">
-                    <label htmlFor="yp-add-type">Park türü</label>
-                    <select
-                      id="yp-add-type"
-                      value={formParkType}
-                      onChange={(e) => setFormParkType(e.target.value as ParkType)}
-                    >
-                      {PARK_TYPES.map((type) => (
-                        <option key={type} value={type}>
-                          {PARK_TYPE_LABELS[type]}
-                        </option>
-                      ))}
-                    </select>
+              {tab === "add-city" ? (
+                <>
+                  <div className="yp-form-grid">
+                    <div className="yp-field yp-field--wide">
+                      <label htmlFor="yp-add-name">Şehir adı</label>
+                      <input
+                        id="yp-add-name"
+                        value={formName}
+                        onChange={(e) => setFormName(e.target.value)}
+                        placeholder="Yazmaya başla — otomatik aranır"
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="yp-field">
+                      <label htmlFor="yp-add-country">Ülke</label>
+                      <select
+                        id="yp-add-country"
+                        value={formCountry}
+                        onChange={(e) => setFormCountry(e.target.value)}
+                      >
+                        <option value="">Ülke seç</option>
+                        {YP_COUNTRY_LIST.map((c) => (
+                          <option key={c.code} value={c.code}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                ) : null}
-                <div className="yp-field">
-                  <label htmlFor="yp-add-lat">Enlem (isteğe bağlı)</label>
-                  <input
-                    id="yp-add-lat"
-                    inputMode="decimal"
-                    value={formLat}
-                    onChange={(e) => setFormLat(e.target.value)}
-                    placeholder="Boş bırakılabilir"
-                  />
-                </div>
-                <div className="yp-field">
-                  <label htmlFor="yp-add-lng">Boylam (isteğe bağlı)</label>
-                  <input
-                    id="yp-add-lng"
-                    inputMode="decimal"
-                    value={formLng}
-                    onChange={(e) => setFormLng(e.target.value)}
-                    placeholder="Boş bırakılabilir"
-                  />
-                </div>
-              </div>
-              <div className="yp-form-actions">
-                <button
-                  type="submit"
-                  className="yp-btn yp-btn--primary"
-                  disabled={busyId === "add"}
-                >
-                  Kataloğa ekle
-                </button>
-              </div>
+
+                  <div style={{ padding: "0 0.9rem 0.65rem" }}>
+                    {formName.trim().length > 0 &&
+                    formName.trim().length < ADD_CITY_MIN_QUERY ? (
+                      <p className="yp-muted" style={{ margin: 0, fontSize: "0.85rem" }}>
+                        Arama için en az {ADD_CITY_MIN_QUERY} karakter yaz.
+                      </p>
+                    ) : null}
+                    {addSearchLoading ? (
+                      <p className="yp-muted" style={{ margin: 0, fontSize: "0.85rem" }}>
+                        Aranıyor…
+                      </p>
+                    ) : null}
+                    {addSearchDone &&
+                    !addSearchLoading &&
+                    formName.trim().length >= ADD_CITY_MIN_QUERY &&
+                    !formCountry ? (
+                      <p className="yp-error" style={{ margin: "0.35rem 0 0", fontSize: "0.85rem" }}>
+                        Eklemek için ülke seçmelisin.
+                      </p>
+                    ) : null}
+                    {addSearchDone && !addSearchLoading && addSearchResults.length > 0 ? (
+                      <div style={{ marginTop: "0.35rem" }}>
+                        <p
+                          className="yp-muted"
+                          style={{ margin: "0 0 0.4rem", fontSize: "0.78rem", fontWeight: 600 }}
+                        >
+                          Katalogda bulunanlar
+                        </p>
+                        <table className="yp-table">
+                          <thead>
+                            <tr>
+                              <th>Ad</th>
+                              <th>Ülke</th>
+                              <th>Kaynak</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {addSearchResults.map((row) => {
+                              const isExact =
+                                exactCityMatch != null &&
+                                resultKey(row) === resultKey(exactCityMatch);
+                              return (
+                                <tr
+                                  key={resultKey(row)}
+                                  style={
+                                    isExact
+                                      ? {
+                                          background:
+                                            "color-mix(in srgb, var(--color-wbs-blue) 10%, transparent)",
+                                        }
+                                      : undefined
+                                  }
+                                >
+                                  <td>
+                                    {row.name}{" "}
+                                    {row.capital ? (
+                                      <span className="yp-badge">Başkent</span>
+                                    ) : null}{" "}
+                                    {row.popular ? (
+                                      <span className="yp-badge">Popüler</span>
+                                    ) : null}
+                                  </td>
+                                  <td>
+                                    {row.countryName} ({row.countryCode})
+                                  </td>
+                                  <td>{row.source === "yp" ? "YP" : "Statik"}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : null}
+                    {exactCityMatch ? (
+                      <p
+                        className="yp-muted"
+                        style={{ margin: "0.55rem 0 0", fontSize: "0.85rem" }}
+                      >
+                        Bu şehir zaten katalogda — yeniden eklenmez.
+                      </p>
+                    ) : null}
+                    {canAddCity && addSearchResults.length === 0 ? (
+                      <p
+                        className="yp-muted"
+                        style={{ margin: "0.55rem 0 0", fontSize: "0.85rem" }}
+                      >
+                        Katalogda yok — ekleyebilirsin.
+                      </p>
+                    ) : null}
+                    {canAddCity && addSearchResults.length > 0 ? (
+                      <p
+                        className="yp-muted"
+                        style={{ margin: "0.55rem 0 0", fontSize: "0.85rem" }}
+                      >
+                        Tam eşleşme yok — &quot;{formName.trim()}&quot; olarak ekleyebilirsin.
+                      </p>
+                    ) : null}
+                  </div>
+
+                  {canAddCity ? (
+                    <>
+                      <div className="yp-form-grid">
+                        <div className="yp-field">
+                          <label htmlFor="yp-add-lat">Enlem (isteğe bağlı)</label>
+                          <input
+                            id="yp-add-lat"
+                            inputMode="decimal"
+                            value={formLat}
+                            onChange={(e) => setFormLat(e.target.value)}
+                            placeholder="Boş bırakılabilir"
+                          />
+                        </div>
+                        <div className="yp-field">
+                          <label htmlFor="yp-add-lng">Boylam (isteğe bağlı)</label>
+                          <input
+                            id="yp-add-lng"
+                            inputMode="decimal"
+                            value={formLng}
+                            onChange={(e) => setFormLng(e.target.value)}
+                            placeholder="Boş bırakılabilir"
+                          />
+                        </div>
+                        <div className="yp-field yp-field--wide">
+                          <label htmlFor="yp-add-popular">Popüler</label>
+                          <label
+                            htmlFor="yp-add-popular"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.5rem",
+                              textTransform: "none",
+                              letterSpacing: "normal",
+                              fontSize: "0.9rem",
+                              fontWeight: 500,
+                              color: "var(--foreground)",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <input
+                              id="yp-add-popular"
+                              type="checkbox"
+                              checked={formPopular}
+                              onChange={(e) => setFormPopular(e.target.checked)}
+                            />
+                            Popüler etiketi ekle
+                          </label>
+                        </div>
+                      </div>
+                      <div className="yp-form-actions">
+                        <button
+                          type="submit"
+                          className="yp-btn yp-btn--primary"
+                          disabled={busyId === "add"}
+                        >
+                          Ekle
+                        </button>
+                      </div>
+                    </>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  <div className="yp-form-grid">
+                    <div className="yp-field yp-field--wide">
+                      <label htmlFor="yp-add-name">Ad</label>
+                      <input
+                        id="yp-add-name"
+                        required
+                        value={formName}
+                        onChange={(e) => setFormName(e.target.value)}
+                      />
+                    </div>
+                    <div className="yp-field">
+                      <label htmlFor="yp-add-country">Ülke</label>
+                      <select
+                        id="yp-add-country"
+                        value={formCountry}
+                        onChange={(e) => setFormCountry(e.target.value)}
+                        required
+                      >
+                        <option value="">Ülke seç</option>
+                        {YP_COUNTRY_LIST.map((c) => (
+                          <option key={c.code} value={c.code}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="yp-field">
+                      <label htmlFor="yp-add-type">Park türü</label>
+                      <select
+                        id="yp-add-type"
+                        value={formParkType}
+                        onChange={(e) => setFormParkType(e.target.value as ParkType)}
+                      >
+                        {PARK_TYPES.map((type) => (
+                          <option key={type} value={type}>
+                            {PARK_TYPE_LABELS[type]}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="yp-field">
+                      <label htmlFor="yp-add-lat">Enlem (isteğe bağlı)</label>
+                      <input
+                        id="yp-add-lat"
+                        inputMode="decimal"
+                        value={formLat}
+                        onChange={(e) => setFormLat(e.target.value)}
+                        placeholder="Boş bırakılabilir"
+                      />
+                    </div>
+                    <div className="yp-field">
+                      <label htmlFor="yp-add-lng">Boylam (isteğe bağlı)</label>
+                      <input
+                        id="yp-add-lng"
+                        inputMode="decimal"
+                        value={formLng}
+                        onChange={(e) => setFormLng(e.target.value)}
+                        placeholder="Boş bırakılabilir"
+                      />
+                    </div>
+                  </div>
+                  <div className="yp-form-actions">
+                    <button
+                      type="submit"
+                      className="yp-btn yp-btn--primary"
+                      disabled={busyId === "add"}
+                    >
+                      Kataloğa ekle
+                    </button>
+                  </div>
+                </>
+              )}
             </form>
           </div>
 
@@ -540,6 +839,9 @@ export function KamikazeCatalogPanel() {
                       <tr key={key}>
                         <td>
                           {row.name}{" "}
+                          {tab === "add-city" && row.capital ? (
+                            <span className="yp-badge">Başkent</span>
+                          ) : null}{" "}
                           {tab === "add-city" && row.popular ? (
                             <span className="yp-badge">Popüler</span>
                           ) : null}
@@ -649,7 +951,9 @@ export function KamikazeCatalogPanel() {
                 </div>
               ) : (
                 <span className="yp-muted" style={{ fontWeight: 500, fontSize: "0.78rem" }}>
-                  Checkbox ile seç → toplu işlem
+                  {kind === "city"
+                    ? `${results.length} şehir`
+                    : `${results.length} park`}
                 </span>
               )}
             </div>
@@ -695,6 +999,9 @@ export function KamikazeCatalogPanel() {
                         </td>
                         <td>
                           {row.name}{" "}
+                          {kind === "city" && row.capital ? (
+                            <span className="yp-badge">Başkent</span>
+                          ) : null}{" "}
                           {kind === "city" && row.popular ? (
                             <span className="yp-badge">Popüler</span>
                           ) : null}

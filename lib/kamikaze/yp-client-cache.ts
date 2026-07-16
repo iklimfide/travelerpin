@@ -75,9 +75,10 @@ export function ypCacheInvalidate(prefix?: string): void {
 }
 
 export const YP_CACHE_KEYS = {
+  // Bump catalog version when list row shape changes (e.g. capital flag).
   catalog: (kind: string, country: string, q: string) =>
-    `catalog:${kind}:${country}:${q.trim().toLowerCase()}`,
-  catalogAdditions: (kind: string) => `catalog:additions:${kind}`,
+    `catalog:v2:${kind}:${country}:${q.trim().toLowerCase()}`,
+  catalogAdditions: (kind: string) => `catalog:additions:v2:${kind}`,
   users: (query: string) => `users:${query.trim().toLowerCase()}`,
   stats: "stats",
   notifications: "notifications",
