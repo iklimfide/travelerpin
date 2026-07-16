@@ -55,7 +55,9 @@
     "pin_batch": "{name} pinned {count} new destinations",
     "pin_batch_title": "Pinned destinations",
     "pin_batch_back": "Back",
-    "pin_batch_view_profile": "View profile"
+    "pin_batch_view_profile": "View profile",
+    "system": "{message}",
+    "system_with_title": "{title}: {message}"
   },
   "saveDestination": {
     "title": "Pin a destination",

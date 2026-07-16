@@ -3987,11 +3987,26 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 .dashboard-shell {
   --dashboard-bottom-bar-height: 84px;
   --profile-stack-gap: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* First paint before localStorage/auth chrome is known — pin layout, hide footer text. */
+.dashboard-shell--booting .site-footer {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.dashboard-shell > *:not(.site-footer) {
+  flex: 1 0 auto;
 }
 
 /* Guests: top bar chrome on all breakpoints (no bottom bar). */
 .dashboard-shell--guest {
   --dashboard-top-bar-height: 45px;
+  padding-bottom: 0;
 }
 
 .dashboard-shell--guest > main,
@@ -4019,7 +4034,8 @@ html[data-tp-mobile-preview-embed] body {
 }
 
 .site-footer {
-  margin-top: var(--profile-stack-gap);
+  flex-shrink: 0;
+  margin-top: auto;
   padding-top: var(--profile-stack-gap);
   padding-bottom: calc(
     var(--dashboard-bottom-bar-height, 84px) + var(--profile-stack-gap) + env(safe-area-inset-bottom, 0px)

@@ -27,6 +27,9 @@ function resolveActorName(
   notification: EnrichedNotificationRow,
   payload: NotificationPayload
 ): string {
+  if (notification.type === "system") {
+    return payload.actorDisplayName ?? "TravelerPin.com";
+  }
   return (
     payload.actorDisplayName ??
     (notification.actorProfile
@@ -64,6 +67,22 @@ function formatGroupBody(group: NotificationGroup): string {
       return formatMessage(notificationMessages.pin_park, { name, place });
     case "pin_media":
       return formatMessage(notificationMessages.pin_media, { name, place });
+    case "system": {
+      const message =
+        typeof payload.message === "string" && payload.message.trim()
+          ? payload.message.trim()
+          : "";
+      const title =
+        typeof payload.title === "string" && payload.title.trim()
+          ? payload.title.trim()
+          : "";
+      if (title && message) {
+        return formatMessage(notificationMessages.system_with_title, { title, message });
+      }
+      return formatMessage(notificationMessages.system, {
+        message: message || title || name,
+      });
+    }
     default:
       return name;
   }
@@ -97,6 +116,7 @@ function resolveActorUsername(
   notification: EnrichedNotificationRow,
   payload: NotificationPayload
 ): string {
+  if (notification.type === "system") return "travelerpin";
   return (
     payload.actorUsername ??
     notification.actorProfile?.username ??
@@ -108,6 +128,9 @@ function resolveActorDisplayName(
   notification: EnrichedNotificationRow,
   payload: NotificationPayload
 ): string {
+  if (notification.type === "system") {
+    return payload.actorDisplayName ?? "TravelerPin.com";
+  }
   if (payload.actorDisplayName) return payload.actorDisplayName;
   if (notification.actorProfile) {
     return resolveProfileDisplayName(

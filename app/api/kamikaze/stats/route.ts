@@ -16,8 +16,8 @@ export async function GET() {
   const { data: countryStats, error: countryError } = await admin
     .from("country_pinner_stats")
     .select("country_code, pinner_count")
-    .order("pinner_count", { ascending: false })
-    .limit(50);
+    .gt("pinner_count", 0)
+    .order("pinner_count", { ascending: false });
 
   if (countryError) {
     return NextResponse.json({ error: countryError.message }, { status: 400 });
@@ -58,8 +58,8 @@ export async function GET() {
       cityName: entry.cityName,
       pinnerCount: entry.users.size,
     }))
-    .sort((a, b) => b.pinnerCount - a.pinnerCount || a.cityName.localeCompare(b.cityName))
-    .slice(0, 50);
+    .filter((row) => row.pinnerCount > 0)
+    .sort((a, b) => b.pinnerCount - a.pinnerCount || a.cityName.localeCompare(b.cityName));
 
   const parkMap = new Map<
     string,
@@ -91,15 +91,17 @@ export async function GET() {
       parkType: entry.parkType,
       pinnerCount: entry.users.size,
     }))
-    .sort((a, b) => b.pinnerCount - a.pinnerCount || a.parkName.localeCompare(b.parkName))
-    .slice(0, 50);
+    .filter((row) => row.pinnerCount > 0)
+    .sort((a, b) => b.pinnerCount - a.pinnerCount || a.parkName.localeCompare(b.parkName));
 
   return NextResponse.json({
-    countries: (countryStats ?? []).map((row) => ({
-      countryCode: String(row.country_code).toUpperCase(),
-      countryName: getCountryName(String(row.country_code)),
-      pinnerCount: Number(row.pinner_count) || 0,
-    })),
+    countries: (countryStats ?? [])
+      .map((row) => ({
+        countryCode: String(row.country_code).toUpperCase(),
+        countryName: getCountryName(String(row.country_code)),
+        pinnerCount: Number(row.pinner_count) || 0,
+      }))
+      .filter((row) => row.pinnerCount > 0),
     cities,
     parks,
   });

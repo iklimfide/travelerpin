@@ -13,11 +13,14 @@ import type { ParkType } from "@/types/database";
 export { sortCitiesForAddModal };
 
 /**
- * Public overlay tables are RLS-readable with the anon key.
- * Prefer anon for reads so a bad/missing SERVICE_ROLE_KEY cannot wipe
- * popularity/exclusions on production (admin writes stay on service role).
+ * Public overlay tables are RLS-readable with the anon key, but Add/city lists
+ * must see the same rows YP writes via service role. Prefer admin on the server
+ * so a RLS/policy gap cannot silently drop YP extras from the live catalog.
  */
 function createOverlayReadClient() {
+  const admin = createAdminSupabaseClient();
+  if (admin) return admin;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (url && anon) {
@@ -27,7 +30,7 @@ function createOverlayReadClient() {
     });
   }
 
-  return createAdminSupabaseClient();
+  return null;
 }
 
 export type YpCatalogCityRow = {
@@ -93,10 +96,22 @@ async function fetchCatalogOverlayUncached(): Promise<CatalogOverlaySnapshot> {
     client.from("yp_city_popularity").select("*").order("updated_at", { ascending: false }),
   ]);
 
+  if (citiesRes.error) {
+    console.error("yp_catalog_cities overlay read failed:", citiesRes.error.message);
+  }
+  if (parksRes.error) {
+    console.error("yp_catalog_parks overlay read failed:", parksRes.error.message);
+  }
+  if (exclusionsRes.error) {
+    console.error("yp_catalog_exclusions overlay read failed:", exclusionsRes.error.message);
+  }
+
   return {
-    cities: (citiesRes.data ?? []) as YpCatalogCityRow[],
-    parks: (parksRes.data ?? []) as YpCatalogParkRow[],
-    exclusions: (exclusionsRes.data ?? []) as YpCatalogExclusionRow[],
+    cities: citiesRes.error ? [] : ((citiesRes.data ?? []) as YpCatalogCityRow[]),
+    parks: parksRes.error ? [] : ((parksRes.data ?? []) as YpCatalogParkRow[]),
+    exclusions: exclusionsRes.error
+      ? []
+      : ((exclusionsRes.data ?? []) as YpCatalogExclusionRow[]),
     // Table may be missing until migration 032 is applied.
     popularity: popularityRes.error
       ? []

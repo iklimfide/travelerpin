@@ -3,7 +3,7 @@ import { Skeleton, SkeletonScreen } from "@/components/ui/Skeleton";
 export function HomePageSkeleton() {
   return (
     <SkeletonScreen label="Loading home">
-      <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 py-[46px] pb-[72px] max-sm:px-3.5 max-sm:py-8 max-sm:pb-[54px] lg:max-w-[1400px] lg:px-10 xl:max-w-[1520px] xl:px-12">
+      <main className="mx-auto flex w-full min-h-[70dvh] max-w-[1200px] flex-1 flex-col px-6 py-[46px] pb-[72px] max-sm:px-3.5 max-sm:py-8 max-sm:pb-[54px] lg:max-w-[1400px] lg:px-10 xl:max-w-[1520px] xl:px-12">
         <div className="grid items-stretch gap-[34px] lg:grid-cols-[0.9fr_1.1fr] lg:gap-10 xl:gap-12">
           <div className="flex h-full min-h-0 min-w-0 flex-col">
             <div className="space-y-4 lg:hidden">

@@ -3,7 +3,7 @@ import { Skeleton, SkeletonScreen } from "@/components/ui/Skeleton";
 export function ProfilePageSkeleton() {
   return (
     <SkeletonScreen label="Loading profile">
-      <div className="profile-page profile-page--route">
+      <div className="profile-page profile-page--route min-h-[70dvh]">
         <div className="profile-shell">
           <div className="profile-story-capture">
             <div className="profile-hero-card">

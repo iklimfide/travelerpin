@@ -15,7 +15,16 @@ export type NotificationPayload = {
   countryCode?: string;
   href?: string;
   parkType?: string;
+  /** System / brand announcements */
+  title?: string;
+  message?: string;
 };
+
+/** Shown as the sender for YP broadcast notifications. */
+export const SYSTEM_NOTIFICATION_SENDER = {
+  displayName: "TravelerPin.com",
+  avatarUrl: "/favicon-32x32.png",
+} as const;
 
 export async function notifyProfileFollowers(
   supabase: SupabaseClient,
@@ -247,6 +256,14 @@ export function notificationActorProfileHref(notification: NotificationRow): str
 
 export function notificationTargetHref(notification: NotificationRow): string | null {
   const payload = notification.payload as NotificationPayload;
+
+  if (notification.type === "system") {
+    if (typeof payload.href === "string" && payload.href.startsWith("/")) {
+      return payload.href;
+    }
+    return null;
+  }
+
   if (notification.type === "follow") {
     if (payload.actorUsername) {
       return profilePath(payload.actorUsername);

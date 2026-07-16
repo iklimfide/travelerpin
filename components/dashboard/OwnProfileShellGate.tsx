@@ -32,18 +32,20 @@ function readProvisionalOwnProfile(): BottomBarOwnProfile | null {
 /**
  * App chrome (footer + top/bottom nav) for all users.
  *
- * Always mounts OwnProfileShell so SiteFooter is not delayed until auth.
- * Restores signed-in chrome from localStorage in useLayoutEffect (before paint)
- * so logged-in mobile users do not flash the guest top bar, then confirm with Supabase.
+ * Resolves guest vs signed-in chrome in useLayoutEffect (before paint) from
+ * localStorage so logged-in users never flash the guest top bar. Footer stays
+ * pinned to the viewport bottom via dashboard-shell flex + min-height.
  */
 export function OwnProfileShellGate({ children }: { children: ReactNode }) {
   const [ownProfile, setOwnProfile] = useState<BottomBarOwnProfile | null>(null);
+  const [chromeReady, setChromeReady] = useState(false);
 
   useLayoutEffect(() => {
     const provisional = readProvisionalOwnProfile();
     if (provisional) {
       setOwnProfile(provisional);
     }
+    setChromeReady(true);
   }, []);
 
   useEffect(() => {
@@ -86,7 +88,6 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
         setOwnUsername(profile?.username ?? null);
       }
 
-      // Backfill home-city pin once per browser session (e.g. residence "İstanbul").
       if (profile?.username && profile.residence?.trim()) {
         const flagKey = `tp:ensure-residence:${user.id}`;
         try {
@@ -118,8 +119,16 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      void loadUsername();
+    } = supabase.auth.onAuthStateChange((event) => {
+      // Ignore noisy token refresh; SIGNED_IN / SIGNED_OUT / INITIAL_SESSION matter.
+      if (
+        event === "SIGNED_IN" ||
+        event === "SIGNED_OUT" ||
+        event === "INITIAL_SESSION" ||
+        event === "USER_UPDATED"
+      ) {
+        void loadUsername();
+      }
     });
 
     return () => {
@@ -128,5 +137,9 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return <OwnProfileShell ownProfile={ownProfile}>{children}</OwnProfileShell>;
+  return (
+    <OwnProfileShell ownProfile={ownProfile} chromeReady={chromeReady}>
+      {children}
+    </OwnProfileShell>
+  );
 }

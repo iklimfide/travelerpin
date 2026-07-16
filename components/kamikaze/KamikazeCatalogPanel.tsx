@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useModal } from "@/components/ui/ModalProvider";
 import { COUNTRY_LIST } from "@/lib/data/countries";
+import { YP_CACHE_KEYS, ypCacheGet, ypCacheInvalidate, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
 import { PARK_TYPES, type ParkType } from "@/types/database";
 
 type Kind = "city" | "park";
+type CatalogTab = "cities" | "parks" | "add-city" | "add-park";
 
 type CatalogResult = {
   id?: string;
@@ -16,15 +18,11 @@ type CatalogResult = {
   longitude: number | null;
   parkType?: ParkType;
   source: "static" | "yp";
-  hidden: boolean;
   popular?: boolean;
 };
 
-type ExclusionRow = {
-  id: string;
-  kind: Kind;
-  country_code: string;
-  name_key: string;
+type CatalogCachePayload = {
+  results: CatalogResult[];
 };
 
 const PARK_TYPE_LABELS: Record<ParkType, string> = {
@@ -41,11 +39,10 @@ const YP_COUNTRY_LIST = [
 
 export function KamikazeCatalogPanel() {
   const modal = useModal();
-  const [kind, setKind] = useState<Kind>("city");
+  const [tab, setTab] = useState<CatalogTab>("cities");
   const [country, setCountry] = useState("");
   const [q, setQ] = useState("");
   const [results, setResults] = useState<CatalogResult[]>([]);
-  const [exclusions, setExclusions] = useState<ExclusionRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -58,38 +55,106 @@ export function KamikazeCatalogPanel() {
   const [formLat, setFormLat] = useState("");
   const [formLng, setFormLng] = useState("");
   const [formParkType, setFormParkType] = useState<ParkType>("national_park");
+  const [ypAdditions, setYpAdditions] = useState<CatalogResult[]>([]);
+  const [additionsLoading, setAdditionsLoading] = useState(false);
+
+  const kind: Kind = tab === "parks" || tab === "add-park" ? "park" : "city";
+  const isManageTab = tab === "cities" || tab === "parks";
+  const isAddTab = tab === "add-city" || tab === "add-park";
 
   function resultKey(row: CatalogResult): string {
     return `${row.source}:${row.countryCode}:${row.name}:${row.id ?? ""}`;
   }
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams({ kind });
-      if (country) params.set("country", country);
-      if (q.trim()) params.set("q", q.trim());
-      const res = await fetch(`/api/kamikaze/catalog?${params}`);
-      const data = (await res.json()) as {
-        results?: CatalogResult[];
-        exclusions?: ExclusionRow[];
-        error?: string;
-      };
-      if (!res.ok) throw new Error(data.error ?? "Katalog yüklenemedi");
-      setResults(data.results ?? []);
-      setExclusions(data.exclusions ?? []);
-      setSelectedKeys(new Set());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Katalog yüklenemedi");
-    } finally {
-      setLoading(false);
-    }
-  }, [kind, country, q]);
+  const loadAdditions = useCallback(
+    async (options?: { force?: boolean }) => {
+      if (!isAddTab) return;
+      const addKind: Kind = tab === "add-park" ? "park" : "city";
+      const cacheKey = YP_CACHE_KEYS.catalogAdditions(addKind);
+      if (!options?.force) {
+        const cached = ypCacheGet<{ results: CatalogResult[] }>(cacheKey);
+        if (cached) {
+          setYpAdditions(cached.results);
+          setAdditionsLoading(false);
+          return;
+        }
+      }
+
+      setAdditionsLoading(true);
+      try {
+        const params = new URLSearchParams({ kind: addKind, ypOnly: "1" });
+        const res = await fetch(`/api/kamikaze/catalog?${params}`);
+        const data = (await res.json()) as {
+          results?: CatalogResult[];
+          error?: string;
+        };
+        if (!res.ok) throw new Error(data.error ?? "Eklenenler yüklenemedi");
+        const next = data.results ?? [];
+        setYpAdditions(next);
+        ypCacheSet(cacheKey, { results: next });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Eklenenler yüklenemedi");
+      } finally {
+        setAdditionsLoading(false);
+      }
+    },
+    [isAddTab, tab]
+  );
+
+  const load = useCallback(
+    async (options?: { force?: boolean }) => {
+      if (!isManageTab) return;
+      const cacheKey = YP_CACHE_KEYS.catalog(kind, country, q);
+      if (!options?.force) {
+        const cached = ypCacheGet<CatalogCachePayload>(cacheKey);
+        if (cached) {
+          setResults(cached.results);
+          setSelectedKeys(new Set());
+          setLoading(false);
+          setError(null);
+          return;
+        }
+      }
+
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams({ kind });
+        if (country) params.set("country", country);
+        if (q.trim()) params.set("q", q.trim());
+        const res = await fetch(`/api/kamikaze/catalog?${params}`);
+        const data = (await res.json()) as {
+          results?: CatalogResult[];
+          error?: string;
+        };
+        if (!res.ok) throw new Error(data.error ?? "Katalog yüklenemedi");
+        const nextResults = data.results ?? [];
+        setResults(nextResults);
+        setSelectedKeys(new Set());
+        ypCacheSet(cacheKey, { results: nextResults } satisfies CatalogCachePayload);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Katalog yüklenemedi");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [kind, country, q, isManageTab]
+  );
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    void loadAdditions();
+  }, [loadAdditions]);
+
+  function selectTab(next: CatalogTab) {
+    setTab(next);
+    setError(null);
+    setSelectedKeys(new Set());
+    setRenameTarget(null);
+  }
 
   async function postAction(body: Record<string, unknown>, busyKey: string) {
     setBusyId(busyKey);
@@ -102,7 +167,12 @@ export function KamikazeCatalogPanel() {
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? "İşlem başarısız");
-      await load();
+      ypCacheInvalidate("catalog:");
+      if (isAddTab) {
+        await loadAdditions({ force: true });
+      } else {
+        await load({ force: true });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "İşlem başarısız");
     } finally {
@@ -151,9 +221,7 @@ export function KamikazeCatalogPanel() {
 
   async function handleDelete(row: CatalogResult) {
     const ok = await modal.confirm(
-      row.source === "yp"
-        ? `"${row.name}" YP kaydı kalıcı silinsin mi?`
-        : `"${row.name}" katalogdan kaldırılsın mı? Statik kayıt gizlenir; kullanıcı pinleri silinmez.`,
+      `"${row.name}" katalogdan kalıcı silinsin mi? Kullanıcı pinleri silinmez.`,
       {
         title: "Kayıt silinsin mi?",
         variant: "error",
@@ -177,12 +245,8 @@ export function KamikazeCatalogPanel() {
     );
   }
 
-  // Hidden rows are managed in the exclusions panel — keep the main list clean.
-  const visibleResults = results.filter((row) => !row.hidden);
-  const deletableResults = visibleResults;
-  const allDeletableSelected =
-    deletableResults.length > 0 &&
-    deletableResults.every((row) => selectedKeys.has(resultKey(row)));
+  const allSelected =
+    results.length > 0 && results.every((row) => selectedKeys.has(resultKey(row)));
 
   function toggleSelect(row: CatalogResult) {
     const key = resultKey(row);
@@ -195,11 +259,11 @@ export function KamikazeCatalogPanel() {
   }
 
   function toggleSelectAll() {
-    if (allDeletableSelected) {
+    if (allSelected) {
       setSelectedKeys(new Set());
       return;
     }
-    setSelectedKeys(new Set(deletableResults.map((row) => resultKey(row))));
+    setSelectedKeys(new Set(results.map((row) => resultKey(row))));
   }
 
   async function handleSetPopular(row: CatalogResult, isPopular: boolean) {
@@ -216,14 +280,14 @@ export function KamikazeCatalogPanel() {
   }
 
   function selectedRows() {
-    return visibleResults.filter((row) => selectedKeys.has(resultKey(row)));
+    return results.filter((row) => selectedKeys.has(resultKey(row)));
   }
 
   async function handleBulkDelete() {
     const selected = selectedRows();
     if (selected.length === 0) return;
     const ok = await modal.confirm(
-      `${selected.length} kayıt katalogdan kaldırılsın mı? Kullanıcı pinleri silinmez.`,
+      `${selected.length} kayıt katalogdan kalıcı silinsin mi? Kullanıcı pinleri silinmez.`,
       {
         title: "Toplu silme",
         variant: "error",
@@ -293,7 +357,7 @@ export function KamikazeCatalogPanel() {
       return;
     }
 
-    if (kind === "city") {
+    if (tab === "add-city") {
       await postAction(
         {
           action: "add_city",
@@ -331,336 +395,373 @@ export function KamikazeCatalogPanel() {
 
       {error ? <p className="yp-error">{error}</p> : null}
 
-      <div className="yp-tabs" role="tablist" aria-label="Katalog türü">
-        <button type="button" aria-selected={kind === "city"} onClick={() => setKind("city")}>
+      <div className="yp-tabs" role="tablist" aria-label="Katalog sekmeleri">
+        <button
+          type="button"
+          aria-selected={tab === "cities"}
+          onClick={() => selectTab("cities")}
+        >
           Şehirler
         </button>
-        <button type="button" aria-selected={kind === "park"} onClick={() => setKind("park")}>
+        <button
+          type="button"
+          aria-selected={tab === "parks"}
+          onClick={() => selectTab("parks")}
+        >
           Parklar
         </button>
-      </div>
-
-      <div className="yp-toolbar">
-        <div className="yp-field">
-          <label htmlFor="yp-cat-country">Ülke</label>
-          <select
-            id="yp-cat-country"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-          >
-            <option value="">Tümü</option>
-            {YP_COUNTRY_LIST.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.name} ({c.code})
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="yp-field" style={{ minWidth: "14rem", flex: 1 }}>
-          <label htmlFor="yp-cat-q">Ara</label>
-          <input
-            id="yp-cat-q"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="En az 2 karakter"
-          />
-        </div>
-        <button type="button" className="yp-btn" onClick={() => void load()} disabled={loading}>
-          {loading ? "Yükleniyor…" : "Yenile"}
+        <button
+          type="button"
+          aria-selected={tab === "add-city"}
+          onClick={() => selectTab("add-city")}
+        >
+          Şehir ekle
+        </button>
+        <button
+          type="button"
+          aria-selected={tab === "add-park"}
+          onClick={() => selectTab("add-park")}
+        >
+          Park ekle
         </button>
       </div>
 
-      <div className="yp-panel">
-        <div className="yp-panel__title">
-          {kind === "city" ? "Şehir ekle" : "Park ekle"}
-        </div>
-        <form onSubmit={(e) => void handleAdd(e)}>
-          <div className="yp-form-grid">
-            <div className="yp-field yp-field--wide">
-              <label htmlFor="yp-add-name">Ad</label>
-              <input
-                id="yp-add-name"
-                required
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-              />
+      {isAddTab ? (
+        <>
+          <div className="yp-panel">
+            <div className="yp-panel__title">
+              {tab === "add-city" ? "Şehir ekle" : "Park ekle"}
             </div>
+            <form onSubmit={(e) => void handleAdd(e)}>
+              <div className="yp-form-grid">
+                <div className="yp-field yp-field--wide">
+                  <label htmlFor="yp-add-name">Ad</label>
+                  <input
+                    id="yp-add-name"
+                    required
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                  />
+                </div>
+                <div className="yp-field">
+                  <label htmlFor="yp-add-country">Ülke</label>
+                  <select
+                    id="yp-add-country"
+                    value={formCountry}
+                    onChange={(e) => setFormCountry(e.target.value)}
+                  >
+                    {YP_COUNTRY_LIST.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {tab === "add-park" ? (
+                  <div className="yp-field">
+                    <label htmlFor="yp-add-type">Park türü</label>
+                    <select
+                      id="yp-add-type"
+                      value={formParkType}
+                      onChange={(e) => setFormParkType(e.target.value as ParkType)}
+                    >
+                      {PARK_TYPES.map((type) => (
+                        <option key={type} value={type}>
+                          {PARK_TYPE_LABELS[type]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
+                <div className="yp-field">
+                  <label htmlFor="yp-add-lat">Enlem (isteğe bağlı)</label>
+                  <input
+                    id="yp-add-lat"
+                    inputMode="decimal"
+                    value={formLat}
+                    onChange={(e) => setFormLat(e.target.value)}
+                    placeholder="Boş bırakılabilir"
+                  />
+                </div>
+                <div className="yp-field">
+                  <label htmlFor="yp-add-lng">Boylam (isteğe bağlı)</label>
+                  <input
+                    id="yp-add-lng"
+                    inputMode="decimal"
+                    value={formLng}
+                    onChange={(e) => setFormLng(e.target.value)}
+                    placeholder="Boş bırakılabilir"
+                  />
+                </div>
+              </div>
+              <div className="yp-form-actions">
+                <button
+                  type="submit"
+                  className="yp-btn yp-btn--primary"
+                  disabled={busyId === "add"}
+                >
+                  Kataloğa ekle
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div className="yp-panel">
+            <div className="yp-panel__title">
+              <span className="yp-panel__title-label">
+                {tab === "add-city" ? "Eklenen şehirler" : "Eklenen parklar"}
+              </span>
+              <span className="yp-muted" style={{ fontWeight: 500, fontSize: "0.78rem" }}>
+                En son eklenen üstte
+              </span>
+            </div>
+            {additionsLoading && ypAdditions.length === 0 ? (
+              <div className="yp-empty">Yükleniyor…</div>
+            ) : ypAdditions.length === 0 ? (
+              <div className="yp-empty">
+                {tab === "add-city"
+                  ? "Henüz YP şehri eklenmedi."
+                  : "Henüz YP parkı eklenmedi."}
+              </div>
+            ) : (
+              <table className="yp-table">
+                <thead>
+                  <tr>
+                    <th>Ad</th>
+                    <th>Ülke</th>
+                    {tab === "add-park" ? <th>Tür</th> : null}
+                    <th>İşlemler</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ypAdditions.map((row) => {
+                    const key = resultKey(row);
+                    return (
+                      <tr key={key}>
+                        <td>
+                          {row.name}{" "}
+                          {tab === "add-city" && row.popular ? (
+                            <span className="yp-badge">Popüler</span>
+                          ) : null}
+                        </td>
+                        <td>
+                          {row.countryName} ({row.countryCode})
+                        </td>
+                        {tab === "add-park" ? (
+                          <td>
+                            {row.parkType
+                              ? PARK_TYPE_LABELS[row.parkType] ?? row.parkType
+                              : "—"}
+                          </td>
+                        ) : null}
+                        <td>
+                          <div className="yp-actions">
+                            <button
+                              type="button"
+                              className="yp-btn yp-btn--danger"
+                              disabled={Boolean(busyId?.startsWith("delete:"))}
+                              onClick={() => void handleDelete(row)}
+                            >
+                              Sil
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </>
+      ) : null}
+
+      {isManageTab ? (
+        <>
+          <div className="yp-toolbar">
             <div className="yp-field">
-              <label htmlFor="yp-add-country">Ülke</label>
+              <label htmlFor="yp-cat-country">Ülke</label>
               <select
-                id="yp-add-country"
-                value={formCountry}
-                onChange={(e) => setFormCountry(e.target.value)}
+                id="yp-cat-country"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
               >
+                <option value="">Tümü</option>
                 {YP_COUNTRY_LIST.map((c) => (
                   <option key={c.code} value={c.code}>
-                    {c.name}
+                    {c.name} ({c.code})
                   </option>
                 ))}
               </select>
             </div>
-            {kind === "park" ? (
-              <div className="yp-field">
-                <label htmlFor="yp-add-type">Park türü</label>
-                <select
-                  id="yp-add-type"
-                  value={formParkType}
-                  onChange={(e) => setFormParkType(e.target.value as ParkType)}
-                >
-                  {PARK_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {PARK_TYPE_LABELS[type]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : null}
-            <div className="yp-field">
-              <label htmlFor="yp-add-lat">Enlem (isteğe bağlı)</label>
+            <div className="yp-field" style={{ minWidth: "14rem", flex: 1 }}>
+              <label htmlFor="yp-cat-q">Ara</label>
               <input
-                id="yp-add-lat"
-                inputMode="decimal"
-                value={formLat}
-                onChange={(e) => setFormLat(e.target.value)}
-                placeholder="Boş bırakılabilir"
+                id="yp-cat-q"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="En az 2 karakter"
               />
             </div>
-            <div className="yp-field">
-              <label htmlFor="yp-add-lng">Boylam (isteğe bağlı)</label>
-              <input
-                id="yp-add-lng"
-                inputMode="decimal"
-                value={formLng}
-                onChange={(e) => setFormLng(e.target.value)}
-                placeholder="Boş bırakılabilir"
-              />
-            </div>
-          </div>
-          <div className="yp-form-actions">
             <button
-              type="submit"
-              className="yp-btn yp-btn--primary"
-              disabled={busyId === "add"}
+              type="button"
+              className="yp-btn"
+              onClick={() => void load({ force: true })}
+              disabled={loading}
             >
-              Kataloğa ekle
+              {loading ? "Yükleniyor…" : "Yenile"}
             </button>
           </div>
-        </form>
-      </div>
 
-      <div className="yp-panel">
-        <div className="yp-panel__title">
-          <span className="yp-panel__title-label">Arama sonuçları</span>
-          {selectedKeys.size > 0 ? (
-            <div className="yp-actions">
-              {kind === "city" ? (
-                <>
+          <div className="yp-panel">
+            <div className="yp-panel__title">
+              <span className="yp-panel__title-label">Arama sonuçları</span>
+              {selectedKeys.size > 0 ? (
+                <div className="yp-actions">
+                  {kind === "city" ? (
+                    <>
+                      <button
+                        type="button"
+                        className="yp-btn yp-btn--primary"
+                        disabled={busyId === "bulk-popular-on"}
+                        onClick={() => void handleBulkPopular(true)}
+                      >
+                        Popüler yap ({selectedKeys.size})
+                      </button>
+                      <button
+                        type="button"
+                        className="yp-btn"
+                        disabled={busyId === "bulk-popular-off"}
+                        onClick={() => void handleBulkPopular(false)}
+                      >
+                        Popüler kaldır ({selectedKeys.size})
+                      </button>
+                    </>
+                  ) : null}
                   <button
                     type="button"
-                    className="yp-btn yp-btn--primary"
-                    disabled={busyId === "bulk-popular-on"}
-                    onClick={() => void handleBulkPopular(true)}
+                    className="yp-btn yp-btn--danger"
+                    disabled={busyId === "bulk-delete"}
+                    onClick={() => void handleBulkDelete()}
                   >
-                    Popüler yap ({selectedKeys.size})
+                    Sil ({selectedKeys.size})
                   </button>
-                  <button
-                    type="button"
-                    className="yp-btn"
-                    disabled={busyId === "bulk-popular-off"}
-                    onClick={() => void handleBulkPopular(false)}
-                  >
-                    Popüler kaldır ({selectedKeys.size})
-                  </button>
-                </>
-              ) : null}
-              <button
-                type="button"
-                className="yp-btn yp-btn--danger"
-                disabled={busyId === "bulk-delete"}
-                onClick={() => void handleBulkDelete()}
-              >
-                Sil ({selectedKeys.size})
-              </button>
+                </div>
+              ) : (
+                <span className="yp-muted" style={{ fontWeight: 500, fontSize: "0.78rem" }}>
+                  Checkbox ile seç → toplu işlem
+                </span>
+              )}
             </div>
-          ) : (
-            <span className="yp-muted" style={{ fontWeight: 500, fontSize: "0.78rem" }}>
-              Checkbox ile seç → toplu işlem
-            </span>
-          )}
-        </div>
-        {visibleResults.length === 0 ? (
-          <div className="yp-empty">
-            {q.length < 2 && !country
-              ? "Listelemek için ülke seç veya arama yaz."
-              : "Sonuç yok."}
-          </div>
-        ) : (
-          <table className="yp-table">
-            <thead>
-              <tr>
-                <th style={{ width: "2.25rem" }}>
-                  <input
-                    type="checkbox"
-                    aria-label="Tümünü seç"
-                    checked={allDeletableSelected}
-                    disabled={deletableResults.length === 0}
-                    onChange={toggleSelectAll}
-                  />
-                </th>
-                <th>Ad</th>
-                <th>Ülke</th>
-                {kind === "park" ? <th>Tür</th> : null}
-                <th>Kaynak</th>
-                <th>İşlemler</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleResults.map((row) => {
-                const key = resultKey(row);
-                const checked = selectedKeys.has(key);
-                return (
-                  <tr key={key}>
-                    <td>
+            {results.length === 0 ? (
+              <div className="yp-empty">
+                {q.length < 2 && !country
+                  ? "Listelemek için ülke seç veya arama yaz."
+                  : "Sonuç yok."}
+              </div>
+            ) : (
+              <table className="yp-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: "2.25rem" }}>
                       <input
                         type="checkbox"
-                        aria-label={`${row.name} seç`}
-                        checked={checked}
-                        disabled={row.hidden}
-                        onChange={() => toggleSelect(row)}
+                        aria-label="Tümünü seç"
+                        checked={allSelected}
+                        disabled={results.length === 0}
+                        onChange={toggleSelectAll}
                       />
-                    </td>
-                    <td>
-                      {row.name}{" "}
-                      {kind === "city" && row.popular ? (
-                        <span className="yp-badge">Popüler</span>
-                      ) : null}{" "}
-                      {row.hidden ? (
-                        <span className="yp-badge yp-badge--danger">Gizli</span>
-                      ) : null}
-                    </td>
-                    <td>
-                      {row.countryName} ({row.countryCode})
-                    </td>
-                    {kind === "park" ? (
-                      <td>
-                        {row.parkType
-                          ? PARK_TYPE_LABELS[row.parkType] ?? row.parkType
-                          : "—"}
-                      </td>
-                    ) : null}
-                    <td>
-                      {row.source === "yp" ? <span className="yp-badge">YP</span> : "Statik"}
-                    </td>
-                    <td>
-                      <div className="yp-actions">
-                        {!row.hidden && kind === "city" ? (
-                          row.popular ? (
+                    </th>
+                    <th>Ad</th>
+                    <th>Ülke</th>
+                    {kind === "park" ? <th>Tür</th> : null}
+                    <th>Kaynak</th>
+                    <th>İşlemler</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {results.map((row) => {
+                    const key = resultKey(row);
+                    const checked = selectedKeys.has(key);
+                    return (
+                      <tr key={key}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            aria-label={`${row.name} seç`}
+                            checked={checked}
+                            onChange={() => toggleSelect(row)}
+                          />
+                        </td>
+                        <td>
+                          {row.name}{" "}
+                          {kind === "city" && row.popular ? (
+                            <span className="yp-badge">Popüler</span>
+                          ) : null}
+                        </td>
+                        <td>
+                          {row.countryName} ({row.countryCode})
+                        </td>
+                        {kind === "park" ? (
+                          <td>
+                            {row.parkType
+                              ? PARK_TYPE_LABELS[row.parkType] ?? row.parkType
+                              : "—"}
+                          </td>
+                        ) : null}
+                        <td>
+                          {row.source === "yp" ? <span className="yp-badge">YP</span> : "Statik"}
+                        </td>
+                        <td>
+                          <div className="yp-actions">
+                            {kind === "city" ? (
+                              row.popular ? (
+                                <button
+                                  type="button"
+                                  className="yp-btn"
+                                  disabled={Boolean(busyId?.startsWith("popular:"))}
+                                  onClick={() => void handleSetPopular(row, false)}
+                                >
+                                  Popüler kaldır
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="yp-btn yp-btn--primary"
+                                  disabled={Boolean(busyId?.startsWith("popular:"))}
+                                  onClick={() => void handleSetPopular(row, true)}
+                                >
+                                  Popüler yap
+                                </button>
+                              )
+                            ) : null}
                             <button
                               type="button"
                               className="yp-btn"
-                              disabled={Boolean(busyId?.startsWith("popular:"))}
-                              onClick={() => void handleSetPopular(row, false)}
+                              disabled={busyId?.startsWith("rename:") || busyId === key}
+                              onClick={() => openRename(row)}
                             >
-                              Popüler kaldır
+                              Yeniden adlandır
                             </button>
-                          ) : (
                             <button
                               type="button"
-                              className="yp-btn yp-btn--primary"
-                              disabled={Boolean(busyId?.startsWith("popular:"))}
-                              onClick={() => void handleSetPopular(row, true)}
+                              className="yp-btn yp-btn--danger"
+                              disabled={Boolean(busyId?.startsWith("delete:"))}
+                              onClick={() => void handleDelete(row)}
                             >
-                              Popüler yap
+                              Sil
                             </button>
-                          )
-                        ) : null}
-                        {!row.hidden ? (
-                          <button
-                            type="button"
-                            className="yp-btn"
-                            disabled={busyId?.startsWith("rename:") || busyId === key}
-                            onClick={() => openRename(row)}
-                          >
-                            Yeniden adlandır
-                          </button>
-                        ) : null}
-                        {row.hidden ? (
-                          <button
-                            type="button"
-                            className="yp-btn"
-                            disabled={busyId === key}
-                            onClick={() =>
-                              void postAction(
-                                {
-                                  action: "unhide",
-                                  kind,
-                                  countryCode: row.countryCode,
-                                  name: row.name,
-                                },
-                                key
-                              )
-                            }
-                          >
-                            Geri al
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className="yp-btn yp-btn--danger"
-                            disabled={Boolean(busyId?.startsWith("delete:"))}
-                            onClick={() => void handleDelete(row)}
-                          >
-                            Sil
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      <div className="yp-panel">
-        <div className="yp-panel__title">Gizlenen kayıtlar</div>
-        {exclusions.length === 0 ? (
-          <div className="yp-empty">Gizlenmiş katalog kaydı yok.</div>
-        ) : (
-          <table className="yp-table">
-            <thead>
-              <tr>
-                <th>Tür</th>
-                <th>Ülke</th>
-                <th>Ad anahtarı</th>
-                <th>İşlemler</th>
-              </tr>
-            </thead>
-            <tbody>
-              {exclusions.map((row) => (
-                <tr key={row.id}>
-                  <td>{row.kind === "city" ? "Şehir" : "Park"}</td>
-                  <td>{row.country_code}</td>
-                  <td>{row.name_key}</td>
-                  <td>
-                    <button
-                      type="button"
-                      className="yp-btn"
-                      disabled={busyId === row.id}
-                      onClick={() =>
-                        void postAction({ action: "unhide_by_id", id: row.id }, row.id)
-                      }
-                    >
-                      Geri al
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </>
+      ) : null}
 
       {renameTarget ? (
         <div className="yp-rename-modal" role="presentation">

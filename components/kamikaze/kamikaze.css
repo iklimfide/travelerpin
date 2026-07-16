@@ -197,6 +197,17 @@
   border-bottom: none;
 }
 
+.yp-link {
+  color: var(--color-wbs-blue);
+  text-decoration: none;
+  font-weight: 650;
+}
+
+.yp-link:hover {
+  text-decoration: underline;
+  color: var(--color-wbs-blue-hover, var(--color-wbs-blue));
+}
+
 .yp-actions {
   display: flex;
   flex-wrap: wrap;
@@ -221,6 +232,7 @@
 
 .yp-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.35rem;
   margin-bottom: 1rem;
 }

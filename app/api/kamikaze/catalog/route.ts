@@ -9,10 +9,10 @@ import {
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
 import {
   getCatalogOverlay,
+  getCatalogOverlayFresh,
   popularityOverrideMap,
   revalidateCatalogOverlay,
   type YpCatalogCityRow,
-  type YpCatalogExclusionRow,
   type YpCatalogParkRow,
 } from "@/lib/kamikaze/catalog-overlay";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
@@ -26,7 +26,6 @@ type CityListRow = {
   latitude: number | null;
   longitude: number | null;
   source: "static" | "yp";
-  hidden: boolean;
   popular: boolean;
   id?: string;
 };
@@ -54,15 +53,18 @@ function dedupeCityListRows(rows: CityListRow[]): CityListRow[] {
       continue;
     }
 
-    // Prefer visible YP rows, then non-hidden, then popular.
-    const score = (r: CityListRow) =>
-      (r.source === "yp" ? 4 : 0) + (r.hidden ? 0 : 2) + (r.popular ? 1 : 0);
-    byKey.set(key, score(next) >= score(existing) ? { ...existing, ...next, name: canonicalName } : {
-      ...existing,
-      name: canonicalName,
-      popular: existing.popular || next.popular,
-      hidden: existing.hidden && next.hidden,
-    });
+    // Prefer YP rows, then popular.
+    const score = (r: CityListRow) => (r.source === "yp" ? 2 : 0) + (r.popular ? 1 : 0);
+    byKey.set(
+      key,
+      score(next) >= score(existing)
+        ? { ...existing, ...next, name: canonicalName }
+        : {
+            ...existing,
+            name: canonicalName,
+            popular: existing.popular || next.popular,
+          }
+    );
   }
 
   return [...byKey.values()];
@@ -77,28 +79,94 @@ export async function GET(request: Request) {
   const country = searchParams.get("country")?.toUpperCase() ?? "";
   const q = searchParams.get("q")?.trim() ?? "";
 
+  // YP additions only (newest first) — used by Şehir ekle / Park ekle tabs.
+  if (searchParams.get("ypOnly") === "1") {
+    const overlayFresh = await getCatalogOverlayFresh();
+    const excludedKeys = new Set(
+      overlayFresh.exclusions
+        .filter((row) => row.kind === kind)
+        .map((row) => {
+          const code = row.country_code.toUpperCase();
+          return `${code}:${catalogNameKey(
+            row.name_key,
+            kind === "city" ? code : undefined
+          )}`;
+        })
+    );
+
+    if (kind === "city") {
+      const overrides = popularityOverrideMap(overlayFresh);
+      const results = overlayFresh.cities
+        .filter((row) => {
+          const code = row.country_code.toUpperCase();
+          return !excludedKeys.has(`${code}:${catalogNameKey(row.name, code)}`);
+        })
+        .map((row) => ({
+          id: row.id,
+          name: row.name,
+          countryCode: row.country_code.toUpperCase(),
+          countryName: row.country_name,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          source: "yp" as const,
+          popular: resolveCityPopular(row.country_code, row.name, overrides),
+          createdAt: row.created_at,
+        }));
+      // overlay.cities is already created_at desc.
+      return NextResponse.json({ kind: "city", results, ypOnly: true });
+    }
+
+    const results = overlayFresh.parks
+      .filter((row) => {
+        const code = row.country_code.toUpperCase();
+        return !excludedKeys.has(`${code}:${catalogNameKey(row.name)}`);
+      })
+      .map((row) => ({
+        id: row.id,
+        name: row.name,
+        parkType: row.park_type,
+        countryCode: row.country_code.toUpperCase(),
+        countryName: row.country_name,
+        latitude: row.latitude,
+        longitude: row.longitude,
+        source: "yp" as const,
+        createdAt: row.created_at,
+      }));
+    return NextResponse.json({ kind: "park", results, ypOnly: true });
+  }
+
   const overlay = await getCatalogOverlay();
 
   if (kind === "city") {
-    const additions = overlay.cities.filter(
-      (row) =>
-        (!country || row.country_code.toUpperCase() === country) &&
-        (q.length < 2 || matchesPlaceNameSearch(row.name, q))
-    );
-
-    const exclusions = overlay.exclusions.filter((row) => row.kind === "city");
     const excludedKeys = new Set(
-      exclusions.map((row) => {
-        const code = row.country_code.toUpperCase();
-        return `${code}:${catalogNameKey(row.name_key, code)}`;
-      })
+      overlay.exclusions
+        .filter((row) => row.kind === "city")
+        .map((row) => {
+          const code = row.country_code.toUpperCase();
+          return `${code}:${catalogNameKey(row.name_key, code)}`;
+        })
     );
     const overrides = popularityOverrideMap(overlay);
+
+    const additions = overlay.cities.filter((row) => {
+      const code = row.country_code.toUpperCase();
+      if (excludedKeys.has(`${code}:${catalogNameKey(row.name, code)}`)) return false;
+      if (country && code !== country) return false;
+      if (q.length >= 2 && !matchesPlaceNameSearch(row.name, q)) return false;
+      return true;
+    });
 
     let staticMatches: CityListRow[] = [];
 
     if (q.length >= 2 || country) {
       staticMatches = TOURIST_CITIES.filter((city) => {
+        if (
+          excludedKeys.has(
+            `${city.countryCode}:${catalogNameKey(city.name, city.countryCode)}`
+          )
+        ) {
+          return false;
+        }
         if (country && city.countryCode !== country) return false;
         if (q.length >= 2 && !matchesPlaceNameSearch(city.name, q)) return false;
         return true;
@@ -111,9 +179,6 @@ export async function GET(request: Request) {
           latitude: city.latitude,
           longitude: city.longitude,
           source: "static" as const,
-          hidden: excludedKeys.has(
-            `${city.countryCode}:${catalogNameKey(city.name, city.countryCode)}`
-          ),
           popular: resolveCityPopular(city.countryCode, city.name, overrides),
         }));
     }
@@ -126,9 +191,6 @@ export async function GET(request: Request) {
       latitude: row.latitude,
       longitude: row.longitude,
       source: "yp" as const,
-      hidden: excludedKeys.has(
-        `${row.country_code.toUpperCase()}:${catalogNameKey(row.name, row.country_code)}`
-      ),
       popular: resolveCityPopular(row.country_code, row.name, overrides),
     }));
 
@@ -136,21 +198,22 @@ export async function GET(request: Request) {
       kind: "city",
       results: dedupeCityListRows([...additionRows, ...staticMatches]).slice(0, 80),
       additions,
-      exclusions: exclusions.filter(
-        (row) => !country || row.country_code.toUpperCase() === country
-      ),
     });
   }
 
-  const additions = overlay.parks.filter(
-    (row) =>
-      (!country || row.country_code.toUpperCase() === country) &&
-      (q.length < 2 || matchesPlaceNameSearch(row.name, q))
-  );
-  const exclusions = overlay.exclusions.filter((row) => row.kind === "park");
   const excludedKeys = new Set(
-    exclusions.map((row) => `${row.country_code.toUpperCase()}:${row.name_key}`)
+    overlay.exclusions
+      .filter((row) => row.kind === "park")
+      .map((row) => `${row.country_code.toUpperCase()}:${row.name_key}`)
   );
+
+  const additions = overlay.parks.filter((row) => {
+    const code = row.country_code.toUpperCase();
+    if (excludedKeys.has(`${code}:${catalogNameKey(row.name)}`)) return false;
+    if (country && code !== country) return false;
+    if (q.length >= 2 && !matchesPlaceNameSearch(row.name, q)) return false;
+    return true;
+  });
 
   let staticMatches: Array<{
     name: string;
@@ -160,12 +223,14 @@ export async function GET(request: Request) {
     latitude: number | null;
     longitude: number | null;
     source: "static" | "yp";
-    hidden: boolean;
     id?: string;
   }> = [];
 
   if (q.length >= 2 || country) {
     staticMatches = TOURIST_PARKS.filter((park) => {
+      if (excludedKeys.has(`${park.countryCode}:${catalogNameKey(park.name)}`)) {
+        return false;
+      }
       if (country && park.countryCode !== country) return false;
       if (q.length >= 2 && !matchesPlaceNameSearch(park.name, q)) return false;
       return true;
@@ -179,9 +244,6 @@ export async function GET(request: Request) {
         latitude: park.latitude,
         longitude: park.longitude,
         source: "static" as const,
-        hidden: excludedKeys.has(
-          `${park.countryCode}:${catalogNameKey(park.name)}`
-        ),
       }));
   }
 
@@ -194,18 +256,12 @@ export async function GET(request: Request) {
     latitude: row.latitude,
     longitude: row.longitude,
     source: "yp" as const,
-    hidden: excludedKeys.has(
-      `${row.country_code.toUpperCase()}:${catalogNameKey(row.name)}`
-    ),
   }));
 
   return NextResponse.json({
     kind: "park",
     results: [...additionRows, ...staticMatches],
     additions,
-    exclusions: exclusions.filter(
-      (row) => !country || row.country_code.toUpperCase() === country
-    ),
   });
 }
 
@@ -294,22 +350,6 @@ type CatalogBody =
       parkType?: ParkType;
     }
   | {
-      action: "hide";
-      kind: "city" | "park";
-      countryCode: string;
-      name: string;
-    }
-  | {
-      action: "unhide";
-      kind: "city" | "park";
-      countryCode: string;
-      name: string;
-    }
-  | {
-      action: "unhide_by_id";
-      id: string;
-    }
-  | {
       action: "set_popular";
       countryCode: string;
       name: string;
@@ -365,6 +405,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    // Re-add after delete: clear any permanent exclusion for this name.
+    await admin
+      .from("yp_catalog_exclusions")
+      .delete()
+      .eq("kind", "city")
+      .eq("country_code", countryCode)
+      .eq("name_key", catalogNameKey(name, countryCode));
+
     await revalidateCatalogOverlay();
     return NextResponse.json({ city: data });
   }
@@ -402,6 +450,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    await admin
+      .from("yp_catalog_exclusions")
+      .delete()
+      .eq("kind", "park")
+      .eq("country_code", countryCode)
+      .eq("name_key", catalogNameKey(name));
+
     await revalidateCatalogOverlay();
     return NextResponse.json({ park: data });
   }
@@ -427,20 +482,24 @@ export async function POST(request: Request) {
     const name = input.name.trim();
     if (!countryCode || !name) return "Geçersiz silme isteği";
 
+    const nameKey = catalogNameKey(
+      name,
+      input.kind === "city" ? countryCode : undefined
+    );
+
+    // YP rows are hard-deleted from the DB.
     if (input.source === "yp") {
       if (!input.id) return "YP kaydı id gerekli";
       const table = input.kind === "city" ? "yp_catalog_cities" : "yp_catalog_parks";
       const { error } = await admin.from(table).delete().eq("id", input.id);
-      return error?.message ?? null;
+      if (error) return error.message;
     }
 
+    // Permanent catalog removal (also blocks a static twin from reappearing).
     const { error: insertError } = await admin.from("yp_catalog_exclusions").insert({
       kind: input.kind,
       country_code: countryCode,
-      name_key: catalogNameKey(
-        name,
-        input.kind === "city" ? countryCode : undefined
-      ),
+      name_key: nameKey,
     });
     if (insertError && !insertError.message.toLowerCase().includes("duplicate")) {
       return insertError.message;
@@ -625,67 +684,6 @@ export async function POST(request: Request) {
         .eq("name_key", newKey);
     }
 
-    await revalidateCatalogOverlay();
-    return NextResponse.json({ ok: true });
-  }
-
-  if (body.action === "hide") {
-    const countryCode = body.countryCode?.trim().toUpperCase();
-    const name = body.name?.trim();
-    if (!countryCode || !name) {
-      return NextResponse.json({ error: "Invalid hide payload" }, { status: 400 });
-    }
-
-    const exclusion: Omit<YpCatalogExclusionRow, "id" | "created_at"> = {
-      kind: body.kind,
-      country_code: countryCode,
-      name_key: catalogNameKey(
-        name,
-        body.kind === "city" ? countryCode : undefined
-      ),
-    };
-
-    const { error } = await admin.from("yp_catalog_exclusions").insert(exclusion);
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    await revalidateCatalogOverlay();
-    return NextResponse.json({ ok: true });
-  }
-
-  if (body.action === "unhide") {
-    const countryCode = body.countryCode?.trim().toUpperCase();
-    const name = body.name?.trim();
-    if (!countryCode || !name) {
-      return NextResponse.json({ error: "Invalid unhide payload" }, { status: 400 });
-    }
-
-    const nameKey = catalogNameKey(
-      name,
-      body.kind === "city" ? countryCode : undefined
-    );
-    const { error } = await admin
-      .from("yp_catalog_exclusions")
-      .delete()
-      .eq("kind", body.kind)
-      .eq("country_code", countryCode)
-      .eq("name_key", nameKey);
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    await revalidateCatalogOverlay();
-    return NextResponse.json({ ok: true });
-  }
-
-  if (body.action === "unhide_by_id") {
-    const { error } = await admin
-      .from("yp_catalog_exclusions")
-      .delete()
-      .eq("id", body.id);
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
     await revalidateCatalogOverlay();
     return NextResponse.json({ ok: true });
   }

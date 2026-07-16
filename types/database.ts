@@ -103,7 +103,8 @@ export type NotificationType =
   | "pin_country"
   | "pin_city"
   | "pin_park"
-  | "pin_media";
+  | "pin_media"
+  | "system";
 
 export interface NotificationRow {
   id: string;
