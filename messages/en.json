@@ -117,7 +117,8 @@
     "loading": "Loading...",
     "saveHint": "Check or uncheck countries, then tap Save to update your wishlist.",
     "saveFailed": "Could not save your wishlist. Please try again.",
-    "loginRequired": "Sign in to manage your wishlist."
+    "loginRequired": "Sign in to manage your wishlist.",
+    "alreadyVisited": "Visited"
   },
   "home": {
     "hero": "Pin your travels. Share with friends.",
@@ -431,7 +432,10 @@
     "visitorPhotos": "{name}'s photos",
     "myInstagramLinks": "My Instagram links",
     "visitorInstagramLinks": "{name}'s Instagram links",
+    "noPhotosYet": "No photos added yet.",
     "noInstagramYet": "No Instagram links added yet.",
+    "visitorNoPhotosYet": "{name} hasn't added photos yet.",
+    "visitorNoInstagramYet": "{name} hasn't added Instagram links yet.",
     "viewPin": "View pin",
     "viewMap": "View map",
     "closePin": "Close",

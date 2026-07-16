@@ -481,6 +481,11 @@ button.add-destination-country-tile__main:hover {
   color: #1e96f3;
 }
 
+.add-destination-country-tile__body {
+  min-width: 0;
+  flex: 1;
+}
+
 .add-destination-country-tile__flag {
   display: block;
   width: 22px;
@@ -491,12 +496,21 @@ button.add-destination-country-tile__main:hover {
 }
 
 .add-destination-country-tile__name {
-  flex: 1;
+  display: block;
   min-width: 0;
   font-size: 0.82rem;
   font-weight: 600;
   color: #0f172a;
   line-height: 1.25;
+}
+
+.add-destination-country-tile__meta {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #1e96f3;
+  line-height: 1.2;
 }
 
 .add-destination-empty {

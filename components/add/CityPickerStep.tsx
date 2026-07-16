@@ -31,6 +31,8 @@ type CityPickerStepProps = {
   countryName: string;
   existingCityNames: string[];
   pendingCityKeys: Set<string>;
+  pendingRemoveCityKeys?: Set<string>;
+  allowToggleOnMap?: boolean;
   onToggleCity: (city: CatalogCity) => void;
   existingCityHint?: string;
 };
@@ -62,6 +64,8 @@ export function CityPickerStep({
   countryName,
   existingCityNames,
   pendingCityKeys,
+  pendingRemoveCityKeys,
+  allowToggleOnMap = false,
   onToggleCity,
   existingCityHint,
 }: CityPickerStepProps) {
@@ -164,12 +168,15 @@ export function CityPickerStep({
   function renderCityRow(city: CatalogCity) {
     const key = citySelectionKey(countryCode, city.name);
     const onMap = existingNames.some((name) => citiesAreSame(countryCode, name, city.name));
-    const pending = pendingCityKeys.has(key);
-    const checked = onMap || pending;
+    const pendingRemove = pendingRemoveCityKeys?.has(key) ?? false;
+    const pendingAdd = pendingCityKeys.has(key);
+    const locked = onMap && !allowToggleOnMap;
+    const checked = (onMap && !pendingRemove) || pendingAdd;
+    const pending = pendingAdd || pendingRemove;
     const displayName = formatKnownPlaceName(city.name);
 
     function toggle() {
-      if (onMap) return;
+      if (locked) return;
       onToggleCity({
         ...city,
         countryCode,
@@ -179,10 +186,10 @@ export function CityPickerStep({
     return (
       <div
         key={key}
-        className={`add-destination-city-row${onMap ? " is-disabled" : ""}${pending ? " is-pending" : ""}`}
-        onClick={onMap ? undefined : toggle}
+        className={`add-destination-city-row${locked ? " is-disabled" : ""}${pending ? " is-pending" : ""}`}
+        onClick={locked ? undefined : toggle}
         onKeyDown={
-          onMap
+          locked
             ? undefined
             : (event) => {
                 if (event.key === "Enter" || event.key === " ") {
@@ -191,12 +198,12 @@ export function CityPickerStep({
                 }
               }
         }
-        role={onMap ? undefined : "button"}
-        tabIndex={onMap ? undefined : 0}
+        role={locked ? undefined : "button"}
+        tabIndex={locked ? undefined : 0}
       >
         <AddDestinationCheckbox
           checked={checked}
-          disabled={onMap}
+          disabled={locked}
           onChange={toggle}
           label={displayName}
         />
@@ -211,7 +218,7 @@ export function CityPickerStep({
               <span className="add-destination-city-row__badge">{addDestinationMessages.popular}</span>
             ) : null}
           </span>
-          {onMap ? (
+          {onMap && !pendingRemove ? (
             <span className="add-destination-city-row__meta">
               {existingCityHint ?? mapMessages.cityOnMap}
             </span>

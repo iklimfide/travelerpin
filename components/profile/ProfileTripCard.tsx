@@ -45,9 +45,8 @@ export function ProfileTripCard({
             <img
               src={countryCodeToFlagUrl(trip.countryCode)}
               alt=""
-              width={80}
-              height={80}
-              className="rounded-full object-cover shadow-md"
+              width={72}
+              height={72}
             />
           </div>
         ) : null}

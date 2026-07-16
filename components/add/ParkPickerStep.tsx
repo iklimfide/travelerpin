@@ -8,6 +8,7 @@ import { flagCountryCode } from "@/lib/data/uk-nations";
 import { CONTACT_EMAIL } from "@/lib/legal/contact";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { formatKnownPlaceName } from "@/lib/utils/city-name";
+import { shortParkLabel } from "@/lib/utils/park-name";
 import { matchesParkTypeFilter, parkTypeLabel } from "@/lib/utils/park-type";
 import type { ParkType } from "@/types/database";
 import { AddDestinationCityListSkeleton } from "@/components/skeletons/AddDestinationModalSkeleton";
@@ -25,6 +26,8 @@ type ParkPickerStepProps = {
   countryName: string;
   existingParkKeys: string[];
   pendingParkKeys: Set<string>;
+  pendingRemoveParkKeys?: Set<string>;
+  allowToggleOnMap?: boolean;
   onTogglePark: (park: CatalogPark) => void;
 };
 
@@ -52,6 +55,8 @@ export function ParkPickerStep({
   countryName,
   existingParkKeys,
   pendingParkKeys,
+  pendingRemoveParkKeys,
+  allowToggleOnMap = false,
   onTogglePark,
 }: ParkPickerStepProps) {
   const [parks, setParks] = useState<CatalogPark[]>([]);
@@ -115,13 +120,17 @@ export function ParkPickerStep({
   function renderParkRow(park: CatalogPark) {
     const key = parkSelectionKey(park.parkType, park.name);
     const onMap = existingKeys.has(key);
-    const pending = pendingParkKeys.has(key);
-    const checked = onMap || pending;
-    const displayName = formatKnownPlaceName(park.name);
+    const pendingRemove = pendingRemoveParkKeys?.has(key) ?? false;
+    const pendingAdd = pendingParkKeys.has(key);
+    const locked = onMap && !allowToggleOnMap;
+    const checked = (onMap && !pendingRemove) || pendingAdd;
+    const pending = pendingAdd || pendingRemove;
+    const fullName = formatKnownPlaceName(park.name);
+    const displayName = shortParkLabel(park.name);
     const typeLabel = parkTypeLabel(park.parkType);
 
     function toggle() {
-      if (onMap) return;
+      if (locked) return;
       onTogglePark({
         ...park,
         countryCode,
@@ -131,10 +140,10 @@ export function ParkPickerStep({
     return (
       <div
         key={key}
-        className={`add-destination-city-row${onMap ? " is-disabled" : ""}${pending ? " is-pending" : ""}`}
-        onClick={onMap ? undefined : toggle}
+        className={`add-destination-city-row${locked ? " is-disabled" : ""}${pending ? " is-pending" : ""}`}
+        onClick={locked ? undefined : toggle}
         onKeyDown={
-          onMap
+          locked
             ? undefined
             : (event) => {
                 if (event.key === "Enter" || event.key === " ") {
@@ -143,21 +152,23 @@ export function ParkPickerStep({
                 }
               }
         }
-        role={onMap ? undefined : "button"}
-        tabIndex={onMap ? undefined : 0}
+        role={locked ? undefined : "button"}
+        tabIndex={locked ? undefined : 0}
       >
         <AddDestinationCheckbox
           checked={checked}
-          disabled={onMap}
+          disabled={locked}
           onChange={toggle}
           label={displayName}
         />
         <div className="add-destination-city-row__body">
           <span className="add-destination-city-row__title-row">
-            <span className="add-destination-city-row__name">{displayName}</span>
+            <span className="add-destination-city-row__name" title={fullName}>
+              {displayName}
+            </span>
             <span className="add-destination-city-row__badge">{typeLabel}</span>
           </span>
-          {onMap ? (
+          {onMap && !pendingRemove ? (
             <span className="add-destination-city-row__meta">{mapMessages.parkOnMap}</span>
           ) : null}
         </div>

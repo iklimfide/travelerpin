@@ -32,6 +32,8 @@ type CountryPickerStepProps = {
   searchPlaceholder?: string;
   regionProgressSuffix?: string;
   listHint?: string;
+  /** Small label under visited countries (e.g. wishlist picker). */
+  visitedCountryHint?: string;
   /** Re-open this continent when returning from the city step. */
   initialExpandedRegion?: AddRegionId | null;
 };
@@ -43,6 +45,7 @@ function CountryTile({
   locked,
   checked,
   pending,
+  visitedHint,
   onToggle,
   onOpen,
   countriesOnly = false,
@@ -52,6 +55,7 @@ function CountryTile({
   locked: boolean;
   checked: boolean;
   pending: boolean;
+  visitedHint?: string;
   onToggle: () => void;
   onOpen: () => void;
   countriesOnly?: boolean;
@@ -86,7 +90,12 @@ function CountryTile({
           height={22}
           className="add-destination-country-tile__flag"
         />
-        <span className="add-destination-country-tile__name">{displayName}</span>
+        <span className="add-destination-country-tile__body">
+          <span className="add-destination-country-tile__name">{displayName}</span>
+          {locked && visitedHint ? (
+            <span className="add-destination-country-tile__meta">{visitedHint}</span>
+          ) : null}
+        </span>
       </button>
     </div>
   );
@@ -105,6 +114,7 @@ export function CountryPickerStep({
   searchPlaceholder,
   regionProgressSuffix = "visited",
   listHint,
+  visitedCountryHint,
   initialExpandedRegion = null,
 }: CountryPickerStepProps) {
   const progressCodes = countedCodes ?? visitedCodes;
@@ -163,6 +173,7 @@ export function CountryPickerStep({
         locked={locked}
         checked={checked}
         pending={pending}
+        visitedHint={visitedCountryHint}
         onToggle={() => onToggleCountry(country)}
         onOpen={() => onOpenCountry(country)}
         countriesOnly={countriesOnly}

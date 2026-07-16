@@ -30,7 +30,6 @@ export function ProfileWishlistDestinationCard({
             alt=""
             width={72}
             height={72}
-            className="rounded-full object-cover shadow-md"
           />
         </div>
         <span className="profile-trip-badge profile-trip-badge--wishlist">{wantLabel}</span>

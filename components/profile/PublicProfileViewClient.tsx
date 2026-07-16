@@ -253,37 +253,40 @@ export function PublicProfileViewClient({
                 </div>
               ) : null}
 
-              {mediaPins.length > 0 ? (
-                <ProfileMediaSections
-                  username={profile.username}
-                  displayName={displayName}
-                  memoryPins={mediaPins}
-                  isOwnProfile={isOwnProfile}
-                  visitedCountries={visitedCountries}
-                  visitedCities={visitedCities}
-                  visitedParks={visitedParks}
-                  labels={{
-                    photosHeading: isOwnProfile
-                      ? t("myPhotos")
-                      : t("visitorPhotos", { name: displayName }),
-                    instagramHeading: isOwnProfile
-                      ? t("myInstagramLinks")
-                      : t("visitorInstagramLinks", { name: displayName }),
-                    noInstagramYet: t("noInstagramYet"),
-                    viewPin: t("viewPin"),
-                    viewMap: t("viewMap"),
-                    close: t("closePin"),
-                    instagramPost: t("instagramPost"),
-                    viewAll: t("allDestinationsAll"),
-                    editMedia: tCommon("edit"),
-                    removeMedia: tCommon("delete"),
-                    removePhotoTitle: t("removePhotoTitle"),
-                    removePhotoMessage: t("removePhotoMessage"),
-                    removeInstagramTitle: t("removeInstagramTitle"),
-                    removeInstagramMessage: t("removeInstagramMessage"),
-                  }}
-                />
-              ) : null}
+              <ProfileMediaSections
+                username={profile.username}
+                displayName={displayName}
+                memoryPins={mediaPins}
+                isOwnProfile={isOwnProfile}
+                visitedCountries={visitedCountries}
+                visitedCities={visitedCities}
+                visitedParks={visitedParks}
+                labels={{
+                  photosHeading: isOwnProfile
+                    ? t("myPhotos")
+                    : t("visitorPhotos", { name: displayName }),
+                  instagramHeading: isOwnProfile
+                    ? t("myInstagramLinks")
+                    : t("visitorInstagramLinks", { name: displayName }),
+                  noPhotosYet: isOwnProfile
+                    ? t("noPhotosYet")
+                    : t("visitorNoPhotosYet", { name: displayName }),
+                  noInstagramYet: isOwnProfile
+                    ? t("noInstagramYet")
+                    : t("visitorNoInstagramYet", { name: displayName }),
+                  viewPin: t("viewPin"),
+                  viewMap: t("viewMap"),
+                  close: t("closePin"),
+                  instagramPost: t("instagramPost"),
+                  viewAll: t("allDestinationsAll"),
+                  editMedia: tCommon("edit"),
+                  removeMedia: tCommon("delete"),
+                  removePhotoTitle: t("removePhotoTitle"),
+                  removePhotoMessage: t("removePhotoMessage"),
+                  removeInstagramTitle: t("removeInstagramTitle"),
+                  removeInstagramMessage: t("removeInstagramMessage"),
+                }}
+              />
 
               <ProfileNextRouteSection
                 initialStops={parseNextRoute(profile.next_route)}

@@ -67,6 +67,7 @@ function applyTravelState(
 function applyOptimisticPlacesSave(params: {
   pendingCountryCodes: Set<string>;
   pendingCities: Map<string, PendingCitySelection>;
+  pendingRemoveCityKeys: Set<string>;
   visitedCodes: Set<string>;
   visitedCities: VisitedCity[];
 }): { visitedCodes: Set<string>; visitedCities: VisitedCity[] } {
@@ -75,7 +76,14 @@ function applyOptimisticPlacesSave(params: {
     nextCodes.add(code.toUpperCase());
   }
 
-  const nextCities = [...params.visitedCities];
+  let nextCities = [...params.visitedCities];
+  if (params.pendingRemoveCityKeys.size > 0) {
+    nextCities = nextCities.filter((visited) => {
+      const key = citySelectionKey(visited.country_code, visited.city_name);
+      return !params.pendingRemoveCityKeys.has(key);
+    });
+  }
+
   for (const city of params.pendingCities.values()) {
     const countryCode = city.countryCode.toUpperCase();
     const cityName = canonicalCityName(countryCode, city.cityName);
@@ -114,11 +122,19 @@ function applyOptimisticPlacesSave(params: {
 
 function applyOptimisticParksSave(params: {
   pendingParks: Map<string, PendingParkSelection>;
+  pendingRemoveParkKeys: Set<string>;
   visitedCodes: Set<string>;
   visitedParks: VisitedPark[];
 }): { visitedCodes: Set<string>; visitedParks: VisitedPark[] } {
   const nextCodes = new Set(params.visitedCodes);
-  const nextParks = [...params.visitedParks];
+  let nextParks = [...params.visitedParks];
+
+  if (params.pendingRemoveParkKeys.size > 0) {
+    nextParks = nextParks.filter((visited) => {
+      const key = parkSelectionKey(visited.park_type, visited.park_name);
+      return !params.pendingRemoveParkKeys.has(key);
+    });
+  }
 
   for (const park of params.pendingParks.values()) {
     const countryCode = park.countryCode.toUpperCase();
@@ -168,6 +184,12 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
   const [pendingParks, setPendingParks] = useState<Map<string, PendingParkSelection>>(
     () => new Map()
   );
+  const [pendingRemoveCityKeys, setPendingRemoveCityKeys] = useState<Set<string>>(
+    () => new Set()
+  );
+  const [pendingRemoveParkKeys, setPendingRemoveParkKeys] = useState<Set<string>>(
+    () => new Set()
+  );
   const [returnExpandedRegion, setReturnExpandedRegion] = useState<AddRegionId | null>(null);
   const [loadingState, setLoadingState] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -206,6 +228,8 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
     setPendingCountryCodes(new Set());
     setPendingCities(new Map());
     setPendingParks(new Map());
+    setPendingRemoveCityKeys(new Set());
+    setPendingRemoveParkKeys(new Set());
     setReturnExpandedRegion(null);
     setSaveError(null);
     void loadTravelState({ background: false });
@@ -267,9 +291,33 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
   const pendingCityKeys = useMemo(() => new Set(pendingCities.keys()), [pendingCities]);
   const pendingParkKeys = useMemo(() => new Set(pendingParks.keys()), [pendingParks]);
 
+  const pendingRemoveCityIds = useMemo(
+    () =>
+      [...pendingRemoveCityKeys]
+        .map((key) =>
+          visitedCities.find(
+            (city) => citySelectionKey(city.country_code, city.city_name) === key
+          )?.id
+        )
+        .filter((id): id is string => Boolean(id)),
+    [pendingRemoveCityKeys, visitedCities]
+  );
+
+  const pendingRemoveParkIds = useMemo(
+    () =>
+      [...pendingRemoveParkKeys]
+        .map((key) =>
+          visitedParks.find(
+            (park) => parkSelectionKey(park.park_type, park.park_name) === key
+          )?.id
+        )
+        .filter((id): id is string => Boolean(id)),
+    [pendingRemoveParkKeys, visitedParks]
+  );
+
   const pendingSelectionCount = useMemo(() => {
     if (isParksMode) {
-      return [...pendingParks.values()].filter((park) => {
+      const newParks = [...pendingParks.values()].filter((park) => {
         const alreadyOnMap = visitedParks.some(
           (visited) =>
             visited.country_code.toUpperCase() === park.countryCode.toUpperCase() &&
@@ -278,6 +326,8 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
         );
         return !alreadyOnMap;
       }).length;
+
+      return newParks + pendingRemoveParkIds.length;
     }
 
     const newCountries = [...pendingCountryCodes].filter((code) => {
@@ -295,12 +345,14 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
       return !alreadyOnMap;
     }).length;
 
-    return newCountries + newCities;
+    return newCountries + newCities + pendingRemoveCityIds.length;
   }, [
     isParksMode,
     pendingCities,
     pendingCountryCodes,
     pendingParks,
+    pendingRemoveCityIds.length,
+    pendingRemoveParkIds.length,
     visitedCities,
     visitedCodes,
     visitedParks,
@@ -338,7 +390,30 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
         matchesUkCityCountry(visited.country_code, city.countryCode) &&
         citiesAreSame(city.countryCode, visited.city_name, city.name)
     );
-    if (alreadyOnMap) return;
+
+    if (alreadyOnMap) {
+      setPendingCities((prev) => {
+        if (!prev.has(key)) return prev;
+        const next = new Map(prev);
+        next.delete(key);
+        return next;
+      });
+
+      setPendingRemoveCityKeys((prev) => {
+        const next = new Set(prev);
+        if (next.has(key)) next.delete(key);
+        else next.add(key);
+        return next;
+      });
+      return;
+    }
+
+    setPendingRemoveCityKeys((prev) => {
+      if (!prev.has(key)) return prev;
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
 
     setPendingCities((prev) => {
       const next = new Map(prev);
@@ -362,7 +437,30 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
         visited.park_type === park.parkType &&
         visited.park_name.trim().toLowerCase() === park.name.trim().toLowerCase()
     );
-    if (alreadyOnMap) return;
+
+    if (alreadyOnMap) {
+      setPendingParks((prev) => {
+        if (!prev.has(key)) return prev;
+        const next = new Map(prev);
+        next.delete(key);
+        return next;
+      });
+
+      setPendingRemoveParkKeys((prev) => {
+        const next = new Set(prev);
+        if (next.has(key)) next.delete(key);
+        else next.add(key);
+        return next;
+      });
+      return;
+    }
+
+    setPendingRemoveParkKeys((prev) => {
+      if (!prev.has(key)) return prev;
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
 
     setPendingParks((prev) => {
       const next = new Map(prev);
@@ -390,8 +488,11 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
 
     if (isParksMode) {
       const pendingParksSnapshot = new Map(pendingParks);
+      const pendingRemoveParkKeysSnapshot = new Set(pendingRemoveParkKeys);
+      const pendingRemoveParkIdsSnapshot = [...pendingRemoveParkIds];
       const optimistic = applyOptimisticParksSave({
         pendingParks: pendingParksSnapshot,
+        pendingRemoveParkKeys: pendingRemoveParkKeysSnapshot,
         visitedCodes,
         visitedParks,
       });
@@ -421,12 +522,14 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
       notifyTravelStateUpdated(nextData);
 
       setPendingParks(new Map());
+      setPendingRemoveParkKeys(new Set());
       onClose();
 
       void (async () => {
         try {
           const result = await savePendingParks({
             pendingParks: pendingParksSnapshot.values(),
+            pendingRemoveParkIds: pendingRemoveParkIdsSnapshot,
             visitedParks,
           });
 
@@ -451,10 +554,13 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
 
     const pendingCountrySnapshot = new Set(pendingCountryCodes);
     const pendingCitiesSnapshot = new Map(pendingCities);
+    const pendingRemoveCityKeysSnapshot = new Set(pendingRemoveCityKeys);
+    const pendingRemoveCityIdsSnapshot = [...pendingRemoveCityIds];
 
     const optimistic = applyOptimisticPlacesSave({
       pendingCountryCodes: pendingCountrySnapshot,
       pendingCities: pendingCitiesSnapshot,
+      pendingRemoveCityKeys: pendingRemoveCityKeysSnapshot,
       visitedCodes,
       visitedCities,
     });
@@ -479,6 +585,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
 
     setPendingCountryCodes(new Set());
     setPendingCities(new Map());
+    setPendingRemoveCityKeys(new Set());
     onClose();
 
     void (async () => {
@@ -486,6 +593,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
         const result = await savePendingDestinations({
           pendingCountryCodes: pendingCountrySnapshot,
           pendingCities: pendingCitiesSnapshot.values(),
+          pendingRemoveCityIds: pendingRemoveCityIdsSnapshot,
           visitedCodes,
           visitedCities,
         });
@@ -591,6 +699,8 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
               countryName={step.countryName}
               existingParkKeys={existingParkKeys}
               pendingParkKeys={pendingParkKeys}
+              pendingRemoveParkKeys={pendingRemoveParkKeys}
+              allowToggleOnMap
               onTogglePark={handleTogglePark}
             />
           ) : (
@@ -599,6 +709,8 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
               countryName={step.countryName}
               existingCityNames={existingCityNames}
               pendingCityKeys={pendingCityKeys}
+              pendingRemoveCityKeys={pendingRemoveCityKeys}
+              allowToggleOnMap
               onToggleCity={handleToggleCity}
             />
           )}

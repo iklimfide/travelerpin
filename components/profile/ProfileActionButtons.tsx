@@ -47,7 +47,7 @@ export function ProfileActionButtons({
       ) : null}
 
       {showFollow ? (
-        <div className="profile-actions z-10">
+        <div className="profile-actions z-10 !top-[3.25rem]">
           <div className="profile-actions__end ml-auto">
             <Suspense fallback={null}>
               <ProfileFollowButton

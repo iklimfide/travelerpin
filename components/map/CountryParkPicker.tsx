@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addPark, addParksBatch } from "@/lib/client/park-actions";
 import { commonMessages, formatMessage, mapMessages, parkMessages } from "@/lib/i18n/client-messages";
 import { matchesParkTypeFilter, parkTypeLabel } from "@/lib/utils/park-type";
-import { formatCityDisplayName } from "@/lib/utils/city-name";
+import { formatCityDisplayName, formatKnownPlaceName } from "@/lib/utils/city-name";
+import { shortParkLabel } from "@/lib/utils/park-name";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
 import type { ParkType } from "@/types/database";
@@ -339,6 +340,8 @@ export function CountryParkPicker({
             const onMap = existingKeys.has(parkKey(park).toLowerCase());
             const checked = onMap || selectedIds.has(id);
             const typeLabel = parkTypeLabel(park.parkType);
+            const fullName = formatKnownPlaceName(park.name);
+            const displayName = shortParkLabel(park.name);
 
             return (
               <li key={id} className="border-b border-slate-800/80 last:border-b-0">
@@ -355,8 +358,8 @@ export function CountryParkPicker({
                     className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-500/40 disabled:opacity-60"
                   />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm text-slate-100" title={park.name}>
-                      {park.name}
+                    <span className="block truncate text-sm text-slate-100" title={fullName}>
+                      {displayName}
                     </span>
                     <span className="mt-0.5 block text-xs text-slate-500">{typeLabel}</span>
                     {onMap && (

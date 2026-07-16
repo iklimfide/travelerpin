@@ -245,6 +245,7 @@ export function WishlistDestinationModal({ onClose }: WishlistDestinationModalPr
               countriesOnly
               searchPlaceholder={wishlistMessages.searchPlaceholder}
               regionProgressSuffix="on wishlist"
+              visitedCountryHint={wishlistDestinationMessages.alreadyVisited}
             />
           )}
         </div>

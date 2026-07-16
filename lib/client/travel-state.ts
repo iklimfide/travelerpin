@@ -1,8 +1,9 @@
 import {
   addCitiesBatch,
+  deleteCitiesBatch,
 } from "@/lib/client/city-actions";
 import { addVisitedCountry } from "@/lib/client/country-actions";
-import { addParksBatch } from "@/lib/client/park-actions";
+import { addParksBatch, deleteParksBatch } from "@/lib/client/park-actions";
 import { getCountryName } from "@/lib/data/countries";
 import { canonicalCityName, citiesAreSame } from "@/lib/utils/city-aliases";
 import {
@@ -114,11 +115,21 @@ function isCityOnMap(
 export async function savePendingDestinations(params: {
   pendingCountryCodes: Iterable<string>;
   pendingCities: Iterable<PendingCitySelection>;
+  pendingRemoveCityIds?: Iterable<string>;
   visitedCodes: ReadonlySet<string>;
   visitedCities: VisitedCity[];
 }): Promise<{ ok: true; savedCount: number } | { ok: false; error: string }> {
   const pendingCountryCodes = [...params.pendingCountryCodes];
   const pendingCities = [...params.pendingCities];
+  const pendingRemoveCityIds = [...(params.pendingRemoveCityIds ?? [])];
+
+  let savedCount = 0;
+
+  if (pendingRemoveCityIds.length > 0) {
+    const result = await deleteCitiesBatch({ ids: pendingRemoveCityIds });
+    if (!result.ok) return result;
+    savedCount += result.deleted;
+  }
 
   const countriesWithPendingCities = new Set(
     pendingCities.map((city) => city.countryCode.toUpperCase())
@@ -128,8 +139,6 @@ export async function savePendingDestinations(params: {
     .map((code) => code.toUpperCase())
     .filter((code) => !params.visitedCodes.has(code))
     .filter((code) => !countriesWithPendingCities.has(code));
-
-  let savedCount = 0;
 
   for (const code of newCountryCodes) {
     const result = await addVisitedCountry(code);
@@ -185,11 +194,22 @@ function isParkOnMap(
 
 export async function savePendingParks(params: {
   pendingParks: Iterable<PendingParkSelection>;
+  pendingRemoveParkIds?: Iterable<string>;
   visitedParks: VisitedPark[];
 }): Promise<{ ok: true; savedCount: number } | { ok: false; error: string }> {
   const pendingParks = [...params.pendingParks];
-  if (pendingParks.length === 0) {
+  const pendingRemoveParkIds = [...(params.pendingRemoveParkIds ?? [])];
+
+  if (pendingParks.length === 0 && pendingRemoveParkIds.length === 0) {
     return { ok: true, savedCount: 0 };
+  }
+
+  let savedCount = 0;
+
+  if (pendingRemoveParkIds.length > 0) {
+    const result = await deleteParksBatch({ ids: pendingRemoveParkIds });
+    if (!result.ok) return result;
+    savedCount += result.deleted;
   }
 
   const parksByCountry = new Map<
@@ -225,8 +245,6 @@ export async function savePendingParks(params: {
     });
     parksByCountry.set(countryCode, entry);
   }
-
-  let savedCount = 0;
 
   for (const [countryCode, { countryName, parks }] of parksByCountry) {
     for (let index = 0; index < parks.length; index += 50) {

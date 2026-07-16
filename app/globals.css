@@ -2944,8 +2944,21 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 }
 
 .profile-trip-flag {
-  display: grid;
-  place-items: center;
+  display: block;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.16);
+  flex-shrink: 0;
+}
+
+.profile-trip-flag img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
 }
 
 .profile-trip-badge--wishlist {
@@ -3496,9 +3509,9 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
   font-weight: 800;
 }
 
-.profile-all-grid .profile-trip-flag img {
-  width: clamp(48px, 34%, 84px) !important;
-  height: clamp(48px, 34%, 84px) !important;
+.profile-all-grid .profile-trip-flag {
+  width: clamp(48px, 34%, 84px);
+  height: clamp(48px, 34%, 84px);
 }
 
 .profile-destination-card-actions {
@@ -3562,9 +3575,9 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
     padding: 3px 8px;
   }
 
-  .profile-all-grid .profile-trip-flag img {
-    width: clamp(44px, 32%, 72px) !important;
-    height: clamp(44px, 32%, 72px) !important;
+  .profile-all-grid .profile-trip-flag {
+    width: clamp(44px, 32%, 72px);
+    height: clamp(44px, 32%, 72px);
   }
 }
 
@@ -3605,9 +3618,9 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
     padding: 5px 8px;
   }
 
-  .profile-all-grid .profile-trip-flag img {
-    width: clamp(52px, 33%, 80px) !important;
-    height: clamp(52px, 33%, 80px) !important;
+  .profile-all-grid .profile-trip-flag {
+    width: clamp(52px, 33%, 80px);
+    height: clamp(52px, 33%, 80px);
   }
 }
 
@@ -3651,9 +3664,9 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
     font-size: 11px;
   }
 
-  .profile-all-grid .profile-trip-flag img {
-    width: clamp(56px, 34%, 84px) !important;
-    height: clamp(56px, 34%, 84px) !important;
+  .profile-all-grid .profile-trip-flag {
+    width: clamp(56px, 34%, 84px);
+    height: clamp(56px, 34%, 84px);
   }
 }
 
@@ -5535,9 +5548,9 @@ a.save-destination-modal__name-link:hover {
     font-size: 10px;
   }
 
-  .profile-all-page .profile-all-grid .profile-trip-flag img {
-    width: clamp(52px, 33%, 80px) !important;
-    height: clamp(52px, 33%, 80px) !important;
+  .profile-all-page .profile-all-grid .profile-trip-flag {
+    width: clamp(52px, 33%, 80px);
+    height: clamp(52px, 33%, 80px);
   }
 
   .profile-all-page .profile-destination-card-actions {
@@ -5723,9 +5736,9 @@ a.save-destination-modal__name-link:hover {
     font-size: 12px;
   }
 
-  .profile-all-page .profile-all-grid .profile-trip-flag img {
-    width: clamp(56px, 33%, 84px) !important;
-    height: clamp(56px, 33%, 84px) !important;
+  .profile-all-page .profile-all-grid .profile-trip-flag {
+    width: clamp(56px, 33%, 84px);
+    height: clamp(56px, 33%, 84px);
   }
 
   .profile-page--route .profile-guest-auth-bar {

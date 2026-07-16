@@ -328,7 +328,7 @@ export function ProfileMediaGallery({
     );
   }
 
-  if (items.length === 0 && !(alwaysShow && variant === "instagram")) {
+  if (items.length === 0 && !alwaysShow) {
     return null;
   }
 

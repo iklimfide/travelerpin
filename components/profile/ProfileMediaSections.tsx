@@ -1,11 +1,7 @@
 "use client";
 
 import { ProfileMediaGallery } from "@/components/profile/ProfileMediaGallery";
-import {
-  pinHasInstagramMedia,
-  pinHasPhotoMedia,
-  type HubTravelerPin,
-} from "@/lib/supabase/hub-traveler-pin";
+import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
 import { profileMediaPath } from "@/lib/seo/site";
 import {
   PROFILE_MEDIA_PREVIEW_LIMIT,
@@ -24,6 +20,7 @@ type ProfileMediaSectionsProps = {
   labels: {
     photosHeading: string;
     instagramHeading: string;
+    noPhotosYet: string;
     noInstagramYet: string;
     viewPin: string;
     viewMap: string;
@@ -49,39 +46,39 @@ export function ProfileMediaSections({
   visitedParks,
   labels,
 }: ProfileMediaSectionsProps) {
-  if (memoryPins.length === 0) return null;
-
-  const photoPins = memoryPins.filter((pin) => pinHasPhotoMedia(pin));
-  const instagramPins = memoryPins.filter((pin) => pinHasInstagramMedia(pin));
   const { photos, instagram } = splitProfileMediaItems(memoryPins);
   const previewPhotos = photos.slice(0, PROFILE_MEDIA_PREVIEW_LIMIT);
   const previewInstagram = instagram.slice(0, PROFILE_MEDIA_PREVIEW_LIMIT);
 
   return (
     <div className="profile-media-sections">
-      {photoPins.length > 0 ? (
-        <ProfileMediaGallery
-          hubName={displayName}
-          variant="photos"
-          headingId="profile-photos-heading"
-          items={previewPhotos}
-          viewAllHref={profileMediaPath(username, "photos")}
-          isOwnProfile={isOwnProfile}
-          visitedCountries={visitedCountries}
-          visitedCities={visitedCities}
-          visitedParks={visitedParks}
-          labels={labels}
-        />
-      ) : null}
+      <ProfileMediaGallery
+        hubName={displayName}
+        variant="photos"
+        headingId="profile-photos-heading"
+        alwaysShow
+        emptyLabel={labels.noPhotosYet}
+        items={previewPhotos}
+        viewAllHref={
+          previewPhotos.length > 0 ? profileMediaPath(username, "photos") : undefined
+        }
+        isOwnProfile={isOwnProfile}
+        visitedCountries={visitedCountries}
+        visitedCities={visitedCities}
+        visitedParks={visitedParks}
+        labels={labels}
+      />
 
       <ProfileMediaGallery
         hubName={displayName}
         variant="instagram"
         headingId="profile-instagram-heading"
-        alwaysShow={memoryPins.length > 0}
+        alwaysShow
         emptyLabel={labels.noInstagramYet}
         items={previewInstagram}
-        viewAllHref={profileMediaPath(username, "instagram")}
+        viewAllHref={
+          previewInstagram.length > 0 ? profileMediaPath(username, "instagram") : undefined
+        }
         isOwnProfile={isOwnProfile}
         visitedCountries={visitedCountries}
         visitedCities={visitedCities}
