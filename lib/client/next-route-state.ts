@@ -2,7 +2,6 @@ import { getCountryName } from "@/lib/data/countries";
 import {
   notifyNextRouteChanged,
   readOwnNextRouteCache,
-  writeOwnNextRouteCache,
 } from "@/lib/client/session-page-cache";
 import {
   buildCityStop,
@@ -22,8 +21,6 @@ type FetchNextRouteResult =
   | { ok: true; stops: NextRouteStop[]; fromCache: boolean }
   | { ok: false; status: number };
 
-let backgroundRefresh: Promise<void> | null = null;
-
 async function fetchNextRouteFromNetwork(): Promise<FetchNextRouteResult> {
   const res = await fetch("/api/me/next-route");
   if (!res.ok) {
@@ -32,23 +29,8 @@ async function fetchNextRouteFromNetwork(): Promise<FetchNextRouteResult> {
 
   const data = (await res.json()) as { stops?: unknown };
   const stops = parseNextRoute(data.stops);
-  writeOwnNextRouteCache(stops);
   notifyNextRouteChanged(stops);
   return { ok: true, stops, fromCache: false };
-}
-
-function refreshNextRouteInBackground(): void {
-  if (backgroundRefresh) return;
-
-  backgroundRefresh = (async () => {
-    try {
-      await fetchNextRouteFromNetwork();
-    } catch {
-      // Keep cached route when refresh fails.
-    } finally {
-      backgroundRefresh = null;
-    }
-  })();
 }
 
 export async function fetchNextRoute(options?: {
@@ -58,10 +40,10 @@ export async function fetchNextRoute(options?: {
   const preferCache = options?.preferCache ?? true;
   const force = options?.force ?? false;
 
+  // Cache hit (including empty route): no network until a mutation.
   if (preferCache && !force) {
     const cached = readOwnNextRouteCache();
-    if (cached) {
-      refreshNextRouteInBackground();
+    if (cached !== null) {
       return { ok: true, stops: cached, fromCache: true };
     }
   }

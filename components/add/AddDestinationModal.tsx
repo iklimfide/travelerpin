@@ -174,9 +174,15 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
   const toast = useToast();
   const isParksMode = mode === "parks";
   const [step, setStep] = useState<Step>({ kind: "countries" });
-  const [visitedCodes, setVisitedCodes] = useState<Set<string>>(new Set());
-  const [visitedCities, setVisitedCities] = useState<VisitedCity[]>([]);
-  const [visitedParks, setVisitedParks] = useState<VisitedPark[]>([]);
+  const [visitedCodes, setVisitedCodes] = useState<Set<string>>(
+    () => new Set((readTravelStateCache()?.visitedCodes ?? []).map((c) => c.toUpperCase()))
+  );
+  const [visitedCities, setVisitedCities] = useState<VisitedCity[]>(
+    () => readTravelStateCache()?.visitedCities ?? []
+  );
+  const [visitedParks, setVisitedParks] = useState<VisitedPark[]>(
+    () => readTravelStateCache()?.visitedParks ?? []
+  );
   const [pendingCountryCodes, setPendingCountryCodes] = useState<Set<string>>(new Set());
   const [pendingCities, setPendingCities] = useState<Map<string, PendingCitySelection>>(
     () => new Map()
@@ -191,11 +197,11 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
     () => new Set()
   );
   const [returnExpandedRegion, setReturnExpandedRegion] = useState<AddRegionId | null>(null);
-  const [loadingState, setLoadingState] = useState(true);
+  const [loadingState, setLoadingState] = useState(() => !readTravelStateCache());
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
-  const hasTravelStateRef = useRef(false);
+  const hasTravelStateRef = useRef(Boolean(readTravelStateCache()));
 
   useEffect(() => {
     setMounted(true);
@@ -223,7 +229,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
   }, []);
 
   useEffect(() => {
-    hasTravelStateRef.current = false;
+    hasTravelStateRef.current = Boolean(readTravelStateCache());
     setStep({ kind: "countries" });
     setPendingCountryCodes(new Set());
     setPendingCities(new Map());
@@ -232,6 +238,14 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
     setPendingRemoveParkKeys(new Set());
     setReturnExpandedRegion(null);
     setSaveError(null);
+
+    const cached = readTravelStateCache();
+    if (cached) {
+      applyTravelState(cached, setVisitedCodes, setVisitedCities, setVisitedParks);
+      setLoadingState(false);
+      return;
+    }
+
     void loadTravelState({ background: false });
   }, [loadTravelState, mode]);
 

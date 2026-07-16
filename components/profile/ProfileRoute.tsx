@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { notFound } from "next/navigation";
 import { ProfileOwnerTools } from "@/components/dashboard/ProfileOwnerTools";
 import { PublicProfileViewClient } from "@/components/profile/PublicProfileViewClient";
+import { ProfilePageSkeleton } from "@/components/skeletons/ProfilePageSkeleton";
 import {
   PROFILE_DATA_STALE_EVENT,
   TRAVEL_STATE_UPDATED_EVENT,
@@ -77,8 +78,11 @@ function applyTravelStateToProfile(
 
 export function ProfileRoute({ username }: ProfileRouteProps) {
   const normalized = username.trim().toLowerCase();
+  // Never read localStorage during the initial render — SSR and the first
+  // client paint must match. Cache is applied in useLayoutEffect before paint.
   const [data, setData] = useState<PublicProfilePageData | null>(null);
   const [missing, setMissing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const loadProfile = useCallback(
     async (forceNetwork = false) => {
@@ -87,6 +91,7 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
         if (cached) {
           setData(cached);
           setMissing(false);
+          setLoading(false);
           return;
         }
       }
@@ -97,12 +102,14 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
 
       if (res.status === 404) {
         setMissing(true);
+        setLoading(false);
         return;
       }
 
       if (!res.ok) {
         // Transient 5xx / cache failures — keep trying, do not convert to notFound.
         setMissing(false);
+        setLoading(false);
         return;
       }
 
@@ -110,11 +117,24 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
       writeProfileCache(normalized, payload);
       setData(payload);
       setMissing(false);
+      setLoading(false);
     },
     [normalized]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const cached = readProfileCache(normalized);
+    if (cached) {
+      setData(cached);
+      setMissing(false);
+      setLoading(false);
+      return;
+    }
+
+    setData(null);
+    setMissing(false);
+    setLoading(true);
+
     let cancelled = false;
 
     void (async () => {
@@ -125,7 +145,7 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
     return () => {
       cancelled = true;
     };
-  }, [loadProfile]);
+  }, [loadProfile, normalized]);
 
   useEffect(() => {
     function onProfileStale(event: Event) {
@@ -173,7 +193,7 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
   }
 
   if (!data) {
-    return null;
+    return loading ? <ProfilePageSkeleton /> : null;
   }
 
   const { profile, currentUsername, isLoggedIn } = data;

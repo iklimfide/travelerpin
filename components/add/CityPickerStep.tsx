@@ -75,6 +75,7 @@ export function CityPickerStep({
   const [openTierLevel, setOpenTierLevel] = useState<number | null>(null);
   const cityListRef = useRef<HTMLDivElement>(null);
   const tierSectionRefs = useRef<Map<number, HTMLElement>>(new Map());
+  const hasLoadedRef = useRef(false);
 
   const existingNames = useMemo(
     () => existingCityNames,
@@ -85,11 +86,14 @@ export function CityPickerStep({
 
   useEffect(() => {
     setFilter("");
+    hasLoadedRef.current = false;
   }, [countryCode]);
 
   useEffect(() => {
     setOpenTierLevel(null);
-    setLoading(true);
+    if (!hasLoadedRef.current) {
+      setLoading(true);
+    }
 
     const params = new URLSearchParams({ country: catalogCountryCode(countryCode) });
     const q = filter.trim();
@@ -112,7 +116,10 @@ export function CityPickerStep({
         if (error instanceof DOMException && error.name === "AbortError") return;
         setTiers([]);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        hasLoadedRef.current = true;
+        setLoading(false);
+      });
 
     return () => controller.abort();
   }, [countryCode, filter, isFiltering]);

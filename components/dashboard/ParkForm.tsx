@@ -199,7 +199,6 @@ export function ParkForm({
         setSearchQuery("");
         setParkName("");
         setSearchResults([]);
-        notifyProfileDataChanged();
         onSuccess?.();
       } finally {
         setLoading(false);

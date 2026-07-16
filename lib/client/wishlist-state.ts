@@ -1,6 +1,5 @@
 import { addWishlistCountry, removeWishlistCountry } from "@/lib/client/country-actions";
 import { fetchTravelState } from "@/lib/client/travel-state";
-import { invalidateOwnProfileCache } from "@/lib/client/session-page-cache";
 import { isUkNationCode, isUkNationVisited } from "@/lib/data/uk-nations";
 import type { WishlistCountry } from "@/types/database";
 
@@ -53,7 +52,6 @@ export async function savePendingWishlistChanges(params: {
   }
 
   if (savedCount > 0) {
-    invalidateOwnProfileCache();
     await fetchTravelState({ force: true });
   }
 

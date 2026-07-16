@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AddDestinationCheckbox } from "@/components/add/AddDestinationCheckbox";
 import { addDestinationMessages, mapMessages, parkMessages } from "@/lib/i18n/client-messages";
 import { flagCountryCode } from "@/lib/data/uk-nations";
@@ -63,6 +63,7 @@ export function ParkPickerStep({
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>(ALL_TYPES);
+  const hasLoadedRef = useRef(false);
 
   const existingKeys = useMemo(
     () => new Set(existingParkKeys.map((key) => key.toLowerCase())),
@@ -74,10 +75,13 @@ export function ParkPickerStep({
   useEffect(() => {
     setFilter("");
     setTypeFilter(ALL_TYPES);
+    hasLoadedRef.current = false;
   }, [countryCode]);
 
   useEffect(() => {
-    setLoading(true);
+    if (!hasLoadedRef.current) {
+      setLoading(true);
+    }
 
     const params = new URLSearchParams({ country: countryCode.toUpperCase() });
     const q = filter.trim();
@@ -100,7 +104,10 @@ export function ParkPickerStep({
         if (error instanceof DOMException && error.name === "AbortError") return;
         setParks([]);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        hasLoadedRef.current = true;
+        setLoading(false);
+      });
 
     return () => controller.abort();
   }, [countryCode, filter, isFiltering]);

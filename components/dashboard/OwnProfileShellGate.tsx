@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { OwnProfileShell } from "@/components/dashboard/OwnProfileShell";
-import { setOwnUsername } from "@/lib/client/session-page-cache";
+import { setOwnUserId, setOwnUsername } from "@/lib/client/session-page-cache";
 import { createClient } from "@/lib/supabase/client";
 
 export type BottomBarOwnProfile = {
@@ -35,11 +35,14 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
       if (!user) {
         if (!cancelled) {
           setOwnProfile(null);
+          setOwnUserId(null);
           setOwnUsername(null);
           setAuthResolved(true);
         }
         return;
       }
+
+      setOwnUserId(user.id);
 
       const { data: profile } = await supabase
         .from("profiles")

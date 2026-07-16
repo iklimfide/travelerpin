@@ -5,18 +5,38 @@ export function HomePageSkeleton() {
     <SkeletonScreen label="Loading home">
       <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 py-[46px] pb-[72px] max-sm:px-3.5 max-sm:py-8 max-sm:pb-[54px] lg:max-w-[1400px] lg:px-10 xl:max-w-[1520px] xl:px-12">
         <div className="grid items-stretch gap-[34px] lg:grid-cols-[0.9fr_1.1fr] lg:gap-10 xl:gap-12">
-          <div className="space-y-5">
-            <Skeleton className="hidden h-9 w-40 rounded-full lg:block" />
-            <Skeleton className="h-12 w-full max-w-xl" />
-            <Skeleton className="h-12 w-full max-w-lg" />
-            <Skeleton className="h-5 w-full max-w-md" />
-            <Skeleton className="h-5 w-full max-w-sm" />
-            <div className="flex flex-wrap gap-3">
-              <Skeleton className="h-12 w-36 rounded-full" />
-              <Skeleton className="h-12 w-40 rounded-full" />
+          <div className="flex h-full min-h-0 min-w-0 flex-col">
+            <div className="space-y-4 lg:hidden">
+              <Skeleton className="h-12 w-full max-w-xl" />
+              <Skeleton className="h-5 w-full max-w-md" />
+              <div className="flex flex-wrap gap-3">
+                <Skeleton className="h-12 w-36 rounded-full" />
+                <Skeleton className="h-12 w-40 rounded-full" />
+              </div>
             </div>
-            <div className="hidden space-y-3 lg:block">
-              <Skeleton className="h-44 w-full rounded-[28px]" />
+
+            <div className="hidden h-full min-h-0 flex-1 lg:block">
+              <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[28px] border border-[#e2e8f0]/90 bg-white">
+                <div className="flex items-center gap-3 border-b border-[#eef2f7] px-5 py-3.5">
+                  <div className="flex shrink-0 gap-2">
+                    <Skeleton className="!h-3 !w-3 !rounded-full" />
+                    <Skeleton className="!h-3 !w-3 !rounded-full" />
+                    <Skeleton className="!h-3 !w-3 !rounded-full" />
+                  </div>
+                  <Skeleton className="mx-auto h-9 w-full max-w-[280px] rounded-[10px]" />
+                  <div className="w-[52px] shrink-0" />
+                </div>
+                <div className="flex min-h-0 flex-1 flex-col px-8 pb-8 pt-8 xl:px-10 xl:pb-10 xl:pt-10">
+                  <Skeleton className="mx-auto h-8 w-40" />
+                  <Skeleton className="mx-auto mt-4 h-5 w-64 max-w-full" />
+                  <div className="mt-8 grid grid-cols-3 gap-3">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <Skeleton key={index} className="h-[96px] w-full rounded-[20px]" />
+                    ))}
+                  </div>
+                  <Skeleton className="mt-8 h-40 w-full rounded-[24px]" />
+                </div>
+              </div>
             </div>
           </div>
 

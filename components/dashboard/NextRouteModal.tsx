@@ -8,7 +8,11 @@ import { COUNTRY_LIST, searchCountries } from "@/lib/data/countries";
 import { getPopularCountries } from "@/lib/data/popular-countries";
 import { POPULAR_DESTINATIONS } from "@/lib/data/popular-destinations";
 import { commonMessages, nextRouteMessages, saveDestinationMessages } from "@/lib/i18n/client-messages";
-import { notifyNextRouteChanged } from "@/lib/client/session-page-cache";
+import {
+  notifyNextRouteChanged,
+  readOwnNextRouteCache,
+} from "@/lib/client/session-page-cache";
+import { fetchNextRoute } from "@/lib/client/next-route-state";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import {
   areNextRouteStopsEqual,
@@ -144,17 +148,18 @@ function buildStopFromResult(result: SearchResult): NextRouteStop {
 }
 
 export function NextRouteModal({ open, onClose, initialTab = "countries" }: NextRouteModalProps) {
-  const [stops, setStops] = useState<NextRouteStop[]>([]);
+  const cachedStops = readOwnNextRouteCache();
+  const [stops, setStops] = useState<NextRouteStop[]>(() => cachedStops ?? []);
   const [tab, setTab] = useState<NextRouteTab>("countries");
   const [query, setQuery] = useState("");
-  const [loadingRoute, setLoadingRoute] = useState(false);
+  const [loadingRoute, setLoadingRoute] = useState(() => cachedStops === null);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [savedStops, setSavedStops] = useState<NextRouteStop[]>([]);
+  const [savedStops, setSavedStops] = useState<NextRouteStop[]>(() => cachedStops ?? []);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const hasRouteRef = useRef(false);
+  const hasRouteRef = useRef(cachedStops !== null);
 
   const trimmedQuery = query.trim();
   const isSearching = trimmedQuery.length >= 2;
@@ -177,21 +182,29 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
     setSearchResults([]);
     setSaveError(null);
 
+    const cached = readOwnNextRouteCache();
+    if (cached !== null) {
+      setStops(cached);
+      setSavedStops(cached);
+      hasRouteRef.current = true;
+      setLoadingRoute(false);
+      return;
+    }
+
     const background = hasRouteRef.current;
     if (!background) {
       setLoadingRoute(true);
     }
 
-    fetch("/api/me/next-route")
-      .then((res) => (res.ok ? res.json() : { stops: [] }))
-      .then((data) => {
-        const parsed = parseNextRoute(data.stops);
-        setStops(parsed);
-        setSavedStops(parsed);
-      })
-      .catch(() => {
-        setStops([]);
-        setSavedStops([]);
+    void fetchNextRoute({ preferCache: false, force: true })
+      .then((result) => {
+        if (!result.ok) {
+          setStops([]);
+          setSavedStops([]);
+          return;
+        }
+        setStops(result.stops);
+        setSavedStops(result.stops);
       })
       .finally(() => {
         hasRouteRef.current = true;
@@ -207,6 +220,7 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
     }
 
     const controller = new AbortController();
+    // Keep previous results visible while the next search loads.
     setLoadingSearch(true);
 
     const timer = window.setTimeout(() => {
@@ -376,8 +390,7 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
     setTab("route");
   }
 
-  const showListSkeleton =
-    (loadingRoute && tab === "route" && !isSearching) || (isSearching && loadingSearch);
+  const showListSkeleton = loadingRoute && tab === "route" && !isSearching;
 
   const listSkeletonVariant = tab === "route" && !isSearching ? "route" : "browse";
 

@@ -1,4 +1,5 @@
 import type { QuickParkInput } from "@/lib/validations/park";
+import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
 import { offerShareAfterPin } from "@/lib/client/share-pin-prompt";
 
 export async function quickAddPark(
@@ -21,6 +22,7 @@ export async function quickAddPark(
   const data = await res.json();
   const added = Boolean(data.added);
   if (added) {
+    notifyProfileDataChanged();
     const kind =
       payload.park_type === "national_park" || payload.park_type === "botanical_garden"
         ? "national_park"
@@ -54,9 +56,13 @@ export async function quickRemovePark(
   }
 
   const data = await res.json();
+  const removed = Boolean(data.removed);
+  if (removed) {
+    notifyProfileDataChanged();
+  }
   return {
     ok: true,
-    removed: Boolean(data.removed),
+    removed,
     countryRemoved: Boolean(data.countryRemoved),
   };
 }

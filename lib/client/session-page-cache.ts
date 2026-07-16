@@ -1,6 +1,13 @@
 import type { ProfileSettingsRow } from "@/lib/supabase/profile-settings";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
-import type { NextRouteStop, TravelStats, VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
+import type {
+  NextRouteStop,
+  TravelStats,
+  VisitedCity,
+  VisitedCountry,
+  VisitedPark,
+  WishlistCountry,
+} from "@/types/database";
 import { parseNextRoute } from "@/lib/utils/next-route";
 
 export type TravelStateData = {
@@ -12,13 +19,10 @@ export type TravelStateData = {
   visitedCodes: string[];
 };
 
-type CachedTravelStatePayload = {
-  v: number;
-  data: TravelStateData;
-};
-
-const CACHE_VERSION = 3;
+/** Bump when payload shape changes. Persists in localStorage until pin/settings/logout. */
+const CACHE_VERSION = 5;
 const OWN_USERNAME_KEY = "tp:own-username";
+const OWN_USER_ID_KEY = "tp:own-user-id";
 
 export type CachedProfilePayload = {
   v: number;
@@ -32,18 +36,37 @@ export type CachedSettingsPayload = {
   stats: TravelStats;
 };
 
+export type CachedHomePayload = {
+  v: number;
+  isLoggedIn: boolean;
+};
+
 function profileCacheKey(username: string): string {
   return `tp:v${CACHE_VERSION}:profile:${username.trim().toLowerCase()}`;
 }
 
+function travelStateCacheKey(userId: string): string {
+  return `tp:v${CACHE_VERSION}:travel:${userId}`;
+}
+
+function nextRouteCacheKey(userId: string): string {
+  return `tp:v${CACHE_VERSION}:next-route:${userId}`;
+}
+
+function settingsCacheKey(userId: string): string {
+  return `tp:v${CACHE_VERSION}:settings:${userId}`;
+}
+
+const HOME_CACHE_KEY = `tp:v${CACHE_VERSION}:home`;
+
 function readJson<T>(key: string): T | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = sessionStorage.getItem(key);
+    const raw = localStorage.getItem(key);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as T & { v?: number };
     if (parsed.v !== CACHE_VERSION) {
-      sessionStorage.removeItem(key);
+      localStorage.removeItem(key);
       return null;
     }
     return parsed;
@@ -55,9 +78,40 @@ function readJson<T>(key: string): T | null {
 function writeJson(key: string, value: object): void {
   if (typeof window === "undefined") return;
   try {
-    sessionStorage.setItem(key, JSON.stringify({ v: CACHE_VERSION, ...value }));
+    localStorage.setItem(key, JSON.stringify({ v: CACHE_VERSION, ...value }));
   } catch {
     // Private mode / quota — ignore.
+  }
+}
+
+function removeKey(key: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+}
+
+export function setOwnUserId(userId: string | null): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (!userId) {
+      localStorage.removeItem(OWN_USER_ID_KEY);
+      return;
+    }
+    localStorage.setItem(OWN_USER_ID_KEY, userId);
+  } catch {
+    // ignore
+  }
+}
+
+export function getOwnUserId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage.getItem(OWN_USER_ID_KEY);
+  } catch {
+    return null;
   }
 }
 
@@ -65,10 +119,10 @@ export function setOwnUsername(username: string | null): void {
   if (typeof window === "undefined") return;
   try {
     if (!username) {
-      sessionStorage.removeItem(OWN_USERNAME_KEY);
+      localStorage.removeItem(OWN_USERNAME_KEY);
       return;
     }
-    sessionStorage.setItem(OWN_USERNAME_KEY, username.toLowerCase());
+    localStorage.setItem(OWN_USERNAME_KEY, username.toLowerCase());
   } catch {
     // ignore
   }
@@ -77,7 +131,7 @@ export function setOwnUsername(username: string | null): void {
 export function getOwnUsername(): string | null {
   if (typeof window === "undefined") return null;
   try {
-    return sessionStorage.getItem(OWN_USERNAME_KEY);
+    return localStorage.getItem(OWN_USERNAME_KEY);
   } catch {
     return null;
   }
@@ -97,12 +151,7 @@ export function writeProfileCache(username: string, data: PublicProfilePageData)
 }
 
 export function invalidateProfileCache(username: string): void {
-  if (typeof window === "undefined") return;
-  try {
-    sessionStorage.removeItem(profileCacheKey(username));
-  } catch {
-    // ignore
-  }
+  removeKey(profileCacheKey(username));
 }
 
 export const PROFILE_DATA_STALE_EVENT = "tp:profile-data-stale";
@@ -117,7 +166,7 @@ export type ProfileDataStaleDetail = {
   removeParkIds?: string[];
 };
 
-/** Merge travel-state pins into the own-profile session cache (map ↔ My cities sync). */
+/** Merge travel-state pins into the own-profile page cache (map ↔ My cities sync). */
 export function syncOwnProfileCacheFromTravelState(data: TravelStateData): void {
   const username = getOwnUsername();
   if (!username) return;
@@ -136,18 +185,18 @@ export function syncOwnProfileCacheFromTravelState(data: TravelStateData): void 
   });
 }
 
-const OWN_TRAVEL_STATE_CACHE_KEY = `tp:v${CACHE_VERSION}:own-travel-state`;
-
-const OWN_NEXT_ROUTE_CACHE_KEY = `tp:v${CACHE_VERSION}:own-next-route`;
-
 export function readOwnNextRouteCache(): NextRouteStop[] | null {
-  const payload = readJson<{ stops: unknown }>(OWN_NEXT_ROUTE_CACHE_KEY);
+  const userId = getOwnUserId();
+  if (!userId) return null;
+  const payload = readJson<{ stops: unknown }>(nextRouteCacheKey(userId));
   if (!payload) return null;
   return parseNextRoute(payload.stops);
 }
 
 export function writeOwnNextRouteCache(stops: NextRouteStop[]): void {
-  writeJson(OWN_NEXT_ROUTE_CACHE_KEY, { stops });
+  const userId = getOwnUserId();
+  if (!userId) return;
+  writeJson(nextRouteCacheKey(userId), { stops });
 }
 
 export function patchOwnProfileNextRoute(stops: NextRouteStop[]): void {
@@ -178,7 +227,7 @@ export function notifyNextRouteChanged(stops: NextRouteStop[]): void {
   );
 }
 
-/** Bust profile session cache and ask mounted profile views to refetch. */
+/** Bust profile page cache and ask mounted profile views to refetch. */
 export function notifyProfileDataChanged(
   username?: string | null,
   options?: {
@@ -209,21 +258,22 @@ export function notifyProfileDataChanged(
 }
 
 export function readTravelStateCache(): TravelStateData | null {
-  const payload = readJson<CachedTravelStatePayload>(OWN_TRAVEL_STATE_CACHE_KEY);
+  const userId = getOwnUserId();
+  if (!userId) return null;
+  const payload = readJson<{ data: TravelStateData }>(travelStateCacheKey(userId));
   return payload?.data ?? null;
 }
 
 export function writeTravelStateCache(data: TravelStateData): void {
-  writeJson(OWN_TRAVEL_STATE_CACHE_KEY, { data });
+  const userId = getOwnUserId();
+  if (!userId) return;
+  writeJson(travelStateCacheKey(userId), { data });
 }
 
 export function invalidateTravelStateCache(): void {
-  if (typeof window === "undefined") return;
-  try {
-    sessionStorage.removeItem(OWN_TRAVEL_STATE_CACHE_KEY);
-  } catch {
-    // ignore
-  }
+  const userId = getOwnUserId();
+  if (!userId) return;
+  removeKey(travelStateCacheKey(userId));
 }
 
 export function notifyTravelStateUpdated(data: TravelStateData): void {
@@ -242,54 +292,50 @@ export function invalidateOwnProfileCache(): void {
   notifyProfileDataChanged();
 }
 
-const SETTINGS_CACHE_KEY = `tp:v${CACHE_VERSION}:settings`;
-
 export function readSettingsCache(): CachedSettingsPayload | null {
-  const payload = readJson<CachedSettingsPayload>(SETTINGS_CACHE_KEY);
+  const userId = getOwnUserId();
+  if (!userId) return null;
+  const payload = readJson<CachedSettingsPayload>(settingsCacheKey(userId));
   if (!payload?.profile) return null;
   return payload;
 }
 
 export function writeSettingsCache(payload: Omit<CachedSettingsPayload, "v">): void {
-  writeJson(SETTINGS_CACHE_KEY, payload);
+  const userId = getOwnUserId();
+  if (!userId) return;
+  writeJson(settingsCacheKey(userId), payload);
 }
 
 export function invalidateSettingsCache(): void {
-  if (typeof window === "undefined") return;
-  try {
-    sessionStorage.removeItem(SETTINGS_CACHE_KEY);
-  } catch {
-    // ignore
-  }
+  const userId = getOwnUserId();
+  if (!userId) return;
+  removeKey(settingsCacheKey(userId));
 }
 
-const HOME_CACHE_KEY = `tp:v${CACHE_VERSION}:home`;
-
-export function readHomeCache(): PublicProfilePageData | null {
-  const payload = readJson<{ data: PublicProfilePageData }>(HOME_CACHE_KEY);
-  return payload?.data ?? null;
+/** Home cache only stores auth flag; Jennifer demo map is rebuilt from static code. */
+export function readHomeCache(): CachedHomePayload | null {
+  const payload = readJson<CachedHomePayload>(HOME_CACHE_KEY);
+  if (!payload || typeof payload.isLoggedIn !== "boolean") return null;
+  return payload;
 }
 
-export function writeHomeCache(data: PublicProfilePageData): void {
-  writeJson(HOME_CACHE_KEY, { data });
+export function writeHomeCache(isLoggedIn: boolean): void {
+  writeJson(HOME_CACHE_KEY, { isLoggedIn });
 }
 
+/** Clear own page caches on logout. Home auth flag is reset to guest. */
 export function clearAllSessionPageCaches(): void {
-  invalidateSettingsCache();
-  invalidateTravelStateCache();
-  if (typeof window === "undefined") return;
-  try {
-    sessionStorage.removeItem(HOME_CACHE_KEY);
-    sessionStorage.removeItem(OWN_NEXT_ROUTE_CACHE_KEY);
-  } catch {
-    // ignore
-  }
+  const userId = getOwnUserId();
   const username = getOwnUsername();
-  if (username) invalidateProfileCache(username);
-  if (typeof window === "undefined") return;
-  try {
-    sessionStorage.removeItem(OWN_USERNAME_KEY);
-  } catch {
-    // ignore
+
+  if (userId) {
+    removeKey(travelStateCacheKey(userId));
+    removeKey(nextRouteCacheKey(userId));
+    removeKey(settingsCacheKey(userId));
   }
+  if (username) invalidateProfileCache(username);
+
+  writeHomeCache(false);
+  setOwnUserId(null);
+  setOwnUsername(null);
 }

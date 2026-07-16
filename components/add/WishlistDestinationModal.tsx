@@ -6,6 +6,7 @@ import { CountryPickerStep } from "@/components/add/CountryPickerStep";
 import {
   PROFILE_DATA_STALE_EVENT,
   TRAVEL_STATE_UPDATED_EVENT,
+  readTravelStateCache,
   type TravelStateData,
 } from "@/lib/client/session-page-cache";
 import { fetchTravelState } from "@/lib/client/travel-state";
@@ -34,16 +35,23 @@ function isCountryOnWishlist(code: string, wishlistCodes: ReadonlySet<string>): 
 }
 
 export function WishlistDestinationModal({ onClose }: WishlistDestinationModalProps) {
-  const [wishlistCountries, setWishlistCountries] = useState<WishlistCountry[]>([]);
-  const [wishlistCodes, setWishlistCodes] = useState<Set<string>>(new Set());
-  const [visitedCodes, setVisitedCodes] = useState<Set<string>>(new Set());
+  const cached = readTravelStateCache();
+  const [wishlistCountries, setWishlistCountries] = useState<WishlistCountry[]>(
+    () => cached?.wishlistCountries ?? []
+  );
+  const [wishlistCodes, setWishlistCodes] = useState<Set<string>>(
+    () => wishlistCodesFromCountries(cached?.wishlistCountries ?? [])
+  );
+  const [visitedCodes, setVisitedCodes] = useState<Set<string>>(
+    () => new Set((cached?.visitedCodes ?? []).map((code) => code.toUpperCase()))
+  );
   const [pendingCountryCodes, setPendingCountryCodes] = useState<Set<string>>(new Set());
   const [pendingRemoveCountryCodes, setPendingRemoveCountryCodes] = useState<Set<string>>(new Set());
-  const [loadingState, setLoadingState] = useState(true);
+  const [loadingState, setLoadingState] = useState(() => !cached);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
-  const hasStateRef = useRef(false);
+  const hasStateRef = useRef(Boolean(cached));
 
   useEffect(() => {
     setMounted(true);
@@ -80,12 +88,20 @@ export function WishlistDestinationModal({ onClose }: WishlistDestinationModalPr
   }, [applyTravelData]);
 
   useEffect(() => {
-    hasStateRef.current = false;
+    hasStateRef.current = Boolean(readTravelStateCache());
     setPendingCountryCodes(new Set());
     setPendingRemoveCountryCodes(new Set());
     setSaveError(null);
+
+    const hit = readTravelStateCache();
+    if (hit) {
+      applyTravelData(hit);
+      setLoadingState(false);
+      return;
+    }
+
     void loadState({ background: false });
-  }, [loadState]);
+  }, [loadState, applyTravelData]);
 
   useEffect(() => {
     function onProfileStale() {

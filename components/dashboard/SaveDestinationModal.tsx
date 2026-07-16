@@ -18,9 +18,12 @@ import { quickAddPark, quickRemovePark } from "@/lib/client/park-destination-act
 import { addCity } from "@/lib/client/city-actions";
 import { addWishlistCountry, removeWishlistCountry } from "@/lib/client/country-actions";
 import {
-  invalidateOwnProfileCache,
   PROFILE_DATA_STALE_EVENT,
+  TRAVEL_STATE_UPDATED_EVENT,
+  readTravelStateCache,
+  type TravelStateData,
 } from "@/lib/client/session-page-cache";
+import { fetchTravelState } from "@/lib/client/travel-state";
 import { addPark } from "@/lib/client/park-actions";
 import { CityForm } from "@/components/dashboard/CityForm";
 import { ParkForm } from "@/components/dashboard/ParkForm";
@@ -366,12 +369,24 @@ export function SaveDestinationModal({
   const [query, setQuery] = useState("");
   const [pendingIds, setPendingIds] = useState<Set<string>>(() => new Set());
   const [loadingSearch, setLoadingSearch] = useState(false);
-  const [loadingTravelState, setLoadingTravelState] = useState(false);
-  const [visitedCountries, setVisitedCountries] = useState<VisitedCountry[]>([]);
-  const [visitedCities, setVisitedCities] = useState<VisitedCity[]>([]);
-  const [visitedParks, setVisitedParks] = useState<VisitedPark[]>([]);
-  const [visitedCodes, setVisitedCodes] = useState<string[]>([]);
-  const [wishlistCountries, setWishlistCountries] = useState<WishlistCountry[]>([]);
+  const [loadingTravelState, setLoadingTravelState] = useState(
+    () => !readTravelStateCache()
+  );
+  const [visitedCountries, setVisitedCountries] = useState<VisitedCountry[]>(
+    () => readTravelStateCache()?.visitedCountries ?? []
+  );
+  const [visitedCities, setVisitedCities] = useState<VisitedCity[]>(
+    () => readTravelStateCache()?.visitedCities ?? []
+  );
+  const [visitedParks, setVisitedParks] = useState<VisitedPark[]>(
+    () => readTravelStateCache()?.visitedParks ?? []
+  );
+  const [visitedCodes, setVisitedCodes] = useState<string[]>(
+    () => (readTravelStateCache()?.visitedCodes ?? []).map((code) => code.toUpperCase())
+  );
+  const [wishlistCountries, setWishlistCountries] = useState<WishlistCountry[]>(
+    () => readTravelStateCache()?.wishlistCountries ?? []
+  );
   const [searchCities, setSearchCities] = useState<SearchCityResult[]>([]);
   const [searchParks, setSearchParks] = useState<SearchParkResult[]>([]);
   const [recentlyAdded, setRecentlyAdded] = useState<Set<string>>(new Set());
@@ -380,25 +395,30 @@ export function SaveDestinationModal({
   const [recentlyWishlistRemoved, setRecentlyWishlistRemoved] = useState<Set<string>>(new Set());
   const [editingCityId, setEditingCityId] = useState<string | null>(null);
   const [editingParkId, setEditingParkId] = useState<string | null>(null);
-  const hasTravelStateRef = useRef(false);
+  const hasTravelStateRef = useRef(Boolean(readTravelStateCache()));
 
-  const loadTravelState = useCallback(async (options?: { background?: boolean }) => {
+  const applyTravelData = useCallback((data: TravelStateData) => {
+    setVisitedCountries(data.visitedCountries ?? []);
+    setVisitedCities(data.visitedCities ?? []);
+    setVisitedParks(data.visitedParks ?? []);
+    setVisitedCodes((data.visitedCodes ?? []).map((code) => code.toUpperCase()));
+    setWishlistCountries(data.wishlistCountries ?? []);
+    hasTravelStateRef.current = true;
+  }, []);
+
+  const loadTravelState = useCallback(async (options?: { background?: boolean; force?: boolean }) => {
     const background = options?.background ?? hasTravelStateRef.current;
     if (!background) {
       setLoadingTravelState(true);
     }
     try {
-      const res = await fetch("/api/me/travel-state");
-      if (!res.ok) return;
-      const data = await res.json();
-      setVisitedCountries(data.visitedCountries ?? []);
-      setVisitedCities(data.visitedCities ?? []);
-      setVisitedParks(data.visitedParks ?? []);
-      setVisitedCodes(
-        (data.visitedCodes ?? []).map((code: string) => code.toUpperCase())
-      );
-      setWishlistCountries(data.wishlistCountries ?? []);
-      hasTravelStateRef.current = true;
+      const result = await fetchTravelState({
+        preferCache: !options?.force,
+        force: options?.force,
+      });
+      if (result.ok) {
+        applyTravelData(result.data);
+      }
     } catch {
       // keep previous state
     } finally {
@@ -406,11 +426,11 @@ export function SaveDestinationModal({
         setLoadingTravelState(false);
       }
     }
-  }, []);
+  }, [applyTravelData]);
 
   useEffect(() => {
     if (!open) {
-      hasTravelStateRef.current = false;
+      hasTravelStateRef.current = Boolean(readTravelStateCache());
       return;
     }
     setQuery("");
@@ -424,19 +444,38 @@ export function SaveDestinationModal({
     setPendingIds(new Set());
     setEditingCityId(null);
     setEditingParkId(null);
+
+    const cached = readTravelStateCache();
+    if (cached) {
+      applyTravelData(cached);
+      setLoadingTravelState(false);
+      return;
+    }
+
     void loadTravelState({ background: false });
-  }, [open, initialTab, loadTravelState]);
+  }, [open, initialTab, loadTravelState, applyTravelData]);
 
   useEffect(() => {
     if (!open) return;
 
     function onProfileStale() {
-      void loadTravelState({ background: true });
+      void loadTravelState({ background: true, force: true });
+    }
+
+    function onTravelStateUpdated(event: Event) {
+      const detail = (event as CustomEvent<{ data: TravelStateData }>).detail;
+      if (!detail?.data) return;
+      applyTravelData(detail.data);
+      setLoadingTravelState(false);
     }
 
     window.addEventListener(PROFILE_DATA_STALE_EVENT, onProfileStale);
-    return () => window.removeEventListener(PROFILE_DATA_STALE_EVENT, onProfileStale);
-  }, [open, loadTravelState]);
+    window.addEventListener(TRAVEL_STATE_UPDATED_EVENT, onTravelStateUpdated);
+    return () => {
+      window.removeEventListener(PROFILE_DATA_STALE_EVENT, onProfileStale);
+      window.removeEventListener(TRAVEL_STATE_UPDATED_EVENT, onTravelStateUpdated);
+    };
+  }, [open, loadTravelState, applyTravelData]);
 
   useEffect(() => {
     if (!open) return;
@@ -872,7 +911,6 @@ export function SaveDestinationModal({
         }
 
         void loadTravelState({ background: true });
-        invalidateOwnProfileCache();
       } finally {
         clearPending("custom:city");
       }
@@ -927,7 +965,6 @@ export function SaveDestinationModal({
         }
 
         void loadTravelState({ background: true });
-        invalidateOwnProfileCache();
       } finally {
         clearPending("custom:park");
       }
@@ -1057,7 +1094,6 @@ export function SaveDestinationModal({
         }
 
         void loadTravelState({ background: true });
-        invalidateOwnProfileCache();
       } finally {
         clearPending(id);
       }
@@ -1149,7 +1185,6 @@ export function SaveDestinationModal({
         }
 
         void loadTravelState({ background: true });
-        invalidateOwnProfileCache();
       } finally {
         clearPending(id);
       }
@@ -1169,8 +1204,8 @@ export function SaveDestinationModal({
   const showListSkeleton =
     !editingCity &&
     !editingPark &&
-    ((loadingTravelState && !hasTravelStateRef.current) ||
-      (loadingSearch && trimmedQuery.length >= 2));
+    loadingTravelState &&
+    !hasTravelStateRef.current;
 
   return (
     <div className="save-destination-modal" role="presentation">
@@ -1268,7 +1303,6 @@ export function SaveDestinationModal({
                 onSuccess={() => {
                   setEditingCityId(null);
                   void loadTravelState({ background: true });
-      invalidateOwnProfileCache();
                 }}
                 onCancel={() => setEditingCityId(null)}
               />
@@ -1280,7 +1314,6 @@ export function SaveDestinationModal({
                 onSuccess={() => {
                   setEditingParkId(null);
                   void loadTravelState({ background: true });
-      invalidateOwnProfileCache();
                 }}
                 onCancel={() => setEditingParkId(null)}
               />

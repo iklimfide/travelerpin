@@ -29,6 +29,7 @@ export async function addPark(
     kind: parkPinKind(payload.park_type),
     name: payload.park_name,
   });
+  notifyProfileDataChanged();
   return { ok: true, park: await res.json() };
 }
 
@@ -58,6 +59,7 @@ export async function addParksBatch(
         ? { kind: parkPinKind(first.park_type), name: first.park_name }
         : { kind: "places", name: "places" }
     );
+    notifyProfileDataChanged();
   }
   return {
     ok: true,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { HomeBestDestinations } from "@/components/home/HomeBestDestinations";
 import { HomeBelowFoldSections } from "@/components/home/HomeBelowFoldSections";
 import { HomeLandingSectionClient } from "@/components/home/HomeLandingSectionClient";
@@ -14,17 +14,28 @@ import { profilePath } from "@/lib/seo/site";
 import { createClient } from "@/lib/supabase/client";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
 
+function buildHomeData(isLoggedIn: boolean): PublicProfilePageData {
+  return {
+    ...buildStaticDemoPublicProfilePage(),
+    isLoggedIn,
+  };
+}
+
 export function HomePageClient() {
-  const [data, setData] = useState<PublicProfilePageData | null>(null);
+  // SSR-safe default: never read localStorage on the first paint.
+  const [data, setData] = useState<PublicProfilePageData>(() => buildHomeData(false));
+
+  useLayoutEffect(() => {
+    const cached = readHomeCache();
+    if (cached) {
+      setData(buildHomeData(cached.isLoggedIn));
+    }
+  }, []);
 
   useEffect(() => {
-    // Always rebuild demo map data from code so sample profile stays in sync.
-    const fresh = buildStaticDemoPublicProfilePage();
-    const previous = readHomeCache();
-    const next = previous
-      ? { ...fresh, isLoggedIn: previous.isLoggedIn }
-      : fresh;
-    writeHomeCache(next);
+    const cached = readHomeCache();
+    const next = buildHomeData(cached?.isLoggedIn ?? false);
+    writeHomeCache(next.isLoggedIn);
     setData(next);
 
     const supabase = createClient();
@@ -32,11 +43,13 @@ export function HomePageClient() {
 
     void supabase.auth.getUser().then(({ data: { user } }) => {
       if (cancelled) return;
+      const isLoggedIn = Boolean(user);
+      writeHomeCache(isLoggedIn);
       setData((current) =>
         current
           ? {
               ...current,
-              isLoggedIn: Boolean(user),
+              isLoggedIn,
             }
           : current
       );
@@ -45,11 +58,13 @@ export function HomePageClient() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      const isLoggedIn = Boolean(session?.user);
+      writeHomeCache(isLoggedIn);
       setData((current) =>
         current
           ? {
               ...current,
-              isLoggedIn: Boolean(session?.user),
+              isLoggedIn,
             }
           : current
       );
@@ -60,10 +75,6 @@ export function HomePageClient() {
       subscription.unsubscribe();
     };
   }, []);
-
-  if (!data) {
-    return null;
-  }
 
   return (
     <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 py-[46px] pb-[72px] max-sm:px-3.5 max-sm:py-8 max-sm:pb-[54px] lg:max-w-[1400px] lg:px-10 xl:max-w-[1520px] xl:px-12">

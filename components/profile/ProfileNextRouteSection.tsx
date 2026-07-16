@@ -12,6 +12,7 @@ import {
   readOwnNextRouteCache,
   writeOwnNextRouteCache,
 } from "@/lib/client/session-page-cache";
+import { fetchNextRoute } from "@/lib/client/next-route-state";
 import { nextRouteMessages, profileMessages } from "@/lib/i18n/client-messages";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import {
@@ -29,15 +30,22 @@ type ProfileNextRouteSectionProps = {
 function resolveInitialStops(
   initialStops: NextRouteStop[] | undefined,
   isOwnProfile: boolean
-): NextRouteStop[] {
+): { stops: NextRouteStop[]; fromCache: boolean } {
   const safeInitialStops = initialStops ?? [];
 
-  if (!isOwnProfile) return safeInitialStops;
+  if (!isOwnProfile) {
+    return { stops: safeInitialStops, fromCache: false };
+  }
 
   const cached = readOwnNextRouteCache();
-  if (cached && cached.length > 0) return cached;
-  if (safeInitialStops.length > 0) return safeInitialStops;
-  return [];
+  // null = miss; [] = valid empty hit
+  if (cached !== null) {
+    return { stops: cached, fromCache: true };
+  }
+  if (safeInitialStops.length > 0) {
+    return { stops: safeInitialStops, fromCache: false };
+  }
+  return { stops: [], fromCache: false };
 }
 
 function mergeIncomingStops(
@@ -67,9 +75,9 @@ export function ProfileNextRouteSection({
     [initialStops, isOwnProfile]
   );
   const { openNextRouteModal } = useDashboardAdd();
-  const [stops, setStops] = useState(() => initialResolved);
+  const [stops, setStops] = useState(() => initialResolved.stops);
   const [loadingOwnRoute, setLoadingOwnRoute] = useState(
-    () => isOwnProfile && initialResolved.length === 0
+    () => isOwnProfile && !initialResolved.fromCache && initialResolved.stops.length === 0
   );
 
   const applyStops = useCallback((incoming: NextRouteStop[], options?: { replace?: boolean }) => {
@@ -83,20 +91,35 @@ export function ProfileNextRouteSection({
     });
   }, [isOwnProfile]);
 
-  const loadOwnRoute = useCallback(async () => {
+  const loadOwnRoute = useCallback(async (options?: { force?: boolean; showSkeleton?: boolean }) => {
     if (!isOwnProfile) return;
-    setLoadingOwnRoute((current) => current || stops.length === 0);
+
+    const preferCache = !options?.force;
+    if (preferCache) {
+      const cached = readOwnNextRouteCache();
+      if (cached !== null) {
+        applyStops(cached, { replace: true });
+        setLoadingOwnRoute(false);
+        return;
+      }
+    }
+
+    if (options?.showSkeleton !== false) {
+      setLoadingOwnRoute((current) => current || true);
+    }
+
     try {
-      const res = await fetch("/api/me/next-route");
-      if (!res.ok) return;
-      const data = (await res.json()) as { stops?: unknown };
-      applyStops(parseNextRoute(data.stops));
-    } catch {
-      // Keep the last known route on transient failures.
+      const result = await fetchNextRoute({
+        preferCache: false,
+        force: true,
+      });
+      if (result.ok) {
+        applyStops(result.stops, { replace: true });
+      }
     } finally {
       setLoadingOwnRoute(false);
     }
-  }, [applyStops, isOwnProfile, stops.length]);
+  }, [applyStops, isOwnProfile]);
 
   useEffect(() => {
     setStops((current) => mergeIncomingStops(current, initialStops));
@@ -107,19 +130,20 @@ export function ProfileNextRouteSection({
 
   useEffect(() => {
     if (!isOwnProfile) return;
-    void loadOwnRoute();
+    void loadOwnRoute({ force: false, showSkeleton: true });
   }, [isOwnProfile, loadOwnRoute]);
 
   useEffect(() => {
     if (!isOwnProfile) return;
 
     function onProfileStale() {
-      void loadOwnRoute();
+      void loadOwnRoute({ force: true, showSkeleton: false });
     }
 
     function onRouteChanged(event: Event) {
       const detail = (event as CustomEvent<{ stops?: unknown }>).detail;
       applyStops(parseNextRoute(detail?.stops), { replace: true });
+      setLoadingOwnRoute(false);
     }
 
     window.addEventListener(PROFILE_DATA_STALE_EVENT, onProfileStale);

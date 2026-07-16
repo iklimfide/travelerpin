@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ProfileSettingsForm } from "@/components/dashboard/ProfileSettingsForm";
+import { SettingsPageSkeleton } from "@/components/skeletons/SettingsPageSkeleton";
 import {
   readSettingsCache,
   writeSettingsCache,
@@ -16,15 +17,16 @@ import type { TravelStats } from "@/types/database";
 export function SettingsPageClient() {
   const router = useRouter();
   const t = translateSettings;
+  // SSR-safe: no localStorage on the first paint.
   const [profile, setProfile] = useState<ProfileSettingsRow | null>(null);
   const [stats, setStats] = useState<TravelStats | null>(null);
   const [ready, setReady] = useState(false);
 
-  useEffect(() => {
-    const cached = readSettingsCache();
-    if (cached) {
-      setProfile(cached.profile);
-      setStats(cached.stats);
+  useLayoutEffect(() => {
+    const hit = readSettingsCache();
+    if (hit) {
+      setProfile(hit.profile);
+      setStats(hit.stats);
       setReady(true);
       return;
     }
@@ -62,7 +64,7 @@ export function SettingsPageClient() {
   }, [router]);
 
   if (!ready || !profile || !stats) {
-    return null;
+    return <SettingsPageSkeleton />;
   }
 
   const mapHref = profile.username ? profilePath(profile.username) : "/";
@@ -79,7 +81,6 @@ export function SettingsPageClient() {
           </Link>
         ) : null}
       </div>
-
       <ProfileSettingsForm profile={profile} stats={stats} />
     </main>
   );

@@ -33,8 +33,6 @@ type FetchTravelStateResult =
   | { ok: true; data: TravelStateData; fromCache: boolean }
   | { ok: false; status: number };
 
-let backgroundRefresh: Promise<void> | null = null;
-
 function normalizeTravelStateData(raw: Partial<TravelStateData>): TravelStateData {
   return {
     visitedCountries: raw.visitedCountries ?? [],
@@ -57,20 +55,6 @@ async function fetchTravelStateFromNetwork(): Promise<FetchTravelStateResult> {
   return { ok: true, data, fromCache: false };
 }
 
-function refreshTravelStateInBackground(): void {
-  if (backgroundRefresh) return;
-
-  backgroundRefresh = (async () => {
-    try {
-      await fetchTravelStateFromNetwork();
-    } catch {
-      // Keep cached state when refresh fails.
-    } finally {
-      backgroundRefresh = null;
-    }
-  })();
-}
-
 export async function fetchTravelState(options?: {
   preferCache?: boolean;
   force?: boolean;
@@ -78,10 +62,10 @@ export async function fetchTravelState(options?: {
   const preferCache = options?.preferCache ?? true;
   const force = options?.force ?? false;
 
+  // Cache hit: no network until a pin/mutation forces refresh.
   if (preferCache && !force) {
     const cached = readTravelStateCache();
     if (cached) {
-      refreshTravelStateInBackground();
       return { ok: true, data: cached, fromCache: true };
     }
   }
@@ -93,7 +77,7 @@ export async function fetchTravelState(options?: {
   }
 }
 
-/** Fire-and-forget full travel-state sync (does not block Save UI). */
+/** Fire-and-forget full travel-state sync after a save (does not block Save UI). */
 export function refreshTravelStateAfterSave(): void {
   void fetchTravelStateFromNetwork().catch(() => {
     // Keep existing cache if refresh fails.

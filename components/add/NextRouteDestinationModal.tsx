@@ -7,6 +7,7 @@ import { CityPickerStep, citySelectionKey } from "@/components/add/CityPickerSte
 import {
   NEXT_ROUTE_CHANGED_EVENT,
   PROFILE_DATA_STALE_EVENT,
+  readOwnNextRouteCache,
 } from "@/lib/client/session-page-cache";
 import {
   fetchNextRoute,
@@ -36,18 +37,23 @@ type Step =
   | { kind: "cities"; countryCode: string; countryName: string };
 
 export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModalProps) {
+  const cachedStops = readOwnNextRouteCache();
   const [step, setStep] = useState<Step>({ kind: "countries" });
-  const [routeStops, setRouteStops] = useState<NextRouteStop[]>([]);
-  const [routeCountryCodeSet, setRouteCountryCodeSet] = useState<Set<string>>(new Set());
-  const [routeCityKeySet, setRouteCityKeySet] = useState<Set<string>>(new Set());
+  const [routeStops, setRouteStops] = useState<NextRouteStop[]>(() => cachedStops ?? []);
+  const [routeCountryCodeSet, setRouteCountryCodeSet] = useState<Set<string>>(
+    () => (cachedStops ? routeCountryCodes(cachedStops) : new Set())
+  );
+  const [routeCityKeySet, setRouteCityKeySet] = useState<Set<string>>(
+    () => (cachedStops ? routeCityKeys(cachedStops) : new Set())
+  );
   const [pendingCountryCodes, setPendingCountryCodes] = useState<Set<string>>(new Set());
   const [pendingCityKeys, setPendingCityKeys] = useState<Set<string>>(new Set());
   const [returnExpandedRegion, setReturnExpandedRegion] = useState<AddRegionId | null>(null);
-  const [loadingState, setLoadingState] = useState(true);
+  const [loadingState, setLoadingState] = useState(() => cachedStops === null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
-  const hasRouteStateRef = useRef(false);
+  const hasRouteStateRef = useRef(cachedStops !== null);
 
   useEffect(() => {
     setMounted(true);
@@ -81,14 +87,22 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
   }, [applyRouteStops]);
 
   useEffect(() => {
-    hasRouteStateRef.current = false;
+    hasRouteStateRef.current = readOwnNextRouteCache() !== null;
     setStep({ kind: "countries" });
     setPendingCountryCodes(new Set());
     setPendingCityKeys(new Set());
     setReturnExpandedRegion(null);
     setSaveError(null);
+
+    const cached = readOwnNextRouteCache();
+    if (cached !== null) {
+      applyRouteStops(cached);
+      setLoadingState(false);
+      return;
+    }
+
     void loadRouteState({ background: false });
-  }, [loadRouteState]);
+  }, [loadRouteState, applyRouteStops]);
 
   useEffect(() => {
     function onProfileStale() {
