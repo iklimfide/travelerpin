@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { notFound } from "next/navigation";
 import { ProfileOwnerTools } from "@/components/dashboard/ProfileOwnerTools";
 import { PublicProfileViewClient } from "@/components/profile/PublicProfileViewClient";
@@ -14,6 +14,7 @@ import {
   type ProfileDataStaleDetail,
   type TravelStateData,
 } from "@/lib/client/session-page-cache";
+import { useCachedProfile } from "@/lib/client/use-page-cache";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
 import { computeTravelStats, getVisitedCountryCodes } from "@/lib/utils/stats";
 
@@ -78,11 +79,12 @@ function applyTravelStateToProfile(
 
 export function ProfileRoute({ username }: ProfileRouteProps) {
   const normalized = username.trim().toLowerCase();
-  // Never read localStorage during the initial render — SSR and the first
-  // client paint must match. Cache is applied in useLayoutEffect before paint.
+  const cachedSnapshot = useCachedProfile(normalized);
   const [data, setData] = useState<PublicProfilePageData | null>(null);
   const [missing, setMissing] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !cachedSnapshot);
+
+  const displayData = data ?? cachedSnapshot;
 
   const loadProfile = useCallback(
     async (forceNetwork = false) => {
@@ -107,7 +109,6 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
       }
 
       if (!res.ok) {
-        // Transient 5xx / cache failures — keep trying, do not convert to notFound.
         setMissing(false);
         setLoading(false);
         return;
@@ -122,26 +123,25 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
     [normalized]
   );
 
-  useLayoutEffect(() => {
-    const cached = readProfileCache(normalized);
-    if (cached) {
-      setData(cached);
-      setMissing(false);
+  useEffect(() => {
+    if (!cachedSnapshot) return;
+    setData(cachedSnapshot);
+    setMissing(false);
+    setLoading(false);
+  }, [cachedSnapshot]);
+
+  useEffect(() => {
+    if (readProfileCache(normalized)) {
       setLoading(false);
       return;
     }
 
-    setData(null);
-    setMissing(false);
     setLoading(true);
-
     let cancelled = false;
-
     void (async () => {
       await loadProfile(false);
       if (cancelled) return;
     })();
-
     return () => {
       cancelled = true;
     };
@@ -192,11 +192,11 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
     notFound();
   }
 
-  if (!data) {
+  if (!displayData) {
     return loading ? <ProfilePageSkeleton /> : null;
   }
 
-  const { profile, currentUsername, isLoggedIn } = data;
+  const { profile, currentUsername, isLoggedIn } = displayData;
   const isOwnProfile =
     currentUsername != null &&
     currentUsername.toLowerCase() === profile.username.toLowerCase();
@@ -204,17 +204,17 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
 
   return (
     <PublicProfileViewClient
-      data={data}
+      data={displayData}
       isOwnProfile={isOwnProfile}
       isGuest={isGuest}
       ownerTools={
         isOwnProfile ? (
           <ProfileOwnerTools
-            visitedCountries={data.visitedCountries}
-            visitedCities={data.visitedCities}
-            visitedParks={data.visitedParks}
-            wishlistCountries={data.wishlistCountries}
-            visitedCodes={data.visitedCodes}
+            visitedCountries={displayData.visitedCountries}
+            visitedCities={displayData.visitedCities}
+            visitedParks={displayData.visitedParks}
+            wishlistCountries={displayData.wishlistCountries}
+            visitedCodes={displayData.visitedCodes}
           />
         ) : undefined
       }

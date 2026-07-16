@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 export const DESKTOP_DASHBOARD_NAV_QUERY = "(min-width: 1024px)";
 
 export function useIsDesktopDashboardNav() {
   const [isDesktop, setIsDesktop] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const mediaQuery = window.matchMedia(DESKTOP_DASHBOARD_NAV_QUERY);
     const sync = () => setIsDesktop(mediaQuery.matches);
 

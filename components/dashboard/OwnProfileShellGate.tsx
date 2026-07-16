@@ -1,8 +1,13 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { OwnProfileShell } from "@/components/dashboard/OwnProfileShell";
-import { setOwnUserId, setOwnUsername } from "@/lib/client/session-page-cache";
+import {
+  getOwnUserId,
+  getOwnUsername,
+  setOwnUserId,
+  setOwnUsername,
+} from "@/lib/client/session-page-cache";
 import { createClient } from "@/lib/supabase/client";
 
 export type BottomBarOwnProfile = {
@@ -11,17 +16,35 @@ export type BottomBarOwnProfile = {
   avatarUrl: string | null;
   displayName: string | null;
 };
+
+function readProvisionalOwnProfile(): BottomBarOwnProfile | null {
+  const userId = getOwnUserId();
+  const username = getOwnUsername();
+  if (!userId || !username) return null;
+  return {
+    id: userId,
+    username,
+    avatarUrl: null,
+    displayName: null,
+  };
+}
+
 /**
- * Loads the signed-in username in the browser so the root layout does not
- * need a server-side auth/profile round-trip on every request.
+ * App chrome (footer + top/bottom nav) for all users.
  *
- * OwnProfileShell mounts the bottom bar for guests and signed-in users once
- * auth resolves. Must stay inside DashboardAddProvider (layout) so the bottom
- * bar can open SaveDestinationModal.
+ * Always mounts OwnProfileShell so SiteFooter is not delayed until auth.
+ * Restores signed-in chrome from localStorage in useLayoutEffect (before paint)
+ * so logged-in mobile users do not flash the guest top bar, then confirm with Supabase.
  */
 export function OwnProfileShellGate({ children }: { children: ReactNode }) {
   const [ownProfile, setOwnProfile] = useState<BottomBarOwnProfile | null>(null);
-  const [authResolved, setAuthResolved] = useState(false);
+
+  useLayoutEffect(() => {
+    const provisional = readProvisionalOwnProfile();
+    if (provisional) {
+      setOwnProfile(provisional);
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -37,7 +60,6 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
           setOwnProfile(null);
           setOwnUserId(null);
           setOwnUsername(null);
-          setAuthResolved(true);
         }
         return;
       }
@@ -62,7 +84,6 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
             : null
         );
         setOwnUsername(profile?.username ?? null);
-        setAuthResolved(true);
       }
 
       // Backfill home-city pin once per browser session (e.g. residence "İstanbul").
@@ -107,9 +128,5 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return authResolved ? (
-    <OwnProfileShell ownProfile={ownProfile}>{children}</OwnProfileShell>
-  ) : (
-    children
-  );
+  return <OwnProfileShell ownProfile={ownProfile}>{children}</OwnProfileShell>;
 }

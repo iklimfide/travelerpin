@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
+import { useNextRouteDestination } from "@/components/add/NextRouteDestinationProvider";
 import { ProfileNextRouteSectionSkeleton } from "@/components/skeletons/ProfileNextRouteSectionSkeleton";
 import {
   NEXT_ROUTE_CHANGED_EVENT,
@@ -75,6 +76,7 @@ export function ProfileNextRouteSection({
     [initialStops, isOwnProfile]
   );
   const { openNextRouteModal } = useDashboardAdd();
+  const { open: openNextRouteDestination } = useNextRouteDestination();
   const [stops, setStops] = useState(() => initialResolved.stops);
   const [loadingOwnRoute, setLoadingOwnRoute] = useState(
     () => isOwnProfile && !initialResolved.fromCache && initialResolved.stops.length === 0
@@ -212,7 +214,10 @@ export function ProfileNextRouteSection({
               <button
                 type="button"
                 className="profile-owner-section__btn profile-owner-section__btn--add"
-                onClick={() => router.push(`/c/next?next=${encodeURIComponent(pathname)}`)}
+                onClick={() => {
+                  openNextRouteDestination();
+                  router.push(`/c/next?next=${encodeURIComponent(pathname)}`);
+                }}
               >
                 {profileMessages.ownerAdd}
               </button>

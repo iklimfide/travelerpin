@@ -52,16 +52,17 @@ function WishlistDestinationProviderInner({ children }: { children: ReactNode })
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [open, setOpen] = useState(false);
+  const [softOpen, setSoftOpen] = useState(false);
   const nextFromUrl = sanitizeNext(searchParams?.get("next") ?? null);
   const routeOpen = pathname === "/c/wishlist";
+  const open = routeOpen || softOpen;
 
   useEffect(() => {
-    setOpen(routeOpen);
+    if (routeOpen) setSoftOpen(false);
   }, [routeOpen]);
 
   const close = useCallback(() => {
-    setOpen(false);
+    setSoftOpen(false);
     if (pathname !== "/c/wishlist") return;
 
     const target = nextFromUrl ?? "/";
@@ -71,7 +72,7 @@ function WishlistDestinationProviderInner({ children }: { children: ReactNode })
   }, [router, pathname, nextFromUrl]);
 
   const openModal = useCallback(() => {
-    setOpen(true);
+    setSoftOpen(true);
   }, []);
 
   const ctxValue = useMemo(() => ({ open: openModal, close }), [openModal, close]);

@@ -59,8 +59,23 @@ function settingsCacheKey(userId: string): string {
 
 const HOME_CACHE_KEY = `tp:v${CACHE_VERSION}:home`;
 
+/** Fired when any page cache entry is written/removed (for useSyncExternalStore). */
+export const PAGE_CACHE_CHANGED_EVENT = "tp:page-cache-changed";
+
+const memoryStore = new Map<string, unknown>();
+
+function notifyPageCacheChanged(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(PAGE_CACHE_CHANGED_EVENT));
+}
+
 function readJson<T>(key: string): T | null {
   if (typeof window === "undefined") return null;
+
+  if (memoryStore.has(key)) {
+    return memoryStore.get(key) as T;
+  }
+
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
@@ -69,6 +84,7 @@ function readJson<T>(key: string): T | null {
       localStorage.removeItem(key);
       return null;
     }
+    memoryStore.set(key, parsed);
     return parsed;
   } catch {
     return null;
@@ -77,20 +93,25 @@ function readJson<T>(key: string): T | null {
 
 function writeJson(key: string, value: object): void {
   if (typeof window === "undefined") return;
+  const payload = { v: CACHE_VERSION, ...value };
+  memoryStore.set(key, payload);
   try {
-    localStorage.setItem(key, JSON.stringify({ v: CACHE_VERSION, ...value }));
+    localStorage.setItem(key, JSON.stringify(payload));
   } catch {
-    // Private mode / quota — ignore.
+    // Private mode / quota — keep memory copy.
   }
+  notifyPageCacheChanged();
 }
 
 function removeKey(key: string): void {
   if (typeof window === "undefined") return;
+  memoryStore.delete(key);
   try {
     localStorage.removeItem(key);
   } catch {
     // ignore
   }
+  notifyPageCacheChanged();
 }
 
 export function setOwnUserId(userId: string | null): void {

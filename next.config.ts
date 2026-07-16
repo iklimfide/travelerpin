@@ -8,6 +8,14 @@ const r2Hostname = getR2PublicHostname();
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["sharp"],
+  // Soft-nav revisits (profile/settings/modals) stay instant until pin/settings change.
+  // Page bodies still hydrate from localStorage; this only caches the thin RSC shell.
+  experimental: {
+    staleTimes: {
+      dynamic: 86400,
+      static: 86400,
+    },
+  },
   images: {
     localPatterns: [
       {

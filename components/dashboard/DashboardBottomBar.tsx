@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAddDestination } from "@/components/add/AddDestinationProvider";
+import { useNextRouteDestination } from "@/components/add/NextRouteDestinationProvider";
+import { useWishlistDestination } from "@/components/add/WishlistDestinationProvider";
 import { BottomBarProfileNav } from "@/components/dashboard/BottomBarProfileNav";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
 import { PublicGuestAuthLinks } from "@/components/nav/PublicGuestAuthLinks";
@@ -99,6 +101,8 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { open: openAddDestination } = useAddDestination();
+  const { open: openNextRouteDestination } = useNextRouteDestination();
+  const { open: openWishlistDestination } = useWishlistDestination();
   const barRef = useRef<HTMLElement>(null);
   const [mounted, setMounted] = useState(false);
   const isDesktopNav = useIsDesktopDashboardNav();
@@ -112,7 +116,7 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
   const loginHref = loginHrefFor(currentPath);
   const registerHref = registerHrefFor(currentPath);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setMounted(true);
   }, []);
 
@@ -138,6 +142,8 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
       router.push(loginHrefFor(currentPath));
       return;
     }
+    // Open from cache immediately; URL update is secondary.
+    openNextRouteDestination();
     router.push(`/c/next?next=${encodeURIComponent(currentPath)}`);
   }
 
@@ -146,6 +152,7 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
       router.push(loginHrefFor(currentPath));
       return;
     }
+    openWishlistDestination();
     router.push(`/c/wishlist?next=${encodeURIComponent(currentPath)}`);
   }
 
