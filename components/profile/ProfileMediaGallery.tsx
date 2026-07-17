@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { Link } from "@/lib/i18n/navigation";
 import { ProfileInstagramLinkCard } from "@/components/profile/ProfileInstagramLinkCard";
 import { HubExternalPhoto } from "@/components/hub/HubExternalPhoto";
 import { HubMemoryLightbox } from "@/components/hub/HubMemoryLightbox";
@@ -15,7 +16,7 @@ import {
   removeParkInstagramUrl,
   removeParkPhoto,
 } from "@/lib/client/profile-media-update";
-import type { HubGalleryItem } from "@/lib/supabase/hub-traveler-pin";
+import type { HubGalleryItem, HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
 import { hubGalleryPhotoSrc } from "@/lib/storage/hub-photo-url";
 import { parseProfilePinId } from "@/lib/utils/profile-media";
@@ -103,6 +104,21 @@ function MediaItemActions({
   );
 }
 
+function MediaPlaceCaption({ pin }: { pin: HubTravelerPin }) {
+  const label = pin.placeLabel?.trim();
+  if (!label) return null;
+
+  if (pin.placePath) {
+    return (
+      <Link href={pin.placePath} className="profile-media-item__place">
+        {label}
+      </Link>
+    );
+  }
+
+  return <span className="profile-media-item__place profile-media-item__place--static">{label}</span>;
+}
+
 function GalleryTile({
   item,
   hubName,
@@ -122,7 +138,6 @@ function GalleryTile({
   onRemove: () => void;
   photoAnchorPrefix?: string;
 }) {
-  const { modal: modalMessages } = useAppMessages();
   const ownerActions = isOwnProfile ? (
     <MediaItemActions
       editLabel={labels.editMedia}
@@ -132,11 +147,16 @@ function GalleryTile({
     />
   ) : null;
 
+  const anchorId =
+    photoAnchorPrefix && item.mediaType === "photo"
+      ? `${photoAnchorPrefix}${item.id}`
+      : undefined;
+
+  let media: ReactNode;
+
   if (item.mediaType === "instagram") {
     const instagramHref = normalizeInstagramPostUrl(item.mediaUrl);
-
-    // Photos stay only in the photos section — never duplicate them under Instagram links.
-    const instagramLink = (
+    media = (
       <a
         href={instagramHref}
         target="_blank"
@@ -147,71 +167,36 @@ function GalleryTile({
         <ProfileInstagramLinkCard displayName={item.pin.displayName} />
       </a>
     );
-
-    if (isOwnProfile) {
-      return (
-        <div className="profile-media-item">
-          {instagramLink}
-          {ownerActions}
-        </div>
-      );
-    }
-
-    return instagramLink;
-  }
-
-  if (isOwnProfile) {
+  } else {
     const photoSrc = hubGalleryPhotoSrc(item);
-    const anchorId =
-      photoAnchorPrefix && item.mediaType === "photo"
-        ? `${photoAnchorPrefix}${item.id}`
-        : undefined;
-    return (
-      <div className="profile-media-item" id={anchorId}>
-        <button
-          type="button"
-          className="city-page__traveler-picture-btn profile-media-item__link"
-          onClick={() => onSelect(item)}
-          aria-label={`${labels.viewPin} — ${item.pin.placeLabel}`}
-        >
-          {photoSrc ? (
-            <HubExternalPhoto
-              src={photoSrc}
-              alt={`${hubName} — ${item.pin.placeLabel}`}
-              width={160}
-              height={160}
-              className="city-page__traveler-picture-image"
-            />
-          ) : null}
-        </button>
-        {ownerActions}
-      </div>
+    media = (
+      <button
+        type="button"
+        className="city-page__traveler-picture-btn profile-media-item__link"
+        onClick={() => onSelect(item)}
+        aria-label={`${labels.viewPin} — ${item.pin.placeLabel}`}
+      >
+        {photoSrc ? (
+          <HubExternalPhoto
+            src={photoSrc}
+            alt={`${hubName} — ${item.pin.placeLabel}`}
+            width={160}
+            height={160}
+            className="city-page__traveler-picture-image"
+          />
+        ) : null}
+      </button>
     );
   }
 
-  const photoSrc = hubGalleryPhotoSrc(item);
-  const anchorId =
-    photoAnchorPrefix && item.mediaType === "photo"
-      ? `${photoAnchorPrefix}${item.id}`
-      : undefined;
   return (
-    <button
-      id={anchorId}
-      type="button"
-      className="city-page__traveler-picture-btn"
-      onClick={() => onSelect(item)}
-      aria-label={`${labels.viewPin} — ${item.pin.placeLabel}`}
-    >
-      {photoSrc ? (
-        <HubExternalPhoto
-          src={photoSrc}
-          alt={`${hubName} — ${item.pin.placeLabel}`}
-          width={160}
-          height={160}
-          className="city-page__traveler-picture-image"
-        />
-      ) : null}
-    </button>
+    <div className="profile-media-item" id={anchorId}>
+      <div className="profile-media-item__media">
+        {media}
+        {ownerActions}
+      </div>
+      <MediaPlaceCaption pin={item.pin} />
+    </div>
   );
 }
 

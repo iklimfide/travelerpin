@@ -2159,10 +2159,16 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   }
 
   .profile-media-sections .city-page__traveler-picture-btn,
-  .profile-media-sections .profile-media-item {
+  .profile-media-sections .profile-media-item__media {
     width: 100%;
     height: auto;
     aspect-ratio: 1;
+  }
+
+  .profile-media-sections .profile-media-item {
+    width: 100%;
+    height: auto;
+    aspect-ratio: auto;
   }
 
   .profile-media-sections .city-page__traveler-picture-image {
@@ -2173,14 +2179,48 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 
 .profile-media-item {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 160px;
+  height: auto;
+}
+
+.profile-media-item__media {
+  position: relative;
   width: 160px;
   height: 160px;
+  flex-shrink: 0;
 }
 
 .profile-media-item__link {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.profile-media-item__place {
+  display: block;
+  margin-top: 6px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #2563eb;
+  text-align: center;
+  text-decoration: none;
+}
+
+.profile-media-item__place:hover {
+  text-decoration: underline;
+}
+
+.profile-media-item__place--static {
+  color: var(--city-muted, #64748b);
+  cursor: default;
 }
 
 .profile-media-item__actions {
