@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { getCountryCapitalName, matchesCapitalCity } from "@/lib/data/country-capitals";
-import { getCountryName } from "@/lib/data/countries";
+import {
+  clearCountryListCache,
+  getCountryList,
+  getCountryName,
+} from "@/lib/data/countries";
+import { writeYpCountryNameTrFile } from "@/lib/data/country-name-tr-yp-server";
 import { TOURIST_CITIES } from "@/lib/data/tourist-cities";
 import { TOURIST_PARKS } from "@/lib/data/tourist-parks";
 import {
@@ -13,6 +18,7 @@ import {
   getCatalogOverlayFresh,
   popularityOverrideMap,
   cityNameTrOverrideMap,
+  countryNameTrOverrideMap,
   revalidateCatalogOverlay,
   type YpCatalogCityRow,
   type YpCatalogParkRow,
@@ -58,13 +64,45 @@ function resolveCityNameTr(
 ): string | null {
   const code = countryCode.toUpperCase();
   const canonical = canonicalCityName(code, name);
-  const key = `${code}:${catalogNameKey(canonical, code)}`;
-  const fromDb = overrides.get(key)?.trim();
+  const fromDb = overrides.get(`${code}:${catalogNameKey(canonical, code)}`);
   if (fromDb) return fromDb;
-
-  const fromCatalog = getLocalizedCityName(code, canonical, "tr");
-  if (fromCatalog !== canonical) return fromCatalog;
+  const localized = getLocalizedCityName(code, canonical, "tr");
+  if (localized && localized !== canonical) return localized;
   return null;
+}
+
+type CountryListRow = {
+  name: string;
+  nameTr: string | null;
+  countryCode: string;
+  countryName: string;
+  latitude: null;
+  longitude: null;
+  source: "static";
+  trSource: "db" | "static" | "iso";
+};
+
+function resolveCountryListNameTr(
+  countryCode: string,
+  nameEn: string,
+  overrides: Map<string, string>
+): Pick<CountryListRow, "nameTr" | "trSource"> {
+  const code = countryCode.toUpperCase();
+  const fromDb = overrides.get(code);
+  if (fromDb) return { nameTr: fromDb, trSource: "db" };
+  const tr = getCountryName(code, "tr");
+  if (tr && tr !== nameEn) return { nameTr: tr, trSource: "static" };
+  return { nameTr: null, trSource: "iso" };
+}
+
+function isMissingRelationError(message: string | undefined): boolean {
+  if (!message) return false;
+  const lower = message.toLowerCase();
+  return (
+    lower.includes("does not exist") ||
+    lower.includes("schema cache") ||
+    lower.includes("could not find the table")
+  );
 }
 
 function withCityNameTr(
@@ -217,9 +255,59 @@ export async function GET(request: Request) {
   if ("response" in gate) return gate.response;
 
   const { searchParams } = new URL(request.url);
-  const kind = searchParams.get("kind") === "park" ? "park" : "city";
-  const country = searchParams.get("country")?.toUpperCase() ?? "";
+  const kindParam = searchParams.get("kind");
   const q = searchParams.get("q")?.trim() ?? "";
+
+  if (kindParam === "country") {
+    const overlay = await getCatalogOverlayFresh();
+    const overrides = countryNameTrOverrideMap(overlay);
+    const offsetRaw = Number(searchParams.get("offset") ?? "0");
+    const limitRaw = Number(searchParams.get("limit") ?? "80");
+    const offset =
+      Number.isFinite(offsetRaw) && offsetRaw > 0 ? Math.floor(offsetRaw) : 0;
+    const limit = Number.isFinite(limitRaw)
+      ? Math.min(200, Math.max(1, Math.floor(limitRaw)))
+      : 80;
+
+    const all: CountryListRow[] = getCountryList("en").map((country) => {
+      const { nameTr, trSource } = resolveCountryListNameTr(
+        country.code,
+        country.name,
+        overrides
+      );
+      return {
+        name: country.name,
+        nameTr,
+        countryCode: country.code,
+        countryName: country.name,
+        latitude: null,
+        longitude: null,
+        source: "static" as const,
+        trSource,
+      };
+    });
+
+    const filtered =
+      q.length < 2
+        ? all
+        : all.filter((row) => {
+            const haystack = `${row.countryCode} ${row.name} ${row.nameTr ?? ""}`;
+            return matchesPlaceNameSearch(haystack, q);
+          });
+
+    const page = filtered.slice(offset, offset + limit);
+    const nextOffset = offset + page.length;
+    return NextResponse.json({
+      kind: "country",
+      results: page,
+      total: filtered.length,
+      hasMore: nextOffset < filtered.length,
+      nextOffset,
+    });
+  }
+
+  const kind = kindParam === "park" ? "park" : "city";
+  const country = searchParams.get("country")?.toUpperCase() ?? "";
   const popularFilterRaw = searchParams.get("popularFilter");
   const popularFilter =
     popularFilterRaw === "popular" || popularFilterRaw === "not_popular"
@@ -548,6 +636,11 @@ type CatalogBody =
       action: "set_name_tr";
       countryCode: string;
       name: string;
+      nameTr: string | null;
+    }
+  | {
+      action: "set_country_name_tr";
+      countryCode: string;
       nameTr: string | null;
     }
   | {
@@ -1077,6 +1170,99 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
+  if (body.action === "set_country_name_tr") {
+    const countryCode = body.countryCode?.trim().toUpperCase();
+    if (!countryCode || countryCode.length !== 2) {
+      return NextResponse.json({ error: "Ülke kodu gerekli" }, { status: 400 });
+    }
+    const trError = await upsertCountryNameTr(
+      countryCode,
+      body.nameTr?.trim() ? body.nameTr : null
+    );
+    if (trError) {
+      return NextResponse.json({ error: trError }, { status: 400 });
+    }
+    await revalidateCatalogOverlay();
+    return NextResponse.json({ ok: true });
+  }
+
+  async function syncYpCountryNameTrFile(): Promise<string | null> {
+    const { data, error } = await admin
+      .from("yp_country_name_tr")
+      .select("country_code, name_tr")
+      .order("country_code", { ascending: true });
+    if (error) {
+      if (isMissingRelationError(error.message)) {
+        return "yp_country_name_tr tablosu yok — migration 036 uygulanmalı";
+      }
+      return error.message;
+    }
+    try {
+      await writeYpCountryNameTrFile(
+        (data ?? []) as Array<{ country_code: string; name_tr: string }>
+      );
+      clearCountryListCache();
+      return null;
+    } catch (err) {
+      return err instanceof Error ? err.message : "Ülke TR dosyası yazılamadı";
+    }
+  }
+
+  async function upsertCountryNameTr(
+    countryCodeRaw: string,
+    nameTrRaw: string | null
+  ): Promise<string | null> {
+    const countryCode = countryCodeRaw.trim().toUpperCase();
+    if (!countryCode || countryCode.length !== 2) {
+      return "Geçersiz ülke kodu";
+    }
+
+    const nameTr = nameTrRaw?.trim() ?? "";
+
+    if (!nameTr) {
+      const { error } = await admin
+        .from("yp_country_name_tr")
+        .delete()
+        .eq("country_code", countryCode);
+      if (error && isMissingRelationError(error.message)) {
+        return "yp_country_name_tr tablosu yok — migration 036 uygulanmalı";
+      }
+      if (error) return error.message;
+      return syncYpCountryNameTrFile();
+    }
+
+    const displayTr = formatCityDisplayName(nameTr);
+    const now = new Date().toISOString();
+    const { data: existing } = await admin
+      .from("yp_country_name_tr")
+      .select("id")
+      .eq("country_code", countryCode)
+      .maybeSingle();
+
+    if (existing?.id) {
+      const { error } = await admin
+        .from("yp_country_name_tr")
+        .update({ name_tr: displayTr, updated_at: now })
+        .eq("id", existing.id);
+      if (error && isMissingRelationError(error.message)) {
+        return "yp_country_name_tr tablosu yok — migration 036 uygulanmalı";
+      }
+      if (error) return error.message;
+      return syncYpCountryNameTrFile();
+    }
+
+    const { error } = await admin.from("yp_country_name_tr").insert({
+      country_code: countryCode,
+      name_tr: displayTr,
+      updated_at: now,
+    });
+    if (error && isMissingRelationError(error.message)) {
+      return "yp_country_name_tr tablosu yok — migration 036 uygulanmalı";
+    }
+    if (error) return error.message;
+    return syncYpCountryNameTrFile();
+  }
+
   async function upsertCityNameTr(
     countryCodeRaw: string,
     nameRaw: string,
@@ -1123,7 +1309,7 @@ export async function POST(request: Request) {
       name_tr: displayTr,
       updated_at: now,
     });
-    if (error && error.message.toLowerCase().includes("does not exist")) {
+    if (error && isMissingRelationError(error.message)) {
       return "yp_city_name_tr tablosu yok — migration 035 uygulanmalı";
     }
     return error?.message ?? null;

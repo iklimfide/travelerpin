@@ -85,26 +85,50 @@ export type YpCityNameTrRow = {
   updated_at: string;
 };
 
+export type YpCountryNameTrRow = {
+  id: string;
+  country_code: string;
+  name_tr: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type CatalogOverlaySnapshot = {
   cities: YpCatalogCityRow[];
   parks: YpCatalogParkRow[];
   exclusions: YpCatalogExclusionRow[];
   popularity: YpCityPopularityRow[];
   nameTr: YpCityNameTrRow[];
+  countryNameTr: YpCountryNameTrRow[];
 };
 
 async function fetchCatalogOverlayUncached(): Promise<CatalogOverlaySnapshot> {
   const client = createOverlayReadClient();
   if (!client) {
-    return { cities: [], parks: [], exclusions: [], popularity: [], nameTr: [] };
+    return {
+      cities: [],
+      parks: [],
+      exclusions: [],
+      popularity: [],
+      nameTr: [],
+      countryNameTr: [],
+    };
   }
 
-  const [citiesRes, parksRes, exclusionsRes, popularityRes, nameTrRes] = await Promise.all([
+  const [
+    citiesRes,
+    parksRes,
+    exclusionsRes,
+    popularityRes,
+    nameTrRes,
+    countryNameTrRes,
+  ] = await Promise.all([
     client.from("yp_catalog_cities").select("*").order("created_at", { ascending: false }),
     client.from("yp_catalog_parks").select("*").order("created_at", { ascending: false }),
     client.from("yp_catalog_exclusions").select("*").order("created_at", { ascending: false }),
     client.from("yp_city_popularity").select("*").order("updated_at", { ascending: false }),
     client.from("yp_city_name_tr").select("*").order("updated_at", { ascending: false }),
+    client.from("yp_country_name_tr").select("*").order("updated_at", { ascending: false }),
   ]);
 
   if (citiesRes.error) {
@@ -129,6 +153,10 @@ async function fetchCatalogOverlayUncached(): Promise<CatalogOverlaySnapshot> {
       : ((popularityRes.data ?? []) as YpCityPopularityRow[]),
     // Table may be missing until migration 035 is applied.
     nameTr: nameTrRes.error ? [] : ((nameTrRes.data ?? []) as YpCityNameTrRow[]),
+    // Table may be missing until migration 036 is applied.
+    countryNameTr: countryNameTrRes.error
+      ? []
+      : ((countryNameTrRes.data ?? []) as YpCountryNameTrRow[]),
   };
 }
 
@@ -190,6 +218,20 @@ export function cityNameTrOverrideMap(
     const tr = row.name_tr.trim();
     if (!tr) continue;
     map.set(`${code}:${catalogNameKey(row.name_key, code)}`, tr);
+  }
+  return map;
+}
+
+/** Lookup keys: country code → Turkish display label. */
+export function countryNameTrOverrideMap(
+  overlay: CatalogOverlaySnapshot
+): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const row of overlay.countryNameTr) {
+    const code = row.country_code.toUpperCase();
+    const tr = row.name_tr.trim();
+    if (!tr) continue;
+    map.set(code, tr);
   }
   return map;
 }

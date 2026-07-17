@@ -1,6 +1,7 @@
 import countriesLib from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
 import trLocale from "i18n-iso-countries/langs/tr.json";
+import { getYpCountryNameTr } from "@/lib/data/country-name-tr-yp";
 import { defaultLocale, type Locale } from "@/lib/i18n/config";
 import { getUkNationName } from "@/lib/data/uk-nations";
 
@@ -131,6 +132,12 @@ function resolveCountryDisplayName(
   official: string,
   locale: Locale
 ): string {
+  // YP catalog country TR overrides (DB → synced JSON) win over static maps.
+  if (locale === "tr") {
+    const ypTr = getYpCountryNameTr(code);
+    if (ypTr) return ypTr;
+  }
+
   const override = nameOverrides(locale)[code];
   if (override) return override;
 
@@ -202,6 +209,11 @@ function supplementalCountries(locale: Locale): CountryOption[] {
 
 const countryListCache = new Map<Locale, CountryOption[]>();
 
+/** Clear after YP country TR JSON is rewritten so pickers pick up new labels. */
+export function clearCountryListCache(): void {
+  countryListCache.clear();
+}
+
 /** Locale-aware country picker list (ISO + supplemental). UK nations stay separate. */
 export function getCountryList(locale: Locale = defaultLocale): CountryOption[] {
   const cached = countryListCache.get(locale);
@@ -228,6 +240,11 @@ export function getCountryName(
   locale: Locale = defaultLocale
 ): string {
   const normalized = code.toUpperCase();
+  if (locale === "tr") {
+    const ypTr = getYpCountryNameTr(normalized);
+    if (ypTr) return ypTr;
+  }
+
   const ukName = getUkNationName(normalized);
   if (ukName) {
     if (locale === "tr") {

@@ -7,8 +7,8 @@ import { YP_CACHE_KEYS, ypCacheGet, ypCacheInvalidate, ypCacheSet } from "@/lib/
 import { citiesAreSame } from "@/lib/utils/city-aliases";
 import { PARK_TYPES, type ParkType } from "@/types/database";
 
-type Kind = "city" | "park";
-type CatalogTab = "cities" | "parks" | "add-city" | "add-park";
+type Kind = "city" | "park" | "country";
+type CatalogTab = "cities" | "parks" | "countries" | "add-city" | "add-park";
 type PopularFilter = "" | "popular" | "not_popular";
 
 type CatalogResult = {
@@ -23,6 +23,7 @@ type CatalogResult = {
   source: "static" | "yp";
   popular?: boolean;
   capital?: boolean;
+  trSource?: "db" | "static" | "iso";
 };
 
 type CatalogCachePayload = {
@@ -74,8 +75,14 @@ export function KamikazeCatalogPanel() {
   const [addSearchLoading, setAddSearchLoading] = useState(false);
   const [addSearchDone, setAddSearchDone] = useState(false);
 
-  const kind: Kind = tab === "parks" || tab === "add-park" ? "park" : "city";
-  const isManageTab = tab === "cities" || tab === "parks";
+  const kind: Kind =
+    tab === "parks" || tab === "add-park"
+      ? "park"
+      : tab === "countries"
+        ? "country"
+        : "city";
+  const isManageTab = tab === "cities" || tab === "parks" || tab === "countries";
+  const isCountriesTab = tab === "countries";
   const isAddTab = tab === "add-city" || tab === "add-park";
 
   function resultKey(row: CatalogResult): string {
@@ -149,7 +156,7 @@ export function KamikazeCatalogPanel() {
           offset: String(offset),
           limit: String(CATALOG_PAGE_SIZE),
         });
-        if (country) params.set("country", country);
+        if (!isCountriesTab && country) params.set("country", country);
         if (q.trim()) params.set("q", q.trim());
         if (kind === "city" && popularFilter) params.set("popularFilter", popularFilter);
         const res = await fetch(`/api/kamikaze/catalog?${params}`);
@@ -187,7 +194,7 @@ export function KamikazeCatalogPanel() {
         setLoadingMore(false);
       }
     },
-    [kind, country, q, popularFilter, isManageTab]
+    [kind, country, q, popularFilter, isManageTab, isCountriesTab]
   );
 
   useEffect(() => {
@@ -282,8 +289,11 @@ export function KamikazeCatalogPanel() {
     setError(null);
     setSelectedKeys(new Set());
     setRenameTarget(null);
-    if (next === "parks" || next === "add-park") {
+    if (next === "parks" || next === "add-park" || next === "countries") {
       setPopularFilter("");
+    }
+    if (next === "countries") {
+      setCountry("");
     }
   }
 
@@ -317,8 +327,35 @@ export function KamikazeCatalogPanel() {
     setRenameTrValue(row.nameTr ?? "");
   }
 
+  async function submitCountryTr() {
+    if (!renameTarget) return;
+    const nextTr = renameTrValue.trim();
+    const trUnchanged = nextTr === (renameTarget.nameTr ?? "").trim();
+    // Clearing a non-DB fallback (static/iso) with empty string is a no-op unless DB override exists.
+    if (trUnchanged) {
+      setRenameTarget(null);
+      return;
+    }
+    const row = renameTarget;
+    setRenameTarget(null);
+    const key = `rename:${row.countryCode}`;
+    await postAction(
+      {
+        action: "set_country_name_tr",
+        countryCode: row.countryCode,
+        nameTr: nextTr || null,
+      },
+      key
+    );
+    setQ(row.name);
+  }
+
   async function submitRename() {
     if (!renameTarget) return;
+    if (isCountriesTab) {
+      await submitCountryTr();
+      return;
+    }
     const next = renameValue.trim();
     const nextTr = renameTrValue.trim();
     if (!next) {
@@ -566,7 +603,7 @@ export function KamikazeCatalogPanel() {
     <div>
       <h1>Katalog</h1>
       <p className="yp-main__lead">
-        Şehir/park ekle, yeniden adlandır veya katalogdan sil. Kullanıcı pinleri silinmez.
+        Şehir/park/ülke ekle veya TR adlarını düzenle. Kullanıcı pinleri silinmez.
       </p>
 
       {error ? <p className="yp-error">{error}</p> : null}
@@ -585,6 +622,13 @@ export function KamikazeCatalogPanel() {
           onClick={() => selectTab("parks")}
         >
           Parklar
+        </button>
+        <button
+          type="button"
+          aria-selected={tab === "countries"}
+          onClick={() => selectTab("countries")}
+        >
+          Ülkeler
         </button>
         <button
           type="button"
@@ -949,16 +993,18 @@ export function KamikazeCatalogPanel() {
       {isManageTab ? (
         <>
           <div className="yp-toolbar">
-            <div className="yp-field">
-              <label htmlFor="yp-cat-country">Ülke</label>
-              <YpCountrySelect
-                id="yp-cat-country"
-                value={country}
-                onChange={setCountry}
-                emptyLabel="Tümü"
-                showCode
-              />
-            </div>
+            {!isCountriesTab ? (
+              <div className="yp-field">
+                <label htmlFor="yp-cat-country">Ülke</label>
+                <YpCountrySelect
+                  id="yp-cat-country"
+                  value={country}
+                  onChange={setCountry}
+                  emptyLabel="Tümü"
+                  showCode
+                />
+              </div>
+            ) : null}
             <div className="yp-field" style={{ minWidth: "14rem", flex: 1 }}>
               <label htmlFor="yp-cat-q">Ara</label>
               <div className="yp-field__input-wrap">
@@ -966,7 +1012,11 @@ export function KamikazeCatalogPanel() {
                   id="yp-cat-q"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="En az 2 karakter"
+                  placeholder={
+                    isCountriesTab
+                      ? "Kod, EN veya TR (en az 2 karakter)"
+                      : "En az 2 karakter"
+                  }
                   className={q ? "yp-field__input--has-clear" : undefined}
                 />
                 {q ? (
@@ -1007,8 +1057,10 @@ export function KamikazeCatalogPanel() {
 
           <div className="yp-panel">
             <div className="yp-panel__title">
-              <span className="yp-panel__title-label">Arama sonuçları</span>
-              {selectedKeys.size > 0 ? (
+              <span className="yp-panel__title-label">
+                {isCountriesTab ? "Ülkeler" : "Arama sonuçları"}
+              </span>
+              {!isCountriesTab && selectedKeys.size > 0 ? (
                 <div className="yp-actions">
                   {kind === "city" ? (
                     <>
@@ -1041,25 +1093,85 @@ export function KamikazeCatalogPanel() {
                 </div>
               ) : (
                 <span className="yp-muted" style={{ fontWeight: 500, fontSize: "0.78rem" }}>
-                  {kind === "city"
+                  {isCountriesTab
                     ? total > results.length
-                      ? `${results.length} / ${total} şehir`
-                      : `${results.length} şehir`
-                    : total > results.length
-                      ? `${results.length} / ${total} park`
-                      : `${results.length} park`}
+                      ? `${results.length} / ${total} ülke`
+                      : `${results.length} ülke`
+                    : kind === "city"
+                      ? total > results.length
+                        ? `${results.length} / ${total} şehir`
+                        : `${results.length} şehir`
+                      : total > results.length
+                        ? `${results.length} / ${total} park`
+                        : `${results.length} park`}
                 </span>
               )}
             </div>
             {results.length === 0 ? (
               <div className="yp-empty">
-                {popularFilter === "popular" && q.length < 2 && !country
-                  ? "Henüz popüler işaretli şehir yok."
-                  : q.length < 2 && !country
-                    ? "Listelemek için ülke seç, arama yaz veya popüler filtresi kullan."
-                    : "Sonuç yok."}
+                {isCountriesTab
+                  ? loading
+                    ? "Yükleniyor…"
+                    : "Sonuç yok."
+                  : popularFilter === "popular" && q.length < 2 && !country
+                    ? "Henüz popüler işaretli şehir yok."
+                    : q.length < 2 && !country
+                      ? "Listelemek için ülke seç, arama yaz veya popüler filtresi kullan."
+                      : "Sonuç yok."}
               </div>
+            ) : isCountriesTab ? (
+              <table className="yp-table">
+                <thead>
+                  <tr>
+                    <th>Kod</th>
+                    <th>Ad (EN)</th>
+                    <th>TR</th>
+                    <th>Kaynak</th>
+                    <th>İşlemler</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {results.map((row) => {
+                    const key = resultKey(row);
+                    const trLabel =
+                      row.trSource === "db"
+                        ? "YP"
+                        : row.trSource === "static"
+                          ? "Statik"
+                          : "ISO";
+                    return (
+                      <tr key={key}>
+                        <td>
+                          <code>{row.countryCode}</code>
+                        </td>
+                        <td>{row.name}</td>
+                        <td className="yp-muted">{row.nameTr ?? "—"}</td>
+                        <td>
+                          {row.trSource === "db" ? (
+                            <span className="yp-badge">{trLabel}</span>
+                          ) : (
+                            trLabel
+                          )}
+                        </td>
+                        <td>
+                          <div className="yp-actions">
+                            <button
+                              type="button"
+                              className="yp-btn"
+                              disabled={busyId?.startsWith("rename:") || busyId === key}
+                              onClick={() => openRename(row)}
+                            >
+                              TR düzenle
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             ) : (
+              <>
               <table className="yp-table">
                 <thead>
                   <tr>
@@ -1165,6 +1277,7 @@ export function KamikazeCatalogPanel() {
                   })}
                 </tbody>
               </table>
+              </>
             )}
             {hasMore ? (
               <div style={{ padding: "0.75rem 0.9rem" }}>
@@ -1199,37 +1312,56 @@ export function KamikazeCatalogPanel() {
             className="yp-rename-modal__sheet"
           >
             <h2 id="yp-rename-title">
-              {kind === "city" ? "Adı düzenle" : "Yeniden adlandır"}
+              {isCountriesTab
+                ? "Ülke TR adı"
+                : kind === "city"
+                  ? "Adı düzenle"
+                  : "Yeniden adlandır"}
             </h2>
             <p className="yp-muted">
-              {renameTarget.countryName} · {renameTarget.name}
-              {renameTarget.nameTr ? ` / ${renameTarget.nameTr}` : ""}
+              {isCountriesTab ? (
+                <>
+                  <code>{renameTarget.countryCode}</code> · {renameTarget.name}
+                  {renameTarget.nameTr ? ` / ${renameTarget.nameTr}` : ""}
+                </>
+              ) : (
+                <>
+                  {renameTarget.countryName} · {renameTarget.name}
+                  {renameTarget.nameTr ? ` / ${renameTarget.nameTr}` : ""}
+                </>
+              )}
             </p>
-            <div className="yp-field yp-field--wide" style={{ marginTop: "0.85rem" }}>
-              <label htmlFor="yp-rename-input">
-                {kind === "city" ? "Ad (EN)" : "Yeni ad"}
-              </label>
-              <input
-                id="yp-rename-input"
-                autoFocus
-                value={renameValue}
-                onChange={(e) => setRenameValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    void submitRename();
-                  }
-                }}
-              />
-            </div>
-            {kind === "city" ? (
-              <div className="yp-field yp-field--wide" style={{ marginTop: "0.65rem" }}>
+            {!isCountriesTab ? (
+              <div className="yp-field yp-field--wide" style={{ marginTop: "0.85rem" }}>
+                <label htmlFor="yp-rename-input">
+                  {kind === "city" ? "Ad (EN)" : "Yeni ad"}
+                </label>
+                <input
+                  id="yp-rename-input"
+                  autoFocus
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void submitRename();
+                    }
+                  }}
+                />
+              </div>
+            ) : null}
+            {kind === "city" || isCountriesTab ? (
+              <div
+                className="yp-field yp-field--wide"
+                style={{ marginTop: isCountriesTab ? "0.85rem" : "0.65rem" }}
+              >
                 <label htmlFor="yp-rename-tr-input">Ad (TR)</label>
                 <input
                   id="yp-rename-tr-input"
+                  autoFocus={isCountriesTab}
                   value={renameTrValue}
                   onChange={(e) => setRenameTrValue(e.target.value)}
-                  placeholder="Boş bırakılırsa TR etiketi silinir"
+                  placeholder="Boş bırakılırsa YP TR etiketi silinir"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
