@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { LogOutButtonInline } from "@/components/auth/LogOutButtonInline";
+import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
 import { ProfileAvatarUpload } from "@/components/profile/ProfileAvatar";
 import {
   ResidenceCityPicker,
@@ -260,6 +261,17 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
       >
         {loading ? tCommon("loading") : t("save")}
       </button>
+
+      <section className={sectionClass}>
+        <h2 className="text-sm font-semibold text-white">{t("languageTitle")}</h2>
+        <p className="mt-1 text-xs text-slate-500">{t("languageHint")}</p>
+        <div className="mt-4">
+          <LocaleSwitcher
+            variant="settings"
+            label={t("languageTitle")}
+          />
+        </div>
+      </section>
 
       <div className="flex flex-col gap-2">
         <button

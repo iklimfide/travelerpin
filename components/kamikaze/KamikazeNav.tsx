@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/kamikaze/users", label: "Kullanıcılar" },
   { href: "/kamikaze/stats", label: "İstatistikler" },
   { href: "/kamikaze/notifications", label: "Bildirim gönder" },
+  { href: "/kamikaze/i18n", label: "EN–TR" },
 ] as const;
 
 export function KamikazeNav() {

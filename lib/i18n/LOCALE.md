@@ -14,5 +14,7 @@ EN is the default (no URL prefix). Optional locales use `/tr`, `/es`, …
 
 ## Routing
 
-Defined in `lib/i18n/routing.ts` (`localePrefix: "as-needed"`, `localeDetection: false`).
+Defined in `lib/i18n/routing.ts` (`localePrefix: "as-needed"`, `localeDetection: true`).
+First visit follows `Accept-Language` (TR browser → `/tr`); later visits use the `NEXT_LOCALE` cookie / URL.
 Navigation helpers: `lib/i18n/navigation.ts` (`Link`, `useRouter`, …).
+Top-bar dropdown: `LocaleSwitcher` `variant="topBar"` in `DashboardBottomBar`.

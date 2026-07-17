@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { Link } from "@/lib/i18n/navigation";
 import { usePathname } from "next/navigation";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
+import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { NotificationsContext } from "@/components/notifications/NotificationsProvider";
 import { useAppMessages } from "@/lib/i18n/client-messages";
@@ -175,7 +176,7 @@ export function BottomBarProfileNav({
   onWishlistClick,
   onMyParksClick,
 }: BottomBarProfileNavProps) {
-  const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
+  const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages, settings: settingsMessages } = useAppMessages();
   const pathname = usePathname();
   const notifications = useContext(NotificationsContext);
   const menuId = useId();
@@ -195,7 +196,13 @@ export function BottomBarProfileNav({
       isKamikazeMasterProfile({ id: ownProfile.id, username: ownProfile.username })
   );
   const ypActive = pathname.startsWith("/kamikaze");
-
+  const localeMenuSwitcher = (
+    <LocaleSwitcher
+      variant="menu"
+      label={settingsMessages.languageTitle}
+      onSwitch={() => setOpen(false)}
+    />
+  );
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -429,6 +436,7 @@ export function BottomBarProfileNav({
                     </span>
                     {dashboardNavMessages.settings}
                   </Link>
+                  {localeMenuSwitcher}
                   <div className="dashboard-profile-menu__divider" role="presentation" />
                   <button
                     type="button"
@@ -577,6 +585,7 @@ export function BottomBarProfileNav({
                     </span>
                     {dashboardNavMessages.settings}
                   </Link>
+                  {localeMenuSwitcher}
                 </>
               )}
             </div>

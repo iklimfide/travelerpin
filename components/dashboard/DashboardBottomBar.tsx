@@ -9,6 +9,7 @@ import { useNextRouteDestination } from "@/components/add/NextRouteDestinationPr
 import { useWishlistDestination } from "@/components/add/WishlistDestinationProvider";
 import { BottomBarProfileNav } from "@/components/dashboard/BottomBarProfileNav";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
+import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
 import { PublicGuestAuthLinks } from "@/components/nav/PublicGuestAuthLinks";
 import { NotificationsNavLink } from "@/components/notifications/NotificationsNavLink";
 import { useIsDesktopDashboardNav } from "@/lib/hooks/useIsDesktopDashboardNav";
@@ -99,7 +100,11 @@ function NavLink({
 }
 
 export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
-  const { common: commonMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
+  const {
+    common: commonMessages,
+    dashboardNav: dashboardNavMessages,
+    footer: footerMessages,
+  } = useAppMessages();
   const pathname = usePathname();
   const router = useRouter();
   const { open: openAddDestination } = useAddDestination();
@@ -117,6 +122,9 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
   const brandHref = username ? profilePath(username) : "/";
   const loginHref = loginHrefFor(currentPath);
   const registerHref = registerHrefFor(currentPath);
+  const localeSwitcher = (
+    <LocaleSwitcher variant="topBar" label={footerMessages.language} />
+  );
 
   useLayoutEffect(() => {
     setMounted(true);
@@ -202,6 +210,7 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
               <span className="dashboard-top-bar__brand-label">TravelerPin.com</span>
             </Link>
             <div className="dashboard-top-bar__actions">
+              {localeSwitcher}
               {isGuest ? (
                 <PublicGuestAuthLinks
                   loginHref={loginHref}
