@@ -4010,7 +4010,6 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 }
 
 .dashboard-shell--guest > main,
-.dashboard-shell--guest .city-page,
 .dashboard-shell--guest .profile-page:not(.profile-page--embedded) {
   padding-top: var(--dashboard-top-bar-height);
   padding-bottom: 0;
@@ -5752,7 +5751,6 @@ a.save-destination-modal__name-link:hover {
   }
 
   .dashboard-shell > main,
-  .dashboard-shell .city-page,
   .dashboard-shell .profile-page:not(.profile-page--embedded) {
     padding-top: var(--dashboard-top-bar-height);
     padding-bottom: 0;

@@ -5,12 +5,19 @@ import type { CityHub } from "@/lib/data/city-hubs";
 
 type CityPageNavProps = {
   hub: CityHub;
+  displayName: string;
+  countryDisplayName: string;
   labels: {
     home: string;
   };
 };
 
-export function CityPageNav({ hub, labels }: CityPageNavProps) {
+export function CityPageNav({
+  hub,
+  displayName,
+  countryDisplayName,
+  labels,
+}: CityPageNavProps) {
   const flagUrl = countryCodeToFlagUrl(hub.countryCode);
 
   return (
@@ -26,10 +33,10 @@ export function CityPageNav({ hub, labels }: CityPageNavProps) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={flagUrl} alt="" width={18} height={18} className="city-page__nav-flag" />
         ) : null}
-        <span>{hub.countryName}</span>
+        <span>{countryDisplayName}</span>
       </Link>
       <span className="city-page__nav-badge city-page__nav-badge--active" aria-current="page">
-        {hub.name}
+        {displayName}
       </span>
     </nav>
   );

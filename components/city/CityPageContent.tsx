@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { getLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import type { HubPinStatItem } from "@/components/hub/HubPagePinCount";
 import { CityPageNav } from "@/components/city/CityPageNav";
@@ -7,8 +8,11 @@ import { CityPagePinStatsBlock } from "@/components/city/CityPagePinStatsBlock";
 import { HubPageListingSections } from "@/components/hub/HubPageListingSections";
 import { HubPageTopBar } from "@/components/hub/HubPageTopBar";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { getCountryName } from "@/lib/data/countries";
 import { ensureParkHubFromTouristPark } from "@/lib/data/park-hubs";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import { countryPath, parkPath } from "@/lib/seo/site";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
@@ -66,7 +70,7 @@ type CityPageContentProps = {
   };
 };
 
-export function CityPageContent({
+export async function CityPageContent({
   hub,
   touristCity,
   parks,
@@ -80,6 +84,10 @@ export function CityPageContent({
   pinCountItems = [],
   labels,
 }: CityPageContentProps) {
+  const localeRaw = await getLocale();
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
+  const displayName = getLocalizedCityName(hub.countryCode, hub.name, locale);
+  const countryDisplayName = getCountryName(hub.countryCode, locale);
   const heroUrl = DEFAULT_CITY_HERO_IMAGE;
   const featuredPin = memoryPins[0] ?? null;
 
@@ -89,7 +97,7 @@ export function CityPageContent({
     label: labels.country,
     value: (
       <Link href={countryPath(hub.countrySlug)} className="city-page__link">
-        {hub.countryName}
+        {countryDisplayName}
       </Link>
     ),
   });
@@ -118,7 +126,12 @@ export function CityPageContent({
   return (
     <div className="city-page">
       <HubPageTopBar>
-        <CityPageNav hub={hub} labels={labels} />
+        <CityPageNav
+          hub={hub}
+          displayName={displayName}
+          countryDisplayName={countryDisplayName}
+          labels={labels}
+        />
       </HubPageTopBar>
 
       <div className="city-page__container">
@@ -129,7 +142,7 @@ export function CityPageContent({
           </div>
 
           <div>
-            <h1 className="city-page__title">{hub.name}</h1>
+            <h1 className="city-page__title">{displayName}</h1>
             <CityPageActions
               cityName={hub.name}
               countryCode={hub.countryCode}
@@ -156,7 +169,7 @@ export function CityPageContent({
         ) : null}
 
         <HubPageListingSections
-          hubName={hub.name}
+          hubName={displayName}
           travelers={travelers}
           wishlistTravelers={wishlistTravelers}
           memoryPins={memoryPins}

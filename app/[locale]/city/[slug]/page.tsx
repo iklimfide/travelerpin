@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { CityPageContent } from "@/components/city/CityPageContent";
 import { listFeaturedCityHubSlugs } from "@/lib/data/city-hubs";
 import { TOURIST_CITIES } from "@/lib/data/tourist-cities";
@@ -23,6 +23,8 @@ import {
 import { getCachedRecentCityPinsWithPreviews } from "@/lib/supabase/city-travelers-cache";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import { cityPath, cityUrl, buildCityPageTitle, DEFAULT_DESCRIPTION } from "@/lib/seo/site";
 import {
   PIN_MAP_OG_DESCRIPTION,
@@ -56,7 +58,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!context) return { title: "City not found" };
 
   const { hub } = context;
-  const title = buildCityPageTitle(hub.name);
+  const localeRaw = await getLocale();
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
+  const displayName = getLocalizedCityName(hub.countryCode, hub.name, locale);
+  const title = buildCityPageTitle(displayName);
 
   return {
     title,
@@ -108,6 +113,9 @@ export default async function CityHubPage({ params }: PageProps) {
   }
 
   const { hub, touristCity, parks: allParks } = context;
+  const localeRaw = await getLocale();
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
+  const displayName = getLocalizedCityName(hub.countryCode, hub.name, locale);
   const returnPath = cityPath(slug);
   const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;
 
@@ -179,18 +187,18 @@ export default async function CityHubPage({ params }: PageProps) {
     wishlistRemoved: t("wishlistRemoved"),
     alreadyOnMap: t("alreadyOnMap"),
     country: t("country"),
-    parksInCity: t("parksInCity", { city: hub.name }),
+    parksInCity: t("parksInCity", { city: displayName }),
     viewTravelMap: t("viewTravelMap"),
     viewPin: t("viewPin"),
     close: t("closePin"),
     instagramPost: t("instagramPost"),
     editYourPin: t("editYourPin"),
     editYourPinSaved: t("editYourPinSaved"),
-    recentTravelers: t("recentTravelers", { city: hub.name }),
-    noTravelersYet: t("noTravelersYet", { city: hub.name }),
-    wantTravelers: t("wantTravelers", { city: hub.name }),
+    recentTravelers: t("recentTravelers", { city: displayName }),
+    noTravelersYet: t("noTravelersYet", { city: displayName }),
+    wantTravelers: t("wantTravelers", { city: displayName }),
     noWantTravelersYet: t("noWantTravelersYet"),
-    pinCity: t("pinCity", { city: hub.name }),
+    pinCity: t("pinCity", { city: displayName }),
     photosHeading: t("photosHeading"),
     instagramHeading: t("instagramHeading"),
     noInstagramPostsYet: t("noInstagramPostsYet"),

@@ -125,6 +125,11 @@
   box-sizing: border-box;
 }
 
+/* Sit the hero closer under the hub chrome bar (was a large empty band). */
+.city-page__top-bar + .city-page__container {
+  padding-top: 16px;
+}
+
 .city-page__hero {
   display: grid;
   align-items: flex-start;
@@ -1138,6 +1143,10 @@ html.dark .city-page__memory-lightbox-note {
 
   .city-page__container {
     padding: 24px 16px;
+  }
+
+  .city-page__top-bar + .city-page__container {
+    padding-top: 12px;
   }
 
   .city-page__hero {

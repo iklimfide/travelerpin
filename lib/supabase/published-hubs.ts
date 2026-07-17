@@ -14,6 +14,21 @@ import type { ParkType } from "@/types/database";
 
 export type HubKind = "city" | "park";
 
+function isBenignSupabaseLookupError(error: {
+  code?: string;
+  message?: string;
+}): boolean {
+  // Table may not exist until migration 034 is applied.
+  if (error.code === "42P01" || error.code === "PGRST205") return true;
+  const message = (error.message ?? "").toLowerCase();
+  // Shared 4s fetch timeout — treat as miss, not a hard failure.
+  return (
+    message.includes("timeout") ||
+    message.includes("aborted") ||
+    message.includes("abort")
+  );
+}
+
 export type PublishedHubRow = {
   hub_kind: HubKind;
   slug: string;
@@ -147,8 +162,7 @@ export async function findPublishedHubSlugRedirect(
     .maybeSingle();
 
   if (error) {
-    // Table may not exist until migration 034 is applied.
-    if (error.code !== "42P01" && error.code !== "PGRST205") {
+    if (!isBenignSupabaseLookupError(error)) {
       console.error("published_hub_slug_redirects lookup failed:", error.message);
     }
     return null;
