@@ -4,10 +4,11 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import {
   activeLocales,
+  defaultLocale,
   getLocaleLabel,
   type Locale,
 } from "@/lib/i18n/config";
-import { usePathname, useRouter } from "@/lib/i18n/navigation";
+import { usePathname } from "@/lib/i18n/navigation";
 import { stripLocalePrefix } from "@/lib/i18n/pathname";
 
 type Props = {
@@ -24,6 +25,23 @@ type Props = {
 
 function localeCode(code: Locale): string {
   return code.toUpperCase();
+}
+
+/** Build a locale-prefixed URL (EN has no prefix). */
+function hrefForLocale(pathname: string, code: Locale): string {
+  const path = stripLocalePrefix(pathname);
+  if (code === defaultLocale) return path;
+  return path === "/" ? `/${code}` : `/${code}${path}`;
+}
+
+/**
+ * Soft `router.replace(..., { locale })` is unreliable here: Next.js
+ * `experimental.staleTimes` (24h) can keep the previous locale RSC shell and
+ * never change the URL. Full navigation always loads the correct `[locale]` tree.
+ */
+function navigateToLocale(pathname: string, code: Locale) {
+  document.cookie = `NEXT_LOCALE=${code}; path=/; max-age=31536000; SameSite=lax`;
+  window.location.assign(hrefForLocale(pathname, code));
 }
 
 function LanguageIcon({ size = 20 }: { size?: number }) {
@@ -57,7 +75,6 @@ export function LocaleSwitcher({
 }: Props) {
   const locale = useLocale() as Locale;
   const pathname = usePathname();
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
@@ -93,9 +110,7 @@ export function LocaleSwitcher({
     }
     setOpen(false);
     onSwitch?.();
-    // Strip any existing locale prefix before re-prefixing for the target locale.
-    // Otherwise a stale `/tr/...` pathname becomes `/tr/tr/...`.
-    router.replace(stripLocalePrefix(pathname), { locale: code });
+    navigateToLocale(pathname, code);
   }
 
   if (variant === "topBar") {
