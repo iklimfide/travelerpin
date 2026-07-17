@@ -3,6 +3,7 @@
 import { Link } from "@/lib/i18n/navigation";
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { ProfileAllDestinationsListModal } from "@/components/profile/ProfileAllDestinationsListModal";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
 import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
@@ -15,6 +16,8 @@ import { ProfileWishlistDestinationCard } from "@/components/profile/ProfileWish
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
 import { commonMessages, countryMessages, formatMessage, modalMessages, profileDestinationCityCountLabel, profileDestinationParkCountLabel, profileMessages, saveDestinationMessages, useAppMessages } from "@/lib/i18n/client-messages";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
 import { profilePath } from "@/lib/seo/site";
 import {
   countryHasMappedPlaces,
@@ -169,6 +172,8 @@ export function ProfileAllDestinationsView({
 }: ProfileAllDestinationsViewProps) {
   const { common: commonMessages, country: countryMessages, profile: profileMessages, modal: modalMessages, saveDestination: saveDestinationMessages } = useAppMessages();
   const router = useRouter();
+  const localeRaw = useLocale();
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
   const modal = useModal();
   const toast = useToast();
   const [editingCityId, setEditingCityId] = useState<string | null>(null);
@@ -177,7 +182,9 @@ export function ProfileAllDestinationsView({
   const [activeTab, setActiveTab] = useState<ProfileAllTab>("countries");
   const [openModalTab, setOpenModalTab] = useState<ProfileAllTab | null>(null);
 
-  const title = formatMessage(profileMessages.allDestinationsTitle, { name: displayName });
+  const title = formatMessage(profileMessages.allDestinationsTitle, {
+    name: mapTitleOwnerName(displayName, locale),
+  });
 
   const badgeLabels: Record<NonNullable<ProfileTrip["badge"]>, string> = {
     recent: profileMessages.tripBadgeRecent,

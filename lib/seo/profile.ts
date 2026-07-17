@@ -14,9 +14,9 @@ export type ProfileShareCopy = {
 
 const EN_SHARE_COPY: ProfileShareCopy = {
   captionOwn:
-    'I can answer "How many countries have you visited?" with a single link.',
+    'I can answer "How many countries have you visited?" with a single link. Create your map too — answer with a single link.',
   captionGuest:
-    '{name} can answer "How many countries have you visited?" with a single link.',
+    '{name} can answer "How many countries have you visited?" with a single link. Create your map too — answer with a single link.',
   captionDescription: PROFILE_SHARE_DESCRIPTION,
 };
 

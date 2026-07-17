@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileAvatarLightbox } from "@/components/profile/ProfileAvatarLightbox";
@@ -10,6 +11,8 @@ import { ProfileStatCounters } from "@/components/profile/ProfileStatCounters";
 import { ProfileWorldProgress } from "@/components/profile/ProfileWorldProgress";
 import { TravelerBadge } from "@/components/profile/TravelerBadge";
 import { useTranslateProfile } from "@/lib/i18n/client-messages";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
 import { resolvePublicMediaImageUrl } from "@/lib/storage/hub-photo-url";
 import { profileAllPath } from "@/lib/seo/site";
 import type { TravelStats } from "@/types/database";
@@ -64,6 +67,8 @@ export function ProfileIdentityCard({
   isLoggedIn = false,
 }: ProfileIdentityCardProps) {
   const t = useTranslateProfile();
+  const localeRaw = useLocale();
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
   const allHref = profileAllPath(username);
   const [avatarLightboxOpen, setAvatarLightboxOpen] = useState(false);
   const avatarImageSrc = resolvePublicMediaImageUrl(avatarUrl) ?? avatarUrl;
@@ -171,7 +176,7 @@ export function ProfileIdentityCard({
       <Link
         href={allHref}
         className="profile-metrics profile-metrics-link"
-        aria-label={t("allDestinationsTitle", { name: displayName })}
+        aria-label={t("allDestinationsTitle", { name: mapTitleOwnerName(displayName, locale) })}
       >
         <ProfileWorldProgress countryCount={countryCount} />
 

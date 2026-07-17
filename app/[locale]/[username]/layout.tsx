@@ -4,6 +4,7 @@ import { BRAND } from "@/lib/constants";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { buildProfileDescription } from "@/lib/seo/profile";
+import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
 import {
   staticOpenGraphImages,
   staticTwitterImages,
@@ -33,7 +34,8 @@ export async function generateMetadata({ params }: LayoutProps): Promise<Metadat
 
   const { profile, stats } = data;
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
-  const title = tShare("pageTitle", { name: displayName });
+  const mapOwnerName = mapTitleOwnerName(displayName, locale);
+  const title = tShare("pageTitle", { name: mapOwnerName });
   const shareTitle = tShare("ogTitle", { name: displayName });
   const ogDescription = tShare("ogDescription");
   const description = buildProfileDescription(displayName, stats, {

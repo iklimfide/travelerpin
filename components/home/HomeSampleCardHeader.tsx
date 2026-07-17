@@ -1,7 +1,9 @@
 import Image from "next/image";
 import { Link } from "@/lib/i18n/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { profilePath } from "@/lib/seo/site";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
 import type { TravelStats } from "@/types/database";
 
 type HomeSampleCardHeaderProps = {
@@ -30,10 +32,16 @@ export async function HomeSampleCardHeader({
   stats,
   isDemo = true,
 }: HomeSampleCardHeaderProps) {
-  const t = await getTranslations("common");
-  const tHome = await getTranslations("home");
+  const [t, tHome, localeRaw] = await Promise.all([
+    getTranslations("common"),
+    getTranslations("home"),
+    getLocale(),
+  ]);
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
 
-  const title = isDemo ? tHome("demoMapTitle", { name }) : `@${username}`;
+  const title = isDemo
+    ? tHome("demoMapTitle", { name: mapTitleOwnerName(name, locale) })
+    : `@${username}`;
 
   const parkTotal = stats.nationalParks + stats.themeParks;
   const showParks = parkTotal > 0;

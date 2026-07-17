@@ -56,8 +56,8 @@
     "pin_batch_title": "Pinned destinations",
     "pin_batch_back": "Back",
     "pin_batch_view_profile": "View profile",
-    "system": "{message}",
-    "system_with_title": "{title}: {message}"
+    "system": "{name}: {message}",
+    "system_with_title": "{name}: {title} — {message}"
   },
   "saveDestination": {
     "title": "Pin a destination",
@@ -384,8 +384,8 @@
     "travelDiaryTitle": "{name}'s Travel Map",
     "travelDiaryTitleVisitor": "{name}'s Travel Map",
     "travelDiaryTitleVisitorSuffix": "'s Travel Map",
-    "travelDiarySubtitle": "I can answer \"How many countries have you visited?\" with a single link. You can too.",
-    "travelDiarySubtitleVisitor": "{name} can answer \"How many countries have you visited?\" with a single link. You can too.",
+    "travelDiarySubtitle": "I can answer \"How many countries have you visited?\" with a single link. Create your map too — answer with a single link.",
+    "travelDiarySubtitleVisitor": "{name} can answer \"How many countries have you visited?\" with a single link. Create your map too — answer with a single link.",
     "worldExplored": "World explored",
     "worldExploredCaption": "{pinned} of {total} countries pinned",
     "mapExploredBadge": "explored",
@@ -748,8 +748,8 @@
     "copied": "Link copied",
     "copyFailed": "Could not copy the link.",
     "shareTitle": "{name}'s travel map",
-    "captionOwn": "I can answer \"How many countries have you visited?\" with a single link.",
-    "captionGuest": "{name} can answer \"How many countries have you visited?\" with a single link.",
+    "captionOwn": "I can answer \"How many countries have you visited?\" with a single link. Create your map too — answer with a single link.",
+    "captionGuest": "{name} can answer \"How many countries have you visited?\" with a single link. Create your map too — answer with a single link.",
     "captionDescription": "Create your own travel map on TravelerPin and share your journey with just one link.",
     "ogTitle": "Traveler's Pin Map: {name}",
     "ogDescription": "Answer \"How many countries have been explored?\" with a single link. Share a global map of shared adventures.",

@@ -7,7 +7,8 @@ import { buildProfileAllDestinations } from "@/lib/utils/profile-all-destination
 import { parseNextRoute } from "@/lib/utils/next-route";
 import { DEFAULT_DESCRIPTION, profileAllPath } from "@/lib/seo/site";
 import { loadPublicProfilePage } from "@/lib/supabase/profile-page-data";
-import { isLocale } from "@/lib/i18n/config";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
 
 type PageProps = {
   params: Promise<{ username: string }>;
@@ -29,10 +30,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     data.profile.username
   );
   const localeRaw = await getLocale();
-  const locale = isLocale(localeRaw) ? localeRaw : "en";
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
 
   return {
-    title: tShare("pageTitle", { name: displayName }),
+    title: tShare("pageTitle", { name: mapTitleOwnerName(displayName, locale) }),
     description: DEFAULT_DESCRIPTION,
     alternates: {
       canonical: profileAllPath(data.profile.username, locale),

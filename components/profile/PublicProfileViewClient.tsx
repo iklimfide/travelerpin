@@ -23,6 +23,7 @@ import { resolveResidenceCityHref } from "@/lib/utils/residence-city";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { parseNextRoute } from "@/lib/utils/next-route";
 import { useTranslateCommon, useTranslateHome, useTranslateProfile } from "@/lib/i18n/client-messages";
+import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
 import { profileAllPath, profilePath } from "@/lib/seo/site";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
 
@@ -63,6 +64,7 @@ export function PublicProfileViewClient({
   } = data;
 
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
+  const mapOwnerName = mapTitleOwnerName(displayName, locale);
   const wishlistPublic = profile.wishlist_public;
   const visibleWishlistCountries =
     isOwnProfile || wishlistPublic ? wishlistCountries : [];
@@ -97,7 +99,7 @@ export function PublicProfileViewClient({
   const demoProfileHref =
     profilePageHref ?? (embedded && isDemoProfile ? profilePath(profile.username) : undefined);
   const residenceHref = resolveResidenceCityHref(profile.residence);
-  const heroTitle = t("travelDiaryTitle", { name: displayName });
+  const heroTitle = t("travelDiaryTitle", { name: mapOwnerName });
 
   const profileBody = (
     <div className={`profile-page${embedded ? " profile-page--embedded" : ""}`}>

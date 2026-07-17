@@ -27,6 +27,8 @@ import { buildProfileMediaPins } from "@/lib/utils/profile-media";
 import { resolveResidenceCityHref } from "@/lib/utils/residence-city";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { parseNextRoute } from "@/lib/utils/next-route";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
 import { profileAllPath, profilePath } from "@/lib/seo/site";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
 
@@ -74,6 +76,8 @@ export async function PublicProfileView({
   } = data;
 
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
+  const localeCode: Locale = isLocale(locale) ? locale : "en";
+  const mapOwnerName = mapTitleOwnerName(displayName, localeCode);
   const wishlistPublic = profile.wishlist_public;
   const visibleWishlistCountries =
     isOwnProfile || wishlistPublic ? wishlistCountries : [];
@@ -107,7 +111,7 @@ export async function PublicProfileView({
   );
   const demoProfileHref = profilePageHref ?? (embedded && isDemoProfile ? profilePath(profile.username) : undefined);
   const residenceHref = resolveResidenceCityHref(profile.residence);
-  const heroTitle = t("travelDiaryTitle", { name: displayName });
+  const heroTitle = t("travelDiaryTitle", { name: mapOwnerName });
   const badgeTier = getTravelerBadgeTier(stats.countries);
   const badgeLabel = badgeTier ? tBadge(badgeTier) : null;
   const badgeShellClassName = badgeTier ? BADGE_TIER_THEMES[badgeTier].shell : "";

@@ -14,6 +14,7 @@ import { formatMessage, notificationMessages, shareMessages, useAppMessages } fr
 import {
   notificationActorProfileHref,
   notificationTargetHref,
+  SYSTEM_NOTIFICATION_SENDER,
   type NotificationPayload,
 } from "@/lib/supabase/notifications";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
@@ -28,7 +29,7 @@ function resolveActorName(
   payload: NotificationPayload
 ): string {
   if (notification.type === "system") {
-    return payload.actorDisplayName ?? "TravelerPin.com";
+    return payload.actorDisplayName ?? SYSTEM_NOTIFICATION_SENDER.displayName;
   }
   return (
     payload.actorDisplayName ??
@@ -76,11 +77,16 @@ function formatGroupBody(group: NotificationGroup): string {
         typeof payload.title === "string" && payload.title.trim()
           ? payload.title.trim()
           : "";
-      if (title && message) {
-        return formatMessage(notificationMessages.system_with_title, { title, message });
+      if (title && message && title !== message) {
+        return formatMessage(notificationMessages.system_with_title, {
+          name,
+          title,
+          message,
+        });
       }
       return formatMessage(notificationMessages.system, {
-        message: message || title || name,
+        name,
+        message: message || title || "",
       });
     }
     default:
@@ -109,6 +115,9 @@ function resolveActorAvatar(
   if (typeof payload.actorAvatarUrl === "string" && payload.actorAvatarUrl) {
     return payload.actorAvatarUrl;
   }
+  if (notification.type === "system") {
+    return SYSTEM_NOTIFICATION_SENDER.avatarUrl;
+  }
   return notification.actorProfile?.avatar_url ?? null;
 }
 
@@ -129,7 +138,7 @@ function resolveActorDisplayName(
   payload: NotificationPayload
 ): string {
   if (notification.type === "system") {
-    return payload.actorDisplayName ?? "TravelerPin.com";
+    return payload.actorDisplayName ?? SYSTEM_NOTIFICATION_SENDER.displayName;
   }
   if (payload.actorDisplayName) return payload.actorDisplayName;
   if (notification.actorProfile) {
