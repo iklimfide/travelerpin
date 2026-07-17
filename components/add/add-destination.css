@@ -429,6 +429,47 @@ button.add-destination-region__header.is-expanded .add-destination-region__count
   padding: 12px;
 }
 
+.add-destination-search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.add-destination-search-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.add-destination-search-section__title {
+  margin: 0;
+  padding: 0 2px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.add-destination-search-city-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.add-destination-search-city__flag {
+  flex-shrink: 0;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.add-destination-search-city__country {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
 .add-destination-country-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

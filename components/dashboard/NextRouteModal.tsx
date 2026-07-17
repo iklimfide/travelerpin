@@ -310,13 +310,12 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
       setStops(saved);
       setSavedStops(saved);
       notifyNextRouteChanged(saved);
-      onClose();
     } catch {
       setSaveError(nextRouteMessages.saveFailed);
     } finally {
       setSaving(false);
     }
-  }, [hasUnsavedChanges, onClose, saving, stops]);
+  }, [hasUnsavedChanges, saving, stops]);
 
   const addToRoute = useCallback(
     (result: SearchResult) => {

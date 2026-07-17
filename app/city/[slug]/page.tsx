@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { CityPageContent } from "@/components/city/CityPageContent";
 import { listFeaturedCityHubSlugs } from "@/lib/data/city-hubs";
+import { TOURIST_CITIES } from "@/lib/data/tourist-cities";
 import { loadCityPageUserState } from "@/lib/supabase/city-visitor-state";
 import { loadPublicCityHubContext } from "@/lib/supabase/city-hub-access";
 import { loadPublishedParkKeys, touristParkIsPubliclyLinked } from "@/lib/supabase/park-hub-access";
+import { findPublishedHubSlugRedirect } from "@/lib/supabase/published-hubs";
 import { getDemoPinsForCityHub, mergeDemoHubPins } from "@/lib/data/demo-hub-pins";
 import { getCachedCityPinnerCount } from "@/lib/supabase/city-travelers";
 import {
@@ -28,6 +30,8 @@ import {
   staticOpenGraphImages,
   staticTwitterImages,
 } from "@/lib/seo/og";
+import { buildLegacyStrippedSlug } from "@/lib/utils/ascii-slug";
+import { buildCitySlug } from "@/lib/utils/city-slug";
 import { sanitizeCitySlug } from "@/lib/utils/sanitize-city-slug";
 import "../city-page.css";
 
@@ -79,8 +83,29 @@ export default async function CityHubPage({ params }: PageProps) {
   if (!slug) notFound();
 
   const supabase = await createClient();
+
+  const redirectedSlug = await findPublishedHubSlugRedirect(supabase, "city", slug);
+  if (redirectedSlug) {
+    permanentRedirect(cityPath(redirectedSlug));
+  }
+
   const context = await loadPublicCityHubContext(supabase, slug);
-  if (!context) notFound();
+  if (!context) {
+    const legacyTourist = TOURIST_CITIES.find(
+      (city) =>
+        buildLegacyStrippedSlug(city.name) === slug && buildCitySlug(city.name) !== slug
+    );
+    if (legacyTourist) {
+      permanentRedirect(cityPath(buildCitySlug(legacyTourist.name)));
+    }
+    notFound();
+  }
+
+  // Prefer ASCII-folded slug (dusseldorf) over legacy stripped ones (d-sseldorf).
+  const canonicalSlug = buildCitySlug(context.hub.name);
+  if (canonicalSlug && canonicalSlug !== slug) {
+    permanentRedirect(cityPath(canonicalSlug));
+  }
 
   const { hub, touristCity, parks: allParks } = context;
   const returnPath = cityPath(slug);

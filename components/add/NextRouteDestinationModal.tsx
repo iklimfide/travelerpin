@@ -226,14 +226,12 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
       if (result.savedCount === 0) {
         setPendingCountryCodes(new Set());
         setPendingCityKeys(new Set());
-        setStep({ kind: "countries" });
         return;
       }
 
       applyRouteStops(result.stops);
       setPendingCountryCodes(new Set());
       setPendingCityKeys(new Set());
-      setStep({ kind: "countries" });
     } catch {
       setSaveError(nextRouteDestinationMessages.saveFailed);
     } finally {

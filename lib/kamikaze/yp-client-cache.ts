@@ -76,8 +76,8 @@ export function ypCacheInvalidate(prefix?: string): void {
 
 export const YP_CACHE_KEYS = {
   // Bump catalog version when list row shape / pagination changes.
-  catalog: (kind: string, country: string, q: string) =>
-    `catalog:v3:${kind}:${country}:${q.trim().toLowerCase()}`,
+  catalog: (kind: string, country: string, q: string, popularFilter = "") =>
+    `catalog:v4:${kind}:${country}:${q.trim().toLowerCase()}:${popularFilter}`,
   catalogAdditions: (kind: string) => `catalog:additions:v3:${kind}`,
   users: (query: string) => `users:${query.trim().toLowerCase()}`,
   stats: "stats",

@@ -1,9 +1,5 @@
+import { buildAsciiSlug } from "@/lib/utils/ascii-slug";
+
 export function buildCountrySlug(countryName: string): string {
-  return countryName
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 50);
+  return buildAsciiSlug(countryName, 50);
 }

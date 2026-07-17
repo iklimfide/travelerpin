@@ -172,12 +172,9 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
       const travel = (event as CustomEvent<{ data: TravelStateData }>).detail?.data;
       if (!travel) return;
 
-      setData((prev) => {
-        if (!prev) return prev;
-        const next = applyTravelStateToProfile(prev, travel);
-        writeProfileCache(normalized, next);
-        return next;
-      });
+      // Cache is already synced by notifyTravelStateUpdated. Do not writeProfileCache
+      // inside setState — it notifies useSyncExternalStore and re-enters ProfileRoute.
+      setData((prev) => (prev ? applyTravelStateToProfile(prev, travel) : prev));
     }
 
     window.addEventListener(PROFILE_DATA_STALE_EVENT, onProfileStale);

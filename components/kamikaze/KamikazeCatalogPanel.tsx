@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useModal } from "@/components/ui/ModalProvider";
-import { COUNTRY_LIST } from "@/lib/data/countries";
+import { YpCountrySelect } from "@/components/kamikaze/YpCountrySelect";
 import { YP_CACHE_KEYS, ypCacheGet, ypCacheInvalidate, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
 import { citiesAreSame } from "@/lib/utils/city-aliases";
 import { PARK_TYPES, type ParkType } from "@/types/database";
 
 type Kind = "city" | "park";
 type CatalogTab = "cities" | "parks" | "add-city" | "add-park";
+type PopularFilter = "" | "popular" | "not_popular";
 
 type CatalogResult = {
   id?: string;
@@ -40,17 +41,12 @@ const ADD_CITY_SEARCH_DEBOUNCE_MS = 300;
 const ADD_CITY_MIN_QUERY = 2;
 const CATALOG_PAGE_SIZE = 80;
 
-/** TR first, then the rest in alphabetical order. */
-const YP_COUNTRY_LIST = [
-  ...COUNTRY_LIST.filter((c) => c.code === "TR"),
-  ...COUNTRY_LIST.filter((c) => c.code !== "TR"),
-];
-
 export function KamikazeCatalogPanel() {
   const modal = useModal();
   const [tab, setTab] = useState<CatalogTab>("cities");
   const [country, setCountry] = useState("");
   const [q, setQ] = useState("");
+  const [popularFilter, setPopularFilter] = useState<PopularFilter>("");
   const [results, setResults] = useState<CatalogResult[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [nextOffset, setNextOffset] = useState(0);
@@ -124,7 +120,7 @@ export function KamikazeCatalogPanel() {
       options?: { force?: boolean; offset?: number }
     ) => {
       if (!isManageTab) return;
-      const cacheKey = YP_CACHE_KEYS.catalog(kind, country, q);
+      const cacheKey = YP_CACHE_KEYS.catalog(kind, country, q, popularFilter);
       const offset = options?.offset ?? 0;
 
       if (mode === "replace" && !options?.force) {
@@ -152,6 +148,7 @@ export function KamikazeCatalogPanel() {
         });
         if (country) params.set("country", country);
         if (q.trim()) params.set("q", q.trim());
+        if (kind === "city" && popularFilter) params.set("popularFilter", popularFilter);
         const res = await fetch(`/api/kamikaze/catalog?${params}`);
         const data = (await res.json()) as {
           results?: CatalogResult[];
@@ -187,7 +184,7 @@ export function KamikazeCatalogPanel() {
         setLoadingMore(false);
       }
     },
-    [kind, country, q, isManageTab]
+    [kind, country, q, popularFilter, isManageTab]
   );
 
   useEffect(() => {
@@ -282,6 +279,9 @@ export function KamikazeCatalogPanel() {
     setError(null);
     setSelectedKeys(new Set());
     setRenameTarget(null);
+    if (next === "parks" || next === "add-park") {
+      setPopularFilter("");
+    }
   }
 
   async function postAction(body: Record<string, unknown>, busyKey: string) {
@@ -598,18 +598,12 @@ export function KamikazeCatalogPanel() {
                     </div>
                     <div className="yp-field">
                       <label htmlFor="yp-add-country">Ülke</label>
-                      <select
+                      <YpCountrySelect
                         id="yp-add-country"
                         value={formCountry}
-                        onChange={(e) => setFormCountry(e.target.value)}
-                      >
-                        <option value="">Ülke seç</option>
-                        {YP_COUNTRY_LIST.map((c) => (
-                          <option key={c.code} value={c.code}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={setFormCountry}
+                        emptyLabel="Ülke seç"
+                      />
                     </div>
                   </div>
 
@@ -787,19 +781,13 @@ export function KamikazeCatalogPanel() {
                     </div>
                     <div className="yp-field">
                       <label htmlFor="yp-add-country">Ülke</label>
-                      <select
+                      <YpCountrySelect
                         id="yp-add-country"
                         value={formCountry}
-                        onChange={(e) => setFormCountry(e.target.value)}
+                        onChange={setFormCountry}
                         required
-                      >
-                        <option value="">Ülke seç</option>
-                        {YP_COUNTRY_LIST.map((c) => (
-                          <option key={c.code} value={c.code}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
+                        emptyLabel="Ülke seç"
+                      />
                     </div>
                     <div className="yp-field">
                       <label htmlFor="yp-add-type">Park türü</label>
@@ -928,18 +916,13 @@ export function KamikazeCatalogPanel() {
           <div className="yp-toolbar">
             <div className="yp-field">
               <label htmlFor="yp-cat-country">Ülke</label>
-              <select
+              <YpCountrySelect
                 id="yp-cat-country"
                 value={country}
-                onChange={(e) => setCountry(e.target.value)}
-              >
-                <option value="">Tümü</option>
-                {YP_COUNTRY_LIST.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.name} ({c.code})
-                  </option>
-                ))}
-              </select>
+                onChange={setCountry}
+                emptyLabel="Tümü"
+                showCode
+              />
             </div>
             <div className="yp-field" style={{ minWidth: "14rem", flex: 1 }}>
               <label htmlFor="yp-cat-q">Ara</label>
@@ -950,6 +933,20 @@ export function KamikazeCatalogPanel() {
                 placeholder="En az 2 karakter"
               />
             </div>
+            {kind === "city" ? (
+              <div className="yp-field">
+                <label htmlFor="yp-cat-popular">Popüler</label>
+                <select
+                  id="yp-cat-popular"
+                  value={popularFilter}
+                  onChange={(e) => setPopularFilter(e.target.value as PopularFilter)}
+                >
+                  <option value="">Tümü (popüler önce)</option>
+                  <option value="popular">Sadece popüler</option>
+                  <option value="not_popular">Popüler değil</option>
+                </select>
+              </div>
+            ) : null}
             <button
               type="button"
               className="yp-btn"
@@ -1008,9 +1005,11 @@ export function KamikazeCatalogPanel() {
             </div>
             {results.length === 0 ? (
               <div className="yp-empty">
-                {q.length < 2 && !country
-                  ? "Listelemek için ülke seç veya arama yaz."
-                  : "Sonuç yok."}
+                {popularFilter === "popular" && q.length < 2 && !country
+                  ? "Henüz popüler işaretli şehir yok."
+                  : q.length < 2 && !country
+                    ? "Listelemek için ülke seç, arama yaz veya popüler filtresi kullan."
+                    : "Sonuç yok."}
               </div>
             ) : (
               <table className="yp-table">

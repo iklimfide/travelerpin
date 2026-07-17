@@ -537,7 +537,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
 
       setPendingParks(new Map());
       setPendingRemoveParkKeys(new Set());
-      onClose();
+      setSaving(false);
 
       void (async () => {
         try {
@@ -600,7 +600,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
     setPendingCountryCodes(new Set());
     setPendingCities(new Map());
     setPendingRemoveCityKeys(new Set());
-    onClose();
+    setSaving(false);
 
     void (async () => {
       try {
@@ -699,6 +699,12 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
               onToggleCountry={handleToggleCountry}
               onOpenCountry={handleOpenCountry}
               hideCountryCheckbox={isParksMode}
+              enableCitySearch={!isParksMode}
+              visitedCities={visitedCities}
+              pendingCityKeys={pendingCityKeys}
+              pendingRemoveCityKeys={pendingRemoveCityKeys}
+              allowToggleOnMap
+              onToggleCity={handleToggleCity}
               listHint={
                 isParksMode
                   ? addDestinationMessages.parkSaveHint

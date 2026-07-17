@@ -113,6 +113,103 @@
   font-size: 0.9rem;
 }
 
+.yp-country-select {
+  position: relative;
+}
+
+.yp-country-select__trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border: 1px solid var(--yp-border);
+  background: var(--background);
+  color: var(--foreground);
+  border-radius: 0.4rem;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.yp-country-select__trigger:hover {
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.yp-country-select.is-open .yp-country-select__trigger {
+  border-color: color-mix(in srgb, var(--yp-accent) 55%, var(--yp-border));
+}
+
+.yp-country-select__placeholder {
+  color: var(--yp-muted);
+}
+
+.yp-country-select__chevron {
+  flex-shrink: 0;
+  opacity: 0.55;
+  font-size: 0.75rem;
+}
+
+.yp-country-select__popover {
+  border: 1px solid var(--yp-border);
+  border-radius: 0.45rem;
+  background: var(--background);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+}
+
+.yp-country-select__search {
+  border-bottom: 1px solid var(--yp-border);
+  padding: 0.4rem;
+}
+
+.yp-country-select__search input {
+  width: 100%;
+  border: 1px solid var(--yp-border);
+  background: var(--background);
+  color: var(--foreground);
+  border-radius: 0.35rem;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.85rem;
+}
+
+.yp-country-select__list {
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.yp-country-select__option {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  border-radius: 0.3rem;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.yp-country-select__option:hover {
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+
+.yp-country-select__option.is-active {
+  background: color-mix(in srgb, var(--yp-accent) 14%, transparent);
+  font-weight: 600;
+}
+
+.yp-country-select__empty {
+  padding: 0.55rem;
+  font-size: 0.82rem;
+  color: var(--yp-muted);
+}
+
 .yp-btn {
   border: 1px solid var(--yp-border);
   background: var(--background);

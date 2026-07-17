@@ -1,4 +1,4 @@
-import { COUNTRY_LIST, type CountryOption } from "@/lib/data/countries";
+import { COUNTRY_LIST, rankCountriesForSearch, type CountryOption } from "@/lib/data/countries";
 import { isUnMemberCountry } from "@/lib/data/un-member-countries";
 import { getCountryContinent, type ContinentId } from "@/lib/map/continents";
 import {
@@ -69,21 +69,6 @@ export function getAddDestinationCountryList(): CountryOption[] {
   ];
 }
 
-function countrySearchScore(country: CountryOption, query: string): number {
-  const q = query.trim().toLowerCase();
-  if (!q) return 0;
-
-  const code = country.code.toLowerCase();
-  const tokens = country.searchText.split(/\s+/);
-
-  if (code === q) return 1000;
-  if (tokens.includes(q)) return 950;
-  if (country.name.toLowerCase().startsWith(q)) return 900;
-  if (tokens.some((token) => token.startsWith(q))) return 700;
-  if (country.searchText.includes(q)) return 500;
-  return 0;
-}
-
 /** Same rules as region grouping — used to re-open the right continent after Back. */
 export function getAddRegionForCountryCode(countryCode: string): AddRegionId | null {
   const code = countryCode.trim().toUpperCase();
@@ -124,22 +109,10 @@ export function groupCountriesByRegion(): Record<AddRegionId, CountryOption[]> {
 }
 
 export function searchCountriesForAdd(query: string, limit = 60): CountryOption[] {
-  const q = query.trim().toLowerCase();
+  const q = query.trim();
   if (q.length < 2) return [];
 
-  return getAddDestinationCountryList()
-    .map((country) => ({
-      country,
-      score: countrySearchScore(country, q),
-    }))
-    .filter((entry) => entry.score > 0)
-    .sort(
-      (a, b) =>
-        b.score - a.score ||
-        a.country.name.localeCompare(b.country.name, undefined, { sensitivity: "base" })
-    )
-    .slice(0, limit)
-    .map((entry) => entry.country);
+  return rankCountriesForSearch(getAddDestinationCountryList(), q).slice(0, limit);
 }
 
 export function regionCountryCounts(

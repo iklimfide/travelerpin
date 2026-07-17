@@ -108,13 +108,14 @@ export async function findPublishedHubBySlug(
   hubKind: HubKind,
   slug: string
 ): Promise<PublishedHubRow | null> {
+  const normalized = slug.toLowerCase();
   const { data, error } = await supabase
     .from("published_hubs")
     .select(
       "hub_kind, slug, country_code, place_name, country_name, park_type, pinner_count"
     )
     .eq("hub_kind", hubKind)
-    .eq("slug", slug.toLowerCase())
+    .eq("slug", normalized)
     .maybeSingle();
 
   if (error) {
@@ -128,6 +129,32 @@ export async function findPublishedHubBySlug(
     ...(data as Omit<PublishedHubRow, "pinner_count">),
     pinner_count: (data as { pinner_count?: number }).pinner_count ?? 0,
   };
+}
+
+/** Resolve a legacy broken slug (e.g. d-sseldorf) to the canonical hub slug. */
+export async function findPublishedHubSlugRedirect(
+  supabase: SupabaseClient,
+  hubKind: HubKind,
+  fromSlug: string
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("published_hub_slug_redirects")
+    .select("to_slug")
+    .eq("hub_kind", hubKind)
+    .eq("from_slug", fromSlug.toLowerCase())
+    .maybeSingle();
+
+  if (error) {
+    // Table may not exist until migration 034 is applied.
+    if (error.code !== "42P01" && error.code !== "PGRST205") {
+      console.error("published_hub_slug_redirects lookup failed:", error.message);
+    }
+    return null;
+  }
+
+  const toSlug = (data as { to_slug?: string } | null)?.to_slug?.trim().toLowerCase();
+  if (!toSlug || toSlug === fromSlug.toLowerCase()) return null;
+  return toSlug;
 }
 
 function publishedKeysToSet(keys: unknown): Set<string> {

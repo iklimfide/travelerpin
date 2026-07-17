@@ -1,18 +1,10 @@
-const SLUG_PATTERN = /^[a-z0-9-]{1,80}$/;
+import { buildAsciiSlug } from "@/lib/utils/ascii-slug";
 
-function slugifyParkName(parkName: string): string {
-  return parkName
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+const SLUG_PATTERN = /^[a-z0-9-]{1,80}$/;
 
 /** Park URL slug from name only (e.g. Efteling → efteling). */
 export function buildParkSlug(parkName: string, _countryCode?: string): string {
-  return slugifyParkName(parkName);
+  return buildAsciiSlug(parkName, 80);
 }
 
 export function sanitizeParkSlug(raw: string | null | undefined): string | null {

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ParkPageContent } from "@/components/park/ParkPageContent";
 import { listPopularParkHubSlugs } from "@/lib/data/park-hubs";
@@ -24,9 +24,10 @@ import {
 } from "@/lib/supabase/country-pin-count";
 import { countParkPinners, loadParkPageUserState } from "@/lib/supabase/park-visitor-state";
 import { loadPublicParkHubBySlug } from "@/lib/supabase/park-hub-access";
+import { findPublishedHubSlugRedirect } from "@/lib/supabase/published-hubs";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
-import { sanitizeParkSlug } from "@/lib/utils/park-slug";
+import { buildParkSlug, sanitizeParkSlug } from "@/lib/utils/park-slug";
 import "../../city/city-page.css";
 
 type PageProps = {
@@ -76,8 +77,19 @@ export default async function ParkHubPage({ params }: PageProps) {
   if (!slug) notFound();
 
   const supabase = await createClient();
+
+  const redirectedSlug = await findPublishedHubSlugRedirect(supabase, "park", slug);
+  if (redirectedSlug) {
+    permanentRedirect(parkPath(redirectedSlug));
+  }
+
   const hub = await loadPublicParkHubBySlug(supabase, slug);
   if (!hub) notFound();
+
+  const canonicalSlug = buildParkSlug(hub.name);
+  if (canonicalSlug && canonicalSlug !== slug) {
+    permanentRedirect(parkPath(canonicalSlug));
+  }
 
   const returnPath = parkPath(slug);
   const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;

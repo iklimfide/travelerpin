@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
 import { useNextRouteDestination } from "@/components/add/NextRouteDestinationProvider";
 import { ProfileNextRouteSectionSkeleton } from "@/components/skeletons/ProfileNextRouteSectionSkeleton";
@@ -78,19 +78,22 @@ export function ProfileNextRouteSection({
   const { openNextRouteModal } = useDashboardAdd();
   const { open: openNextRouteDestination } = useNextRouteDestination();
   const [stops, setStops] = useState(() => initialResolved.stops);
+  const stopsRef = useRef(initialResolved.stops);
   const [loadingOwnRoute, setLoadingOwnRoute] = useState(
     () => isOwnProfile && !initialResolved.fromCache && initialResolved.stops.length === 0
   );
 
   const applyStops = useCallback((incoming: NextRouteStop[], options?: { replace?: boolean }) => {
     const parsed = parseNextRoute(incoming);
-    setStops((current) => {
-      const next = options?.replace ? parsed : mergeIncomingStops(current, parsed);
-      if (isOwnProfile) {
-        writeOwnNextRouteCache(next);
-      }
-      return next;
-    });
+    const next = options?.replace
+      ? parsed
+      : mergeIncomingStops(stopsRef.current, parsed);
+    stopsRef.current = next;
+    setStops(next);
+    // Outside setState updater: cache notify would update ProfileRoute mid-render.
+    if (isOwnProfile) {
+      writeOwnNextRouteCache(next);
+    }
   }, [isOwnProfile]);
 
   const loadOwnRoute = useCallback(async (options?: { force?: boolean; showSkeleton?: boolean }) => {
@@ -124,7 +127,9 @@ export function ProfileNextRouteSection({
   }, [applyStops, isOwnProfile]);
 
   useEffect(() => {
-    setStops((current) => mergeIncomingStops(current, initialStops));
+    const next = mergeIncomingStops(stopsRef.current, initialStops);
+    stopsRef.current = next;
+    setStops(next);
     if (initialStops.length > 0) {
       setLoadingOwnRoute(false);
     }

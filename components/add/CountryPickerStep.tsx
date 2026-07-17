@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ADD_REGION_BROWN_EMOJI,
   ADD_REGION_EMOJI,
@@ -12,11 +12,23 @@ import {
   type AddRegionId,
 } from "@/lib/add/countries-by-region";
 import { AddDestinationCheckbox } from "@/components/add/AddDestinationCheckbox";
-import { addDestinationMessages } from "@/lib/i18n/client-messages";
-import { flagCountryCode, isUkNationCode, isUkNationVisited } from "@/lib/data/uk-nations";
+import { citySelectionKey } from "@/components/add/CityPickerStep";
+import {
+  addDestinationMessages,
+  commonMessages,
+  mapMessages,
+} from "@/lib/i18n/client-messages";
+import { flagCountryCode, isUkNationCode, isUkNationVisited, matchesUkCityCountry } from "@/lib/data/uk-nations";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
+import { citiesAreSame } from "@/lib/utils/city-aliases";
 import { formatKnownPlaceName } from "@/lib/utils/city-name";
 import type { CountryOption } from "@/lib/data/countries";
+
+type SearchCityResult = {
+  cityName: string;
+  countryCode: string;
+  countryName: string;
+};
 
 type CountryPickerStepProps = {
   visitedCodes: Set<string>;
@@ -36,9 +48,17 @@ type CountryPickerStepProps = {
   visitedCountryHint?: string;
   /** Re-open this continent when returning from the city step. */
   initialExpandedRegion?: AddRegionId | null;
+  /** Also search cities on the first screen (add places flow). */
+  enableCitySearch?: boolean;
+  visitedCities?: Array<{ country_code: string; city_name: string }>;
+  pendingCityKeys?: Set<string>;
+  pendingRemoveCityKeys?: Set<string>;
+  allowToggleOnMap?: boolean;
+  onToggleCity?: (city: { countryCode: string; name: string }) => void;
 };
 
 const MIN_SEARCH_LENGTH = 2;
+const SEARCH_DEBOUNCE_MS = 220;
 
 function CountryTile({
   country,
@@ -116,6 +136,12 @@ export function CountryPickerStep({
   listHint,
   visitedCountryHint,
   initialExpandedRegion = null,
+  enableCitySearch = false,
+  visitedCities = [],
+  pendingCityKeys,
+  pendingRemoveCityKeys,
+  allowToggleOnMap = false,
+  onToggleCity,
 }: CountryPickerStepProps) {
   const progressCodes = countedCodes ?? visitedCodes;
 
@@ -147,16 +173,56 @@ export function CountryPickerStep({
   const [expandedRegion, setExpandedRegion] = useState<AddRegionId | null>(
     initialExpandedRegion
   );
+  const [searchCities, setSearchCities] = useState<SearchCityResult[]>([]);
+  const [loadingCities, setLoadingCities] = useState(false);
 
   const groups = useMemo(() => groupCountriesByRegion(), []);
 
-  const searchResults = useMemo(() => {
+  const countrySearchResults = useMemo(() => {
     const q = query.trim();
     if (q.length < MIN_SEARCH_LENGTH) return [];
     return searchCountriesForAdd(q);
   }, [query]);
 
-  const isSearching = query.trim().length >= MIN_SEARCH_LENGTH;
+  const trimmedQuery = query.trim();
+  const isSearching = trimmedQuery.length >= MIN_SEARCH_LENGTH;
+
+  useEffect(() => {
+    if (!enableCitySearch || !isSearching) {
+      setSearchCities([]);
+      setLoadingCities(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setLoadingCities(true);
+      try {
+        const res = await fetch(
+          `/api/destinations/search?q=${encodeURIComponent(trimmedQuery)}`,
+          { signal: controller.signal }
+        );
+        if (!res.ok) {
+          setSearchCities([]);
+          return;
+        }
+        const data = (await res.json()) as { cities?: SearchCityResult[] };
+        setSearchCities(data.cities ?? []);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setSearchCities([]);
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingCities(false);
+        }
+      }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [enableCitySearch, isSearching, trimmedQuery]);
 
   function toggleRegion(region: AddRegionId) {
     setExpandedRegion((current) => (current === region ? null : region));
@@ -182,6 +248,90 @@ export function CountryPickerStep({
     );
   }
 
+  function isCityOnMap(countryCode: string, cityName: string): boolean {
+    return visitedCities.some(
+      (visited) =>
+        matchesUkCityCountry(visited.country_code, countryCode) &&
+        citiesAreSame(countryCode, visited.city_name, cityName)
+    );
+  }
+
+  function renderSearchCity(city: SearchCityResult) {
+    const key = citySelectionKey(city.countryCode, city.cityName);
+    const onMap = isCityOnMap(city.countryCode, city.cityName);
+    const pendingRemove = pendingRemoveCityKeys?.has(key) ?? false;
+    const pendingAdd = pendingCityKeys?.has(key) ?? false;
+    const locked = onMap && !allowToggleOnMap;
+    const checked = (onMap && !pendingRemove) || pendingAdd;
+    const pending = pendingAdd || pendingRemove;
+    const displayName = formatKnownPlaceName(city.cityName);
+    const countryLabel = formatKnownPlaceName(city.countryName);
+
+    function toggle() {
+      if (locked || !onToggleCity) return;
+      onToggleCity({
+        countryCode: city.countryCode,
+        name: city.cityName,
+      });
+    }
+
+    return (
+      <div
+        key={key}
+        className={`add-destination-city-row${locked ? " is-disabled" : ""}${
+          pending ? " is-pending" : ""
+        }`}
+        onClick={locked ? undefined : toggle}
+        onKeyDown={
+          locked
+            ? undefined
+            : (event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  toggle();
+                }
+              }
+        }
+        role={locked ? undefined : "button"}
+        tabIndex={locked ? undefined : 0}
+      >
+        <AddDestinationCheckbox
+          checked={checked}
+          disabled={locked}
+          onChange={toggle}
+          label={`${displayName}, ${countryLabel}`}
+        />
+        <Image
+          src={countryCodeToFlagUrl(flagCountryCode(city.countryCode))}
+          alt=""
+          width={22}
+          height={22}
+          className="add-destination-search-city__flag"
+        />
+        <div className="add-destination-city-row__body">
+          <span className="add-destination-city-row__title-row">
+            <span className="add-destination-city-row__name">{displayName}</span>
+          </span>
+          <span className="add-destination-search-city__country">{countryLabel}</span>
+          {onMap && !pendingRemove ? (
+            <span className="add-destination-city-row__meta">{mapMessages.cityOnMap}</span>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  const defaultPlaceholder = enableCitySearch
+    ? addDestinationMessages.searchPlaces
+    : addDestinationMessages.searchCountries;
+  const emptyMessage = enableCitySearch
+    ? addDestinationMessages.noPlaceResults
+    : addDestinationMessages.noCountryResults;
+  const hasCountryResults = countrySearchResults.length > 0;
+  const hasCityResults = searchCities.length > 0;
+  const searchEmpty =
+    !hasCountryResults && !hasCityResults && !loadingCities;
+
   return (
     <div className="add-destination-step add-destination-step--countries">
       <div className="add-destination-countries-toolbar">
@@ -196,7 +346,7 @@ export function CountryPickerStep({
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder={searchPlaceholder ?? addDestinationMessages.searchCountries}
+            placeholder={searchPlaceholder ?? defaultPlaceholder}
             className="add-destination-search__input"
             autoComplete="off"
           />
@@ -206,13 +356,43 @@ export function CountryPickerStep({
       <div className="add-destination-countries-scroll">
         <div className="add-destination-countries-scroll__inner">
           {isSearching ? (
-            <div className="add-destination-country-grid-wrap">
-              {searchResults.length === 0 ? (
-                <p className="add-destination-empty">{addDestinationMessages.noCountryResults}</p>
+            <div className="add-destination-search-results">
+              {searchEmpty ? (
+                <p className="add-destination-empty">{emptyMessage}</p>
               ) : (
-                <div className="add-destination-country-grid">
-                  {searchResults.map((country) => renderCountry(country))}
-                </div>
+                <>
+                  {hasCountryResults ? (
+                    <section className="add-destination-search-section">
+                      {enableCitySearch ? (
+                        <h3 className="add-destination-search-section__title">
+                          {commonMessages.countries}
+                        </h3>
+                      ) : null}
+                      <div className="add-destination-country-grid-wrap">
+                        <div className="add-destination-country-grid">
+                          {countrySearchResults.map((country) => renderCountry(country))}
+                        </div>
+                      </div>
+                    </section>
+                  ) : null}
+
+                  {enableCitySearch ? (
+                    <section className="add-destination-search-section">
+                      {(hasCityResults || loadingCities) && hasCountryResults ? (
+                        <h3 className="add-destination-search-section__title">
+                          {commonMessages.cities}
+                        </h3>
+                      ) : null}
+                      {loadingCities && !hasCityResults ? (
+                        <p className="add-destination-empty">{commonMessages.loading}</p>
+                      ) : hasCityResults ? (
+                        <div className="add-destination-search-city-list">
+                          {searchCities.map((city) => renderSearchCity(city))}
+                        </div>
+                      ) : null}
+                    </section>
+                  ) : null}
+                </>
               )}
             </div>
           ) : (

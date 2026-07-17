@@ -166,29 +166,42 @@ function countrySearchScore(country: CountryOption, query: string): number {
   if (!q) return 0;
 
   const code = country.code.toLowerCase();
+  const name = country.name.toLowerCase();
   const tokens = country.searchText.split(/\s+/);
 
+  // Exact / prefix code beats name; mid-string (e.g. Botswana "swana") stays last.
   if (code === q) return 1000;
-  if (tokens.includes(q)) return 950;
-  if (country.name.toLowerCase().startsWith(q)) return 900;
-  if (tokens.some((token) => token.startsWith(q))) return 700;
-  if (country.searchText.includes(q)) return 500;
+  if (code.startsWith(q)) return 980;
+  if (name === q) return 960;
+  if (name.startsWith(q)) return 920;
+  if (tokens.some((token) => token === q)) return 880;
+  if (tokens.some((token) => token.startsWith(q))) return 800;
+  if (country.searchText.includes(q)) return 200;
   return 0;
 }
 
-export function searchCountries(query: string, limit = 12): CountryOption[] {
+/** Rank countries for typeahead: code/prefix first, mid-string matches last. */
+export function rankCountriesForSearch(
+  countries: CountryOption[],
+  query: string
+): CountryOption[] {
   const q = query.trim().toLowerCase();
-  if (q.length < 2) return [];
+  if (!q) return countries;
 
-  return COUNTRY_LIST.map((country) => ({
-    country,
-    score: countrySearchScore(country, q),
-  }))
+  return countries
+    .map((country) => ({ country, score: countrySearchScore(country, q) }))
     .filter((entry) => entry.score > 0)
     .sort(
       (a, b) =>
-        b.score - a.score || a.country.name.localeCompare(b.country.name, undefined, { sensitivity: "base" })
+        b.score - a.score ||
+        a.country.name.localeCompare(b.country.name, undefined, { sensitivity: "base" })
     )
-    .slice(0, limit)
     .map((entry) => entry.country);
+}
+
+export function searchCountries(query: string, limit = 12): CountryOption[] {
+  const q = query.trim();
+  if (q.length < 2) return [];
+
+  return rankCountriesForSearch(COUNTRY_LIST, q).slice(0, limit);
 }

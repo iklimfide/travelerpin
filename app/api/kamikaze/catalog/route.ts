@@ -85,6 +85,88 @@ function dedupeCityListRows(rows: CityListRow[]): CityListRow[] {
   return [...byKey.values()];
 }
 
+function sortCityListRows(rows: CityListRow[]): CityListRow[] {
+  return [...rows].sort((a, b) => {
+    if (a.popular !== b.popular) return a.popular ? -1 : 1;
+    if (a.capital !== b.capital) return a.capital ? -1 : 1;
+    return a.name.localeCompare(b.name, "tr", { sensitivity: "base" });
+  });
+}
+
+function applyPopularFilter(
+  rows: CityListRow[],
+  filter: "popular" | "not_popular" | null
+): CityListRow[] {
+  if (filter === "popular") return rows.filter((row) => row.popular);
+  if (filter === "not_popular") return rows.filter((row) => !row.popular);
+  return rows;
+}
+
+function buildPopularOnlyCityRows(
+  overlay: Awaited<ReturnType<typeof getCatalogOverlay>>,
+  excludedKeys: Set<string>,
+  overrides: Map<string, boolean>,
+  country: string,
+  q: string
+): CityListRow[] {
+  const rows: CityListRow[] = [];
+
+  for (const [key, isPopular] of overrides) {
+    if (!isPopular) continue;
+
+    const sep = key.indexOf(":");
+    if (sep < 0) continue;
+
+    const code = key.slice(0, sep);
+    const nameKey = key.slice(sep + 1);
+    if (country && code !== country) continue;
+
+    const ypMatch = overlay.cities.find(
+      (city) =>
+        city.country_code.toUpperCase() === code &&
+        catalogNameKey(city.name, code) === nameKey
+    );
+    if (ypMatch) {
+      if (q.length >= 2 && !matchesPlaceNameSearch(ypMatch.name, q)) continue;
+      rows.push({
+        id: ypMatch.id,
+        name: canonicalCityName(code, ypMatch.name),
+        countryCode: code,
+        countryName: ypMatch.country_name,
+        latitude: ypMatch.latitude,
+        longitude: ypMatch.longitude,
+        source: "yp",
+        popular: true,
+        capital: resolveCityCapital(code, ypMatch.name),
+      });
+      continue;
+    }
+
+    if (excludedKeys.has(`${code}:${nameKey}`)) continue;
+
+    const staticMatch = TOURIST_CITIES.find(
+      (city) =>
+        city.countryCode.toUpperCase() === code &&
+        catalogNameKey(city.name, city.countryCode) === nameKey
+    );
+    if (!staticMatch) continue;
+    if (q.length >= 2 && !matchesPlaceNameSearch(staticMatch.name, q)) continue;
+
+    rows.push({
+      name: canonicalCityName(code, staticMatch.name),
+      countryCode: code,
+      countryName: getCountryName(code),
+      latitude: staticMatch.latitude,
+      longitude: staticMatch.longitude,
+      source: "static",
+      popular: true,
+      capital: resolveCityCapital(code, staticMatch.name),
+    });
+  }
+
+  return dedupeCityListRows(rows);
+}
+
 export async function GET(request: Request) {
   const gate = await requireKamikazeMasterApi();
   if ("response" in gate) return gate.response;
@@ -93,6 +175,11 @@ export async function GET(request: Request) {
   const kind = searchParams.get("kind") === "park" ? "park" : "city";
   const country = searchParams.get("country")?.toUpperCase() ?? "";
   const q = searchParams.get("q")?.trim() ?? "";
+  const popularFilterRaw = searchParams.get("popularFilter");
+  const popularFilter =
+    popularFilterRaw === "popular" || popularFilterRaw === "not_popular"
+      ? popularFilterRaw
+      : null;
 
   // YP additions only (newest first) — used by Şehir ekle / Park ekle tabs.
   // Do not hide YP rows via exclusions: exclusions only suppress static catalog
@@ -151,6 +238,26 @@ export async function GET(request: Request) {
     );
     const overrides = popularityOverrideMap(overlay);
 
+    const popularOnlyBrowse =
+      popularFilter === "popular" && !country && q.length < 2;
+
+    if (popularOnlyBrowse) {
+      const all = sortCityListRows(
+        buildPopularOnlyCityRows(overlay, excludedKeys, overrides, country, q)
+      );
+      const page = all.slice(offset, offset + limit);
+      const nextOffset = offset + page.length;
+
+      return NextResponse.json({
+        kind: "city",
+        results: page,
+        total: all.length,
+        hasMore: nextOffset < all.length,
+        nextOffset,
+        popularFilter,
+      });
+    }
+
     // YP additions always listed when they match filters (even if an exclusion
     // remnant exists — that remnant only affects static twins).
     const additions = overlay.cities.filter((row) => {
@@ -198,7 +305,9 @@ export async function GET(request: Request) {
       capital: resolveCityCapital(row.country_code, row.name),
     }));
 
-    const all = dedupeCityListRows([...additionRows, ...staticMatches]);
+    const all = sortCityListRows(
+      applyPopularFilter(dedupeCityListRows([...additionRows, ...staticMatches]), popularFilter)
+    );
     const page = all.slice(offset, offset + limit);
     const nextOffset = offset + page.length;
 
@@ -209,6 +318,7 @@ export async function GET(request: Request) {
       total: all.length,
       hasMore: nextOffset < all.length,
       nextOffset,
+      popularFilter,
     });
   }
 
