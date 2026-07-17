@@ -4,7 +4,7 @@ import {
   type CountryOption,
 } from "@/lib/data/countries";
 import { defaultLocale, type Locale } from "@/lib/i18n/config";
-import { isUnMemberCountry } from "@/lib/data/un-member-countries";
+import { isListedTravelerCountry } from "@/lib/data/un-member-countries";
 import { getCountryContinent, type ContinentId } from "@/lib/map/continents";
 import {
   isUkNationCode,
@@ -107,10 +107,16 @@ export function getAddRegionForCountryCode(countryCode: string): AddRegionId | n
   if (isUkNationCode(code)) return "europe";
   // Traveler-facing: list with Europe, not Special (not a UN member state).
   if (code === "VA") return "europe";
-  if (!isUnMemberCountry(code)) return "special";
 
   const continent = getCountryContinent(code);
-  return continent ? CONTINENT_TO_REGION[continent] : "special";
+  if (continent) {
+    const region = CONTINENT_TO_REGION[continent];
+    if (region) return region;
+  }
+
+  // Curated extras without a continent map fall into Special; junk ISO codes are not listed.
+  if (isListedTravelerCountry(code)) return "special";
+  return null;
 }
 
 export function groupCountriesByRegion(

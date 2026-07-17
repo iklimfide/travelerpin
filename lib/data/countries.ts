@@ -2,6 +2,7 @@ import countriesLib from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
 import trLocale from "i18n-iso-countries/langs/tr.json";
 import { getYpCountryNameTr } from "@/lib/data/country-name-tr-yp";
+import { isListedTravelerCountry } from "@/lib/data/un-member-countries";
 import { defaultLocale, type Locale } from "@/lib/i18n/config";
 import { getUkNationName } from "@/lib/data/uk-nations";
 
@@ -26,6 +27,11 @@ const COUNTRY_NAME_OVERRIDES_EN: Partial<Record<string, string>> = {
   FM: "Micronesia",
   KR: "South Korea",
   KP: "North Korea",
+  HK: "Hong Kong",
+  MO: "Macau",
+  TW: "Taiwan",
+  PS: "Palestine",
+  XK: "Kosovo",
 };
 
 const COUNTRY_NAME_OVERRIDES_TR: Partial<Record<string, string>> = {
@@ -41,6 +47,11 @@ const COUNTRY_NAME_OVERRIDES_TR: Partial<Record<string, string>> = {
   AE: "BAE",
   CZ: "Çekya",
   NL: "Hollanda",
+  HK: "Hong Kong",
+  MO: "Makao",
+  TW: "Tayvan",
+  PS: "Filistin",
+  XK: "Kosova",
 };
 
 /** Extra tokens for search — common abbreviations and alternate names (both locales). */
@@ -73,10 +84,11 @@ const COUNTRY_SEARCH_EXTRA: Partial<Record<string, readonly string[]>> = {
   TZ: ["tanzania"],
   PS: ["palestine", "filistin"],
   TW: ["taiwan", "tayvan"],
+  XK: ["kosovo", "kosova"],
   KT: ["kktc", "trnc", "kuzey kibris", "kuzey kıbrıs", "north cyprus"],
 };
 
-/** All ISO countries — never filtered by population. */
+/** Curated traveler countries — not the full ISO dump. */
 export type CountryOption = {
   code: string;
   name: string;
@@ -214,17 +226,20 @@ export function clearCountryListCache(): void {
   countryListCache.clear();
 }
 
-/** Locale-aware country picker list (ISO + supplemental). UK nations stay separate. */
+/** Locale-aware country picker list (curated traveler set + supplemental). UK nations stay separate. */
 export function getCountryList(locale: Locale = defaultLocale): CountryOption[] {
   const cached = countryListCache.get(locale);
   if (cached) return cached;
 
   const isoCodes = Object.keys(
     countriesLib.getNames("en", { select: "official" })
-  );
+  ).filter((code) => isListedTravelerCountry(code));
   const list = [
     ...isoCodes.map((code) => buildCountryOption(code, locale)),
-    ...supplementalCountries(locale),
+    // KT is already in the curated set; supplementalCountries keeps its search aliases.
+    ...supplementalCountries(locale).filter(
+      (country) => !isoCodes.includes(country.code)
+    ),
   ].sort((a, b) => a.name.localeCompare(b.name, locale === "tr" ? "tr" : "en"));
 
   countryListCache.set(locale, list);
