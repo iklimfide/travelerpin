@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { COUNTRY_LIST, searchCountries, getCountryName } from "@/lib/data/countries";
-import { searchTouristCitiesInCountries } from "@/lib/data/tourist-cities";
+import { searchTouristCitiesInCountries, TOURIST_CITIES } from "@/lib/data/tourist-cities";
 import { searchTouristParksInCountries } from "@/lib/data/tourist-park-search";
 import {
   applyParkOverlay,
@@ -8,11 +8,18 @@ import {
   getCatalogOverlay,
 } from "@/lib/kamikaze/catalog-overlay";
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
+import { isLocale, type Locale, defaultLocale } from "@/lib/i18n/config";
+import { findCanonicalCitiesByLocalizedQuery } from "@/lib/i18n/place-names";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
 import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
 import { createClient } from "@/lib/supabase/server";
 
 const COUNTRY_CODES = COUNTRY_LIST.map((country) => country.code);
+
+function parseLocale(value: string | null): Locale {
+  if (value && isLocale(value)) return value;
+  return defaultLocale;
+}
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -30,12 +37,13 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() ?? "";
+  const locale = parseLocale(searchParams.get("locale"));
 
   if (q.length < 2) {
     return NextResponse.json({ countries: [], cities: [], parks: [] });
   }
 
-  const countries = searchCountries(q, 12).map((country) => ({
+  const countries = searchCountries(q, 12, locale).map((country) => ({
     code: country.code,
     name: country.name,
   }));
@@ -55,6 +63,29 @@ export async function GET(request: Request) {
       (city) => `${city.countryCode}:${catalogNameKey(city.name, city.countryCode)}`
     )
   );
+
+  for (const hit of findCanonicalCitiesByLocalizedQuery(q, locale)) {
+    const code = hit.countryCode.toUpperCase();
+    const key = `${code}:${catalogNameKey(hit.cityName, code)}`;
+    if (cityKeys.has(key) || cityExcluded.has(key)) continue;
+
+    const fromCatalog = TOURIST_CITIES.find(
+      (city) =>
+        city.countryCode.toUpperCase() === code &&
+        canonicalCityName(code, city.name) === hit.cityName
+    );
+    if (!fromCatalog) continue;
+
+    baseCities.push({
+      countryCode: code,
+      name: hit.cityName,
+      latitude: fromCatalog.latitude,
+      longitude: fromCatalog.longitude,
+    });
+    cityKeys.add(key);
+    if (baseCities.length >= 40) break;
+  }
+
   for (const row of overlay.cities) {
     const code = row.country_code.toUpperCase();
     const key = `${code}:${catalogNameKey(row.name, code)}`;
@@ -85,7 +116,7 @@ export async function GET(request: Request) {
   const cities = [...deduped.values()].slice(0, 24).map((city) => ({
     cityName: city.name,
     countryCode: city.countryCode,
-    countryName: getCountryName(city.countryCode),
+    countryName: getCountryName(city.countryCode, locale),
     latitude: city.latitude,
     longitude: city.longitude,
   }));
@@ -98,11 +129,10 @@ export async function GET(request: Request) {
     parkName: park.name,
     parkType: park.parkType,
     countryCode: park.countryCode,
-    countryName: park.countryName,
+    countryName: getCountryName(park.countryCode, locale),
     latitude: park.latitude,
     longitude: park.longitude,
   }));
 
   return NextResponse.json({ countries, cities, parks });
 }
-

@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { homeMessages } from "@/lib/i18n/client-messages";
+import { Link } from "@/lib/i18n/navigation";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import {
   HOME_BEST_CITIES_LINKED,
   HOME_BEST_COUNTRIES_LINKED,
@@ -18,6 +18,7 @@ function TopTenCard({
   items: readonly LinkedDestination[];
   compact?: boolean;
 }) {
+  const { home: homeMessages } = useAppMessages();
   return (
     <article
       className={
@@ -66,6 +67,7 @@ export function HomeBestDestinations({
   compact?: boolean;
   desktop?: boolean;
 }) {
+  const { home: homeMessages } = useAppMessages();
   const t = homeMessages.bestDestinations;
 
   if (desktop) {

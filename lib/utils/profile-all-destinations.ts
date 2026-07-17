@@ -2,6 +2,7 @@ import { buildVisitedCountryList } from "@/lib/map/travel-lists";
 import { getCountryName } from "@/lib/data/countries";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findParkHubSlug } from "@/lib/data/park-hubs";
+import { defaultLocale, type Locale } from "@/lib/i18n/config";
 import type { ParkType, VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
@@ -59,14 +60,16 @@ export function buildProfileAllDestinations(
   visitedParks: VisitedPark[],
   wishlistCountries: WishlistCountry[],
   visitedCodes: string[],
-  residence?: string | null
+  residence?: string | null,
+  locale: Locale = defaultLocale
 ): ProfileAllDestinations {
   const residenceCountryCode = resolveResidenceCountryCode(residence);
   const countryList = buildVisitedCountryList(
     visitedCountries,
     visitedCities,
     visitedCodes,
-    visitedParks
+    visitedParks,
+    locale
   );
 
   const visitedByCode = new Map<string, VisitedCountry>();
@@ -134,7 +137,7 @@ export function buildProfileAllDestinations(
         parkName: formatCityDisplayName(park.park_name),
         parkSlug: findParkHubSlug(park.park_name, park.country_code),
         countryCode: park.country_code,
-        countryName: getCountryName(park.country_code),
+        countryName: getCountryName(park.country_code, locale),
         countrySlug: countryHubSlug(park.country_code),
         imageUrl: getDefaultParkHeroImage(park.park_type),
         parkType: park.park_type,
@@ -147,24 +150,29 @@ export function buildProfileAllDestinations(
 
   const wishlist: ProfileWishlistDestination[] = [...wishlistCountries]
     .sort((a, b) =>
-      getCountryName(a.country_code).localeCompare(
-        getCountryName(b.country_code),
-        undefined,
+      getCountryName(a.country_code, locale).localeCompare(
+        getCountryName(b.country_code, locale),
+        locale === "tr" ? "tr" : "en",
         { sensitivity: "base" }
       )
     )
     .map((country) => ({
       id: country.id,
       countryCode: country.country_code,
-      countryName: getCountryName(country.country_code),
+      countryName: getCountryName(country.country_code, locale),
       countrySlug: countryHubSlug(country.country_code),
     }));
 
   return {
     countries,
-    cities: buildProfileTrips(visitedCountries, visitedCities, [], residence, visitedCodes).filter(
-      (trip) => trip.kind === "city"
-    ),
+    cities: buildProfileTrips(
+      visitedCountries,
+      visitedCities,
+      [],
+      residence,
+      visitedCodes,
+      locale
+    ).filter((trip) => trip.kind === "city"),
     parks,
     wishlist,
   };

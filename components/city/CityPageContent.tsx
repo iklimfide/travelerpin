@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import type { HubPinStatItem } from "@/components/hub/HubPagePinCount";
 import { CityPageNav } from "@/components/city/CityPageNav";
 import { CityPageActions } from "@/components/city/CityPageActions";

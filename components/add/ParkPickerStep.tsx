@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AddDestinationCheckbox } from "@/components/add/AddDestinationCheckbox";
-import { addDestinationMessages, mapMessages, parkMessages } from "@/lib/i18n/client-messages";
+import { addDestinationMessages, mapMessages, parkMessages, useAppMessages } from "@/lib/i18n/client-messages";
 import { flagCountryCode } from "@/lib/data/uk-nations";
 import { CONTACT_EMAIL } from "@/lib/legal/contact";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
@@ -59,6 +59,7 @@ export function ParkPickerStep({
   allowToggleOnMap = false,
   onTogglePark,
 }: ParkPickerStepProps) {
+  const { map: mapMessages, park: parkMessages, addDestination: addDestinationMessages } = useAppMessages();
   const [parks, setParks] = useState<CatalogPark[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");

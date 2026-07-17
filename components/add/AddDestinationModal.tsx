@@ -28,7 +28,7 @@ import {
   getAddRegionForCountryCode,
   type AddRegionId,
 } from "@/lib/add/countries-by-region";
-import { addDestinationMessages, commonMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import type { CountryOption } from "@/lib/data/countries";
 import { isUkNationCode, isUkNationVisited, matchesUkCityCountry } from "@/lib/data/uk-nations";
 import { canonicalCityName, citiesAreSame } from "@/lib/utils/city-aliases";
@@ -171,6 +171,7 @@ function applyOptimisticParksSave(params: {
 }
 
 export function AddDestinationModal({ onClose, mode = "places" }: AddDestinationModalProps) {
+  const { common: commonMessages, addDestination: addDestinationMessages } = useAppMessages();
   const toast = useToast();
   const isParksMode = mode === "parks";
   const [step, setStep] = useState<Step>({ kind: "countries" });

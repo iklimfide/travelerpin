@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { HomePageClient } from "@/components/home/HomePageClient";
+import { redirectTo } from "@/lib/i18n/navigation";
 import { getAuthenticatedHomePath } from "@/lib/supabase/authenticated-home";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -36,7 +36,7 @@ export default async function HomePage() {
   if (user) {
     const supabase = await createClient();
     if (supabase) {
-      redirect(await getAuthenticatedHomePath(supabase));
+      await redirectTo(await getAuthenticatedHomePath(supabase));
     }
   }
 

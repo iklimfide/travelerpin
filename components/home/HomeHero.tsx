@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { DEMO_PERSONA } from "@/lib/data/demo-persona";
-import { translateHome } from "@/lib/i18n/client-messages";
+import { useTranslateHome } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
 
 export function HomeHero() {
-  const t = translateHome;
+  const t = useTranslateHome();
 
   return (
     <div className="min-w-0 max-sm:flex max-sm:flex-col max-sm:items-center max-sm:pt-3 max-sm:text-center">

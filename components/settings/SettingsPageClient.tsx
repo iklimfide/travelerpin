@@ -1,20 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { useRouter } from "next/navigation";
 import { ProfileSettingsForm } from "@/components/dashboard/ProfileSettingsForm";
 import { SettingsPageSkeleton } from "@/components/skeletons/SettingsPageSkeleton";
 import { writeSettingsCache } from "@/lib/client/session-page-cache";
 import { useCachedSettings } from "@/lib/client/use-page-cache";
-import { translateSettings } from "@/lib/i18n/client-messages";
+import { useTranslateSettings } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
 import type { ProfileSettingsRow } from "@/lib/supabase/profile-settings";
 import type { TravelStats } from "@/types/database";
 
 export function SettingsPageClient() {
   const router = useRouter();
-  const t = translateSettings;
+  const t = useTranslateSettings();
   const cachedSnapshot = useCachedSettings();
   const [profile, setProfile] = useState<ProfileSettingsRow | null>(null);
   const [stats, setStats] = useState<TravelStats | null>(null);

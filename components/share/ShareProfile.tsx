@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ShareSheetModal } from "@/components/share/ShareSheetModal";
-import { shareMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import { finalizeTravelShare } from "@/lib/client/travel-share-snapshot";
 import type { TravelStats } from "@/types/database";
 import { useShareProfile } from "@/components/share/ShareProfileButton";
@@ -20,6 +20,7 @@ export function ShareProfile({
   stats,
   isOwnProfile = false,
 }: ShareProfileProps) {
+  const { share: shareMessages } = useAppMessages();
   const router = useRouter();
 
   async function handleShareComplete() {

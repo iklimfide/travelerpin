@@ -2,14 +2,18 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocale } from "next-intl";
 import { AddDestinationCheckbox } from "@/components/add/AddDestinationCheckbox";
-import { addDestinationMessages, mapMessages } from "@/lib/i18n/client-messages";
+import { addDestinationMessages, mapMessages, useAppMessages } from "@/lib/i18n/client-messages";
+import {
+  cityMatchesLocalizedSearch,
+  getLocalizedCityName,
+} from "@/lib/i18n/place-names";
 import { catalogCountryCode, flagCountryCode } from "@/lib/data/uk-nations";
 import { CONTACT_EMAIL } from "@/lib/legal/contact";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { compareCitiesForAddModal } from "@/lib/add/city-list-sort";
 import { canonicalCityKey, citiesAreSame } from "@/lib/utils/city-aliases";
-import { formatKnownPlaceName } from "@/lib/utils/city-name";
 import { AddDestinationCityListSkeleton } from "@/components/skeletons/AddDestinationModalSkeleton";
 
 type CatalogCity = {
@@ -69,13 +73,14 @@ export function CityPickerStep({
   onToggleCity,
   existingCityHint,
 }: CityPickerStepProps) {
+  const { map: mapMessages, addDestination: addDestinationMessages } = useAppMessages();
+  const locale = useLocale() === "tr" ? "tr" : "en";
   const [tiers, setTiers] = useState<CityTier[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const [openTierLevel, setOpenTierLevel] = useState<number | null>(null);
   const cityListRef = useRef<HTMLDivElement>(null);
   const tierSectionRefs = useRef<Map<number, HTMLElement>>(new Map());
-  const hasLoadedRef = useRef(false);
 
   const existingNames = useMemo(
     () => existingCityNames,
@@ -83,28 +88,29 @@ export function CityPickerStep({
   );
 
   const isFiltering = filter.trim().length >= MIN_FILTER_LENGTH;
+  // TR city labels are matched client-side; only EN needs server-side `q`.
+  const serverFilter = locale === "tr" ? "" : filter.trim();
 
   useEffect(() => {
     setFilter("");
-    hasLoadedRef.current = false;
+    setOpenTierLevel(null);
+    setTiers([]);
   }, [countryCode]);
 
   useEffect(() => {
-    setOpenTierLevel(null);
-    if (!hasLoadedRef.current) {
-      setLoading(true);
-    }
+    let cancelled = false;
+    setLoading(true);
 
     const params = new URLSearchParams({ country: catalogCountryCode(countryCode) });
-    const q = filter.trim();
-    if (q.length >= MIN_FILTER_LENGTH) {
-      params.set("q", q);
+    if (serverFilter.length >= MIN_FILTER_LENGTH) {
+      params.set("q", serverFilter);
     }
 
     const controller = new AbortController();
 
     fetch(`/api/cities/tourist?${params.toString()}`, { signal: controller.signal })
       .then(async (res) => {
+        if (cancelled) return;
         if (!res.ok) {
           setTiers([]);
           return;
@@ -113,22 +119,32 @@ export function CityPickerStep({
         setTiers(data.tiers ?? []);
       })
       .catch((error) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
+        if (cancelled || (error instanceof DOMException && error.name === "AbortError")) {
+          return;
+        }
         setTiers([]);
       })
       .finally(() => {
-        hasLoadedRef.current = true;
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       });
 
-    return () => controller.abort();
-  }, [countryCode, filter, isFiltering]);
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [countryCode, serverFilter]);
 
   const displayTiers = useMemo(() => {
     const flat = tiers.flatMap((tier) => tier.cities);
     if (flat.length === 0) return tiers;
 
-    const sorted = [...flat].sort(compareCitiesForAddModal);
+    const filtered = isFiltering
+      ? flat.filter((city) =>
+          cityMatchesLocalizedSearch(countryCode, city.name, filter, locale)
+        )
+      : flat;
+
+    const sorted = [...filtered].sort(compareCitiesForAddModal);
 
     // Keep the same tier chunking the API used (first page + "more cities").
     const perTier = tiers[0]?.cities.length || sorted.length;
@@ -144,7 +160,7 @@ export function CityPickerStep({
       });
     }
     return next;
-  }, [tiers]);
+  }, [tiers, isFiltering, locale, countryCode, filter]);
 
   const totalCityCount = displayTiers.reduce((sum, tier) => sum + tier.cities.length, 0);
   const primaryTier = displayTiers[0];
@@ -180,7 +196,7 @@ export function CityPickerStep({
     const locked = onMap && !allowToggleOnMap;
     const checked = (onMap && !pendingRemove) || pendingAdd;
     const pending = pendingAdd || pendingRemove;
-    const displayName = formatKnownPlaceName(city.name);
+    const displayName = getLocalizedCityName(city.countryCode, city.name, locale);
 
     function toggle() {
       if (locked) return;

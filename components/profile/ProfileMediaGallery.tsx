@@ -8,7 +8,7 @@ import { HubMemoryLightbox } from "@/components/hub/HubMemoryLightbox";
 import { HubSectionCta } from "@/components/hub/HubSectionCta";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
 import { useModal } from "@/components/ui/ModalProvider";
-import { modalMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import {
   removeCityInstagramUrl,
   removeCityPhoto,
@@ -74,6 +74,7 @@ function MediaItemActions({
   editLabel: string;
   removeLabel: string;
 }) {
+  const { modal: modalMessages } = useAppMessages();
   return (
     <div className="profile-media-item__actions">
       <button
@@ -121,6 +122,7 @@ function GalleryTile({
   onRemove: () => void;
   photoAnchorPrefix?: string;
 }) {
+  const { modal: modalMessages } = useAppMessages();
   const ownerActions = isOwnProfile ? (
     <MediaItemActions
       editLabel={labels.editMedia}
@@ -232,6 +234,7 @@ export function ProfileMediaGallery({
   labels,
   photoAnchorPrefix,
 }: ProfileMediaGalleryProps) {
+  const { modal: modalMessages } = useAppMessages();
   const router = useRouter();
   const modal = useModal();
   const [expandedItem, setExpandedItem] = useState<HubGalleryItem | null>(null);

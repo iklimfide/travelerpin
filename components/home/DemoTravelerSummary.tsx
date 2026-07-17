@@ -1,6 +1,6 @@
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { TravelStatsBar } from "@/components/stats/TravelStats";
-import { formatMessage, homeMessages, commonMessages } from "@/lib/i18n/client-messages";
+import { commonMessages, formatMessage, homeMessages, useAppMessages } from "@/lib/i18n/client-messages";
 import type { TravelStats } from "@/types/database";
 
 type DemoTravelerSummaryProps = {
@@ -15,6 +15,7 @@ export function DemoTravelerStatsCompact({
   stats: TravelStats;
   className?: string;
 }) {
+  const { common: commonMessages, home: homeMessages } = useAppMessages();
   return (
     <div className={`flex shrink-0 flex-col items-end gap-1 text-right ${className}`}>
       <p className="leading-tight">

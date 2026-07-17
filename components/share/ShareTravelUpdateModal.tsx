@@ -9,7 +9,7 @@ import {
   profileSquareCaptureId,
 } from "@/lib/client/capture-profile-square-card";
 import { profileStoryCaptureId } from "@/lib/client/capture-profile-story-card";
-import { profileMessages, shareMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import type { TravelUpdateDelta } from "@/lib/utils/travel-update";
 
 type ShareTravelUpdateModalProps = {
@@ -29,6 +29,7 @@ export function ShareTravelUpdateModal({
   delta,
   persistShareSnapshot = true,
 }: ShareTravelUpdateModalProps) {
+  const { share: shareMessages, profile: profileMessages } = useAppMessages();
   const router = useRouter();
   const [downloading, setDownloading] = useState<"square" | "story" | null>(null);
   const hasUpdate = delta.hasChanges;

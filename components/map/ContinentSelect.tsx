@@ -1,7 +1,7 @@
 "use client";
 
 import { CONTINENT_IDS, type ContinentId } from "@/lib/map/continents";
-import { mapMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 
 type ContinentSelectProps = {
   value: ContinentId;
@@ -9,6 +9,7 @@ type ContinentSelectProps = {
 };
 
 export function ContinentSelect({ value, onChange }: ContinentSelectProps) {
+  const { map: mapMessages } = useAppMessages();
   return (
     <>
       <label className="sr-only" htmlFor="continent-select">

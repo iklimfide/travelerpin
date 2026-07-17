@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { COUNTRY_LIST } from "@/lib/data/countries";
-import { translateCommon, translateSettings } from "@/lib/i18n/client-messages";
+import { useLocale } from "next-intl";
+import { getCountryList, getCountryName } from "@/lib/data/countries";
+import { useTranslateCommon, useTranslateSettings } from "@/lib/i18n/client-messages";
+import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import { formatCityDisplayName, normalizeCityKey } from "@/lib/utils/city-name";
 
 export type ResidenceCitySelection = {
@@ -46,9 +48,11 @@ export function ResidenceCityPicker({
   allowClear = true,
   tone = "dark",
 }: ResidenceCityPickerProps) {
-  const t = translateSettings;
-  const tCommon = translateCommon;
+  const t = useTranslateSettings();
+  const tCommon = useTranslateCommon();
   const isLight = tone === "light";
+  const locale = useLocale() === "tr" ? "tr" : "en";
+  const countryList = useMemo(() => getCountryList(locale), [locale]);
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<CitySearchResult[]>([]);
@@ -56,11 +60,6 @@ export function ResidenceCityPicker({
   const [completedQuery, setCompletedQuery] = useState("");
   const [customCountry, setCustomCountry] = useState("TR");
   const [hydrated, setHydrated] = useState(false);
-
-  const customCountryName = useMemo(
-    () => COUNTRY_LIST.find((country) => country.code === customCountry)?.name ?? "",
-    [customCountry]
-  );
 
   // Hydrate existing residence into a full city selection (same as add-city payload).
   useEffect(() => {
@@ -74,7 +73,10 @@ export function ResidenceCityPicker({
 
     async function hydrate() {
       try {
-        const params = new URLSearchParams({ q: label.split(",")[0]?.trim() || label });
+        const params = new URLSearchParams({
+          q: label.split(",")[0]?.trim() || label,
+          locale,
+        });
         const res = await fetch(`${searchPath}?${params}`);
         if (!res.ok) return;
         const data = await res.json();
@@ -86,7 +88,7 @@ export function ResidenceCityPicker({
           onChange({
             city_name: match.cityName,
             country_code: match.countryCode,
-            country_name: match.countryName,
+            country_name: getCountryName(match.countryCode),
             latitude: match.latitude,
             longitude: match.longitude,
           });
@@ -100,7 +102,7 @@ export function ResidenceCityPicker({
     return () => {
       cancelled = true;
     };
-  }, [hydrated, initialResidence, onChange, searchPath, value]);
+  }, [hydrated, initialResidence, locale, onChange, searchPath, value]);
 
   useEffect(() => {
     if (value) return;
@@ -119,7 +121,7 @@ export function ResidenceCityPicker({
 
     const timer = window.setTimeout(async () => {
       try {
-        const params = new URLSearchParams({ q });
+        const params = new URLSearchParams({ q, locale });
         const res = await fetch(`${searchPath}?${params}`, {
           signal: controller.signal,
         });
@@ -143,13 +145,13 @@ export function ResidenceCityPicker({
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [query, searchPath, value]);
+  }, [query, searchPath, value, locale]);
 
   function selectCity(city: CitySearchResult) {
     onChange({
       city_name: city.cityName,
       country_code: city.countryCode,
-      country_name: city.countryName,
+      country_name: getCountryName(city.countryCode),
       latitude: city.latitude,
       longitude: city.longitude,
     });
@@ -160,11 +162,11 @@ export function ResidenceCityPicker({
 
   function selectCustomCity() {
     const cityName = formatCityDisplayName(query.trim());
-    if (!cityName || !customCountryName) return;
+    if (!cityName || !customCountry) return;
     onChange({
       city_name: cityName,
       country_code: customCountry,
-      country_name: customCountryName,
+      country_name: getCountryName(customCountry),
       latitude: null,
       longitude: null,
     });
@@ -186,7 +188,8 @@ export function ResidenceCityPicker({
           >
             <span aria-hidden className="shrink-0">📍</span>
             <span className="truncate">
-              {value.city_name}, {value.country_name}
+              {getLocalizedCityName(value.country_code, value.city_name, locale)},{" "}
+              {getCountryName(value.country_code, locale)}
             </span>
           </span>
           <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-2">
@@ -288,14 +291,14 @@ export function ResidenceCityPicker({
                           isLight ? "text-slate-800" : "text-blue-600"
                         }`}
                       >
-                        {city.cityName}
+                        {getLocalizedCityName(city.countryCode, city.cityName, locale)}
                       </span>
                       <span
                         className={`truncate text-xs ${
                           isLight ? "text-slate-500" : "text-blue-500/80"
                         }`}
                       >
-                        {city.countryName}
+                        {getCountryName(city.countryCode, locale)}
                       </span>
                     </button>
                   </li>
@@ -328,7 +331,7 @@ export function ResidenceCityPicker({
                       : "min-w-0 flex-1 rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] outline-none transition-[border-color,box-shadow] focus:border-blue-500 focus:ring-1 focus:ring-blue-500/25"
                   }
                 >
-                  {COUNTRY_LIST.map((country) => (
+                  {countryList.map((country) => (
                     <option key={country.code} value={country.code}>
                       {country.name}
                     </option>

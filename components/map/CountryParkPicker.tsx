@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addPark, addParksBatch } from "@/lib/client/park-actions";
-import { commonMessages, formatMessage, mapMessages, parkMessages } from "@/lib/i18n/client-messages";
+import { formatMessage, useAppMessages } from "@/lib/i18n/client-messages";
 import { matchesParkTypeFilter, parkTypeLabel } from "@/lib/utils/park-type";
 import { formatCityDisplayName, formatKnownPlaceName } from "@/lib/utils/city-name";
 import { shortParkLabel } from "@/lib/utils/park-name";
@@ -43,6 +43,7 @@ export function CountryParkPicker({
   existingParkKeys,
   onAdded,
 }: CountryParkPickerProps) {
+  const { common: commonMessages, map: mapMessages, park: parkMessages } = useAppMessages();
   const modal = useModal();
   const toast = useToast();
 

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import type { HubPinStatItem } from "@/components/hub/HubPagePinCount";
 import { CountryPageActions } from "@/components/country/CountryPageActions";
 import { CountryPageNav } from "@/components/country/CountryPageNav";

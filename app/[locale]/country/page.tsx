@@ -1,4 +1,5 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { redirectTo } from "@/lib/i18n/navigation";
 import { sanitizeCountrySlug } from "@/lib/utils/sanitize-country-slug";
 import { getCountryHubBySlug } from "@/lib/data/country-hubs";
 import { countryPath } from "@/lib/seo/site";
@@ -15,5 +16,5 @@ export default async function CountryQueryRedirectPage({ searchParams }: PagePro
     notFound();
   }
 
-  redirect(countryPath(slug));
+  await redirectTo(countryPath(slug));
 }

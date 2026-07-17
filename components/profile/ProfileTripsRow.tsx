@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { ProfileTripCard } from "@/components/profile/ProfileTripCard";
 import { useClampTripsToPrimaryColumn } from "@/lib/hooks/useClampTripsToPrimaryColumn";
 import type { ProfileTrip } from "@/lib/utils/profile-page";

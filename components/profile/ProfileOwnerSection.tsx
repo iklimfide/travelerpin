@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { profileMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 
 export type ProfileOwnerPanelMode = "closed" | "edit";
 
@@ -26,6 +26,7 @@ export function ProfileOwnerSection({
   onAdd,
   editContent,
 }: ProfileOwnerSectionProps) {
+  const { profile: profileMessages } = useAppMessages();
   return (
     <section className="profile-owner-section">
       <div className="profile-owner-section__header">

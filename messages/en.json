@@ -748,6 +748,12 @@
     "copied": "Link copied",
     "copyFailed": "Could not copy the link.",
     "shareTitle": "{name}'s travel map",
+    "captionOwn": "I can answer \"How many countries have you visited?\" with a single link.",
+    "captionGuest": "{name} can answer \"How many countries have you visited?\" with a single link.",
+    "captionDescription": "Create your own travel map on TravelerPin and share your journey with just one link.",
+    "ogTitle": "Traveler's Pin Map: {name}",
+    "ogDescription": "Answer \"How many countries have been explored?\" with a single link. Share a global map of shared adventures.",
+    "pageTitle": "{name}'s Travel Map",
     "whatsapp": "WhatsApp",
     "telegram": "Telegram",
     "x": "X",
@@ -809,6 +815,8 @@
     "maritalStatus": "Relationship status",
     "charCount": "{count} / {max}",
     "moreSettings": "More settings",
+    "languageTitle": "Language",
+    "languageHint": "Choose your preferred language. More languages coming soon.",
     "save": "Save settings",
     "saveSuccess": "Profile updated.",
     "saveFailed": "Could not save profile.",
@@ -879,7 +887,8 @@
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
     "imprint": "Imprint",
-    "contact": "Contact"
+    "contact": "Contact",
+    "language": "Language"
   },
   "legal": {
     "termsTitle": "Terms of Service",

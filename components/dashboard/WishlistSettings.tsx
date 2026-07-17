@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useModal } from "@/components/ui/ModalProvider";
-import { wishlistMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 
 type WishlistSettingsProps = {
   wishlistPublic: boolean;
 };
 
 export function WishlistSettings({ wishlistPublic }: WishlistSettingsProps) {
+  const { wishlist: wishlistMessages } = useAppMessages();
   const modal = useModal();
   const router = useRouter();
   const [enabled, setEnabled] = useState(wishlistPublic);

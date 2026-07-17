@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LIMITS } from "@/lib/constants";
-import { cityMessages, formatMessage } from "@/lib/i18n/client-messages";
+import { cityMessages, formatMessage, useAppMessages } from "@/lib/i18n/client-messages";
 import {
   extractVisitYears,
   yearsToVisitYearMonths,
@@ -32,6 +32,7 @@ function formatTriggerLabel(selectedYears: number[]): string {
 }
 
 export function VisitYearsMultiSelect({ value, onChange }: VisitYearsMultiSelectProps) {
+  const { city: cityMessages } = useAppMessages();
   const [open, setOpen] = useState(false);
   const [draftYears, setDraftYears] = useState<number[]>(() => extractVisitYears(value));
   const rootRef = useRef<HTMLDivElement>(null);

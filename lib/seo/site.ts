@@ -1,4 +1,5 @@
 import { BRAND } from "@/lib/constants";
+import { defaultLocale, type Locale } from "@/lib/i18n/config";
 
 export function getSiteUrl(): string {
   let url: string;
@@ -15,20 +16,23 @@ export function getSiteUrl(): string {
   return url;
 }
 
-export function profilePath(username: string): string {
-  return `/${username.toLowerCase()}`;
+export function profilePath(username: string, locale: Locale = defaultLocale): string {
+  const base = `/${username.toLowerCase()}`;
+  if (locale === defaultLocale) return base;
+  return `/${locale}${base}`;
 }
 
-export function profileAllPath(username: string): string {
-  return `${profilePath(username)}/all`;
+export function profileAllPath(username: string, locale: Locale = defaultLocale): string {
+  return `${profilePath(username, locale)}/all`;
 }
 
 export function profileMediaPath(
   username: string,
   tab: "photos" | "instagram" = "photos",
-  page = 1
+  page = 1,
+  locale: Locale = defaultLocale
 ): string {
-  const path = `${profilePath(username)}/media`;
+  const path = `${profilePath(username, locale)}/media`;
   if (tab === "photos" && page <= 1) return path;
 
   const params = new URLSearchParams();
@@ -39,13 +43,13 @@ export function profileMediaPath(
   return query ? `${path}?${query}` : path;
 }
 
-export function profileUrl(username: string): string {
-  return `${getSiteUrl()}${profilePath(username)}`;
+export function profileUrl(username: string, locale: Locale = defaultLocale): string {
+  return `${getSiteUrl()}${profilePath(username, locale)}`;
 }
 
 /** Profile URL with a stable share query param to bust link-preview caches. */
-export function profileShareUrl(username: string): string {
-  return profileUrl(username);
+export function profileShareUrl(username: string, locale: Locale = defaultLocale): string {
+  return profileUrl(username, locale);
 }
 
 export function countryPath(slug: string): string {

@@ -13,6 +13,7 @@ import {
   staticTwitterImages,
 } from "@/lib/seo/og";
 import { defaultLocale, type Locale } from "@/lib/i18n/config";
+import { ClientMessagesProvider } from "@/lib/i18n/ClientMessagesProvider";
 import enMessages from "@/messages/en.json";
 import { ModalProvider } from "@/components/ui/ModalProvider";
 import { ToastProvider } from "@/components/ui/ToastProvider";
@@ -104,6 +105,7 @@ export default async function RootLayout({
           `}
         </Script>
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <ClientMessagesProvider>
           <ThemeProvider>
             <ClearPwaArtifacts />
             <ModalProvider>
@@ -124,6 +126,7 @@ export default async function RootLayout({
               </ToastProvider>
             </ModalProvider>
           </ThemeProvider>
+          </ClientMessagesProvider>
         </NextIntlClientProvider>
         {process.env.NODE_ENV === "development" ? (
           <Suspense fallback={null}>

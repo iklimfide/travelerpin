@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
+import { useLocale } from "next-intl";
 import type { ReactNode } from "react";
 import { HomeFeaturesClient } from "@/components/home/HomeFeaturesClient";
 import { ProfileHeroCover } from "@/components/profile/ProfileHeroCover";
@@ -21,11 +22,7 @@ import { buildProfileMediaPins } from "@/lib/utils/profile-media";
 import { resolveResidenceCityHref } from "@/lib/utils/residence-city";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { parseNextRoute } from "@/lib/utils/next-route";
-import {
-  translateCommon,
-  translateHome,
-  translateProfile,
-} from "@/lib/i18n/client-messages";
+import { useTranslateCommon, useTranslateHome, useTranslateProfile } from "@/lib/i18n/client-messages";
 import { profileAllPath, profilePath } from "@/lib/seo/site";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
 
@@ -46,9 +43,10 @@ export function PublicProfileViewClient({
   embedded = false,
   profilePageHref,
 }: PublicProfileViewClientProps) {
-  const t = translateProfile;
-  const tHome = translateHome;
-  const tCommon = translateCommon;
+  const t = useTranslateProfile();
+  const tHome = useTranslateHome();
+  const tCommon = useTranslateCommon();
+  const locale = useLocale() === "tr" ? "tr" : "en";
 
   const {
     profile,
@@ -81,7 +79,8 @@ export function PublicProfileViewClient({
     visitedCities,
     visitedParks,
     profile.residence,
-    visitedCodes
+    visitedCodes,
+    locale
   );
   const mediaPins = buildProfileMediaPins(visitedCities, visitedParks, profile);
   const isDemoProfile = isDemoProfileUsername(profile.username);

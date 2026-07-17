@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { ProfileAllDestinationsListModal } from "@/components/profile/ProfileAllDestinationsListModal";
@@ -14,16 +14,7 @@ import { ProfileTripCard } from "@/components/profile/ProfileTripCard";
 import { ProfileWishlistDestinationCard } from "@/components/profile/ProfileWishlistDestinationCard";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
-import {
-  commonMessages,
-  countryMessages,
-  formatMessage,
-  modalMessages,
-  profileDestinationCityCountLabel,
-  profileDestinationParkCountLabel,
-  profileMessages,
-  saveDestinationMessages,
-} from "@/lib/i18n/client-messages";
+import { commonMessages, countryMessages, formatMessage, modalMessages, profileDestinationCityCountLabel, profileDestinationParkCountLabel, profileMessages, saveDestinationMessages, useAppMessages } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
 import {
   countryHasMappedPlaces,
@@ -176,6 +167,7 @@ export function ProfileAllDestinationsView({
   stats,
   initialNextRouteStops,
 }: ProfileAllDestinationsViewProps) {
+  const { common: commonMessages, country: countryMessages, profile: profileMessages, modal: modalMessages, saveDestination: saveDestinationMessages } = useAppMessages();
   const router = useRouter();
   const modal = useModal();
   const toast = useToast();

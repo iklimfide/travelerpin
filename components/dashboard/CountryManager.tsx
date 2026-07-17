@@ -2,12 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
-import { countryMessages, formatMessage, modalMessages, wishlistMessages } from "@/lib/i18n/client-messages";
+import { formatMessage, useAppMessages } from "@/lib/i18n/client-messages";
 import { CountryCityPickerSheet } from "@/components/map/CountryCityPickerSheet";
 import { ProfileCountryLink } from "@/components/profile/ProfilePlaceLink";
-import { COUNTRY_LIST, searchCountries } from "@/lib/data/countries";
+import { getCountryList, searchCountries } from "@/lib/data/countries";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { addVisitedCountry, addWishlistCountry, removeVisitedCountry, removeWishlistCountry } from "@/lib/client/country-actions";
 import {
@@ -46,9 +47,11 @@ export function CountryManager({
   embedded = false,
   onEditCountryCities,
 }: CountryManagerProps) {
+  const { country: countryMessages, wishlist: wishlistMessages, modal: modalMessages } = useAppMessages();
   const router = useRouter();
   const modal = useModal();
   const toast = useToast();
+  const locale = useLocale() === "tr" ? "tr" : "en";
   const [query, setQuery] = useState("");
   const [busyCode, setBusyCode] = useState<string | null>(null);
   const [cityPickerTarget, setCityPickerTarget] = useState<{
@@ -87,10 +90,11 @@ export function CountryManager({
 
   const rows = useMemo((): CountryRow[] => {
     const q = query.trim().toLowerCase();
+    const countryList = getCountryList(locale);
 
     const source = q
-      ? searchCountries(query)
-      : COUNTRY_LIST.filter(
+      ? searchCountries(query, 12, locale)
+      : countryList.filter(
           (c) =>
             visitedCodeSet.has(c.code) || wishlistByCode.has(c.code)
         );
@@ -110,7 +114,7 @@ export function CountryManager({
         isWishlist: wishlistByCode.has(c.code),
       };
     });
-  }, [query, visitedByCode, wishlistByCode, visitedCodeSet]);
+  }, [query, visitedByCode, wishlistByCode, visitedCodeSet, locale]);
 
   async function addVisited(code: string) {
     const result = await addVisitedCountry(code);

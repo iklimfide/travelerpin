@@ -1,17 +1,19 @@
 "use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { BRAND } from "@/lib/constants";
-import { footerMessages } from "@/lib/i18n/client-messages";
+import { Link } from "@/lib/i18n/navigation";
+import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
 
 const FOOTER_LINKS = [
-  { href: "/terms", label: footerMessages.terms },
-  { href: "/policy", label: footerMessages.privacy },
-  { href: "/imprint", label: footerMessages.imprint },
-  { href: "/contact", label: footerMessages.contact },
+  { href: "/terms", labelKey: "terms" as const },
+  { href: "/policy", labelKey: "privacy" as const },
+  { href: "/imprint", labelKey: "imprint" as const },
+  { href: "/contact", labelKey: "contact" as const },
 ] as const;
 
 export function SiteFooter() {
+  const t = useTranslations("footer");
   const year = new Date().getFullYear();
 
   return (
@@ -25,12 +27,13 @@ export function SiteFooter() {
                   href={link.href}
                   className="whitespace-nowrap text-[0.6875rem] font-medium text-[#64748b] transition-colors hover:text-[#2563eb] sm:text-sm dark:text-[#94a3b8] dark:hover:text-[#60a5fa]"
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               </li>
             ))}
           </ul>
         </nav>
+        <LocaleSwitcher label={t("language")} />
         <p className="text-xs text-[#94a3b8]">
           © {year} {BRAND.name}
         </p>

@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { redirectTo } from "@/lib/i18n/navigation";
 import { profilePath } from "@/lib/seo/site";
 
 type PageProps = {
@@ -7,5 +7,5 @@ type PageProps = {
 
 export default async function LegacyProfileRedirect({ params }: PageProps) {
   const { username } = await params;
-  redirect(profilePath(username));
+  await redirectTo(profilePath(username));
 }

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuthGate } from "@/components/auth/useAuthGate";
 import { ProfileFollowStats } from "@/components/profile/ProfileFollowStats";
 import { followProfile, unfollowProfile } from "@/lib/client/follow-actions";
-import { profileMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 
 type ProfileFollowButtonProps = {
   username: string;
@@ -31,6 +31,7 @@ export function ProfileFollowButton({
   variant = "default",
   showStats = true,
 }: ProfileFollowButtonProps) {
+  const { profile: profileMessages } = useAppMessages();
   const router = useRouter();
   const { requireLogin } = useAuthGate();
   const [isFollowing, setIsFollowing] = useState(initialFollowing);

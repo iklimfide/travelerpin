@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { useEffect, useRef, useState } from "react";
 import { LIMITS } from "@/lib/constants";
-import { footerMessages, translateAuth, translateCommon } from "@/lib/i18n/client-messages";
+import { useAppMessages, useTranslateAuth, useTranslateCommon } from "@/lib/i18n/client-messages";
 import { createClient } from "@/lib/supabase/client";
 import { formatDisplayName } from "@/lib/utils/display-name";
 import { formatAuthErrorMessage } from "@/lib/utils/auth-error-message";
@@ -35,8 +35,9 @@ function sanitizeNext(next: string | undefined): string | null {
 }
 
 export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFormProps) {
-  const t = translateAuth;
-  const tCommon = translateCommon;
+  const { footer: footerMessages } = useAppMessages();
+  const t = useTranslateAuth();
+  const tCommon = useTranslateCommon();
   const supabase = createClient();
   const modal = useModal();
   const abortRef = useRef<AbortController | null>(null);

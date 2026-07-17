@@ -10,7 +10,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from "@/lib/client/notification-actions";
-import { formatMessage, notificationMessages, shareMessages } from "@/lib/i18n/client-messages";
+import { formatMessage, notificationMessages, shareMessages, useAppMessages } from "@/lib/i18n/client-messages";
 import {
   notificationActorProfileHref,
   notificationTargetHref,
@@ -154,6 +154,7 @@ export function NotificationsPanel({
   initialNotifications,
   initialUnreadCount = 0,
 }: NotificationsPanelProps) {
+  const { share: shareMessages, notifications: notificationMessages } = useAppMessages();
   const router = useRouter();
   const [notifications, setNotifications] = useState<EnrichedNotificationRow[]>(
     initialNotifications ?? []

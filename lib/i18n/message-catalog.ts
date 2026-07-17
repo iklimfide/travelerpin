@@ -1,6 +1,8 @@
 import enMessages from "@/messages/en.json";
 
-/** Static copy for client map components (English-only; avoids NextIntl provider edge cases). */
+export type AppMessages = typeof enMessages;
+
+/** Static English catalog — safe for server utils and API routes. */
 export const commonMessages = enMessages.common;
 export const mapMessages = enMessages.map;
 export const countryMessages = enMessages.country;

@@ -1,4 +1,9 @@
-import { COUNTRY_LIST, rankCountriesForSearch, type CountryOption } from "@/lib/data/countries";
+import {
+  getCountryList,
+  rankCountriesForSearch,
+  type CountryOption,
+} from "@/lib/data/countries";
+import { defaultLocale, type Locale } from "@/lib/i18n/config";
 import { isUnMemberCountry } from "@/lib/data/un-member-countries";
 import { getCountryContinent, type ContinentId } from "@/lib/map/continents";
 import {
@@ -49,9 +54,32 @@ const CONTINENT_TO_REGION: Record<ContinentId, AddRegionId | null> = {
   "south-america": "south-america",
 };
 
-function sortCountriesByName(countries: CountryOption[]): CountryOption[] {
+const UK_NATION_NAMES_TR: Record<string, string> = {
+  EN: "İngiltere",
+  SF: "İskoçya",
+  WL: "Galler",
+};
+
+function ukNationOptions(locale: Locale): CountryOption[] {
+  if (locale !== "tr") return UK_NATION_OPTIONS;
+  return UK_NATION_OPTIONS.map((option) => {
+    const name = UK_NATION_NAMES_TR[option.code] ?? option.name;
+    return {
+      ...option,
+      name,
+      searchText: `${option.searchText} ${name}`.toLocaleLowerCase("tr"),
+    };
+  });
+}
+
+function sortCountriesByName(
+  countries: CountryOption[],
+  locale: Locale
+): CountryOption[] {
   return [...countries].sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+    a.name.localeCompare(b.name, locale === "tr" ? "tr" : "en", {
+      sensitivity: "base",
+    })
   );
 }
 
@@ -62,10 +90,12 @@ function isCountryVisited(code: string, visitedCodes: Set<string>): boolean {
   return visitedCodes.has(code.toUpperCase());
 }
 
-export function getAddDestinationCountryList(): CountryOption[] {
+export function getAddDestinationCountryList(
+  locale: Locale = defaultLocale
+): CountryOption[] {
   return [
-    ...COUNTRY_LIST.filter((country) => country.code !== UK_LEGACY_CODE),
-    ...UK_NATION_OPTIONS,
+    ...getCountryList(locale).filter((country) => country.code !== UK_LEGACY_CODE),
+    ...ukNationOptions(locale),
   ];
 }
 
@@ -75,13 +105,17 @@ export function getAddRegionForCountryCode(countryCode: string): AddRegionId | n
   if (!code) return null;
 
   if (isUkNationCode(code)) return "europe";
+  // Traveler-facing: list with Europe, not Special (not a UN member state).
+  if (code === "VA") return "europe";
   if (!isUnMemberCountry(code)) return "special";
 
   const continent = getCountryContinent(code);
   return continent ? CONTINENT_TO_REGION[continent] : "special";
 }
 
-export function groupCountriesByRegion(): Record<AddRegionId, CountryOption[]> {
+export function groupCountriesByRegion(
+  locale: Locale = defaultLocale
+): Record<AddRegionId, CountryOption[]> {
   const groups: Record<AddRegionId, CountryOption[]> = {
     africa: [],
     asia: [],
@@ -92,7 +126,7 @@ export function groupCountriesByRegion(): Record<AddRegionId, CountryOption[]> {
     special: [],
   };
 
-  for (const country of getAddDestinationCountryList()) {
+  for (const country of getAddDestinationCountryList(locale)) {
     const region = getAddRegionForCountryCode(country.code);
     if (region) {
       groups[region].push(country);
@@ -102,17 +136,25 @@ export function groupCountriesByRegion(): Record<AddRegionId, CountryOption[]> {
   }
 
   for (const region of ADD_REGION_ORDER) {
-    groups[region] = sortCountriesByName(groups[region]);
+    groups[region] = sortCountriesByName(groups[region], locale);
   }
 
   return groups;
 }
 
-export function searchCountriesForAdd(query: string, limit = 60): CountryOption[] {
+export function searchCountriesForAdd(
+  query: string,
+  limit = 60,
+  locale: Locale = defaultLocale
+): CountryOption[] {
   const q = query.trim();
   if (q.length < 2) return [];
 
-  return rankCountriesForSearch(getAddDestinationCountryList(), q).slice(0, limit);
+  return rankCountriesForSearch(
+    getAddDestinationCountryList(locale),
+    q,
+    locale
+  ).slice(0, limit);
 }
 
 export function regionCountryCounts(

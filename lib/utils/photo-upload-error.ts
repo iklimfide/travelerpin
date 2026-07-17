@@ -1,4 +1,4 @@
-import { commonMessages } from "@/lib/i18n/client-messages";
+import { commonMessages } from "@/lib/i18n/message-catalog";
 
 export function formatPhotoUploadError(message: string | undefined | null): string {
   const raw = (message ?? "").trim();

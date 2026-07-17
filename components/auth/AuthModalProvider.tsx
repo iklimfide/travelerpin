@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { AuthForm } from "@/components/auth/AuthForm";
 
 type AuthModalMode = "login" | "register";

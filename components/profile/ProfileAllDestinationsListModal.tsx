@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { shareMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 
 type ProfileAllDestinationsListModalProps = {
   open: boolean;
@@ -18,6 +18,7 @@ export function ProfileAllDestinationsListModal({
   closeOnEscape = true,
   children,
 }: ProfileAllDestinationsListModalProps) {
+  const { share: shareMessages } = useAppMessages();
   useEffect(() => {
     if (!open || !closeOnEscape) return;
 

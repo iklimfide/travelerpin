@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { InstagramMemoryThumb } from "@/components/city/InstagramMemoryThumb";
 import { HubMemoryLightbox } from "@/components/hub/HubMemoryLightbox";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { useLocale } from "next-intl";
 import {
   ADD_REGION_BROWN_EMOJI,
   ADD_REGION_EMOJI,
@@ -13,11 +14,8 @@ import {
 } from "@/lib/add/countries-by-region";
 import { AddDestinationCheckbox } from "@/components/add/AddDestinationCheckbox";
 import { citySelectionKey } from "@/components/add/CityPickerStep";
-import {
-  addDestinationMessages,
-  commonMessages,
-  mapMessages,
-} from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
+import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import { flagCountryCode, isUkNationCode, isUkNationVisited, matchesUkCityCountry } from "@/lib/data/uk-nations";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { citiesAreSame } from "@/lib/utils/city-aliases";
@@ -81,6 +79,7 @@ function CountryTile({
   countriesOnly?: boolean;
   hideCountryCheckbox?: boolean;
 }) {
+  const { common: commonMessages, map: mapMessages, addDestination: addDestinationMessages } = useAppMessages();
   const displayName = formatKnownPlaceName(country.name);
   const showVisited = locked && !hideCountryCheckbox;
 
@@ -143,6 +142,8 @@ export function CountryPickerStep({
   allowToggleOnMap = false,
   onToggleCity,
 }: CountryPickerStepProps) {
+  const { common: commonMessages, map: mapMessages, addDestination: addDestinationMessages } = useAppMessages();
+  const locale = useLocale() === "tr" ? "tr" : "en";
   const progressCodes = countedCodes ?? visitedCodes;
 
   function isInCodeSet(code: string, codes: Set<string>): boolean {
@@ -176,13 +177,13 @@ export function CountryPickerStep({
   const [searchCities, setSearchCities] = useState<SearchCityResult[]>([]);
   const [loadingCities, setLoadingCities] = useState(false);
 
-  const groups = useMemo(() => groupCountriesByRegion(), []);
+  const groups = useMemo(() => groupCountriesByRegion(locale), [locale]);
 
   const countrySearchResults = useMemo(() => {
     const q = query.trim();
     if (q.length < MIN_SEARCH_LENGTH) return [];
-    return searchCountriesForAdd(q);
-  }, [query]);
+    return searchCountriesForAdd(q, 60, locale);
+  }, [query, locale]);
 
   const trimmedQuery = query.trim();
   const isSearching = trimmedQuery.length >= MIN_SEARCH_LENGTH;
@@ -199,7 +200,7 @@ export function CountryPickerStep({
       setLoadingCities(true);
       try {
         const res = await fetch(
-          `/api/destinations/search?q=${encodeURIComponent(trimmedQuery)}`,
+          `/api/destinations/search?q=${encodeURIComponent(trimmedQuery)}&locale=${locale}`,
           { signal: controller.signal }
         );
         if (!res.ok) {
@@ -222,7 +223,7 @@ export function CountryPickerStep({
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [enableCitySearch, isSearching, trimmedQuery]);
+  }, [enableCitySearch, isSearching, trimmedQuery, locale]);
 
   function toggleRegion(region: AddRegionId) {
     setExpandedRegion((current) => (current === region ? null : region));
@@ -264,7 +265,11 @@ export function CountryPickerStep({
     const locked = onMap && !allowToggleOnMap;
     const checked = (onMap && !pendingRemove) || pendingAdd;
     const pending = pendingAdd || pendingRemove;
-    const displayName = formatKnownPlaceName(city.cityName);
+    const displayName = getLocalizedCityName(
+      city.countryCode,
+      city.cityName,
+      locale
+    );
     const countryLabel = formatKnownPlaceName(city.countryName);
 
     function toggle() {

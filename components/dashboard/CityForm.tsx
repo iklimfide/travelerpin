@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LIMITS } from "@/lib/constants";
-import { translateCity, translateCommon } from "@/lib/i18n/client-messages";
+import { useTranslateCity, useTranslateCommon } from "@/lib/i18n/client-messages";
 import { addCity } from "@/lib/client/city-actions";
 import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
@@ -59,8 +59,8 @@ export function CityForm({
   hideHeader = false,
 }: CityFormProps) {
   const isEdit = Boolean(city);
-  const t = translateCity;
-  const tCommon = translateCommon;
+  const t = useTranslateCity();
+  const tCommon = useTranslateCommon();
   const modal = useModal();
   const toast = useToast();
   const abortRef = useRef<AbortController | null>(null);
@@ -515,22 +515,39 @@ export function CityForm({
             <label className="dashboard-form-city__label">
               {t("searchCities")}
             </label>
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => {
-                lastPromptKeyRef.current = null;
-                setSearchQuery(e.target.value);
-                if (e.target.value !== cityName) {
-                  setCityName("");
-                  setCoords(null);
-                }
-              }}
-              placeholder={t("searchCitiesPlaceholder")}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-blue-500"
-              autoComplete="off"
-              autoFocus
-            />
+            <div className="relative">
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => {
+                  lastPromptKeyRef.current = null;
+                  setSearchQuery(e.target.value);
+                  if (e.target.value !== cityName) {
+                    setCityName("");
+                    setCoords(null);
+                  }
+                }}
+                placeholder={t("searchCitiesPlaceholder")}
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 pr-10 text-white outline-none focus:border-blue-500 [&::-webkit-search-cancel-button]:hidden"
+                autoComplete="off"
+                autoFocus
+              />
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    lastPromptKeyRef.current = null;
+                    setSearchQuery("");
+                    setCityName("");
+                    setCoords(null);
+                  }}
+                  className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+                  aria-label="Clear"
+                >
+                  ✕
+                </button>
+              ) : null}
+            </div>
           </div>
 
           {trimmedQuery.length >= MIN_QUERY_LENGTH && (

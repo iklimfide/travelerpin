@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileAvatarLightbox } from "@/components/profile/ProfileAvatarLightbox";
 import { ProfileActionButtons } from "@/components/profile/ProfileActionButtons";
@@ -9,7 +9,7 @@ import { ProfileInstagramLink } from "@/components/profile/ProfileInstagramLink"
 import { ProfileStatCounters } from "@/components/profile/ProfileStatCounters";
 import { ProfileWorldProgress } from "@/components/profile/ProfileWorldProgress";
 import { TravelerBadge } from "@/components/profile/TravelerBadge";
-import { translateProfile } from "@/lib/i18n/client-messages";
+import { useTranslateProfile } from "@/lib/i18n/client-messages";
 import { resolvePublicMediaImageUrl } from "@/lib/storage/hub-photo-url";
 import { profileAllPath } from "@/lib/seo/site";
 import type { TravelStats } from "@/types/database";
@@ -63,7 +63,7 @@ export function ProfileIdentityCard({
   canFollow = false,
   isLoggedIn = false,
 }: ProfileIdentityCardProps) {
-  const t = translateProfile;
+  const t = useTranslateProfile();
   const allHref = profileAllPath(username);
   const [avatarLightboxOpen, setAvatarLightboxOpen] = useState(false);
   const avatarImageSrc = resolvePublicMediaImageUrl(avatarUrl) ?? avatarUrl;

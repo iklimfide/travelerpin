@@ -1,7 +1,7 @@
 "use client";
 
 import { CountryCityPicker } from "@/components/map/CountryCityPicker";
-import { mapMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 
 type CountryCityPickerSheetProps = {
   countryCode: string;
@@ -18,6 +18,7 @@ export function CountryCityPickerSheet({
   onAdded,
   onClose,
 }: CountryCityPickerSheetProps) {
+  const { map: mapMessages } = useAppMessages();
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 sm:items-center"

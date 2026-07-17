@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
@@ -14,7 +14,7 @@ import {
   writeOwnNextRouteCache,
 } from "@/lib/client/session-page-cache";
 import { fetchNextRoute } from "@/lib/client/next-route-state";
-import { nextRouteMessages, profileMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import {
   areNextRouteStopsEqual,
@@ -69,6 +69,7 @@ export function ProfileNextRouteSection({
   initialStops = [],
   isOwnProfile,
 }: ProfileNextRouteSectionProps) {
+  const { profile: profileMessages, nextRoute: nextRouteMessages } = useAppMessages();
   const router = useRouter();
   const pathname = usePathname() ?? "/";
   const initialResolved = useMemo(

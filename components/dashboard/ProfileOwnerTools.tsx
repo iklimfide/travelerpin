@@ -9,7 +9,7 @@ import {
   ProfileOwnerSection,
   type ProfileOwnerPanelMode,
 } from "@/components/profile/ProfileOwnerSection";
-import { profileMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import type { VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 
 type ProfileOwnerToolsProps = {
@@ -27,6 +27,7 @@ export function ProfileOwnerTools({
   wishlistCountries,
   visitedCodes,
 }: ProfileOwnerToolsProps) {
+  const { profile: profileMessages } = useAppMessages();
   const { open: openAddDestination } = useAddDestination();
   const [countriesPanel, setCountriesPanel] = useState<ProfileOwnerPanelMode>("closed");
   const [citiesPanel, setCitiesPanel] = useState<ProfileOwnerPanelMode>("closed");

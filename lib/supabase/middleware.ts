@@ -23,18 +23,26 @@ function isRecoverableAuthError(message: string): boolean {
 /** Skip Supabase round-trip while the access token is still comfortably valid. */
 const SESSION_REFRESH_LEAD_SECONDS = 15 * 60;
 
-export async function updateSession(request: NextRequest) {
+/**
+ * Refresh the auth session when needed.
+ * Pass `baseResponse` from next-intl (or other) middleware so redirects/rewrites
+ * and their cookies are preserved.
+ */
+export async function updateSession(
+  request: NextRequest,
+  baseResponse?: NextResponse
+) {
   const env = getSupabaseEnv();
   if (!env) {
-    return NextResponse.next({ request });
+    return baseResponse ?? NextResponse.next({ request });
   }
 
   // Anonymous / bot traffic has nothing to refresh — skip the Supabase round-trip.
   if (!hasSupabaseAuthCookie(request.cookies)) {
-    return NextResponse.next({ request });
+    return baseResponse ?? NextResponse.next({ request });
   }
 
-  let supabaseResponse = NextResponse.next({ request });
+  let supabaseResponse = baseResponse ?? NextResponse.next({ request });
 
   const supabase = createServerClient(env.url, env.key, {
     global: { fetch: fetchWithTimeout },
@@ -46,7 +54,9 @@ export async function updateSession(request: NextRequest) {
         cookiesToSet.forEach(({ name, value }) =>
           request.cookies.set(name, value)
         );
-        supabaseResponse = NextResponse.next({ request });
+        if (!baseResponse) {
+          supabaseResponse = NextResponse.next({ request });
+        }
         cookiesToSet.forEach(({ name, value, options }) =>
           supabaseResponse.cookies.set(name, value, options)
         );

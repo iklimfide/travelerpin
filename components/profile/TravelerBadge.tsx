@@ -5,7 +5,7 @@ import {
   getTravelerBadgeTier,
   type TravelerBadgeTier,
 } from "@/lib/utils/traveler-badge";
-import { translateBadge } from "@/lib/i18n/client-messages";
+import { useTranslateBadge } from "@/lib/i18n/client-messages";
 
 function BadgeIcon({ tier, className }: { tier: TravelerBadgeTier; className: string }) {
   const props = {
@@ -64,7 +64,7 @@ export function TravelerBadge({ countryCount, className = "" }: TravelerBadgePro
   const tier = getTravelerBadgeTier(countryCount);
   if (!tier) return null;
 
-  const t = translateBadge;
+  const t = useTranslateBadge();
   const theme = BADGE_TIER_THEMES[tier];
 
   return (

@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { useLocale } from "next-intl";
+import { Link } from "@/lib/i18n/navigation";
 import {
   POPULAR_DESTINATIONS,
   type PopularDestination,
 } from "@/lib/data/popular-destinations";
 import { POPULAR_PARKS, type PopularPark } from "@/lib/data/popular-parks";
-import { COUNTRY_LIST, searchCountries } from "@/lib/data/countries";
+import { getCountryList, getCountryName, searchCountries } from "@/lib/data/countries";
 import { getPopularCountries } from "@/lib/data/popular-countries";
 import {
   quickAddDestination,
@@ -31,14 +32,9 @@ import {
   SaveDestinationModalListSkeleton,
   SaveDestinationModalStatusSkeleton,
 } from "@/components/skeletons/SaveDestinationModalSkeleton";
-import {
-  commonMessages,
-  cityMessages,
-  countryHubMessages,
-  parkMessages,
-  saveDestinationMessages,
-  destinationMessages,
-} from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
+import type { Locale } from "@/lib/i18n/config";
+import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { parkTypeLabel } from "@/lib/utils/park-type";
@@ -156,25 +152,26 @@ function destinationRowHref(row: DestinationRow): string | null {
   return parkPlacePath(row.parkName, row.countryCode);
 }
 
-function popularToRow(destination: PopularDestination): DestinationRow {
+function popularToRow(destination: PopularDestination, locale: Locale): DestinationRow {
   if (destination.kind === "country") {
+    const countryName = getCountryName(destination.countryCode, locale);
     return {
       id: destinationId("country", destination.countryCode),
       kind: "country",
-      title: destination.label,
-      subtitle: destination.countryName,
+      title: countryName,
+      subtitle: countryName,
       countryCode: destination.countryCode,
-      countryName: destination.countryName,
+      countryName,
     };
   }
 
   return {
     id: destinationId("city", destination.countryCode, destination.cityName),
     kind: "city",
-    title: destination.label,
-    subtitle: destination.countryName,
+    title: getLocalizedCityName(destination.countryCode, destination.cityName, locale),
+    subtitle: getCountryName(destination.countryCode, locale),
     countryCode: destination.countryCode,
-    countryName: destination.countryName,
+    countryName: getCountryName(destination.countryCode, locale),
     cityName: destination.cityName,
     latitude: destination.latitude,
     longitude: destination.longitude,
@@ -192,42 +189,42 @@ function countryToRow(country: { code: string; name: string }): DestinationRow {
   };
 }
 
-function cityToRow(city: SearchCityResult): DestinationRow {
+function cityToRow(city: SearchCityResult, locale: Locale): DestinationRow {
   return {
     id: destinationId("city", city.countryCode, city.cityName),
     kind: "city",
-    title: city.cityName,
-    subtitle: city.countryName,
+    title: getLocalizedCityName(city.countryCode, city.cityName, locale),
+    subtitle: getCountryName(city.countryCode, locale),
     countryCode: city.countryCode,
-    countryName: city.countryName,
+    countryName: getCountryName(city.countryCode, locale),
     cityName: city.cityName,
     latitude: city.latitude,
     longitude: city.longitude,
   };
 }
 
-function visitedCityToRow(city: VisitedCity): DestinationRow {
+function visitedCityToRow(city: VisitedCity, locale: Locale): DestinationRow {
   return {
     id: destinationId("city", city.country_code, city.city_name),
     kind: "city",
-    title: city.city_name,
-    subtitle: city.country_name,
+    title: getLocalizedCityName(city.country_code, city.city_name, locale),
+    subtitle: getCountryName(city.country_code, locale),
     countryCode: city.country_code,
-    countryName: city.country_name,
+    countryName: getCountryName(city.country_code, locale),
     cityName: city.city_name,
     latitude: city.latitude ?? 0,
     longitude: city.longitude ?? 0,
   };
 }
 
-function visitedParkToRow(park: VisitedPark): DestinationRow {
+function visitedParkToRow(park: VisitedPark, locale: Locale): DestinationRow {
   return {
     id: destinationId("park", park.country_code, park.park_name, park.park_type as ParkType),
     kind: "park",
     title: park.park_name,
-    subtitle: `${park.country_name} · ${parkTypeLabel(park.park_type)}`,
+    subtitle: `${getCountryName(park.country_code, locale)} · ${parkTypeLabel(park.park_type)}`,
     countryCode: park.country_code,
-    countryName: park.country_name,
+    countryName: getCountryName(park.country_code, locale),
     parkName: park.park_name,
     parkType: park.park_type as ParkType,
     ...(park.latitude != null && park.longitude != null
@@ -236,20 +233,21 @@ function visitedParkToRow(park: VisitedPark): DestinationRow {
   };
 }
 
-function parkToRow(park: SearchParkResult | PopularPark): DestinationRow {
+function parkToRow(park: SearchParkResult | PopularPark, locale: Locale): DestinationRow {
   const hasCoords =
     "latitude" in park &&
     "longitude" in park &&
     typeof park.latitude === "number" &&
     typeof park.longitude === "number";
+  const countryName = getCountryName(park.countryCode, locale);
 
   return {
     id: destinationId("park", park.countryCode, park.parkName, park.parkType),
     kind: "park",
     title: "label" in park ? park.label : park.parkName,
-    subtitle: `${park.countryName} · ${parkTypeLabel(park.parkType)}`,
+    subtitle: `${countryName} · ${parkTypeLabel(park.parkType)}`,
     countryCode: park.countryCode,
-    countryName: park.countryName,
+    countryName,
     parkName: park.parkName,
     parkType: park.parkType,
     ...(hasCoords ? { latitude: park.latitude, longitude: park.longitude } : {}),
@@ -363,6 +361,9 @@ export function SaveDestinationModal({
   initialTab = "popular",
   onClose,
 }: SaveDestinationModalProps) {
+  const { common: commonMessages, countryHub: countryHubMessages, city: cityMessages, destinations: destinationMessages, park: parkMessages, saveDestination: saveDestinationMessages } = useAppMessages();
+  const locale = useLocale() === "tr" ? "tr" : "en";
+  const countryList = useMemo(() => getCountryList(locale), [locale]);
   const toast = useToast();
 
   const [tab, setTab] = useState<SaveDestinationTab>("popular");
@@ -504,7 +505,7 @@ export function SaveDestinationModal({
       setLoadingSearch(true);
       try {
         const res = await fetch(
-          `/api/destinations/search?q=${encodeURIComponent(trimmedQuery)}`,
+          `/api/destinations/search?q=${encodeURIComponent(trimmedQuery)}&locale=${locale}`,
           { signal: controller.signal }
         );
         if (!res.ok) {
@@ -530,7 +531,7 @@ export function SaveDestinationModal({
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [open, trimmedQuery]);
+  }, [open, trimmedQuery, locale]);
 
   const isWantMode = tab === "want";
 
@@ -593,24 +594,24 @@ export function SaveDestinationModal({
     if (trimmedQuery.length >= 2) {
       const visitedCityRows = visitedCities
         .filter((city) => city.city_name.toLowerCase().includes(needle))
-        .map(visitedCityToRow);
+        .map((city) => visitedCityToRow(city, locale));
       const visitedParkRows = visitedParks
         .filter((park) => park.park_name.toLowerCase().includes(needle))
-        .map(visitedParkToRow);
-      const countryRows = searchCountries(trimmedQuery, 8).map(countryToRow);
-      const cityRows = searchCities.map(cityToRow);
-      const parkRows = searchParks.map(parkToRow);
+        .map((park) => visitedParkToRow(park, locale));
+      const countryRows = searchCountries(trimmedQuery, 8, locale).map(countryToRow);
+      const cityRows = searchCities.map((city) => cityToRow(city, locale));
+      const parkRows = searchParks.map((park) => parkToRow(park, locale));
       const popularRows = POPULAR_DESTINATIONS.filter((destination) =>
         `${destination.label} ${destination.cityName} ${destination.countryName} ${destination.countryCode}`
           .toLowerCase()
           .includes(needle)
-      ).map(popularToRow);
+      ).map((destination) => popularToRow(destination, locale));
 
       const popularParkRows = POPULAR_PARKS.filter((park) =>
         `${park.label} ${park.parkName} ${park.countryName} ${park.countryCode}`
           .toLowerCase()
           .includes(needle)
-      ).map(parkToRow);
+      ).map((park) => parkToRow(park, locale));
 
       const merged = new Map<string, DestinationRow>();
       for (const row of [
@@ -636,27 +637,39 @@ export function SaveDestinationModal({
 
     if (tab === "want") {
       return excludeVisitedCountries(
-        getPopularCountries(40).map(countryToRow),
+        getPopularCountries(40).map((country) =>
+          countryToRow({
+            ...country,
+            name: getCountryName(country.code, locale),
+          })
+        ),
         visitedCountryCodes
       );
     }
 
     if (tab === "countries") {
-      return getPopularCountries(40).map(countryToRow);
+      return getPopularCountries(40).map((country) =>
+        countryToRow({
+          ...country,
+          name: getCountryName(country.code, locale),
+        })
+      );
     }
 
     if (tab === "cities") {
       return POPULAR_DESTINATIONS.filter((destination) => destination.kind === "city")
         .slice(0, 40)
-        .map(popularToRow);
+        .map((destination) => popularToRow(destination, locale));
     }
 
     if (tab === "parks") {
-      return POPULAR_PARKS.slice(0, 40).map(parkToRow);
+      return POPULAR_PARKS.slice(0, 40).map((park) => parkToRow(park, locale));
     }
 
-    return POPULAR_DESTINATIONS.slice(0, 40).map(popularToRow);
-  }, [isWantMode, needle, searchCities, searchParks, tab, trimmedQuery.length, visitedCountryCodes, visitedCities, visitedParks]);
+    return POPULAR_DESTINATIONS.slice(0, 40).map((destination) =>
+      popularToRow(destination, locale)
+    );
+  }, [isWantMode, needle, searchCities, searchParks, tab, trimmedQuery.length, visitedCountryCodes, visitedCities, visitedParks, locale]);
 
   const editingCity = useMemo(
     () => visitedCities.find((city) => city.id === editingCityId) ?? null,
@@ -693,27 +706,29 @@ export function SaveDestinationModal({
         add(row.countryCode, row.countryName, 1);
       }
     }
-    for (const country of searchCountries(trimmedQuery, 12)) {
+    for (const country of searchCountries(trimmedQuery, 12, locale)) {
       add(country.code, country.name, 1);
     }
     for (const country of visitedCountries) {
       add(country.country_code, country.country_name, 2);
     }
-    for (const country of COUNTRY_LIST) {
+    for (const country of countryList) {
       add(country.code, country.name, 3);
     }
 
     const sorted = [...map.values()].sort(
       (a, b) =>
         a.priority - b.priority ||
-        a.label.localeCompare(b.label, undefined, { sensitivity: "base" })
+        a.label.localeCompare(b.label, locale === "tr" ? "tr" : "en", {
+          sensitivity: "base",
+        })
     );
 
     return {
       customCountryOptions: sorted.map(({ value, label }) => ({ value, label })),
-      customCountryDefault: sorted[0]?.value ?? COUNTRY_LIST[0]!.code,
+      customCountryDefault: sorted[0]?.value ?? countryList[0]!.code,
     };
-  }, [rows, searchCities, searchParks, trimmedQuery, visitedCountries]);
+  }, [rows, searchCities, searchParks, trimmedQuery, visitedCountries, locale, countryList]);
 
   const showCustomCity =
     !isWantMode &&
@@ -878,13 +893,16 @@ export function SaveDestinationModal({
     }
     if (pendingIds.has("custom:city")) return;
 
-    const row = cityToRow({
-      cityName,
-      countryCode,
-      countryName,
-      latitude: 0,
-      longitude: 0,
-    });
+    const row = cityToRow(
+      {
+        cityName,
+        countryCode,
+        countryName,
+        latitude: 0,
+        longitude: 0,
+      },
+      locale
+    );
 
     markPending("custom:city");
     applyOptimisticAdd(row, id);
@@ -930,14 +948,17 @@ export function SaveDestinationModal({
     }
     if (pendingIds.has("custom:park")) return;
 
-    const row = parkToRow({
-      parkName,
-      parkType,
-      countryCode,
-      countryName,
-      latitude: 0,
-      longitude: 0,
-    });
+    const row = parkToRow(
+      {
+        parkName,
+        parkType,
+        countryCode,
+        countryName,
+        latitude: 0,
+        longitude: 0,
+      },
+      locale
+    );
 
     markPending("custom:park");
     applyOptimisticAdd(row, id);

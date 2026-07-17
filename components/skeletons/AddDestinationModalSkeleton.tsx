@@ -1,8 +1,9 @@
 import { ADD_REGION_ORDER } from "@/lib/add/countries-by-region";
-import { addDestinationMessages } from "@/lib/i18n/client-messages";
+import { addDestinationMessages, useAppMessages } from "@/lib/i18n/client-messages";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 export function AddDestinationCountryPickerSkeleton() {
+  const { addDestination: addDestinationMessages } = useAppMessages();
   return (
     <div
       className="add-destination-step add-destination-step--countries add-destination-step--skeleton"

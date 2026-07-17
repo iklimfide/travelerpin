@@ -1,6 +1,6 @@
 "use client";
 
-import { homeMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 
 const FEATURES = [
   { key: "map", iconBg: "bg-[#dbeafe]", icon: "🗺️" },
@@ -21,6 +21,7 @@ export function HomeFeaturesClient({
   className?: string;
   compact?: boolean;
 }) {
+  const { home: homeMessages } = useAppMessages();
   const steps = [
     homeMessages.steps.signUp,
     homeMessages.steps.addPins,

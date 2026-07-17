@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useLocale } from "next-intl";
 import { CityForm } from "@/components/dashboard/CityForm";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
 import { ProfileCityLink, ProfileCountryLink } from "@/components/profile/ProfilePlaceLink";
@@ -9,15 +10,10 @@ import { deleteCitiesBatch } from "@/lib/client/city-actions";
 import { getCountryName } from "@/lib/data/countries";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findCityHubSlug } from "@/lib/data/city-hubs";
+import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
 import { buildCitySlug } from "@/lib/utils/city-slug";
-import {
-  cityMessages,
-  commonMessages,
-  formatMessage,
-  modalMessages,
-  translateCity,
-} from "@/lib/i18n/client-messages";
+import { formatMessage, useAppMessages, useTranslateCity } from "@/lib/i18n/client-messages";
 import { formatVisitDatesSummary } from "@/lib/utils/visit-date";
 import { getIntlLocale } from "@/lib/i18n/config";
 import type { VisitedCity, VisitedCountry } from "@/types/database";
@@ -41,17 +37,25 @@ type CityListProps = {
   initialCountryFilter?: string | null;
 };
 
-function sortCities(cities: VisitedCity[], countryFilter: string): VisitedCity[] {
+function sortCities(
+  cities: VisitedCity[],
+  countryFilter: string,
+  locale: "en" | "tr"
+): VisitedCity[] {
   return [...cities].sort((a, b) => {
     if (countryFilter === ALL_COUNTRIES) {
-      const byCountry = getCountryName(a.country_code).localeCompare(
-        getCountryName(b.country_code),
-        undefined,
+      const byCountry = getCountryName(a.country_code, locale).localeCompare(
+        getCountryName(b.country_code, locale),
+        locale === "tr" ? "tr" : "en",
         { sensitivity: "base" }
       );
       if (byCountry !== 0) return byCountry;
     }
-    return a.city_name.localeCompare(b.city_name, undefined, { sensitivity: "base" });
+    return getLocalizedCityName(a.country_code, a.city_name, locale).localeCompare(
+      getLocalizedCityName(b.country_code, b.city_name, locale),
+      locale === "tr" ? "tr" : "en",
+      { sensitivity: "base" }
+    );
   });
 }
 
@@ -61,6 +65,9 @@ export function CityList({
   embedded = false,
   initialCountryFilter = null,
 }: CityListProps) {
+  const { common: commonMessages, city: cityMessages, modal: modalMessages } = useAppMessages();
+  const translateCity = useTranslateCity();
+  const locale = useLocale() === "tr" ? "tr" : "en";
   const modal = useModal();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
@@ -84,19 +91,23 @@ export function CityList({
     for (const city of cities) {
       const code = city.country_code.toUpperCase();
       if (!map.has(code)) {
-        map.set(code, getCountryName(code));
+        map.set(code, getCountryName(code, locale));
       }
     }
     if (initialCountryFilter?.trim()) {
       const code = initialCountryFilter.trim().toUpperCase();
       if (!map.has(code)) {
-        map.set(code, getCountryName(code));
+        map.set(code, getCountryName(code, locale));
       }
     }
     return [...map.entries()]
       .map(([code, name]) => ({ code, name }))
-      .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
-  }, [cities, initialCountryFilter]);
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, locale === "tr" ? "tr" : "en", {
+          sensitivity: "base",
+        })
+      );
+  }, [cities, initialCountryFilter, locale]);
 
   const filteredCities = useMemo(() => {
     const list =
@@ -104,8 +115,8 @@ export function CityList({
         ? cities
         : cities.filter((city) => city.country_code.toUpperCase() === countryFilter);
 
-    return sortCities(list, countryFilter);
-  }, [cities, countryFilter]);
+    return sortCities(list, countryFilter, locale);
+  }, [cities, countryFilter, locale]);
 
   const showCountryFilter = countryOptions.length > 1 || countryFilter !== ALL_COUNTRIES;
   const selectedCount = useMemo(
@@ -295,16 +306,22 @@ export function CityList({
                 }
               >
                 {filteredCities.map((city) => {
-                  const displayName = canonicalCityName(city.country_code, city.city_name);
-                  const countryName = getCountryName(city.country_code);
+                  const canonical = canonicalCityName(city.country_code, city.city_name);
+                  const displayName = getLocalizedCityName(
+                    city.country_code,
+                    canonical,
+                    locale
+                  );
+                  const countryName = getCountryName(city.country_code, locale);
                   const visitSummary = formatVisitDatesSummary(
                     city.visit_dates ?? [],
                     (count) => translateCity("visitCount", { count }),
                     getIntlLocale()
                   );
                   const citySlug =
-                    findCityHubSlug(city.country_code, displayName) ?? buildCitySlug(displayName);
-                  const countrySlug = resolveCountryHubSlug(city.country_code, countryName);
+                    findCityHubSlug(city.country_code, canonical) ??
+                    buildCitySlug(canonical);
+                  const countrySlug = resolveCountryHubSlug(city.country_code);
                   const fullTitle =
                     countryFilter === ALL_COUNTRIES
                       ? `${displayName}, ${countryName}`

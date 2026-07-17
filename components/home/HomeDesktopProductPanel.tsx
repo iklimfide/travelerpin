@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { HomeBelowFoldSections } from "@/components/home/HomeBelowFoldSections";
 import { BRAND } from "@/lib/constants";
 import { DEMO_PERSONA } from "@/lib/data/demo-persona";
 import { getDemoLatestPinned } from "@/lib/data/demo-latest-pinned";
-import { translateHome } from "@/lib/i18n/client-messages";
+import { useTranslateHome } from "@/lib/i18n/client-messages";
 import { profileAllPath, profilePath } from "@/lib/seo/site";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 
@@ -58,7 +58,7 @@ export function HomeDesktopProductPanel({
   cities,
   worldPercent,
 }: HomeDesktopProductPanelProps) {
-  const t = translateHome;
+  const t = useTranslateHome();
   const latestPinned = getDemoLatestPinned();
   const demoAllHref = profileAllPath(DEMO_PERSONA.username);
 

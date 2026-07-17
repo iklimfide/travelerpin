@@ -4,7 +4,7 @@ import { useContext, useEffect, useLayoutEffect, useState, type CSSProperties } 
 import { NotificationsPanel } from "@/components/notifications/NotificationsPanel";
 import { NotificationsContext } from "@/components/notifications/NotificationsProvider";
 import { useIsDesktopDashboardNav } from "@/lib/hooks/useIsDesktopDashboardNav";
-import { shareMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import {
   getFixedMenuBelowPosition,
   type FixedMenuPosition,
@@ -24,6 +24,7 @@ export function NotificationsModal({
   initialNotifications,
   initialUnreadCount = 0,
 }: NotificationsModalProps) {
+  const { share: shareMessages } = useAppMessages();
   const notifications = useContext(NotificationsContext);
   const isDesktopNav = useIsDesktopDashboardNav();
   const [sheetPosition, setSheetPosition] = useState<FixedMenuPosition | null>(null);

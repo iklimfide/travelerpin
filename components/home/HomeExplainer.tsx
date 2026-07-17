@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { formatMessage, homeMessages, translateHome } from "@/lib/i18n/client-messages";
+import { Link } from "@/lib/i18n/navigation";
+import { formatMessage, useAppMessages, useTranslateHome } from "@/lib/i18n/client-messages";
 import { linkNameInMessage } from "@/lib/utils/link-name-in-message";
 
 type HomeExplainerProps = {
@@ -19,7 +19,8 @@ export function HomeExplainer({
   compact = false,
   profileHref,
 }: HomeExplainerProps) {
-  const t = translateHome;
+  const { home: homeMessages } = useAppMessages();
+  const t = useTranslateHome();
   const statValues = { countries, cities };
 
   return (

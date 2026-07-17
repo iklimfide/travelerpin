@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 import { ShareSheetModal } from "@/components/share/ShareSheetModal";
 import { buildShareText, buildShareUrlOnly } from "@/lib/seo/profile";
 import { profileShareUrl } from "@/lib/seo/site";
-import { shareMessages } from "@/lib/i18n/client-messages";
+import { formatMessage, shareMessages, useAppMessages } from "@/lib/i18n/client-messages";
+import { isLocale, type Locale } from "@/lib/i18n/config";
 import type { TravelStats } from "@/types/database";
 
 type ShareProfileCoreProps = {
@@ -27,19 +29,32 @@ export function useShareProfile({
   onShareComplete,
 }: ShareProfileCoreProps) {
   const [open, setOpen] = useState(false);
+  const { share: shareCopy } = useAppMessages();
+  const localeRaw = useLocale();
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
 
-  const shareUrl = profileShareUrl(username);
+  const shareUrl = profileShareUrl(username, locale);
   // Messengers already show OG title/description on the preview card — send URL only.
-  const shareUrlOnly = buildShareUrlOnly(username, shareUrl);
+  const shareUrlOnly = buildShareUrlOnly(username, shareUrl, locale);
   // X benefits from explicit caption text in the composer.
   const shareText = buildShareText(displayName, stats, username, {
     url: shareUrl,
     isOwnProfile,
+    locale,
+    copy: {
+      captionOwn: shareCopy.captionOwn,
+      captionGuest: shareCopy.captionGuest,
+      captionDescription: shareCopy.captionDescription,
+    },
   });
 
   const shareLinks = {
     whatsapp: `https://wa.me/?text=${encode(shareUrlOnly)}`,
-    telegram: `https://t.me/share/url?url=${encode(shareUrlOnly)}`,
+    telegram: `https://t.me/share/url?url=${encode(shareUrlOnly)}&text=${encode(
+      isOwnProfile
+        ? shareCopy.captionOwn
+        : formatMessage(shareCopy.captionGuest, { name: displayName })
+    )}`,
     x: `https://x.com/intent/post?text=${encode(shareText)}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encode(shareUrlOnly)}`,
   };
@@ -74,6 +89,7 @@ export function ShareProfileButton({
   isOwnProfile = true,
   className = "",
 }: ShareProfileButtonProps) {
+  const { share: shareMessages } = useAppMessages();
   const { open, setOpen, shareLinks, handleCopy } = useShareProfile({
     username,
     displayName,

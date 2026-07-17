@@ -11,7 +11,7 @@ import {
 } from "@/lib/client/session-page-cache";
 import { fetchTravelState } from "@/lib/client/travel-state";
 import { savePendingWishlistChanges } from "@/lib/client/wishlist-state";
-import { commonMessages, wishlistDestinationMessages, wishlistMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import type { CountryOption } from "@/lib/data/countries";
 import { isUkNationCode, isUkNationVisited } from "@/lib/data/uk-nations";
 import type { WishlistCountry } from "@/types/database";
@@ -35,6 +35,7 @@ function isCountryOnWishlist(code: string, wishlistCodes: ReadonlySet<string>): 
 }
 
 export function WishlistDestinationModal({ onClose }: WishlistDestinationModalProps) {
+  const { common: commonMessages, wishlist: wishlistMessages, wishlistDestination: wishlistDestinationMessages } = useAppMessages();
   const cached = readTravelStateCache();
   const [wishlistCountries, setWishlistCountries] = useState<WishlistCountry[]>(
     () => cached?.wishlistCountries ?? []

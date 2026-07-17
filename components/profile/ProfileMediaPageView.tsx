@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { useState } from "react";
 import { ProfileMediaGallery } from "@/components/profile/ProfileMediaGallery";
 import { formatMessage } from "@/lib/i18n/client-messages";

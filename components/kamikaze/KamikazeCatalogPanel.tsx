@@ -14,6 +14,7 @@ type PopularFilter = "" | "popular" | "not_popular";
 type CatalogResult = {
   id?: string;
   name: string;
+  nameTr?: string | null;
   countryCode: string;
   countryName: string;
   latitude: number | null;
@@ -58,8 +59,10 @@ export function KamikazeCatalogPanel() {
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set());
   const [renameTarget, setRenameTarget] = useState<CatalogResult | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [renameTrValue, setRenameTrValue] = useState("");
 
   const [formName, setFormName] = useState("");
+  const [formNameTr, setFormNameTr] = useState("");
   const [formCountry, setFormCountry] = useState("");
   const [formLat, setFormLat] = useState("");
   const [formLng, setFormLng] = useState("");
@@ -311,22 +314,42 @@ export function KamikazeCatalogPanel() {
   function openRename(row: CatalogResult) {
     setRenameTarget(row);
     setRenameValue(row.name);
+    setRenameTrValue(row.nameTr ?? "");
   }
 
   async function submitRename() {
     if (!renameTarget) return;
     const next = renameValue.trim();
+    const nextTr = renameTrValue.trim();
     if (!next) {
       setError("Yeni ad boş olamaz");
       return;
     }
-    if (next === renameTarget.name) {
+    const nameUnchanged = next === renameTarget.name;
+    const trUnchanged = nextTr === (renameTarget.nameTr ?? "").trim();
+    if (nameUnchanged && trUnchanged) {
       setRenameTarget(null);
       return;
     }
     const row = renameTarget;
     setRenameTarget(null);
     const key = `rename:${row.source}:${row.countryCode}:${row.name}`;
+
+    if (nameUnchanged && kind === "city") {
+      await postAction(
+        {
+          action: "set_name_tr",
+          countryCode: row.countryCode,
+          name: row.name,
+          nameTr: nextTr || null,
+        },
+        key
+      );
+      setCountry(row.countryCode);
+      setQ(row.name);
+      return;
+    }
+
     await postAction(
       {
         action: "rename",
@@ -334,6 +357,7 @@ export function KamikazeCatalogPanel() {
         countryCode: row.countryCode,
         oldName: row.name,
         newName: next,
+        ...(kind === "city" ? { nameTr: nextTr || null } : {}),
         source: row.source,
         id: row.id,
         latitude: row.latitude,
@@ -502,6 +526,7 @@ export function KamikazeCatalogPanel() {
         {
           action: "add_city",
           name: formName,
+          nameTr: formNameTr.trim() || null,
           countryCode: formCountry,
           latitude,
           longitude,
@@ -511,6 +536,7 @@ export function KamikazeCatalogPanel() {
       );
       setFormPopular(false);
       setFormCountry("");
+      setFormNameTr("");
     } else {
       if (!formCountry) {
         setError("Ülke seçmelisin");
@@ -587,12 +613,22 @@ export function KamikazeCatalogPanel() {
                 <>
                   <div className="yp-form-grid">
                     <div className="yp-field yp-field--wide">
-                      <label htmlFor="yp-add-name">Şehir adı</label>
+                      <label htmlFor="yp-add-name">Şehir adı (EN)</label>
                       <input
                         id="yp-add-name"
                         value={formName}
                         onChange={(e) => setFormName(e.target.value)}
                         placeholder="Yazmaya başla — otomatik aranır"
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="yp-field yp-field--wide">
+                      <label htmlFor="yp-add-name-tr">Şehir adı (TR, isteğe bağlı)</label>
+                      <input
+                        id="yp-add-name-tr"
+                        value={formNameTr}
+                        onChange={(e) => setFormNameTr(e.target.value)}
+                        placeholder="Örn. Londra"
                         autoComplete="off"
                       />
                     </div>
@@ -638,7 +674,8 @@ export function KamikazeCatalogPanel() {
                         <table className="yp-table">
                           <thead>
                             <tr>
-                              <th>Ad</th>
+                              <th>Ad (EN)</th>
+                              <th>TR</th>
                               <th>Ülke</th>
                               <th>Kaynak</th>
                             </tr>
@@ -647,32 +684,26 @@ export function KamikazeCatalogPanel() {
                             {addSearchResults.map((row) => {
                               const isExact =
                                 exactCityMatch != null &&
-                                resultKey(row) === resultKey(exactCityMatch);
+                                resultKey(exactCityMatch) === resultKey(row);
                               return (
-                                <tr
-                                  key={resultKey(row)}
-                                  style={
-                                    isExact
-                                      ? {
-                                          background:
-                                            "color-mix(in srgb, var(--color-wbs-blue) 10%, transparent)",
-                                        }
-                                      : undefined
-                                  }
-                                >
+                                <tr key={resultKey(row)}>
                                   <td>
                                     {row.name}{" "}
-                                    {row.capital ? (
-                                      <span className="yp-badge">Başkent</span>
-                                    ) : null}{" "}
-                                    {row.popular ? (
-                                      <span className="yp-badge">Popüler</span>
+                                    {isExact ? (
+                                      <span className="yp-badge">Eşleşme</span>
                                     ) : null}
                                   </td>
+                                  <td className="yp-muted">{row.nameTr ?? "—"}</td>
                                   <td>
                                     {row.countryName} ({row.countryCode})
                                   </td>
-                                  <td>{row.source === "yp" ? "YP" : "Statik"}</td>
+                                  <td>
+                                    {row.source === "yp" ? (
+                                      <span className="yp-badge">YP</span>
+                                    ) : (
+                                      "Statik"
+                                    )}
+                                  </td>
                                 </tr>
                               );
                             })}
@@ -859,7 +890,8 @@ export function KamikazeCatalogPanel() {
               <table className="yp-table">
                 <thead>
                   <tr>
-                    <th>Ad</th>
+                    <th>Ad (EN)</th>
+                    {tab === "add-city" ? <th>TR</th> : null}
                     <th>Ülke</th>
                     {tab === "add-park" ? <th>Tür</th> : null}
                     <th>İşlemler</th>
@@ -879,6 +911,9 @@ export function KamikazeCatalogPanel() {
                             <span className="yp-badge">Popüler</span>
                           ) : null}
                         </td>
+                        {tab === "add-city" ? (
+                          <td className="yp-muted">{row.nameTr ?? "—"}</td>
+                        ) : null}
                         <td>
                           {row.countryName} ({row.countryCode})
                         </td>
@@ -926,12 +961,25 @@ export function KamikazeCatalogPanel() {
             </div>
             <div className="yp-field" style={{ minWidth: "14rem", flex: 1 }}>
               <label htmlFor="yp-cat-q">Ara</label>
-              <input
-                id="yp-cat-q"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="En az 2 karakter"
-              />
+              <div className="yp-field__input-wrap">
+                <input
+                  id="yp-cat-q"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="En az 2 karakter"
+                  className={q ? "yp-field__input--has-clear" : undefined}
+                />
+                {q ? (
+                  <button
+                    type="button"
+                    className="yp-field__clear"
+                    onClick={() => setQ("")}
+                    aria-label="Temizle"
+                  >
+                    ✕
+                  </button>
+                ) : null}
+              </div>
             </div>
             {kind === "city" ? (
               <div className="yp-field">
@@ -1024,7 +1072,8 @@ export function KamikazeCatalogPanel() {
                         onChange={toggleSelectAll}
                       />
                     </th>
-                    <th>Ad</th>
+                    <th>Ad (EN)</th>
+                    {kind === "city" ? <th>TR</th> : null}
                     <th>Ülke</th>
                     {kind === "park" ? <th>Tür</th> : null}
                     <th>Kaynak</th>
@@ -1054,6 +1103,9 @@ export function KamikazeCatalogPanel() {
                             <span className="yp-badge">Popüler</span>
                           ) : null}
                         </td>
+                        {kind === "city" ? (
+                          <td className="yp-muted">{row.nameTr ?? "—"}</td>
+                        ) : null}
                         <td>
                           {row.countryName} ({row.countryCode})
                         </td>
@@ -1146,12 +1198,17 @@ export function KamikazeCatalogPanel() {
             aria-labelledby="yp-rename-title"
             className="yp-rename-modal__sheet"
           >
-            <h2 id="yp-rename-title">Yeniden adlandır</h2>
+            <h2 id="yp-rename-title">
+              {kind === "city" ? "Adı düzenle" : "Yeniden adlandır"}
+            </h2>
             <p className="yp-muted">
               {renameTarget.countryName} · {renameTarget.name}
+              {renameTarget.nameTr ? ` / ${renameTarget.nameTr}` : ""}
             </p>
             <div className="yp-field yp-field--wide" style={{ marginTop: "0.85rem" }}>
-              <label htmlFor="yp-rename-input">Yeni ad</label>
+              <label htmlFor="yp-rename-input">
+                {kind === "city" ? "Ad (EN)" : "Yeni ad"}
+              </label>
               <input
                 id="yp-rename-input"
                 autoFocus
@@ -1165,6 +1222,23 @@ export function KamikazeCatalogPanel() {
                 }}
               />
             </div>
+            {kind === "city" ? (
+              <div className="yp-field yp-field--wide" style={{ marginTop: "0.65rem" }}>
+                <label htmlFor="yp-rename-tr-input">Ad (TR)</label>
+                <input
+                  id="yp-rename-tr-input"
+                  value={renameTrValue}
+                  onChange={(e) => setRenameTrValue(e.target.value)}
+                  placeholder="Boş bırakılırsa TR etiketi silinir"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void submitRename();
+                    }
+                  }}
+                />
+              </div>
+            ) : null}
             <div className="yp-form-actions" style={{ padding: "0.9rem 0 0" }}>
               <button type="button" className="yp-btn" onClick={() => setRenameTarget(null)}>
                 Vazgeç

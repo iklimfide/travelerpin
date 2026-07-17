@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { CountryCityPicker } from "@/components/map/CountryCityPicker";
 import { CountryParkPicker } from "@/components/map/CountryParkPicker";
-import { countryMessages, mapMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 
 type CountryPopupProps = {
   countryName: string;
@@ -42,6 +42,7 @@ export function CountryPopup({
   cityPickerFirst = false,
   readOnly = false,
 }: CountryPopupProps) {
+  const { map: mapMessages, country: countryMessages } = useAppMessages();
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();

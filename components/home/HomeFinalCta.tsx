@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { translateHome } from "@/lib/i18n/client-messages";
+import { Link } from "@/lib/i18n/navigation";
+import { useTranslateHome } from "@/lib/i18n/client-messages";
 
 export function HomeFinalCta({ compact = false }: { compact?: boolean }) {
-  const t = translateHome;
+  const t = useTranslateHome();
 
   return (
     <section

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { InstagramIcon } from "@/components/share/SharePlatformIcons";
 import { HubExternalPhoto } from "@/components/hub/HubExternalPhoto";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";

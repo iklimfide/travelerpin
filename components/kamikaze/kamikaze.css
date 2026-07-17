@@ -113,6 +113,42 @@
   font-size: 0.9rem;
 }
 
+.yp-field__input-wrap {
+  position: relative;
+}
+
+.yp-field__input-wrap input {
+  width: 100%;
+}
+
+.yp-field__input-wrap input.yp-field__input--has-clear {
+  padding-right: 2rem;
+}
+
+.yp-field__clear {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: none;
+  border-radius: 0.3rem;
+  background: transparent;
+  color: var(--yp-muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.yp-field__clear:hover {
+  background: color-mix(in srgb, var(--yp-border) 70%, transparent);
+  color: var(--foreground);
+}
+
 .yp-country-select {
   position: relative;
 }

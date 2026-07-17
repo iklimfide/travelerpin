@@ -8,12 +8,7 @@ import { useModal } from "@/components/ui/ModalProvider";
 import { deleteParksBatch } from "@/lib/client/park-actions";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findParkHubSlug } from "@/lib/data/park-hubs";
-import {
-  commonMessages,
-  formatMessage,
-  modalMessages,
-  parkMessages,
-} from "@/lib/i18n/client-messages";
+import { formatMessage, useAppMessages } from "@/lib/i18n/client-messages";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import type { VisitedCountry, VisitedPark } from "@/types/database";
@@ -50,6 +45,7 @@ function sortParks(parks: VisitedPark[], countryFilter: string): VisitedPark[] {
 }
 
 export function ParkList({ parks, countries, embedded = false }: ParkListProps) {
+  const { common: commonMessages, park: parkMessages, modal: modalMessages } = useAppMessages();
   const modal = useModal();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);

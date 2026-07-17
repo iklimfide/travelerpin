@@ -1,7 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { getTranslations } from "next-intl/server";
-import { formatMessage, homeMessages } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
 import type { TravelStats } from "@/types/database";
 
@@ -34,9 +33,7 @@ export async function HomeSampleCardHeader({
   const t = await getTranslations("common");
   const tHome = await getTranslations("home");
 
-  const title = isDemo
-    ? formatMessage(homeMessages.demoMapTitle, { name })
-    : `@${username}`;
+  const title = isDemo ? tHome("demoMapTitle", { name }) : `@${username}`;
 
   const parkTotal = stats.nationalParks + stats.themeParks;
   const showParks = parkTotal > 0;

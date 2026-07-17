@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { Link } from "@/lib/i18n/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { HomeFeatures } from "@/components/home/HomeFeatures";
 import { ProfileHeroCover } from "@/components/profile/ProfileHeroCover";
@@ -51,11 +51,12 @@ export async function PublicProfileView({
   embedded = false,
   profilePageHref,
 }: PublicProfileViewProps) {
-  const [t, tHome, tCommon, tBadge] = await Promise.all([
+  const [t, tHome, tCommon, tBadge, locale] = await Promise.all([
     getTranslations("profile"),
     getTranslations("home"),
     getTranslations("common"),
     getTranslations("badge"),
+    getLocale(),
   ]);
 
   const {
@@ -89,7 +90,8 @@ export async function PublicProfileView({
     visitedCities,
     visitedParks,
     profile.residence,
-    visitedCodes
+    visitedCodes,
+    locale === "tr" ? "tr" : "en"
   );
   const mediaPins = buildProfileMediaPins(visitedCities, visitedParks, profile);
   const isDemoProfile = isDemoProfileUsername(profile.username);

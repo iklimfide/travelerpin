@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocale } from "next-intl";
 import { searchCountries, type CountryOption } from "@/lib/data/countries";
-import { mapMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 
 type MapCountrySearchProps = {
   onSelect: (country: CountryOption) => void;
@@ -12,6 +13,8 @@ const MIN_QUERY_LENGTH = 2;
 const MAX_RESULTS = 8;
 
 export function MapCountrySearch({ onSelect }: MapCountrySearchProps) {
+  const { map: mapMessages } = useAppMessages();
+  const locale = useLocale() === "tr" ? "tr" : "en";
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -19,8 +22,8 @@ export function MapCountrySearch({ onSelect }: MapCountrySearchProps) {
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (q.length < MIN_QUERY_LENGTH) return [];
-    return searchCountries(query, MAX_RESULTS);
-  }, [query]);
+    return searchCountries(query, MAX_RESULTS, locale);
+  }, [query, locale]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {

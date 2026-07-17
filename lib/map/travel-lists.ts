@@ -1,9 +1,6 @@
-import countriesLib from "i18n-iso-countries";
-import enLocale from "i18n-iso-countries/langs/en.json";
 import { getCountryName } from "@/lib/data/countries";
+import { defaultLocale, type Locale } from "@/lib/i18n/config";
 import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
-
-countriesLib.registerLocale(enLocale);
 
 export type TravelCountryItem = {
   code: string;
@@ -21,26 +18,36 @@ export function buildVisitedCountryList(
   countries: VisitedCountry[],
   cities: VisitedCity[],
   extraCodes: string[] = [],
-  parks: VisitedPark[] = []
+  parks: VisitedPark[] = [],
+  locale: Locale = defaultLocale
 ): TravelCountryItem[] {
   const map = new Map<string, TravelCountryItem>();
 
   for (const country of countries) {
     const code = country.country_code.toUpperCase();
-    map.set(code, { code: country.country_code, name: getCountryName(country.country_code) });
+    map.set(code, {
+      code: country.country_code,
+      name: getCountryName(country.country_code, locale),
+    });
   }
 
   for (const city of cities) {
     const code = city.country_code.toUpperCase();
     if (!map.has(code)) {
-      map.set(code, { code: city.country_code, name: getCountryName(city.country_code) });
+      map.set(code, {
+        code: city.country_code,
+        name: getCountryName(city.country_code, locale),
+      });
     }
   }
 
   for (const park of parks) {
     const code = park.country_code.toUpperCase();
     if (!map.has(code)) {
-      map.set(code, { code: park.country_code, name: getCountryName(park.country_code) });
+      map.set(code, {
+        code: park.country_code,
+        name: getCountryName(park.country_code, locale),
+      });
     }
   }
 
@@ -49,12 +56,14 @@ export function buildVisitedCountryList(
     if (!map.has(code)) {
       map.set(code, {
         code: raw,
-        name: getCountryName(raw),
+        name: getCountryName(raw, locale),
       });
     }
   }
 
-  return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
+  return [...map.values()].sort((a, b) =>
+    a.name.localeCompare(b.name, locale === "tr" ? "tr" : "en")
+  );
 }
 
 export function buildVisitedCityList(cities: VisitedCity[]): TravelCityItem[] {

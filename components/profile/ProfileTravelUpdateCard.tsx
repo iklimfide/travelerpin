@@ -1,13 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { useRouter } from "next/navigation";
 import { useCallback, useState, type ReactNode } from "react";
 import { ShareSheetModal } from "@/components/share/ShareSheetModal";
 import { ShareTravelUpdateModal } from "@/components/share/ShareTravelUpdateModal";
 import { useShareProfile } from "@/components/share/ShareProfileButton";
 import { finalizeTravelShare } from "@/lib/client/travel-share-snapshot";
-import { profileMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import { profileAllPath } from "@/lib/seo/site";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import type { TravelUpdateDelta } from "@/lib/utils/travel-update";
@@ -25,6 +25,7 @@ type ProfileTravelUpdateCardProps = {
 type StatKind = "countries" | "cities" | "nationalParks" | "themeParks";
 
 function StatIcon({ kind }: { kind: StatKind }) {
+  const { profile: profileMessages } = useAppMessages();
   const props = {
     width: 22,
     height: 22,
@@ -79,6 +80,7 @@ function ProfileUpdateStat({
   label: string;
   href: string;
 }) {
+  const { profile: profileMessages } = useAppMessages();
   return (
     <Link href={href} className="profile-update-card__stat profile-update-card__stat-link">
       <span className="profile-update-card__stat-icon">
@@ -98,6 +100,7 @@ export function ProfileTravelUpdateCard({
   isOwnProfile = true,
   persistShareSnapshot = true,
 }: ProfileTravelUpdateCardProps) {
+  const { profile: profileMessages } = useAppMessages();
   const router = useRouter();
   const [updateOpen, setUpdateOpen] = useState(false);
   const hasUpdate = delta.hasChanges;

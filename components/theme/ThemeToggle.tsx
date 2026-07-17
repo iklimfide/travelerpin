@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "@/components/theme/ThemeProvider";
-import { commonMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 
 type ThemeToggleProps = {
   variant?: "icon" | "menu";
@@ -10,6 +10,7 @@ type ThemeToggleProps = {
 };
 
 function ThemeIcon({ isDark, className }: { isDark: boolean; className?: string }) {
+  const { common: commonMessages } = useAppMessages();
   if (isDark) {
     return (
       <svg
@@ -49,6 +50,7 @@ function ThemeIcon({ isDark, className }: { isDark: boolean; className?: string 
 }
 
 export function ThemeToggle({ variant = "icon", className = "", onToggled }: ThemeToggleProps) {
+  const { common: commonMessages } = useAppMessages();
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
 

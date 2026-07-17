@@ -12,17 +12,20 @@ import {
   getCatalogOverlay,
   getCatalogOverlayFresh,
   popularityOverrideMap,
+  cityNameTrOverrideMap,
   revalidateCatalogOverlay,
   type YpCatalogCityRow,
   type YpCatalogParkRow,
 } from "@/lib/kamikaze/catalog-overlay";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
+import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
 import { PARK_TYPES, type ParkType } from "@/types/database";
 
 type CityListRow = {
   name: string;
+  nameTr: string | null;
   countryCode: string;
   countryName: string;
   latitude: number | null;
@@ -45,6 +48,45 @@ function resolveCityPopular(
 function resolveCityCapital(countryCode: string, name: string): boolean {
   const capitalName = getCountryCapitalName(countryCode);
   return capitalName ? matchesCapitalCity(name, capitalName) : false;
+}
+
+/** Prefer YP DB override, else curated place-names catalog when it differs from EN. */
+function resolveCityNameTr(
+  countryCode: string,
+  name: string,
+  overrides: Map<string, string>
+): string | null {
+  const code = countryCode.toUpperCase();
+  const canonical = canonicalCityName(code, name);
+  const key = `${code}:${catalogNameKey(canonical, code)}`;
+  const fromDb = overrides.get(key)?.trim();
+  if (fromDb) return fromDb;
+
+  const fromCatalog = getLocalizedCityName(code, canonical, "tr");
+  if (fromCatalog !== canonical) return fromCatalog;
+  return null;
+}
+
+function withCityNameTr(
+  row: Omit<CityListRow, "nameTr">,
+  overrides: Map<string, string>
+): CityListRow {
+  return {
+    ...row,
+    nameTr: resolveCityNameTr(row.countryCode, row.name, overrides),
+  };
+}
+
+function cityNameMatchesSearch(
+  countryCode: string,
+  name: string,
+  q: string,
+  nameTrOverrides: Map<string, string>
+): boolean {
+  if (q.length < 2) return true;
+  if (matchesPlaceNameSearch(name, q)) return true;
+  const nameTr = resolveCityNameTr(countryCode, name, nameTrOverrides);
+  return nameTr ? matchesPlaceNameSearch(nameTr, q) : false;
 }
 
 function dedupeCityListRows(rows: CityListRow[]): CityListRow[] {
@@ -106,10 +148,11 @@ function buildPopularOnlyCityRows(
   overlay: Awaited<ReturnType<typeof getCatalogOverlay>>,
   excludedKeys: Set<string>,
   overrides: Map<string, boolean>,
+  nameTrOverrides: Map<string, string>,
   country: string,
   q: string
 ): CityListRow[] {
-  const rows: CityListRow[] = [];
+  const rows: Array<Omit<CityListRow, "nameTr">> = [];
 
   for (const [key, isPopular] of overrides) {
     if (!isPopular) continue;
@@ -127,10 +170,11 @@ function buildPopularOnlyCityRows(
         catalogNameKey(city.name, code) === nameKey
     );
     if (ypMatch) {
-      if (q.length >= 2 && !matchesPlaceNameSearch(ypMatch.name, q)) continue;
+      const name = canonicalCityName(code, ypMatch.name);
+      if (!cityNameMatchesSearch(code, name, q, nameTrOverrides)) continue;
       rows.push({
         id: ypMatch.id,
-        name: canonicalCityName(code, ypMatch.name),
+        name,
         countryCode: code,
         countryName: ypMatch.country_name,
         latitude: ypMatch.latitude,
@@ -150,10 +194,11 @@ function buildPopularOnlyCityRows(
         catalogNameKey(city.name, city.countryCode) === nameKey
     );
     if (!staticMatch) continue;
-    if (q.length >= 2 && !matchesPlaceNameSearch(staticMatch.name, q)) continue;
+    const name = canonicalCityName(code, staticMatch.name);
+    if (!cityNameMatchesSearch(code, name, q, nameTrOverrides)) continue;
 
     rows.push({
-      name: canonicalCityName(code, staticMatch.name),
+      name,
       countryCode: code,
       countryName: getCountryName(code),
       latitude: staticMatch.latitude,
@@ -164,7 +209,7 @@ function buildPopularOnlyCityRows(
     });
   }
 
-  return dedupeCityListRows(rows);
+  return dedupeCityListRows(rows.map((row) => withCityNameTr(row, nameTrOverrides)));
 }
 
 export async function GET(request: Request) {
@@ -189,18 +234,23 @@ export async function GET(request: Request) {
 
     if (kind === "city") {
       const overrides = popularityOverrideMap(overlayFresh);
-      const results = overlayFresh.cities.map((row) => ({
-        id: row.id,
-        name: row.name,
-        countryCode: row.country_code.toUpperCase(),
-        countryName: row.country_name,
-        latitude: row.latitude,
-        longitude: row.longitude,
-        source: "yp" as const,
-        popular: resolveCityPopular(row.country_code, row.name, overrides),
-        capital: resolveCityCapital(row.country_code, row.name),
-        createdAt: row.created_at,
-      }));
+      const nameTrOverrides = cityNameTrOverrideMap(overlayFresh);
+      const results = overlayFresh.cities.map((row) =>
+        withCityNameTr(
+          {
+            id: row.id,
+            name: row.name,
+            countryCode: row.country_code.toUpperCase(),
+            countryName: row.country_name,
+            latitude: row.latitude,
+            longitude: row.longitude,
+            source: "yp" as const,
+            popular: resolveCityPopular(row.country_code, row.name, overrides),
+            capital: resolveCityCapital(row.country_code, row.name),
+          },
+          nameTrOverrides
+        )
+      );
       // overlay.cities is already created_at desc.
       return NextResponse.json({ kind: "city", results, ypOnly: true });
     }
@@ -237,13 +287,21 @@ export async function GET(request: Request) {
         })
     );
     const overrides = popularityOverrideMap(overlay);
+    const nameTrOverrides = cityNameTrOverrideMap(overlay);
 
     const popularOnlyBrowse =
       popularFilter === "popular" && !country && q.length < 2;
 
     if (popularOnlyBrowse) {
       const all = sortCityListRows(
-        buildPopularOnlyCityRows(overlay, excludedKeys, overrides, country, q)
+        buildPopularOnlyCityRows(
+          overlay,
+          excludedKeys,
+          overrides,
+          nameTrOverrides,
+          country,
+          q
+        )
       );
       const page = all.slice(offset, offset + limit);
       const nextOffset = offset + page.length;
@@ -263,11 +321,11 @@ export async function GET(request: Request) {
     const additions = overlay.cities.filter((row) => {
       const code = row.country_code.toUpperCase();
       if (country && code !== country) return false;
-      if (q.length >= 2 && !matchesPlaceNameSearch(row.name, q)) return false;
+      if (!cityNameMatchesSearch(code, row.name, q, nameTrOverrides)) return false;
       return true;
     });
 
-    let staticMatches: CityListRow[] = [];
+    let staticMatches: Array<Omit<CityListRow, "nameTr">> = [];
 
     if (q.length >= 2 || country) {
       staticMatches = TOURIST_CITIES.filter((city) => {
@@ -279,7 +337,9 @@ export async function GET(request: Request) {
           return false;
         }
         if (country && city.countryCode !== country) return false;
-        if (q.length >= 2 && !matchesPlaceNameSearch(city.name, q)) return false;
+        if (!cityNameMatchesSearch(city.countryCode, city.name, q, nameTrOverrides)) {
+          return false;
+        }
         return true;
       }).map((city) => ({
         name: city.name,
@@ -293,7 +353,7 @@ export async function GET(request: Request) {
       }));
     }
 
-    const additionRows: CityListRow[] = additions.map((row) => ({
+    const additionRows: Array<Omit<CityListRow, "nameTr">> = additions.map((row) => ({
       id: row.id,
       name: row.name,
       countryCode: row.country_code,
@@ -306,7 +366,14 @@ export async function GET(request: Request) {
     }));
 
     const all = sortCityListRows(
-      applyPopularFilter(dedupeCityListRows([...additionRows, ...staticMatches]), popularFilter)
+      applyPopularFilter(
+        dedupeCityListRows(
+          [...additionRows, ...staticMatches].map((row) =>
+            withCityNameTr(row, nameTrOverrides)
+          )
+        ),
+        popularFilter
+      )
     );
     const page = all.slice(offset, offset + limit);
     const nextOffset = offset + page.length;
@@ -427,6 +494,7 @@ type CatalogBody =
   | {
       action: "add_city";
       name: string;
+      nameTr?: string | null;
       countryCode: string;
       latitude?: number | string | null;
       longitude?: number | string | null;
@@ -469,11 +537,18 @@ type CatalogBody =
       countryCode: string;
       oldName: string;
       newName: string;
+      nameTr?: string | null;
       source: "static" | "yp";
       id?: string;
       latitude?: number | null;
       longitude?: number | null;
       parkType?: ParkType;
+    }
+  | {
+      action: "set_name_tr";
+      countryCode: string;
+      name: string;
+      nameTr: string | null;
     }
   | {
       action: "set_popular";
@@ -504,6 +579,7 @@ export async function POST(request: Request) {
 
   if (body.action === "add_city") {
     const name = formatCityDisplayName(body.name ?? "");
+    const nameTr = body.nameTr?.trim() ? formatCityDisplayName(body.nameTr) : null;
     const countryCode = body.countryCode?.trim().toUpperCase();
     if (!name || !countryCode || countryCode.length !== 2) {
       return NextResponse.json({ error: "Invalid city payload" }, { status: 400 });
@@ -556,6 +632,12 @@ export async function POST(request: Request) {
           );
         }
       }
+      if (nameTr) {
+        const trError = await upsertCityNameTr(countryCode, existing.name, nameTr);
+        if (trError) {
+          return NextResponse.json({ error: trError, city: existing }, { status: 400 });
+        }
+      }
       await revalidateCatalogOverlay();
       return NextResponse.json({ city: existing, alreadyExisted: true });
     }
@@ -589,6 +671,9 @@ export async function POST(request: Request) {
           (r) => catalogNameKey(r.name, countryCode) === nameKey
         );
         if (found) {
+          if (nameTr) {
+            await upsertCityNameTr(countryCode, found.name, nameTr);
+          }
           await revalidateCatalogOverlay();
           return NextResponse.json({ city: found, alreadyExisted: true });
         }
@@ -610,6 +695,13 @@ export async function POST(request: Request) {
           { error: popularError, city: data },
           { status: 400 }
         );
+      }
+    }
+
+    if (nameTr) {
+      const trError = await upsertCityNameTr(countryCode, name, nameTr);
+      if (trError) {
+        return NextResponse.json({ error: trError, city: data }, { status: 400 });
       }
     }
 
@@ -931,8 +1023,110 @@ export async function POST(request: Request) {
         .eq("name_key", newKey);
     }
 
+    if (body.kind === "city") {
+      if (oldKey !== newKey) {
+        // Move TR label to the new EN key when the English name changes.
+        const { data: oldTr } = await admin
+          .from("yp_city_name_tr")
+          .select("name_tr")
+          .eq("country_code", countryCode)
+          .eq("name_key", oldKey)
+          .maybeSingle();
+        if (oldTr?.name_tr) {
+          await admin
+            .from("yp_city_name_tr")
+            .delete()
+            .eq("country_code", countryCode)
+            .eq("name_key", oldKey);
+          if (body.nameTr === undefined) {
+            await upsertCityNameTr(countryCode, newName, String(oldTr.name_tr));
+          }
+        }
+      }
+      if (body.nameTr !== undefined) {
+        const trError = await upsertCityNameTr(
+          countryCode,
+          newName,
+          body.nameTr?.trim() ? body.nameTr : null
+        );
+        if (trError) {
+          return NextResponse.json({ error: trError }, { status: 400 });
+        }
+      }
+    }
+
     await revalidateCatalogOverlay();
     return NextResponse.json({ ok: true });
+  }
+
+  if (body.action === "set_name_tr") {
+    const countryCode = body.countryCode?.trim().toUpperCase();
+    const name = body.name?.trim();
+    if (!countryCode || countryCode.length !== 2 || !name) {
+      return NextResponse.json({ error: "Ülke ve şehir adı gerekli" }, { status: 400 });
+    }
+    const trError = await upsertCityNameTr(
+      countryCode,
+      name,
+      body.nameTr?.trim() ? body.nameTr : null
+    );
+    if (trError) {
+      return NextResponse.json({ error: trError }, { status: 400 });
+    }
+    await revalidateCatalogOverlay();
+    return NextResponse.json({ ok: true });
+  }
+
+  async function upsertCityNameTr(
+    countryCodeRaw: string,
+    nameRaw: string,
+    nameTrRaw: string | null
+  ): Promise<string | null> {
+    const countryCode = countryCodeRaw.trim().toUpperCase();
+    const name = nameRaw.trim();
+    if (!countryCode || countryCode.length !== 2 || !name) {
+      return "Geçersiz TR adı isteği";
+    }
+
+    const nameKey = catalogNameKey(name, countryCode);
+    const nameTr = nameTrRaw?.trim() ?? "";
+
+    if (!nameTr) {
+      await admin
+        .from("yp_city_name_tr")
+        .delete()
+        .eq("country_code", countryCode)
+        .eq("name_key", nameKey);
+      return null;
+    }
+
+    const displayTr = formatCityDisplayName(nameTr);
+    const now = new Date().toISOString();
+    const { data: existing } = await admin
+      .from("yp_city_name_tr")
+      .select("id")
+      .eq("country_code", countryCode)
+      .eq("name_key", nameKey)
+      .maybeSingle();
+
+    if (existing?.id) {
+      const { error } = await admin
+        .from("yp_city_name_tr")
+        .update({ name_tr: displayTr, updated_at: now })
+        .eq("id", existing.id);
+      return error?.message ?? null;
+    }
+
+    const { error } = await admin.from("yp_city_name_tr").insert({
+      country_code: countryCode,
+      name_key: nameKey,
+      name_tr: displayTr,
+      updated_at: now,
+    });
+    if (error && error.message.toLowerCase().includes("does not exist")) {
+      return "yp_city_name_tr tablosu yok — migration 035 uygulanmalı";
+    }
+    return error?.message ?? null;
   }
 
   async function upsertCityPopular(

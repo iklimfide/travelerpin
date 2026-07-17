@@ -133,10 +133,12 @@ export async function findPublishedHubBySlug(
 
 /** Resolve a legacy broken slug (e.g. d-sseldorf) to the canonical hub slug. */
 export async function findPublishedHubSlugRedirect(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient | null,
   hubKind: HubKind,
   fromSlug: string
 ): Promise<string | null> {
+  if (!supabase) return null;
+
   const { data, error } = await supabase
     .from("published_hub_slug_redirects")
     .select("to_slug")

@@ -9,7 +9,7 @@ import {
   WhatsAppIcon,
   XIcon,
 } from "@/components/share/SharePlatformIcons";
-import { shareMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 
 type ShareOption = {
   id: string;
@@ -33,6 +33,7 @@ type ShareSheetModalProps = {
 };
 
 function ShareOptionButton({ label, icon, iconClassName, onClick }: Omit<ShareOption, "id">) {
+  const { share: shareMessages } = useAppMessages();
   return (
     <button
       type="button"
@@ -58,6 +59,7 @@ export function ShareSheetModal({
   onShareComplete,
   shareLinks,
 }: ShareSheetModalProps) {
+  const { share: shareMessages } = useAppMessages();
   useEffect(() => {
     if (!open) return;
 

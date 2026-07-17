@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ProfileAllDestinationsView } from "@/components/profile/ProfileAllDestinationsView";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { buildProfileAllDestinations } from "@/lib/utils/profile-all-destinations";
 import { parseNextRoute } from "@/lib/utils/next-route";
-import { DEFAULT_DESCRIPTION, profileAllPath, travelMapTitle } from "@/lib/seo/site";
+import { DEFAULT_DESCRIPTION, profileAllPath } from "@/lib/seo/site";
 import { loadPublicProfilePage } from "@/lib/supabase/profile-page-data";
+import { isLocale } from "@/lib/i18n/config";
 
 type PageProps = {
   params: Promise<{ username: string }>;
@@ -15,6 +17,7 @@ export const revalidate = false;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
+  const tShare = await getTranslations("share");
   const data = await loadPublicProfilePage(username);
 
   if (!data) {
@@ -25,18 +28,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     data.profile.display_name,
     data.profile.username
   );
+  const localeRaw = await getLocale();
+  const locale = isLocale(localeRaw) ? localeRaw : "en";
 
   return {
-    title: travelMapTitle(displayName),
+    title: tShare("pageTitle", { name: displayName }),
     description: DEFAULT_DESCRIPTION,
     alternates: {
-      canonical: profileAllPath(data.profile.username),
+      canonical: profileAllPath(data.profile.username, locale),
     },
   };
 }
 
 export default async function ProfileAllDestinationsPage({ params }: PageProps) {
   const { username } = await params;
+  const locale = (await getLocale()) === "tr" ? "tr" : "en";
   const data = await loadPublicProfilePage(username);
 
   if (!data) {
@@ -58,7 +64,8 @@ export default async function ProfileAllDestinationsPage({ params }: PageProps) 
     data.visitedParks,
     visibleWishlistCountries,
     data.visitedCodes,
-    profile.residence
+    profile.residence,
+    locale
   );
 
   const view = (

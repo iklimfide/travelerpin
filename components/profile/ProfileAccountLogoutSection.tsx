@@ -1,11 +1,11 @@
 "use client";
 
-import { translateCommon, translateSettings } from "@/lib/i18n/client-messages";
+import { useTranslateCommon, useTranslateSettings } from "@/lib/i18n/client-messages";
 import { clearAllSessionPageCaches } from "@/lib/client/session-page-cache";
 
 export function ProfileAccountLogoutSection() {
-  const tCommon = translateCommon;
-  const tSettings = translateSettings;
+  const tCommon = useTranslateCommon();
+  const tSettings = useTranslateSettings();
 
   async function handleLogout() {
     clearAllSessionPageCaches();

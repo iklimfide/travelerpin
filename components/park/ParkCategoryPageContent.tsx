@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { HubPageTopBar } from "@/components/hub/HubPageTopBar";
 import { formatMessage } from "@/lib/i18n/client-messages";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";

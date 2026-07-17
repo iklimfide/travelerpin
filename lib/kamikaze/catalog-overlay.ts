@@ -76,24 +76,35 @@ export type YpCityPopularityRow = {
   updated_at: string;
 };
 
+export type YpCityNameTrRow = {
+  id: string;
+  country_code: string;
+  name_key: string;
+  name_tr: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type CatalogOverlaySnapshot = {
   cities: YpCatalogCityRow[];
   parks: YpCatalogParkRow[];
   exclusions: YpCatalogExclusionRow[];
   popularity: YpCityPopularityRow[];
+  nameTr: YpCityNameTrRow[];
 };
 
 async function fetchCatalogOverlayUncached(): Promise<CatalogOverlaySnapshot> {
   const client = createOverlayReadClient();
   if (!client) {
-    return { cities: [], parks: [], exclusions: [], popularity: [] };
+    return { cities: [], parks: [], exclusions: [], popularity: [], nameTr: [] };
   }
 
-  const [citiesRes, parksRes, exclusionsRes, popularityRes] = await Promise.all([
+  const [citiesRes, parksRes, exclusionsRes, popularityRes, nameTrRes] = await Promise.all([
     client.from("yp_catalog_cities").select("*").order("created_at", { ascending: false }),
     client.from("yp_catalog_parks").select("*").order("created_at", { ascending: false }),
     client.from("yp_catalog_exclusions").select("*").order("created_at", { ascending: false }),
     client.from("yp_city_popularity").select("*").order("updated_at", { ascending: false }),
+    client.from("yp_city_name_tr").select("*").order("updated_at", { ascending: false }),
   ]);
 
   if (citiesRes.error) {
@@ -116,6 +127,8 @@ async function fetchCatalogOverlayUncached(): Promise<CatalogOverlaySnapshot> {
     popularity: popularityRes.error
       ? []
       : ((popularityRes.data ?? []) as YpCityPopularityRow[]),
+    // Table may be missing until migration 035 is applied.
+    nameTr: nameTrRes.error ? [] : ((nameTrRes.data ?? []) as YpCityNameTrRow[]),
   };
 }
 
@@ -163,6 +176,20 @@ export function popularityOverrideMap(
   for (const row of overlay.popularity) {
     const code = row.country_code.toUpperCase();
     map.set(`${code}:${catalogNameKey(row.name_key, code)}`, row.is_popular);
+  }
+  return map;
+}
+
+/** Lookup keys: `${COUNTRY}:${name_key}` → Turkish display label. */
+export function cityNameTrOverrideMap(
+  overlay: CatalogOverlaySnapshot
+): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const row of overlay.nameTr) {
+    const code = row.country_code.toUpperCase();
+    const tr = row.name_tr.trim();
+    if (!tr) continue;
+    map.set(`${code}:${catalogNameKey(row.name_key, code)}`, tr);
   }
   return map;
 }

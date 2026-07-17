@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { POPULAR_PARKS, type PopularPark } from "@/lib/data/popular-parks";
 import { quickAddPark, quickRemovePark } from "@/lib/client/park-destination-actions";
 import { parkTypeLabel } from "@/lib/utils/park-type";
-import { parkMessages, mapMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import { useToast } from "@/components/ui/ToastProvider";
 import type { VisitedPark } from "@/types/database";
 
@@ -36,6 +36,7 @@ export function MapPopularParks({
   onAdded,
   onRemoved,
 }: MapPopularParksProps) {
+  const { map: mapMessages, park: parkMessages } = useAppMessages();
   const toast = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);

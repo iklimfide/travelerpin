@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LIMITS } from "@/lib/constants";
-import { translateCommon, translatePark } from "@/lib/i18n/client-messages";
+import { useTranslateCommon, useTranslatePark } from "@/lib/i18n/client-messages";
 import { addPark } from "@/lib/client/park-actions";
 import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
 import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEditor";
@@ -57,8 +57,8 @@ export function ParkForm({
   hideHeader = false,
 }: ParkFormProps) {
   const isEdit = Boolean(park);
-  const t = translatePark;
-  const tCommon = translateCommon;
+  const t = useTranslatePark();
+  const tCommon = useTranslateCommon();
   const modal = useModal();
   const toast = useToast();
   const abortRef = useRef<AbortController | null>(null);

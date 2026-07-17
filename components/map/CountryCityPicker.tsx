@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { compareCitiesForAddModal } from "@/lib/add/city-list-sort";
 import { addCitiesBatch, addCity } from "@/lib/client/city-actions";
-import { cityMessages, commonMessages, formatMessage, mapMessages } from "@/lib/i18n/client-messages";
+import { formatMessage, useAppMessages } from "@/lib/i18n/client-messages";
 import { canonicalCityKey, citiesAreSame } from "@/lib/utils/city-aliases";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { useModal } from "@/components/ui/ModalProvider";
@@ -38,6 +38,7 @@ export function CountryCityPicker({
   existingCityNames,
   onAdded,
 }: CountryCityPickerProps) {
+  const { common: commonMessages, map: mapMessages, city: cityMessages } = useAppMessages();
   const modal = useModal();
   const toast = useToast();
 

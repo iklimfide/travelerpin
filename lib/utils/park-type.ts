@@ -1,5 +1,5 @@
 import type { ParkType } from "@/types/database";
-import { parkMessages } from "@/lib/i18n/client-messages";
+import { parkMessages } from "@/lib/i18n/message-catalog";
 
 export function isThemeParkType(type: ParkType): boolean {
   return type === "theme_park";

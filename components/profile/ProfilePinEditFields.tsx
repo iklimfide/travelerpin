@@ -4,7 +4,7 @@ import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEdito
 import { PinMediaFields } from "@/components/dashboard/PinMediaFields";
 import { PinNoteEditor } from "@/components/dashboard/PinNoteEditor";
 import { LIMITS } from "@/lib/constants";
-import { translateCity, translateCommon } from "@/lib/i18n/client-messages";
+import { useTranslateCity, useTranslateCommon } from "@/lib/i18n/client-messages";
 
 type ProfilePinEditFieldsProps = {
   visitDates: string[];
@@ -41,8 +41,8 @@ export function ProfilePinEditFields({
   onCancel,
   submitDisabled = false,
 }: ProfilePinEditFieldsProps) {
-  const t = translateCity;
-  const tCommon = translateCommon;
+  const t = useTranslateCity();
+  const tCommon = useTranslateCommon();
 
   return (
     <div className="profile-pin-edit-fields">

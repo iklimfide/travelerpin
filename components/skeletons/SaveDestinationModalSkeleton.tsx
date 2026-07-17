@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/Skeleton";
-import { saveDestinationMessages } from "@/lib/i18n/client-messages";
+import { saveDestinationMessages, useAppMessages } from "@/lib/i18n/client-messages";
 
 type SaveDestinationModalListSkeletonProps = {
   rows?: number;
@@ -33,6 +33,7 @@ export function SaveDestinationModalListSkeleton({
   rows = 8,
   variant = "browse",
 }: SaveDestinationModalListSkeletonProps) {
+  const { saveDestination: saveDestinationMessages } = useAppMessages();
   return (
     <ul
       className="save-destination-modal__list save-destination-modal__list--skeleton scrollbar-thin"

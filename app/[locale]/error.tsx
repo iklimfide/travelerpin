@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 /**

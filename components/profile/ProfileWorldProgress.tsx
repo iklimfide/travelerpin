@@ -1,14 +1,14 @@
 "use client";
 
 import { WORLD_COUNTRY_TOTAL, worldCoveragePercent } from "@/lib/utils/profile-page";
-import { translateProfile } from "@/lib/i18n/client-messages";
+import { useTranslateProfile } from "@/lib/i18n/client-messages";
 
 type ProfileWorldProgressProps = {
   countryCount: number;
 };
 
 export function ProfileWorldProgress({ countryCount }: ProfileWorldProgressProps) {
-  const t = translateProfile;
+  const t = useTranslateProfile();
   const coverage = worldCoveragePercent(countryCount);
 
   return (

@@ -1,15 +1,16 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { usePathname } from "next/navigation";
 import {
   NotificationsContext,
 } from "@/components/notifications/NotificationsProvider";
 import { fetchUnreadNotificationCount } from "@/lib/client/notification-actions";
-import { dashboardNavMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 
 function BellIcon() {
+  const { dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
     <svg viewBox="0 0 24 24" width={22} height={22} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M12 3a5 5 0 0 0-5 5v2.2c0 .7-.2 1.4-.6 2L5 14.5h14l-1.4-2.3c-.4-.6-.6-1.3-.6-2V8a5 5 0 0 0-5-5Z" strokeLinejoin="round" />
@@ -23,6 +24,7 @@ type NotificationsNavLinkProps = {
 };
 
 export function NotificationsNavLink({ variant = "bottomBar" }: NotificationsNavLinkProps) {
+  const { dashboardNav: dashboardNavMessages } = useAppMessages();
   const pathname = usePathname();
   const notifications = useContext(NotificationsContext);
   const active = pathname.startsWith("/notifications");

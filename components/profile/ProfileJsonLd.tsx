@@ -1,4 +1,6 @@
+import { getLocale, getTranslations } from "next-intl/server";
 import { BRAND } from "@/lib/constants";
+import { isLocale, type Locale } from "@/lib/i18n/config";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { buildProfileDescription } from "@/lib/seo/profile";
 import { profileUrl as buildProfileUrl } from "@/lib/seo/site";
@@ -12,10 +14,17 @@ export async function ProfileJsonLd({ username }: ProfileJsonLdProps) {
   const data = await loadPublicProfileMetadata(username);
   if (!data) return null;
 
+  const localeRaw = await getLocale();
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
+  const tShare = await getTranslations("share");
   const { profile, stats } = data;
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
-  const profileDescription = buildProfileDescription(displayName, stats);
-  const publicUrl = buildProfileUrl(profile.username);
+  const profileDescription = buildProfileDescription(displayName, stats, {
+    captionOwn: tShare("captionOwn"),
+    captionGuest: tShare("captionGuest", { name: displayName }),
+    captionDescription: tShare("captionDescription"),
+  });
+  const publicUrl = buildProfileUrl(profile.username, locale);
 
   const jsonLd = {
     "@context": "https://schema.org",

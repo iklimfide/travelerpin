@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { CityForm } from "@/components/dashboard/CityForm";
 import { CountryForm } from "@/components/dashboard/CountryForm";
 import { ParkForm } from "@/components/dashboard/ParkForm";
-import { cityMessages, countryMessages, parkMessages, shareMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
 
 type ProfileDestinationEditModalProps = {
@@ -27,6 +27,7 @@ export function ProfileDestinationEditModal({
   onClose,
   mediaFocus,
 }: ProfileDestinationEditModalProps) {
+  const { country: countryMessages, city: cityMessages, share: shareMessages, park: parkMessages } = useAppMessages();
   const router = useRouter();
   const open = Boolean(city || park || countryCode);
 

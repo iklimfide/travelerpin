@@ -23,7 +23,7 @@ import {
   type TravelStateData,
 } from "@/lib/client/session-page-cache";
 import { fetchTravelState } from "@/lib/client/travel-state";
-import { countryMessages, mapMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import {
   countryHasMappedPlaces,
   isCountryRemoveBlockedByPlacesError,
@@ -82,6 +82,7 @@ export function TravelMapView({
   shareFillCountryCodes = null,
   shareFillWishlistCountryCodes = null,
 }: TravelMapViewProps) {
+  const { map: mapMessages, country: countryMessages } = useAppMessages();
   const editable = canEditMap ?? isLoggedIn;
   const modal = useModal();
   const toast = useToast();

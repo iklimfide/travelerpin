@@ -13,7 +13,7 @@ import {
   type SharePinOffer,
   type SharePromptPayload,
 } from "@/lib/client/share-pin-prompt";
-import { formatMessage, shareMessages } from "@/lib/i18n/client-messages";
+import { formatMessage, shareMessages, useAppMessages } from "@/lib/i18n/client-messages";
 
 function pinLabel(offer: SharePinOffer): string {
   switch (offer.kind) {
@@ -33,6 +33,7 @@ function pinLabel(offer: SharePinOffer): string {
 }
 
 export function SharePinPromptProvider({ children }: { children: ReactNode }) {
+  const { share: shareMessages } = useAppMessages();
   const toast = useToast();
   const [sharePayload, setSharePayload] = useState<SharePromptPayload | null>(null);
   const showingRef = useRef(false);

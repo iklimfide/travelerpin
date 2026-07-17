@@ -3,6 +3,8 @@ import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findCityHubSlug } from "@/lib/data/city-hubs";
 import { findParkHubSlug } from "@/lib/data/park-hubs";
+import { defaultLocale, type Locale } from "@/lib/i18n/config";
+import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import { buildVisitedCountryList } from "@/lib/map/travel-lists";
 import { buildCitySlug } from "@/lib/utils/city-slug";
 import type { ParkType } from "@/lib/data/tourist-park-search";
@@ -154,13 +156,15 @@ export function buildProfileTrips(
   cities: VisitedCity[],
   parks: VisitedPark[] = [],
   residence?: string | null,
-  visitedCodes: string[] = []
+  visitedCodes: string[] = [],
+  locale: Locale = defaultLocale
 ): ProfileTrip[] {
   const countryList = buildVisitedCountryList(
     visitedCountries,
     cities,
     visitedCodes,
-    parks
+    parks,
+    locale
   );
 
   const visitedByCode = new Map<string, VisitedCountry>();
@@ -210,16 +214,17 @@ export function buildProfileTrips(
   const recentThreshold = sortedCities[0]?.created_at;
 
   const cityTrips: ProfileTrip[] = sortedCities.map((city) => {
-    const placeName = canonicalCityName(city.country_code, city.city_name);
+    const canonical = canonicalCityName(city.country_code, city.city_name);
+    const placeName = getLocalizedCityName(city.country_code, canonical, locale);
     return {
       id: city.id,
       kind: "city",
       placeName,
-      citySlug: cityHubSlug(city.country_code, placeName),
+      citySlug: cityHubSlug(city.country_code, canonical),
       parkSlug: null,
       parkType: null,
       countryCode: city.country_code,
-      countryName: getCountryName(city.country_code),
+      countryName: getCountryName(city.country_code, locale),
       countrySlug: countryHubSlug(city.country_code),
       imageUrl: DEFAULT_CITY_HERO_IMAGE,
       note: city.note,
@@ -236,7 +241,7 @@ export function buildProfileTrips(
     parkSlug: findParkHubSlug(park.park_name, park.country_code),
     parkType: park.park_type,
     countryCode: park.country_code,
-    countryName: getCountryName(park.country_code),
+    countryName: getCountryName(park.country_code, locale),
     countrySlug: countryHubSlug(park.country_code),
     imageUrl: parkTripImage(park),
     note: park.note,
@@ -254,7 +259,8 @@ export function buildProfileSummary(
   visitedCountries: VisitedCountry[],
   visitedCities: VisitedCity[],
   visitedParks: VisitedPark[],
-  wishlistCountries: WishlistCountry[]
+  wishlistCountries: WishlistCountry[],
+  locale: Locale = defaultLocale
 ): ProfileSummary {
   let topCity: ProfileSummary["topCity"] = null;
   let topVisits = 0;
@@ -263,10 +269,11 @@ export function buildProfileSummary(
     const visits = cityVisitCount(city);
     if (visits > topVisits) {
       topVisits = visits;
+      const canonical = canonicalCityName(city.country_code, city.city_name);
       topCity = {
-        name: city.city_name,
-        countryName: getCountryName(city.country_code),
-        citySlug: cityHubSlug(city.country_code, city.city_name),
+        name: getLocalizedCityName(city.country_code, canonical, locale),
+        countryName: getCountryName(city.country_code, locale),
+        citySlug: cityHubSlug(city.country_code, canonical),
         countrySlug: countryHubSlug(city.country_code),
       };
     }
@@ -276,15 +283,16 @@ export function buildProfileSummary(
     visitedCountries,
     visitedCities,
     [],
-    visitedParks
+    visitedParks,
+    locale
   ).length;
 
   const repeatCityCount = visitedCities.filter((city) => cityVisitCount(city) > 1).length;
   const nextWishlist = wishlistCountries[0]
     ? {
-        name: wishlistCountries[0].country_name,
+        name: getCountryName(wishlistCountries[0].country_code, locale),
         code: wishlistCountries[0].country_code,
-        countrySlug: countryHubSlug(wishlistCountries[0].country_code, wishlistCountries[0].country_name),
+        countrySlug: countryHubSlug(wishlistCountries[0].country_code),
       }
     : null;
 
@@ -299,27 +307,28 @@ export function worldCoveragePercent(countryCount: number): number {
 export function latestVisitedCountry(
   visitedCountries: VisitedCountry[],
   visitedCities: VisitedCity[],
-  visitedParks: VisitedPark[]
+  visitedParks: VisitedPark[],
+  locale: Locale = defaultLocale
 ): LatestVisitedCountry | null {
   const items: { name: string; code: string; at: number }[] = [];
 
   for (const country of visitedCountries) {
     items.push({
-      name: country.country_name,
+      name: getCountryName(country.country_code, locale),
       code: country.country_code,
       at: new Date(country.created_at).getTime(),
     });
   }
   for (const city of visitedCities) {
     items.push({
-      name: city.country_name,
+      name: getCountryName(city.country_code, locale),
       code: city.country_code,
       at: new Date(city.created_at).getTime(),
     });
   }
   for (const park of visitedParks) {
     items.push({
-      name: park.country_name,
+      name: getCountryName(park.country_code, locale),
       code: park.country_code,
       at: new Date(park.created_at).getTime(),
     });

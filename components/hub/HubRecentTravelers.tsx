@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { HubSectionHeading } from "@/components/hub/HubSectionHeading";
 import type { CountryTraveler } from "@/lib/supabase/country-travelers";

@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
+import { useLocale } from "next-intl";
 import { useState, type ReactNode } from "react";
 import {
   ProfileCityLink,
@@ -131,13 +132,15 @@ export function ProfileVisitorDestinations({
   visitedCodes,
   labels,
 }: ProfileVisitorDestinationsProps) {
+  const locale = useLocale() === "tr" ? "tr" : "en";
   const destinations = buildProfileAllDestinations(
     visitedCountries,
     visitedCities,
     visitedParks,
     [],
     visitedCodes,
-    residence
+    residence,
+    locale
   );
 
   const allHref = profileAllPath(username);

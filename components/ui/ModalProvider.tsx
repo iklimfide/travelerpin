@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { commonMessages, modalMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 
 export type ModalVariant = "error" | "success" | "info";
 
@@ -68,6 +68,7 @@ const variantTitle: Record<ModalVariant, string> = {
 };
 
 export function ModalProvider({ children }: { children: ReactNode }) {
+  const { common: commonMessages, modal: modalMessages } = useAppMessages();
   const [modal, setModal] = useState<ActiveModal | null>(null);
   const resolveRef = useRef<((value: boolean) => void) | null>(null);
 

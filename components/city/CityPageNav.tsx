@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { countryPath } from "@/lib/seo/site";
 import type { CityHub } from "@/lib/data/city-hubs";

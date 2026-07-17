@@ -11,11 +11,7 @@ import { ShareProfile } from "@/components/share/ShareProfile";
 import { InstagramBrandIcon } from "@/components/share/InstagramBrandIcon";
 import { useModal } from "@/components/ui/ModalProvider";
 import { LIMITS } from "@/lib/constants";
-import {
-  translateCommon,
-  translateSettings,
-  translateWishlist,
-} from "@/lib/i18n/client-messages";
+import { useTranslateCommon, useTranslateSettings, useTranslateWishlist } from "@/lib/i18n/client-messages";
 import { clearSharePromptThrottle } from "@/lib/client/share-pin-prompt";
 import {
   invalidateOwnProfileCache,
@@ -61,9 +57,9 @@ const inputGroupClass =
   "flex overflow-hidden rounded-lg border border-slate-600 bg-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[border-color,box-shadow] focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/25";
 
 export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps) {
-  const t = translateSettings;
-  const tCommon = translateCommon;
-  const tWishlist = translateWishlist;
+  const t = useTranslateSettings();
+  const tCommon = useTranslateCommon();
+  const tWishlist = useTranslateWishlist();
   const modal = useModal();
 
   const username = profile.username;

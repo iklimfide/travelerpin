@@ -4,7 +4,7 @@ import { useState } from "react";
 import { VisitMonthYearSelect } from "@/components/dashboard/VisitMonthYearSelect";
 import { VisitYearsMultiSelect } from "@/components/dashboard/VisitYearsMultiSelect";
 import { LIMITS } from "@/lib/constants";
-import { cityMessages, formatMessage } from "@/lib/i18n/client-messages";
+import { cityMessages, formatMessage, useAppMessages } from "@/lib/i18n/client-messages";
 import { formatVisitMonthYear, normalizeVisitDates } from "@/lib/utils/visit-date";
 
 type CityVisitDatesEditorProps = {
@@ -109,6 +109,7 @@ function CityVisitDatesMonthEditor({
 }
 
 export function CityVisitDatesEditor({ value, onChange, hideHint = false }: CityVisitDatesEditorProps) {
+  const { city: cityMessages } = useAppMessages();
   if (hideHint) {
     return <VisitYearsMultiSelect value={value} onChange={onChange} />;
   }

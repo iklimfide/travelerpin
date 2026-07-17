@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { fetchProfileFollowers, fetchProfileFollowing } from "@/lib/client/follow-actions";
-import { formatMessage, profileMessages, shareMessages } from "@/lib/i18n/client-messages";
+import { formatMessage, useAppMessages } from "@/lib/i18n/client-messages";
 import type { ProfileFollowerSummary, ProfileFollowListType } from "@/types/database";
 
 type ProfileFollowListModalProps = {
@@ -26,6 +26,7 @@ export function ProfileFollowListModal({
   open,
   onClose,
 }: ProfileFollowListModalProps) {
+  const { share: shareMessages, profile: profileMessages } = useAppMessages();
   const [members, setMembers] = useState<ProfileFollowerSummary[]>(initialMembers ?? []);
   const [loading, setLoading] = useState(false);
   const [demo, setDemo] = useState(initialDemo);

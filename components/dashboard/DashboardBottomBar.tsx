@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { usePathname, useRouter } from "next/navigation";
 import { useAddDestination } from "@/components/add/AddDestinationProvider";
 import { useNextRouteDestination } from "@/components/add/NextRouteDestinationProvider";
@@ -13,10 +13,7 @@ import { PublicGuestAuthLinks } from "@/components/nav/PublicGuestAuthLinks";
 import { NotificationsNavLink } from "@/components/notifications/NotificationsNavLink";
 import { useIsDesktopDashboardNav } from "@/lib/hooks/useIsDesktopDashboardNav";
 import { useVisualViewportFixed } from "@/lib/hooks/useVisualViewportFixed";
-import {
-  commonMessages,
-  dashboardNavMessages,
-} from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import { profilePath } from "@/lib/seo/site";
 
 type DashboardBottomBarProps = {
@@ -32,6 +29,7 @@ function registerHrefFor(pathname: string): string {
 }
 
 function RouteIcon() {
+  const { common: commonMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
     <svg viewBox="0 0 24 24" width={22} height={22} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
       <circle cx="6" cy="18" r="2" />
@@ -43,6 +41,7 @@ function RouteIcon() {
 }
 
 function MapPinIcon() {
+  const { common: commonMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
     <svg viewBox="0 0 24 24" width={22} height={22} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path
@@ -60,6 +59,7 @@ function MapPinIcon() {
 }
 
 function PlusIcon() {
+  const { common: commonMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
     <svg viewBox="0 0 24 24" width={26} height={26} aria-hidden fill="none" stroke="currentColor" strokeWidth={2.4}>
       <path d="M12 6v12M6 12h12" strokeLinecap="round" />
@@ -83,6 +83,7 @@ function NavLink({
   pathname: string;
   className?: string;
 }) {
+  const { common: commonMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   const active = item.isActive(pathname);
 
   return (
@@ -98,6 +99,7 @@ function NavLink({
 }
 
 export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
+  const { common: commonMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   const pathname = usePathname();
   const router = useRouter();
   const { open: openAddDestination } = useAddDestination();

@@ -19,7 +19,7 @@ import {
   getAddRegionForCountryCode,
   type AddRegionId,
 } from "@/lib/add/countries-by-region";
-import { addDestinationMessages, commonMessages, nextRouteDestinationMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import type { CountryOption } from "@/lib/data/countries";
 import { isUkNationCode, isUkNationVisited, matchesUkCityCountry } from "@/lib/data/uk-nations";
 import { citiesAreSame } from "@/lib/utils/city-aliases";
@@ -37,6 +37,7 @@ type Step =
   | { kind: "cities"; countryCode: string; countryName: string };
 
 export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModalProps) {
+  const { common: commonMessages, nextRouteDestination: nextRouteDestinationMessages, addDestination: addDestinationMessages } = useAppMessages();
   const cachedStops = readOwnNextRouteCache();
   const [step, setStep] = useState<Step>({ kind: "countries" });
   const [routeStops, setRouteStops] = useState<NextRouteStop[]>(() => cachedStops ?? []);

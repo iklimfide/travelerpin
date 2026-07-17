@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
-import { formatMessage } from "@/lib/i18n/client-messages";
+import { Link } from "@/lib/i18n/navigation";
+import { formatMessage } from "@/lib/i18n/message-catalog";
 
 /** Splits a `{name}` template and wraps the name in a profile link. */
 export function linkNameInMessage(

@@ -4,10 +4,13 @@ import Image from "next/image";
 import { SaveDestinationModalListSkeleton } from "@/components/skeletons/SaveDestinationModalSkeleton";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { COUNTRY_LIST, searchCountries } from "@/lib/data/countries";
+import { useLocale } from "next-intl";
+import { getCountryName, searchCountries } from "@/lib/data/countries";
 import { getPopularCountries } from "@/lib/data/popular-countries";
 import { POPULAR_DESTINATIONS } from "@/lib/data/popular-destinations";
-import { commonMessages, nextRouteMessages, saveDestinationMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
+import { getLocalizedCityName } from "@/lib/i18n/place-names";
+import type { Locale } from "@/lib/i18n/config";
 import {
   notifyNextRouteChanged,
   readOwnNextRouteCache,
@@ -81,49 +84,60 @@ function countryToRow(country: { code: string; name: string }): BrowseRow {
   };
 }
 
-function popularCityToRow(destination: (typeof POPULAR_DESTINATIONS)[number]): BrowseRow {
+function popularCityToRow(
+  destination: (typeof POPULAR_DESTINATIONS)[number],
+  locale: Locale
+): BrowseRow {
   return {
     id: rowId("city", destination.countryCode, destination.cityName),
     kind: "city",
-    title: destination.label,
-    subtitle: destination.countryName,
+    title: getLocalizedCityName(destination.countryCode, destination.cityName, locale),
+    subtitle: getCountryName(destination.countryCode, locale),
     countryCode: destination.countryCode,
-    countryName: destination.countryName,
+    countryName: getCountryName(destination.countryCode, locale),
     cityName: destination.cityName,
   };
 }
 
-function searchToRow(result: SearchResult): BrowseRow {
+function searchToRow(result: SearchResult, locale: Locale): BrowseRow {
   if (result.kind === "country") {
-    return countryToRow({ code: result.countryCode, name: result.countryName });
+    return countryToRow({
+      code: result.countryCode,
+      name: getCountryName(result.countryCode, locale),
+    });
   }
+  const cityName = result.cityName!;
   return {
-    id: rowId("city", result.countryCode, result.cityName!),
+    id: rowId("city", result.countryCode, cityName),
     kind: "city",
-    title: result.cityName!,
-    subtitle: result.countryName,
+    title: getLocalizedCityName(result.countryCode, cityName, locale),
+    subtitle: getCountryName(result.countryCode, locale),
     countryCode: result.countryCode,
-    countryName: result.countryName,
-    cityName: result.cityName,
+    countryName: getCountryName(result.countryCode, locale),
+    cityName,
   };
 }
 
-function stopToRow(stop: NextRouteStop, index: number): BrowseRow & { index: number } {
+function stopToRow(
+  stop: NextRouteStop,
+  index: number,
+  locale: Locale
+): BrowseRow & { index: number } {
   if (stop.kind === "country") {
     const code = stop.countryCode ?? "";
-    const country =
-      COUNTRY_LIST.find((entry) => entry.code === code) ??
-      ({ code, name: stop.name } as const);
-    return { ...countryToRow(country), index };
+    const name = getCountryName(code || stop.name, locale) || stop.name;
+    return { ...countryToRow({ code, name }), index };
   }
+  const code = stop.countryCode ?? "";
+  const cityName = stop.name;
   return {
-    id: rowId("city", stop.countryCode ?? "", stop.name),
+    id: rowId("city", code, cityName),
     kind: "city",
-    title: stop.name,
-    subtitle: stop.countryName ?? "",
-    countryCode: stop.countryCode ?? "",
-    countryName: stop.countryName ?? "",
-    cityName: stop.name,
+    title: getLocalizedCityName(code, cityName, locale),
+    subtitle: getCountryName(code, locale),
+    countryCode: code,
+    countryName: getCountryName(code, locale),
+    cityName,
     index,
   };
 }
@@ -142,12 +156,21 @@ function browseRowToSearchResult(row: BrowseRow): SearchResult {
 
 function buildStopFromResult(result: SearchResult): NextRouteStop {
   if (result.kind === "country") {
-    return buildCountryStop(result.countryCode, result.countryName);
+    return buildCountryStop(
+      result.countryCode,
+      getCountryName(result.countryCode)
+    );
   }
-  return buildCityStop(result.cityName!, result.countryCode, result.countryName);
+  return buildCityStop(
+    result.cityName!,
+    result.countryCode,
+    getCountryName(result.countryCode)
+  );
 }
 
 export function NextRouteModal({ open, onClose, initialTab = "countries" }: NextRouteModalProps) {
+  const { common: commonMessages, saveDestination: saveDestinationMessages, nextRoute: nextRouteMessages } = useAppMessages();
+  const locale = useLocale() === "tr" ? "tr" : "en";
   const cachedStops = readOwnNextRouteCache();
   const [stops, setStops] = useState<NextRouteStop[]>(() => cachedStops ?? []);
   const [tab, setTab] = useState<NextRouteTab>("countries");
@@ -224,7 +247,7 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
     setLoadingSearch(true);
 
     const timer = window.setTimeout(() => {
-      fetch(`/api/destinations/search?q=${encodeURIComponent(trimmedQuery)}`, {
+      fetch(`/api/destinations/search?q=${encodeURIComponent(trimmedQuery)}&locale=${locale}`, {
         signal: controller.signal,
       })
         .then((res) => (res.ok ? res.json() : { countries: [], cities: [] }))
@@ -248,7 +271,7 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
               cityName: city.cityName,
             })
           );
-          const localCountries = searchCountries(trimmedQuery, 8).map((country) => ({
+          const localCountries = searchCountries(trimmedQuery, 8, locale).map((country) => ({
             kind: "country" as const,
             countryCode: country.code,
             countryName: country.name,
@@ -275,7 +298,7 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [open, isSearching, trimmedQuery]);
+  }, [open, isSearching, trimmedQuery, locale]);
 
   const hasUnsavedChanges = useMemo(
     () => !areNextRouteStopsEqual(stops, savedStops),
@@ -361,21 +384,26 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
 
   const browseRows = useMemo((): BrowseRow[] => {
     if (tab === "countries") {
-      return getPopularCountries(40).map(countryToRow);
+      return getPopularCountries(40).map((country) =>
+        countryToRow({
+          ...country,
+          name: getCountryName(country.code, locale),
+        })
+      );
     }
     if (tab === "cities") {
       return POPULAR_DESTINATIONS.filter((destination) => destination.kind === "city")
         .slice(0, 40)
-        .map(popularCityToRow);
+        .map((destination) => popularCityToRow(destination, locale));
     }
     return [];
-  }, [tab]);
+  }, [tab, locale]);
 
   const listRows = useMemo(() => {
-    if (isSearching) return searchResults.map(searchToRow);
-    if (tab === "route") return stops.map(stopToRow);
+    if (isSearching) return searchResults.map((result) => searchToRow(result, locale));
+    if (tab === "route") return stops.map((stop, index) => stopToRow(stop, index, locale));
     return browseRows;
-  }, [browseRows, isSearching, searchResults, stops, tab]);
+  }, [browseRows, isSearching, searchResults, stops, tab, locale]);
 
   const statusLabel = useMemo(() => {
     if (isSearching && loadingSearch) return nextRouteMessages.searching;
@@ -501,7 +529,7 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
             <li className="save-destination-modal__empty">{listEmptyMessage}</li>
           ) : tab === "route" && !isSearching ? (
             stops.map((stop, index) => {
-              const row = stopToRow(stop, index);
+              const row = stopToRow(stop, index, locale);
               const key = browseRowKey(row);
               const isBusy = busyId === key;
               return (

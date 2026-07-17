@@ -2,12 +2,12 @@
 
 import { useContext, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { usePathname } from "next/navigation";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { NotificationsContext } from "@/components/notifications/NotificationsProvider";
-import { commonMessages, dashboardNavMessages, shareMessages, wishlistMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import { isKamikazeMasterProfile } from "@/lib/kamikaze/master";
 import { profilePath } from "@/lib/seo/site";
 import { clearAllSessionPageCaches } from "@/lib/client/session-page-cache";
@@ -25,6 +25,7 @@ type BottomBarProfileNavProps = {
 };
 
 function ProfileIcon() {
+  const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
     <svg viewBox="0 0 24 24" width={22} height={22} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
       <circle cx="12" cy="8" r="3.5" />
@@ -34,6 +35,7 @@ function ProfileIcon() {
 }
 
 function SettingsIcon() {
+  const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path
@@ -47,6 +49,7 @@ function SettingsIcon() {
 }
 
 function RouteIcon() {
+  const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
       <circle cx="6" cy="18" r="2" />
@@ -58,6 +61,7 @@ function RouteIcon() {
 }
 
 function WishlistIcon() {
+  const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path
@@ -69,6 +73,7 @@ function WishlistIcon() {
 }
 
 function MapPinIcon() {
+  const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path
@@ -86,6 +91,7 @@ function MapPinIcon() {
 }
 
 function ParksIcon() {
+  const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M4 20h16" strokeLinecap="round" />
@@ -107,6 +113,7 @@ function ParksIcon() {
 }
 
 function LogOutIcon() {
+  const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M15 12H4" strokeLinecap="round" />
@@ -117,6 +124,7 @@ function LogOutIcon() {
 }
 
 function YpIcon() {
+  const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
       <rect x="4" y="4" width="16" height="16" rx="2.5" />
@@ -126,6 +134,7 @@ function YpIcon() {
 }
 
 function BellMenuIcon() {
+  const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
     <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path
@@ -166,6 +175,7 @@ export function BottomBarProfileNav({
   onWishlistClick,
   onMyParksClick,
 }: BottomBarProfileNavProps) {
+  const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   const pathname = usePathname();
   const notifications = useContext(NotificationsContext);
   const menuId = useId();

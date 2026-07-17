@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { addVisitedCountry } from "@/lib/client/country-actions";
 import { buildPinMediaPayload } from "@/components/dashboard/PinMediaFields";
 import { ProfilePinEditFields } from "@/components/profile/ProfilePinEditFields";
@@ -31,7 +32,8 @@ export function CountryForm({
 }: CountryFormProps) {
   const router = useRouter();
   const modal = useModal();
-  const countryName = getCountryName(countryCode);
+  const locale = useLocale() === "tr" ? "tr" : "en";
+  const countryName = getCountryName(countryCode, locale);
 
   const [note, setNote] = useState(backingCity?.note ?? "");
   const [visitDates, setVisitDates] = useState<string[]>(backingCity?.visit_dates ?? []);

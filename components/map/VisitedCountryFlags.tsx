@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
+import { useLocale } from "next-intl";
 import { useMemo } from "react";
 import { getCountryHubByCode } from "@/lib/data/country-hubs";
 import { buildVisitedCountryList } from "@/lib/map/travel-lists";
@@ -108,9 +109,17 @@ export function VisitedCountryFlags({
   variant = "default",
   className = "",
 }: VisitedCountryFlagsProps) {
+  const locale = useLocale() === "tr" ? "tr" : "en";
   const countries = useMemo(
-    () => buildVisitedCountryList(visitedCountries, userCities, countryCodes, userParks),
-    [visitedCountries, userCities, countryCodes, userParks]
+    () =>
+      buildVisitedCountryList(
+        visitedCountries,
+        userCities,
+        countryCodes,
+        userParks,
+        locale
+      ),
+    [visitedCountries, userCities, countryCodes, userParks, locale]
   );
 
   if (countries.length === 0) return null;

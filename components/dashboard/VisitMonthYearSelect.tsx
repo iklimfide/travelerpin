@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { cityMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import { getIntlLocale } from "@/lib/i18n/config";
 
 type VisitMonthYearSelectProps = {
@@ -22,6 +22,7 @@ function parseYearMonth(value: string | null): { month: string; year: string } {
 }
 
 export function VisitMonthYearSelect({ value, onChange }: VisitMonthYearSelectProps) {
+  const { city: cityMessages } = useAppMessages();
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 

@@ -1,10 +1,10 @@
 "use client";
 
 import { clearAllSessionPageCaches } from "@/lib/client/session-page-cache";
-import { translateCommon } from "@/lib/i18n/client-messages";
+import { useTranslateCommon } from "@/lib/i18n/client-messages";
 
 export function LogOutButtonInline() {
-  const t = translateCommon;
+  const t = useTranslateCommon();
 
   async function handleLogout() {
     clearAllSessionPageCaches();

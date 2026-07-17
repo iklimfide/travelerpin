@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import type { HubPinStatItem } from "@/components/hub/HubPagePinCount";
 import { HubPageListingSections } from "@/components/hub/HubPageListingSections";
 import { HubPageTopBar } from "@/components/hub/HubPageTopBar";

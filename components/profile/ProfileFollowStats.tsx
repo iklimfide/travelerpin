@@ -4,17 +4,17 @@ import { useEffect, useState } from "react";
 import { ProfileFollowListModal } from "@/components/profile/ProfileFollowListModal";
 import { fetchProfileFollowers, fetchProfileFollowing } from "@/lib/client/follow-actions";
 import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
-import { formatMessage, profileMessages } from "@/lib/i18n/client-messages";
+import { formatMessage, type AppMessages, useAppMessages } from "@/lib/i18n/client-messages";
 import type { ProfileFollowerSummary, ProfileFollowListType } from "@/types/database";
 
-function followerCountLabel(count: number): string {
-  if (count === 1) return profileMessages.followersOne;
-  return formatMessage(profileMessages.followers, { count });
+function followerCountLabel(profile: AppMessages["profile"], count: number): string {
+  if (count === 1) return profile.followersOne;
+  return formatMessage(profile.followers, { count });
 }
 
-function followingCountLabel(count: number): string {
-  if (count === 1) return profileMessages.followingOne;
-  return formatMessage(profileMessages.followingCount, { count });
+function followingCountLabel(profile: AppMessages["profile"], count: number): string {
+  if (count === 1) return profile.followingOne;
+  return formatMessage(profile.followingCount, { count });
 }
 
 type ProfileFollowStatsProps = {
@@ -60,6 +60,7 @@ export function ProfileFollowStats({
   followingCount,
   className = "",
 }: ProfileFollowStatsProps) {
+  const { profile: profileMessages } = useAppMessages();
   const [openList, setOpenList] = useState<ProfileFollowListType | null>(null);
   const [prefetchedFollowers, setPrefetchedFollowers] = useState<PrefetchedFollowList | null>(null);
   const [prefetchedFollowing, setPrefetchedFollowing] = useState<PrefetchedFollowList | null>(null);
@@ -114,9 +115,9 @@ export function ProfileFollowStats({
       <div className={statsClass}>
         {followingCount > 0 ? (
           <FollowStatButton
-            label={followingCountLabel(followingCount)}
+            label={followingCountLabel(profileMessages, followingCount)}
             ariaLabel={formatMessage(profileMessages.viewFollowing, {
-              label: followingCountLabel(followingCount),
+              label: followingCountLabel(profileMessages, followingCount),
             })}
             onClick={() => setOpenList("following")}
             className={compactButtonClass.trim()}
@@ -124,9 +125,9 @@ export function ProfileFollowStats({
         ) : null}
         {followerCount > 0 ? (
           <FollowStatButton
-            label={followerCountLabel(followerCount)}
+            label={followerCountLabel(profileMessages, followerCount)}
             ariaLabel={formatMessage(profileMessages.viewFollowers, {
-              label: followerCountLabel(followerCount),
+              label: followerCountLabel(profileMessages, followerCount),
             })}
             onClick={() => setOpenList("followers")}
             className={compactButtonClass.trim()}

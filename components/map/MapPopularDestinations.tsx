@@ -9,7 +9,7 @@ import {
   quickAddDestination,
   quickRemoveDestination,
 } from "@/lib/client/destination-actions";
-import { destinationMessages, mapMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages } from "@/lib/i18n/client-messages";
 import { useToast } from "@/components/ui/ToastProvider";
 import type { VisitedCity, VisitedCountry } from "@/types/database";
 
@@ -48,6 +48,7 @@ export function MapPopularDestinations({
   onAdded,
   onRemoved,
 }: MapPopularDestinationsProps) {
+  const { map: mapMessages, destinations: destinationMessages } = useAppMessages();
   const toast = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
