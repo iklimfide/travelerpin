@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { redirectTo } from "@/lib/i18n/navigation";
+import { redirectTo } from "@/lib/i18n/redirect-to";
 import { sanitizeCountrySlug } from "@/lib/utils/sanitize-country-slug";
 import { getCountryHubBySlug } from "@/lib/data/country-hubs";
 import { countryPath } from "@/lib/seo/site";

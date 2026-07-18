@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { HomePageClient } from "@/components/home/HomePageClient";
-import { redirectTo } from "@/lib/i18n/navigation";
+import { redirectTo } from "@/lib/i18n/redirect-to";
 import { getAuthenticatedHomePath } from "@/lib/supabase/authenticated-home";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";

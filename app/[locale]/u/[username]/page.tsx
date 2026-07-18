@@ -1,4 +1,4 @@
-import { redirectTo } from "@/lib/i18n/navigation";
+import { redirectTo } from "@/lib/i18n/redirect-to";
 import { profilePath } from "@/lib/seo/site";
 
 type PageProps = {

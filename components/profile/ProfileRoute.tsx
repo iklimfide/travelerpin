@@ -133,6 +133,12 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
   useEffect(() => {
     if (readProfileCache(normalized)) {
       setLoading(false);
+      // Own profile cache is invalidated by stale/travel-state events; other
+      // profiles have no such signal — revalidate them in the background so
+      // visitors see new Instagram links, bio changes, etc.
+      if (getOwnUsername() !== normalized) {
+        void loadProfile(true);
+      }
       return;
     }
 

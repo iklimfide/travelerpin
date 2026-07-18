@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { redirectTo } from "@/lib/i18n/navigation";
+import { redirectTo } from "@/lib/i18n/redirect-to";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {

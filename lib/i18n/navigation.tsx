@@ -1,7 +1,5 @@
 import NextLink from "next/link";
-import { redirect as nextRedirect } from "next/navigation";
 import { createNavigation } from "next-intl/navigation";
-import { getLocale } from "next-intl/server";
 import type { ComponentProps } from "react";
 import { isPublicProfilePath, stripLocalePrefix } from "./pathname";
 import { routing } from "./routing";
@@ -63,16 +61,4 @@ export function Link({ href, locale, ...rest }: IntlLinkProps) {
     return <NextLink href={toUnprefixedProfileHref(href)} {...rest} />;
   }
   return <IntlLink href={href} locale={locale} {...rest} />;
-}
-
-/**
- * Server-side redirect that keeps the current locale prefix (`/tr/...`),
- * except for public profiles which stay unprefixed.
- */
-export async function redirectTo(href: string): Promise<never> {
-  if (isPublicProfilePath(href)) {
-    return nextRedirect(stripLocalePrefix(href));
-  }
-  const locale = await getLocale();
-  return redirect({ href, locale });
 }

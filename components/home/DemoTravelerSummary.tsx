@@ -1,6 +1,7 @@
+"use client";
+
 import { Link } from "@/lib/i18n/navigation";
-import { TravelStatsBar } from "@/components/stats/TravelStats";
-import { commonMessages, formatMessage, homeMessages, useAppMessages } from "@/lib/i18n/client-messages";
+import { formatMessage, homeMessages, useAppMessages } from "@/lib/i18n/client-messages";
 import type { TravelStats } from "@/types/database";
 
 type DemoTravelerSummaryProps = {
@@ -15,7 +16,7 @@ export function DemoTravelerStatsCompact({
   stats: TravelStats;
   className?: string;
 }) {
-  const { common: commonMessages, home: homeMessages } = useAppMessages();
+  const { common: commonMessages } = useAppMessages();
   return (
     <div className={`flex shrink-0 flex-col items-end gap-1 text-right ${className}`}>
       <p className="leading-tight">
@@ -52,10 +53,26 @@ export function DemoTravelerStory({ name, stats }: DemoTravelerSummaryProps) {
 }
 
 /** Desktop: stats pill + story (right column). */
-export async function DemoTravelerSummaryDesktop({ name, stats }: DemoTravelerSummaryProps) {
+export function DemoTravelerSummaryDesktop({ name, stats }: DemoTravelerSummaryProps) {
+  const { common: commonMessages } = useAppMessages();
+
   return (
     <div className="hidden flex-col gap-3 sm:flex sm:max-w-md sm:items-end">
-      <TravelStatsBar stats={stats} />
+      <div className="inline-flex items-center gap-3 rounded-full border border-blue-500/30 bg-blue-500/10 px-6 py-3 text-lg font-semibold tracking-wide text-blue-800 dark:text-blue-100">
+        <span>
+          <span className="text-2xl font-bold text-foreground">{stats.countries}</span>{" "}
+          <span className="text-sm font-medium text-blue-700 dark:text-blue-200">
+            {commonMessages.countries}
+          </span>
+        </span>
+        <span className="text-blue-500/60 dark:text-blue-400/60">|</span>
+        <span>
+          <span className="text-2xl font-bold text-foreground">{stats.cities}</span>{" "}
+          <span className="text-sm font-medium text-blue-700 dark:text-blue-200">
+            {commonMessages.cities}
+          </span>
+        </span>
+      </div>
       <DemoTravelerStory name={name} stats={stats} />
     </div>
   );
