@@ -15,43 +15,77 @@ export type PublicProfile = {
   profession: string | null;
   marital_status: string | null;
   wishlist_public: boolean;
+  /** Owner preferred locale for OG / link-preview copy. */
+  locale: "en" | "tr";
   next_route: NextRouteStop[];
 };
 
 const EXTENDED_SELECT =
+  "id, username, display_name, avatar_url, cover_url, bio, residence, instagram_url, profession, marital_status, wishlist_public, next_route, locale";
+const EXTENDED_SELECT_NO_LOCALE =
   "id, username, display_name, avatar_url, cover_url, bio, residence, instagram_url, profession, marital_status, wishlist_public, next_route";
 const LEGACY_EXTENDED_SELECT =
   "id, username, display_name, avatar_url, cover_url, bio, residence, profession, marital_status, wishlist_public";
 const BASE_SELECT = "id, username, display_name";
 
 const PROFILE_PRESENTATION_SELECT =
+  "avatar_url, display_name, cover_url, bio, residence, instagram_url, profession, marital_status, wishlist_public, next_route, locale";
+const PROFILE_PRESENTATION_SELECT_NO_LOCALE =
   "avatar_url, display_name, cover_url, bio, residence, instagram_url, profession, marital_status, wishlist_public, next_route";
+
+function parseProfileLocale(value: unknown): "en" | "tr" {
+  return value === "tr" ? "tr" : "en";
+}
+
+function mapExtendedRow(row: Record<string, unknown>): PublicProfile {
+  return {
+    id: String(row.id ?? ""),
+    username: String(row.username ?? ""),
+    display_name: (row.display_name as string | null) ?? null,
+    avatar_url: (row.avatar_url as string | null) ?? null,
+    cover_url: (row.cover_url as string | null) ?? null,
+    bio: (row.bio as string | null) ?? null,
+    residence: (row.residence as string | null) ?? null,
+    instagram_url: (row.instagram_url as string | null) ?? null,
+    profession: (row.profession as string | null) ?? null,
+    marital_status: (row.marital_status as string | null) ?? null,
+    wishlist_public: row.wishlist_public === true,
+    locale: parseProfileLocale(row.locale),
+    next_route: parseNextRoute(row.next_route),
+  };
+}
 
 /** Profile presentation fields change independently of pin rows — keep them out of stale pin cache. */
 export async function fetchFreshProfilePresentation(
   supabase: SupabaseClient,
   profileId: string
 ): Promise<Partial<PublicProfile> | null> {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(PROFILE_PRESENTATION_SELECT)
-    .eq("id", profileId)
-    .maybeSingle();
+  for (const select of [PROFILE_PRESENTATION_SELECT, PROFILE_PRESENTATION_SELECT_NO_LOCALE]) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select(select)
+      .eq("id", profileId)
+      .maybeSingle();
 
-  if (error || !data) return null;
+    if (!error && data) {
+      const row = data as unknown as Record<string, unknown>;
+      return {
+        avatar_url: (row.avatar_url as string | null) ?? null,
+        display_name: (row.display_name as string | null) ?? null,
+        cover_url: (row.cover_url as string | null) ?? null,
+        bio: (row.bio as string | null) ?? null,
+        residence: (row.residence as string | null) ?? null,
+        instagram_url: (row.instagram_url as string | null) ?? null,
+        profession: (row.profession as string | null) ?? null,
+        marital_status: (row.marital_status as string | null) ?? null,
+        wishlist_public: row.wishlist_public === true,
+        locale: parseProfileLocale(row.locale),
+        next_route: parseNextRoute(row.next_route),
+      };
+    }
+  }
 
-  return {
-    avatar_url: data.avatar_url ?? null,
-    display_name: data.display_name ?? null,
-    cover_url: data.cover_url ?? null,
-    bio: data.bio ?? null,
-    residence: data.residence ?? null,
-    instagram_url: data.instagram_url ?? null,
-    profession: data.profession ?? null,
-    marital_status: data.marital_status ?? null,
-    wishlist_public: data.wishlist_public === true,
-    next_route: parseNextRoute(data.next_route),
-  };
+  return null;
 }
 
 /** Load profile for public pages; tolerates missing profile-detail migration. */
@@ -61,25 +95,16 @@ export async function fetchPublicProfile(
 ): Promise<PublicProfile | null> {
   const normalized = normalizeUsernameInput(username);
 
-  const { data: extended, error: extendedError } = await supabase
-    .from("profiles")
-    .select(EXTENDED_SELECT)
-    .eq("username", normalized)
-    .single();
+  for (const select of [EXTENDED_SELECT, EXTENDED_SELECT_NO_LOCALE]) {
+    const { data: extended, error: extendedError } = await supabase
+      .from("profiles")
+      .select(select)
+      .eq("username", normalized)
+      .single();
 
-  if (!extendedError && extended) {
-    return {
-      ...extended,
-      avatar_url: extended.avatar_url ?? null,
-      cover_url: extended.cover_url ?? null,
-      bio: extended.bio ?? null,
-      residence: extended.residence ?? null,
-      instagram_url: extended.instagram_url ?? null,
-      profession: extended.profession ?? null,
-      marital_status: extended.marital_status ?? null,
-      wishlist_public: extended.wishlist_public === true,
-      next_route: parseNextRoute(extended.next_route),
-    };
+    if (!extendedError && extended) {
+      return mapExtendedRow(extended as unknown as Record<string, unknown>);
+    }
   }
 
   const { data: legacyExtended, error: legacyExtendedError } = await supabase
@@ -99,6 +124,7 @@ export async function fetchPublicProfile(
       profession: legacyExtended.profession ?? null,
       marital_status: legacyExtended.marital_status ?? null,
       wishlist_public: legacyExtended.wishlist_public === true,
+      locale: "en",
       next_route: [],
     };
   }
@@ -132,6 +158,7 @@ export async function fetchPublicProfile(
     profession: null,
     marital_status: null,
     wishlist_public: wishlistPublic,
+    locale: "en",
     next_route: [],
   };
 }

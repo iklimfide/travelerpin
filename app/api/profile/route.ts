@@ -41,6 +41,7 @@ export async function PATCH(request: Request) {
   if (data.share_prompt_mode !== undefined) {
     updates.share_prompt_mode = data.share_prompt_mode;
   }
+  if (data.locale !== undefined) updates.locale = data.locale;
   if (data.display_name !== undefined) {
     updates.display_name = data.display_name || null;
   }

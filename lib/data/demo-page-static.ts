@@ -28,6 +28,7 @@ export const DEMO_PROFILE: PublicProfile = {
   profession: null,
   marital_status: null,
   wishlist_public: true,
+  locale: "en",
   next_route: [],
 };
 

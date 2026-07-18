@@ -22,6 +22,7 @@ export const profileSettingsSchema = z
   .object({
     wishlist_public: z.boolean().optional(),
     share_prompt_mode: z.enum(["every_pin", "after_30m", "never"]).optional(),
+    locale: z.enum(["en", "tr"]).optional(),
     display_name: z
       .string()
       .max(LIMITS.displayNameMaxLength)
@@ -74,4 +75,4 @@ export const profileSettingsSchema = z
 export type ProfileSettingsInput = z.infer<typeof profileSettingsSchema>;
 
 export const PROFILE_SELECT =
-  "username, display_name, avatar_url, bio, residence, instagram_url, profession, marital_status, wishlist_public, share_prompt_mode";
+  "username, display_name, avatar_url, bio, residence, instagram_url, profession, marital_status, wishlist_public, share_prompt_mode, locale";

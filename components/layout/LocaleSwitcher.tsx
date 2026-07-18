@@ -45,6 +45,20 @@ function navigateToLocale(pathname: string, code: Locale) {
   window.location.assign(hrefForLocale(pathname, code));
 }
 
+/** Persist owner share-preview locale when signed in (best-effort). */
+async function persistProfileLocale(code: Locale): Promise<void> {
+  try {
+    await fetch("/api/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ locale: code }),
+      keepalive: true,
+    });
+  } catch {
+    // Guest / offline — UI cookie still applies for browsing.
+  }
+}
+
 function LanguageIcon({ size = 20 }: { size?: number }) {
   return (
     <svg
@@ -80,6 +94,19 @@ export function LocaleSwitcher({
   const rootRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
 
+  // Seed profiles.locale from the current UI locale once per session so
+  // existing TR users get TR Open Graph without having to switch again.
+  useEffect(() => {
+    const key = `tp:locale-synced:${locale}`;
+    try {
+      if (sessionStorage.getItem(key) === "1") return;
+      sessionStorage.setItem(key, "1");
+    } catch {
+      // Private mode — still attempt once this mount.
+    }
+    void persistProfileLocale(locale);
+  }, [locale]);
+
   useEffect(() => {
     if (!open) return;
 
@@ -111,7 +138,9 @@ export function LocaleSwitcher({
     }
     setOpen(false);
     onSwitch?.();
-    navigateToLocale(pathname, code);
+    void persistProfileLocale(code).finally(() => {
+      navigateToLocale(pathname, code);
+    });
   }
 
   if (variant === "topBar") {

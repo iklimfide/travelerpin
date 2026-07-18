@@ -14,9 +14,11 @@ export type ProfileSettingsRow = Pick<
   | "marital_status"
   | "wishlist_public"
   | "share_prompt_mode"
+  | "locale"
 >;
 
 const PROFILE_SELECTS = [
+  "username, display_name, avatar_url, cover_url, bio, residence, instagram_url, profession, marital_status, wishlist_public, share_prompt_mode, locale",
   "username, display_name, avatar_url, cover_url, bio, residence, instagram_url, profession, marital_status, wishlist_public, share_prompt_mode",
   "username, display_name, avatar_url, cover_url, bio, residence, instagram_url, profession, marital_status, wishlist_public",
   "username, display_name, avatar_url, cover_url, bio, residence, profession, marital_status, wishlist_public",
@@ -27,6 +29,10 @@ function parseSharePromptMode(value: unknown): SharePromptMode {
     return value;
   }
   return "every_pin";
+}
+
+function parseLocale(value: unknown): Profile["locale"] {
+  return value === "tr" ? "tr" : "en";
 }
 
 function normalizeProfileSettings(row: Record<string, unknown>): ProfileSettingsRow {
@@ -42,6 +48,7 @@ function normalizeProfileSettings(row: Record<string, unknown>): ProfileSettings
     marital_status: (row.marital_status as string | null) ?? null,
     wishlist_public: row.wishlist_public === true,
     share_prompt_mode: parseSharePromptMode(row.share_prompt_mode),
+    locale: parseLocale(row.locale),
   };
 }
 
@@ -65,7 +72,7 @@ export async function fetchProfileSettings(
   return null;
 }
 
-const OPTIONAL_UPDATE_COLUMNS = ["share_prompt_mode", "instagram_url"] as const;
+const OPTIONAL_UPDATE_COLUMNS = ["locale", "share_prompt_mode", "instagram_url"] as const;
 
 /** Update profile and return settings fields; tolerates pending migrations. */
 export async function updateProfileSettings(

@@ -31,6 +31,8 @@ export interface Profile {
   marital_status: string | null;
   wishlist_public: boolean;
   share_prompt_mode: SharePromptMode;
+  /** Owner preferred locale for UI and Open Graph / link-preview copy. */
+  locale: "en" | "tr";
   next_route?: NextRouteStop[];
   banned_at?: string | null;
   ban_reason?: string | null;

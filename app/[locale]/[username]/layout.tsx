@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { BRAND } from "@/lib/constants";
-import { isLocale, type Locale } from "@/lib/i18n/config";
+import { defaultLocale, isLocale, type Locale } from "@/lib/i18n/config";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { buildProfileDescription } from "@/lib/seo/profile";
 import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
@@ -21,11 +21,13 @@ type LayoutProps = {
   params: Promise<{ username: string }>;
 };
 
+/**
+ * OG / link-preview locale follows the profile owner's saved preference
+ * (`profiles.locale`), not the scraper's Accept-Language or cookies.
+ * WhatsApp and similar bots hit unprefixed `/username` without NEXT_LOCALE.
+ */
 export async function generateMetadata({ params }: LayoutProps): Promise<Metadata> {
   const { username } = await params;
-  const localeRaw = await getLocale();
-  const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
-  const tShare = await getTranslations("share");
   const data = await loadPublicProfileMetadata(username);
 
   if (!data) {
@@ -33,6 +35,9 @@ export async function generateMetadata({ params }: LayoutProps): Promise<Metadat
   }
 
   const { profile, stats } = data;
+  const locale: Locale =
+    isLocale(profile.locale) ? profile.locale : defaultLocale;
+  const tShare = await getTranslations({ locale, namespace: "share" });
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
   const mapOwnerName = mapTitleOwnerName(displayName, locale);
   const title = tShare("pageTitle", { name: mapOwnerName });
