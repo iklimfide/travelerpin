@@ -16,6 +16,8 @@ type ProfileActionButtonsProps = {
   } | null;
   canFollow?: boolean;
   isLoggedIn?: boolean;
+  /** When set (home demo card), follow counts link to the profile instead of opening modals. */
+  profileHref?: string;
 };
 
 export function ProfileActionButtons({
@@ -25,6 +27,7 @@ export function ProfileActionButtons({
   followState,
   canFollow = false,
   isLoggedIn = false,
+  profileHref,
 }: ProfileActionButtonsProps) {
   const showFollow = Boolean(followUsername && followState);
   const showStats = Boolean(followState);
@@ -42,6 +45,7 @@ export function ProfileActionButtons({
             followerCount={followState!.followerCount}
             followingCount={followState!.followingCount}
             className="profile-follow-stats--compact !items-start"
+            profileHref={profileHref}
           />
         </div>
       ) : null}

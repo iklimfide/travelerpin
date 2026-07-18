@@ -23,6 +23,11 @@ export type TravelStateData = {
 const CACHE_VERSION = 5;
 const OWN_USERNAME_KEY = "tp:own-username";
 const OWN_USER_ID_KEY = "tp:own-user-id";
+const OWN_AVATAR_URL_KEY = "tp:own-avatar-url";
+const OWN_DISPLAY_NAME_KEY = "tp:own-display-name";
+
+/** Sentinel stored when the profile is known to have no avatar. */
+const NO_AVATAR_SENTINEL = "";
 
 export type CachedProfilePayload = {
   v: number;
@@ -155,6 +160,63 @@ export function getOwnUsername(): string | null {
     return localStorage.getItem(OWN_USERNAME_KEY);
   } catch {
     return null;
+  }
+}
+
+/** Pass `null` when the profile is known to have no avatar; use clearOwnIdentityExtras on logout. */
+export function setOwnAvatarUrl(avatarUrl: string | null): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(OWN_AVATAR_URL_KEY, avatarUrl ?? NO_AVATAR_SENTINEL);
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * `undefined` = not cached yet (avatar unknown, keep skeleton),
+ * `null` = known to have no avatar, string = avatar URL.
+ */
+export function getOwnAvatarUrl(): string | null | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    const raw = localStorage.getItem(OWN_AVATAR_URL_KEY);
+    if (raw === null) return undefined;
+    return raw === NO_AVATAR_SENTINEL ? null : raw;
+  } catch {
+    return undefined;
+  }
+}
+
+export function setOwnDisplayName(displayName: string | null): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (!displayName) {
+      localStorage.removeItem(OWN_DISPLAY_NAME_KEY);
+      return;
+    }
+    localStorage.setItem(OWN_DISPLAY_NAME_KEY, displayName);
+  } catch {
+    // ignore
+  }
+}
+
+export function getOwnDisplayName(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage.getItem(OWN_DISPLAY_NAME_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function clearOwnIdentityExtras(): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(OWN_AVATAR_URL_KEY);
+    localStorage.removeItem(OWN_DISPLAY_NAME_KEY);
+  } catch {
+    // ignore
   }
 }
 
@@ -359,4 +421,5 @@ export function clearAllSessionPageCaches(): void {
   writeHomeCache(false);
   setOwnUserId(null);
   setOwnUsername(null);
+  clearOwnIdentityExtras();
 }

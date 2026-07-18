@@ -3,8 +3,13 @@
 import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { OwnProfileShell } from "@/components/dashboard/OwnProfileShell";
 import {
+  clearOwnIdentityExtras,
+  getOwnAvatarUrl,
+  getOwnDisplayName,
   getOwnUserId,
   getOwnUsername,
+  setOwnAvatarUrl,
+  setOwnDisplayName,
   setOwnUserId,
   setOwnUsername,
 } from "@/lib/client/session-page-cache";
@@ -15,17 +20,21 @@ export type BottomBarOwnProfile = {
   username: string;
   avatarUrl: string | null;
   displayName: string | null;
+  /** True while avatarUrl is not known yet (first load, no cache) — show a skeleton, not initials. */
+  avatarPending?: boolean;
 };
 
 function readProvisionalOwnProfile(): BottomBarOwnProfile | null {
   const userId = getOwnUserId();
   const username = getOwnUsername();
   if (!userId || !username) return null;
+  const cachedAvatarUrl = getOwnAvatarUrl();
   return {
     id: userId,
     username,
-    avatarUrl: null,
-    displayName: null,
+    avatarUrl: cachedAvatarUrl ?? null,
+    displayName: getOwnDisplayName(),
+    avatarPending: cachedAvatarUrl === undefined,
   };
 }
 
@@ -62,6 +71,7 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
           setOwnProfile(null);
           setOwnUserId(null);
           setOwnUsername(null);
+          clearOwnIdentityExtras();
         }
         return;
       }
@@ -82,10 +92,17 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
                 username: profile.username,
                 avatarUrl: profile.avatar_url ?? null,
                 displayName: profile.display_name ?? null,
+                avatarPending: false,
               }
             : null
         );
         setOwnUsername(profile?.username ?? null);
+        if (profile?.username) {
+          setOwnAvatarUrl(profile.avatar_url ?? null);
+          setOwnDisplayName(profile.display_name ?? null);
+        } else {
+          clearOwnIdentityExtras();
+        }
       }
 
       if (profile?.username && profile.residence?.trim()) {

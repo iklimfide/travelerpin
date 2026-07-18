@@ -102,10 +102,15 @@ export function ProfileIdentityCard({
         followState={followState}
         canFollow={canFollow}
         isLoggedIn={isLoggedIn}
+        profileHref={profileHref}
       />
 
       <div className="profile-avatar-shell">
-        {canExpandAvatar ? (
+        {profileHref ? (
+          <Link href={profileHref} className="profile-avatar-link" aria-label={`${displayName}'s profile`}>
+            {avatarNode}
+          </Link>
+        ) : canExpandAvatar ? (
           <button
             type="button"
             className="profile-avatar-button"
@@ -114,10 +119,6 @@ export function ProfileIdentityCard({
           >
             {avatarNode}
           </button>
-        ) : profileHref ? (
-          <Link href={profileHref} className="profile-avatar-link" aria-label={`${displayName}'s profile`}>
-            {avatarNode}
-          </Link>
         ) : (
           avatarNode
         )}

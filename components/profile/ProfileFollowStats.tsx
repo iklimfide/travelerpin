@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Link } from "@/lib/i18n/navigation";
+import { useAuthModal } from "@/components/auth/AuthModalProvider";
 import { ProfileFollowListModal } from "@/components/profile/ProfileFollowListModal";
 import { fetchProfileFollowers, fetchProfileFollowing } from "@/lib/client/follow-actions";
 import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
@@ -23,6 +25,8 @@ type ProfileFollowStatsProps = {
   followerCount: number;
   followingCount: number;
   className?: string;
+  /** When set (home demo card), counts link to the profile instead of opening list modals. */
+  profileHref?: string;
 };
 
 type PrefetchedFollowList = {
@@ -59,24 +63,29 @@ export function ProfileFollowStats({
   followerCount,
   followingCount,
   className = "",
+  profileHref,
 }: ProfileFollowStatsProps) {
   const { profile: profileMessages } = useAppMessages();
+  const authModal = useAuthModal();
   const [openList, setOpenList] = useState<ProfileFollowListType | null>(null);
   const [prefetchedFollowers, setPrefetchedFollowers] = useState<PrefetchedFollowList | null>(null);
   const [prefetchedFollowing, setPrefetchedFollowing] = useState<PrefetchedFollowList | null>(null);
 
+  const isDemoProfile = isDemoProfileUsername(username);
+
+  function handleStatClick(type: ProfileFollowListType) {
+    // Demo profiles have no real follow lists — invite the visitor to sign up instead.
+    if (isDemoProfile) {
+      authModal.open({ mode: "register" });
+      return;
+    }
+    setOpenList(type);
+  }
+
   useEffect(() => {
     let cancelled = false;
 
-    if (isDemoProfileUsername(username)) {
-      if (followerCount > 0) {
-        setPrefetchedFollowers({ members: [], demo: true });
-      }
-      if (followingCount > 0) {
-        setPrefetchedFollowing({ members: [], demo: true });
-      }
-      return;
-    }
+    if (profileHref || isDemoProfileUsername(username)) return;
 
     if (followerCount > 0) {
       void fetchProfileFollowers(username).then((result) => {
@@ -101,7 +110,7 @@ export function ProfileFollowStats({
     return () => {
       cancelled = true;
     };
-  }, [followerCount, followingCount, username]);
+  }, [followerCount, followingCount, username, profileHref]);
 
   if (followerCount <= 0 && followingCount <= 0) return null;
 
@@ -109,6 +118,31 @@ export function ProfileFollowStats({
   const compactButtonClass = className.includes("profile-follow-stats--compact")
     ? " profile-follow-count--compact"
     : "";
+
+  if (profileHref) {
+    return (
+      <div className={statsClass}>
+        {followingCount > 0 ? (
+          <Link
+            href={profileHref}
+            className={`profile-follow-count profile-follow-count--link${compactButtonClass}`}
+            aria-label={`${displayName}'s profile`}
+          >
+            {followingCountLabel(profileMessages, followingCount)}
+          </Link>
+        ) : null}
+        {followerCount > 0 ? (
+          <Link
+            href={profileHref}
+            className={`profile-follow-count profile-follow-count--link${compactButtonClass}`}
+            aria-label={`${displayName}'s profile`}
+          >
+            {followerCountLabel(profileMessages, followerCount)}
+          </Link>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -119,7 +153,7 @@ export function ProfileFollowStats({
             ariaLabel={formatMessage(profileMessages.viewFollowing, {
               label: followingCountLabel(profileMessages, followingCount),
             })}
-            onClick={() => setOpenList("following")}
+            onClick={() => handleStatClick("following")}
             className={compactButtonClass.trim()}
           />
         ) : null}
@@ -129,7 +163,7 @@ export function ProfileFollowStats({
             ariaLabel={formatMessage(profileMessages.viewFollowers, {
               label: followerCountLabel(profileMessages, followerCount),
             })}
-            onClick={() => setOpenList("followers")}
+            onClick={() => handleStatClick("followers")}
             className={compactButtonClass.trim()}
           />
         ) : null}

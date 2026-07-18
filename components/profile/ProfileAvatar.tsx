@@ -48,7 +48,7 @@ export function ProfileAvatar({
         alt={label}
         width={dims.px}
         height={dims.px}
-        className={`${dims.box} shrink-0 rounded-full object-cover ring-2 ring-slate-700 ${className}`}
+        className={`${dims.box} shrink-0 rounded-full bg-[#e8eef5] object-cover ring-2 ring-slate-700 ${className}`}
       />
     );
   }

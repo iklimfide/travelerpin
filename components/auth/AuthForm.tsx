@@ -8,6 +8,12 @@ import { createClient } from "@/lib/supabase/client";
 import { formatDisplayName } from "@/lib/utils/display-name";
 import { formatAuthErrorMessage } from "@/lib/utils/auth-error-message";
 import { resolveAuthenticatedHomePath } from "@/lib/client/authenticated-home";
+import {
+  setOwnAvatarUrl,
+  setOwnDisplayName,
+  setOwnUserId,
+  setOwnUsername,
+} from "@/lib/client/session-page-cache";
 import { useModal } from "@/components/ui/ModalProvider";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import {
@@ -197,6 +203,14 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
         }
 
         if (signUpData.session) {
+          // Seed identity cache so the post-redirect chrome renders signed-in
+          // immediately (new accounts have no avatar yet).
+          if (signUpData.user?.id) {
+            setOwnUserId(signUpData.user.id);
+            setOwnUsername(parsed.data.username);
+            setOwnDisplayName(formatDisplayName(parsed.data.username));
+            setOwnAvatarUrl(null);
+          }
           const safeNext = sanitizeNext(next);
           window.location.assign(
             safeNext ?? (await resolveAuthenticatedHomePath(supabase))
@@ -246,7 +260,7 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
         if (signedInId) {
           const { data: banProfile } = await supabase
             .from("profiles")
-            .select("banned_at")
+            .select("banned_at, username, avatar_url, display_name")
             .eq("id", signedInId)
             .maybeSingle();
 
@@ -254,6 +268,15 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
             await supabase.auth.signOut();
             setSubmitError(t("loginAccountBanned"));
             return;
+          }
+
+          // Seed identity cache so the post-redirect chrome (bottom bar avatar)
+          // renders instantly instead of flashing guest UI / initials.
+          setOwnUserId(signedInId);
+          if (banProfile?.username) {
+            setOwnUsername(banProfile.username);
+            setOwnDisplayName(banProfile.display_name ?? null);
+            setOwnAvatarUrl(banProfile.avatar_url ?? null);
           }
         }
 

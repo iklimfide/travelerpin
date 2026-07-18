@@ -8,6 +8,7 @@ import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShell
 import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { NotificationsContext } from "@/components/notifications/NotificationsProvider";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 import { isKamikazeMasterProfile } from "@/lib/kamikaze/master";
 import { profilePath } from "@/lib/seo/site";
@@ -609,13 +610,18 @@ export function BottomBarProfileNav({
         onClick={() => setOpen((current) => !current)}
       >
         <span className="dashboard-bottom-bar__icon">
-          <ProfileAvatar
-            avatarUrl={ownProfile?.avatarUrl ?? null}
-            displayName={profileDisplayName}
-            username={username}
-            size="xs"
-            className="dashboard-bottom-bar__avatar !ring-0"
-          />
+          {ownProfile?.avatarPending && !ownProfile.avatarUrl ? (
+            // Avatar not resolved yet (first load) — hold a skeleton instead of flashing initials.
+            <Skeleton className="dashboard-bottom-bar__avatar !rounded-full" />
+          ) : (
+            <ProfileAvatar
+              avatarUrl={ownProfile?.avatarUrl ?? null}
+              displayName={profileDisplayName}
+              username={username}
+              size="xs"
+              className="dashboard-bottom-bar__avatar !ring-0"
+            />
+          )}
         </span>
       </button>
 

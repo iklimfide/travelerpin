@@ -17,6 +17,8 @@ import { clearSharePromptThrottle } from "@/lib/client/share-pin-prompt";
 import {
   invalidateOwnProfileCache,
   invalidateSettingsCache,
+  setOwnAvatarUrl,
+  setOwnDisplayName,
 } from "@/lib/client/session-page-cache";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import {
@@ -125,6 +127,7 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
       }
 
       await modal.alert(t("saveSuccess"), { variant: "success" });
+      setOwnDisplayName(displayName.trim() || null);
       invalidateSettingsCache();
       invalidateOwnProfileCache();
     } finally {
@@ -156,6 +159,7 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
           trailingEnd={<LogOutButtonInline />}
           onChange={(url) => {
             setAvatarUrl(url);
+            setOwnAvatarUrl(url);
             invalidateSettingsCache();
             invalidateOwnProfileCache();
           }}
