@@ -21,7 +21,9 @@ export async function GET(request: Request) {
   return new NextResponse(Buffer.from(object.body), {
     headers: {
       "Content-Type": object.contentType,
-      "Cache-Control": "public, max-age=31536000, immutable",
+      // max-age = browsers; s-maxage = Vercel CDN so Fluid Functions are not
+      // re-invoked for every visitor of the same immutable R2 object key.
+      "Cache-Control": "public, max-age=31536000, s-maxage=31536000, immutable",
     },
   });
 }
