@@ -62,6 +62,7 @@ export function ProfileMediaSections({
         viewAllHref={
           previewPhotos.length > 0 ? profileMediaPath(username, "photos") : undefined
         }
+        showAddButton
         isOwnProfile={isOwnProfile}
         visitedCountries={visitedCountries}
         visitedCities={visitedCities}
@@ -79,6 +80,7 @@ export function ProfileMediaSections({
         viewAllHref={
           previewInstagram.length > 0 ? profileMediaPath(username, "instagram") : undefined
         }
+        showAddButton
         isOwnProfile={isOwnProfile}
         visitedCountries={visitedCountries}
         visitedCities={visitedCities}

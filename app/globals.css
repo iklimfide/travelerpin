@@ -2013,6 +2013,106 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   text-decoration: none;
 }
 
+.profile-media-box__add {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  background: #2563eb;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.profile-media-box__add:hover {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+}
+
+.profile-media-add-picker__sheet {
+  max-width: 420px;
+}
+
+.profile-media-add-picker__hint {
+  margin: 0;
+  padding: 4px 20px 16px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.profile-media-add-picker__search {
+  padding: 0 20px 12px;
+}
+
+.profile-media-add-picker__search-input {
+  width: 100%;
+  border: 1px solid #dce4ef;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 9px 14px;
+  font-size: 14px;
+  color: var(--profile-text, #142033);
+  outline: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.profile-media-add-picker__search-input:focus {
+  border-color: #93c5fd;
+  background: #ffffff;
+}
+
+.profile-media-add-picker__search-input::placeholder {
+  color: #94a3b8;
+}
+
+.profile-media-add-picker__list {
+  margin: 0;
+  padding: 0 12px 16px;
+  list-style: none;
+  max-height: min(52vh, 420px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-media-add-picker__item {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: left;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.profile-media-add-picker__item:hover {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.profile-media-add-picker__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--profile-text, #142033);
+}
+
+.profile-media-add-picker__meta {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
 .profile-media-sections .city-page__traveler-pictures-grid {
   display: flex;
   flex-wrap: wrap;
@@ -3231,6 +3331,17 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
   max-width: none;
   height: 100%;
   max-height: none;
+}
+
+@media (min-width: 768px) {
+  .profile-destination-edit-modal {
+    justify-content: center;
+  }
+
+  .profile-destination-edit-modal .profile-followers-modal__sheet,
+  .profile-destination-edit-modal__sheet {
+    max-width: 480px;
+  }
 }
 
 .profile-all-destinations-modal__head,
@@ -6168,10 +6279,10 @@ a.save-destination-modal__name-link:hover {
 }
 
 .notifications-page__head--modal .notifications-page__actions {
-  position: static;
-  right: auto;
-  top: auto;
-  transform: none;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .notifications-page__head--modal .notifications-page__close {

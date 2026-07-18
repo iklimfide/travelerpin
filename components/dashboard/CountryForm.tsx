@@ -10,6 +10,7 @@ import { useModal } from "@/components/ui/ModalProvider";
 import { getCountryName } from "@/lib/data/countries";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { isValidInstagramUrl } from "@/lib/utils/instagram";
+import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
 import { readInstagramUrls, readPhotoUrl, withInstagramDraftField } from "@/lib/utils/pin-media";
 import type { VisitedCity, VisitedCountry } from "@/types/database";
 
@@ -101,6 +102,7 @@ export function CountryForm({
         return;
       }
 
+      notifyProfileDataChanged();
       onSuccess?.();
       router.refresh();
     } finally {

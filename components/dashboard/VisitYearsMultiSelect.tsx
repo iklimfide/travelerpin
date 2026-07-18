@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LIMITS } from "@/lib/constants";
-import { cityMessages, formatMessage, useAppMessages } from "@/lib/i18n/client-messages";
+import { formatMessage, useAppMessages, type AppMessages } from "@/lib/i18n/client-messages";
 import {
   extractVisitYears,
   yearsToVisitYearMonths,
@@ -23,7 +23,10 @@ function buildYearOptions(endYear: number): number[] {
   return years;
 }
 
-function formatTriggerLabel(selectedYears: number[]): string {
+function formatTriggerLabel(
+  selectedYears: number[],
+  cityMessages: AppMessages["city"]
+): string {
   if (selectedYears.length === 0) return cityMessages.visitDatesTitle;
   if (selectedYears.length <= 3) {
     return `${cityMessages.visitDatesTitle}: ${selectedYears.join(", ")}`;
@@ -92,7 +95,7 @@ export function VisitYearsMultiSelect({ value, onChange }: VisitYearsMultiSelect
         aria-expanded={open}
         aria-haspopup="dialog"
       >
-        {formatTriggerLabel(selectedYears)}
+        {formatTriggerLabel(selectedYears, cityMessages)}
       </button>
 
       {open ? (

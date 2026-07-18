@@ -5,11 +5,22 @@ type NotificationsResult =
   | { ok: false; error: string };
 
 let notificationsCache: Promise<NotificationsResult> | null = null;
+let notificationsCachedAt = 0;
 
-export function fetchNotifications(limit = 40): Promise<NotificationsResult> {
-  if (notificationsCache) return notificationsCache;
+/** Cached list is reused briefly for instant opens; fresh data is fetched on expiry or force. */
+const NOTIFICATIONS_CACHE_TTL_MS = 60_000;
 
-  notificationsCache = fetch(`/api/notifications?limit=${limit}`)
+export function fetchNotifications(
+  limit = 40,
+  options?: { force?: boolean }
+): Promise<NotificationsResult> {
+  const fresh = Date.now() - notificationsCachedAt < NOTIFICATIONS_CACHE_TTL_MS;
+  if (notificationsCache && fresh && !options?.force) {
+    return notificationsCache;
+  }
+
+  notificationsCachedAt = Date.now();
+  const request = fetch(`/api/notifications?limit=${limit}`)
     .then(async (res): Promise<NotificationsResult> => {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -21,13 +32,22 @@ export function fetchNotifications(limit = 40): Promise<NotificationsResult> {
         unreadCount: (data.unreadCount as number) ?? 0,
       };
     })
-    .catch((): NotificationsResult => ({ ok: false, error: "Failed to load notifications" }));
+    .catch((): NotificationsResult => ({ ok: false, error: "Failed to load notifications" }))
+    .then((result) => {
+      // Do not keep failures cached; the next call should retry.
+      if (!result.ok && notificationsCache === request) {
+        notificationsCache = null;
+      }
+      return result;
+    });
 
-  return notificationsCache;
+  notificationsCache = request;
+  return request;
 }
 
 export function clearNotificationsCache() {
   notificationsCache = null;
+  notificationsCachedAt = 0;
 }
 
 export async function fetchUnreadNotificationCount(): Promise<number> {

@@ -9,7 +9,7 @@ import {
   type Locale,
 } from "@/lib/i18n/config";
 import { usePathname } from "@/lib/i18n/navigation";
-import { stripLocalePrefix } from "@/lib/i18n/pathname";
+import { isPublicProfilePath, stripLocalePrefix } from "@/lib/i18n/pathname";
 
 type Props = {
   className?: string;
@@ -27,9 +27,10 @@ function localeCode(code: Locale): string {
   return code.toUpperCase();
 }
 
-/** Build a locale-prefixed URL (EN has no prefix). */
+/** Build a locale-prefixed URL (EN has no prefix; profiles stay unprefixed). */
 function hrefForLocale(pathname: string, code: Locale): string {
   const path = stripLocalePrefix(pathname);
+  if (isPublicProfilePath(path)) return path;
   if (code === defaultLocale) return path;
   return path === "/" ? `/${code}` : `/${code}${path}`;
 }

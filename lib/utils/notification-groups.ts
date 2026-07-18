@@ -91,22 +91,32 @@ export function groupNotifications(
   return groups;
 }
 
-function pinTypeLabel(type: NotificationType): string {
+type NotificationPlaceLabels = {
+  country: string;
+  city: string;
+  park: string;
+  place: string;
+  aPlace: string;
+  localizeCity: (countryCode: string, cityName: string) => string;
+};
+
+function pinTypeLabel(type: NotificationType, labels: NotificationPlaceLabels): string {
   switch (type) {
     case "pin_country":
-      return "Country";
+      return labels.country;
     case "pin_city":
-      return "City";
+      return labels.city;
     case "pin_park":
-      return "Park";
+      return labels.park;
     default:
-      return "Place";
+      return labels.place;
   }
 }
 
 export function notificationGroupPinPlaces(
   group: NotificationGroup,
-  notifications: EnrichedNotificationRow[]
+  notifications: EnrichedNotificationRow[],
+  labels: NotificationPlaceLabels
 ): NotificationPinPlace[] {
   const byId = new Map(notifications.map((item) => [item.id, item]));
 
@@ -115,14 +125,18 @@ export function notificationGroupPinPlaces(
     .filter((item): item is EnrichedNotificationRow => Boolean(item))
     .map((item) => {
       const payload = item.payload as NotificationPayload;
+      const rawPlaceName = payload.placeName ?? labels.aPlace;
       return {
         id: item.id,
-        placeName: payload.placeName ?? "a place",
+        placeName:
+          item.type === "pin_city"
+            ? labels.localizeCity(payload.countryCode ?? "", rawPlaceName)
+            : rawPlaceName,
         countryName:
           typeof payload.countryName === "string" && payload.countryName
             ? payload.countryName
             : null,
-        typeLabel: pinTypeLabel(item.type),
+        typeLabel: pinTypeLabel(item.type, labels),
         href: notificationTargetHref(item),
       };
     });

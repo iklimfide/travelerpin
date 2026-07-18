@@ -12,6 +12,8 @@ import {
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Link } from "@/lib/i18n/navigation";
+import { stripLocalePrefix } from "@/lib/i18n/pathname";
+import { useTranslateAuth, useTranslateCommon } from "@/lib/i18n/client-messages";
 import { AuthForm } from "@/components/auth/AuthForm";
 
 type AuthModalMode = "login" | "register";
@@ -59,13 +61,17 @@ function AuthModalProviderInner({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const t = useTranslateAuth();
+  const tCommon = useTranslateCommon();
 
   const [openState, setOpenState] = useState<OpenAuthModalOptions | null>(null);
 
   const nextFromUrl = sanitizeNext(searchParams?.get("next") ?? null);
 
+  // URL may carry a locale prefix (/tr/login) — compare the bare path.
+  const barePath = stripLocalePrefix(pathname ?? "/");
   const routeMode: AuthModalMode | null =
-    pathname === "/login" ? "login" : pathname === "/register" ? "register" : null;
+    barePath === "/login" ? "login" : barePath === "/register" ? "register" : null;
 
   useEffect(() => {
     if (!routeMode) return;
@@ -134,7 +140,7 @@ function AuthModalProviderInner({ children }: { children: ReactNode }) {
                       : "text-slate-600 hover:text-slate-800"
                   }`}
                 >
-                  Log in
+                  {tCommon("login")}
                 </button>
                 <button
                   type="button"
@@ -145,7 +151,7 @@ function AuthModalProviderInner({ children }: { children: ReactNode }) {
                       : "text-slate-600 hover:text-slate-800"
                   }`}
                 >
-                  Sign up
+                  {tCommon("register")}
                 </button>
               </div>
 
@@ -160,24 +166,24 @@ function AuthModalProviderInner({ children }: { children: ReactNode }) {
               <p className="mt-5 text-center text-xs text-slate-500">
                 {isLogin ? (
                   <>
-                    Don&apos;t have an account?{" "}
+                    {t("noAccount")}{" "}
                     <button
                       type="button"
                       className="font-semibold text-wbs-blue hover:text-wbs-blue-hover"
                       onClick={() => setOpenState({ mode: "register", next: active.next })}
                     >
-                      Sign up
+                      {tCommon("register")}
                     </button>
                   </>
                 ) : (
                   <>
-                    Already have an account?{" "}
+                    {t("hasAccount")}{" "}
                     <button
                       type="button"
                       className="font-semibold text-wbs-blue hover:text-wbs-blue-hover"
                       onClick={() => setOpenState({ mode: "login", next: active.next })}
                     >
-                      Log in
+                      {tCommon("login")}
                     </button>
                   </>
                 )}
@@ -186,7 +192,7 @@ function AuthModalProviderInner({ children }: { children: ReactNode }) {
                     {" "}
                     ·{" "}
                     <Link href={active.next ?? "/"} className="text-slate-500 hover:text-slate-700">
-                      Back
+                      {t("back")}
                     </Link>
                   </>
                 ) : null}

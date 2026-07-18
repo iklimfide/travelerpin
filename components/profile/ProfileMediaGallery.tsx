@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { ProfileInstagramLinkCard } from "@/components/profile/ProfileInstagramLinkCard";
 import { HubExternalPhoto } from "@/components/hub/HubExternalPhoto";
@@ -16,7 +17,12 @@ import {
   removeParkInstagramUrl,
   removeParkPhoto,
 } from "@/lib/client/profile-media-update";
+import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
+import { refreshTravelStateAfterSave } from "@/lib/client/travel-state";
 import type { HubGalleryItem, HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
+import { getCountryName } from "@/lib/data/countries";
+import type { Locale } from "@/lib/i18n/config";
+import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
 import { hubGalleryPhotoSrc } from "@/lib/storage/hub-photo-url";
 import { parseProfilePinId } from "@/lib/utils/profile-media";
@@ -55,6 +61,8 @@ type ProfileMediaGalleryProps = {
   /** Show All only when there are more items than the preview. */
   showViewAll?: boolean;
   hideHeading?: boolean;
+  /** Owner-only Add button in the heading (opens a pin picker, then the edit form). */
+  showAddButton?: boolean;
   isOwnProfile: boolean;
   visitedCountries: VisitedCountry[];
   visitedCities: VisitedCity[];
@@ -212,6 +220,7 @@ export function ProfileMediaGallery({
   viewAllExpanded = false,
   showViewAll,
   hideHeading = false,
+  showAddButton = false,
   isOwnProfile,
   visitedCountries,
   visitedCities,
@@ -219,12 +228,18 @@ export function ProfileMediaGallery({
   labels,
   photoAnchorPrefix,
 }: ProfileMediaGalleryProps) {
-  const { modal: modalMessages } = useAppMessages();
+  const { modal: modalMessages, profile: profileMessages } = useAppMessages();
+  const locale = useLocale() as Locale;
   const router = useRouter();
   const modal = useModal();
   const [expandedItem, setExpandedItem] = useState<HubGalleryItem | null>(null);
   const [editingCityId, setEditingCityId] = useState<string | null>(null);
   const [editingParkId, setEditingParkId] = useState<string | null>(null);
+  const [addPickerOpen, setAddPickerOpen] = useState(false);
+  const [addPickerQuery, setAddPickerQuery] = useState("");
+  const [editMediaFocus, setEditMediaFocus] = useState<"photo" | "instagram" | undefined>(
+    undefined
+  );
 
   const heading = variant === "photos" ? labels.photosHeading : labels.instagramHeading;
 
@@ -235,6 +250,8 @@ export function ProfileMediaGallery({
     const ref = parseProfilePinId(item.pin.id);
     if (!ref) return;
 
+    setEditMediaFocus(undefined);
+
     if (ref.kind === "city") {
       setEditingParkId(null);
       setEditingCityId(ref.id);
@@ -243,6 +260,50 @@ export function ProfileMediaGallery({
 
     setEditingCityId(null);
     setEditingParkId(ref.id);
+  }
+
+  const addMediaFocus = variant === "photos" ? "photo" : "instagram";
+
+  function openAddPicker() {
+    setAddPickerQuery("");
+    setAddPickerOpen(true);
+  }
+
+  const pickerCityEntries = visitedCities.map((city) => ({
+    kind: "city" as const,
+    id: city.id,
+    name: getLocalizedCityName(city.country_code, city.city_name, locale),
+    rawName: city.city_name,
+    countryName: getCountryName(city.country_code, locale),
+    rawCountryName: city.country_name,
+  }));
+  const pickerParkEntries = visitedParks.map((park) => ({
+    kind: "park" as const,
+    id: park.id,
+    name: park.park_name,
+    rawName: park.park_name,
+    countryName: getCountryName(park.country_code, locale),
+    rawCountryName: park.country_name,
+  }));
+
+  const pickerFilter = addPickerQuery.trim().toLocaleLowerCase(locale);
+  const pickerEntries = [...pickerCityEntries, ...pickerParkEntries].filter((entry) => {
+    if (!pickerFilter) return true;
+    return [entry.name, entry.rawName, entry.countryName, entry.rawCountryName].some(
+      (value) => value.toLocaleLowerCase(locale).includes(pickerFilter)
+    );
+  });
+
+  function openAddForPin(kind: "city" | "park", id: string) {
+    setAddPickerOpen(false);
+    setEditMediaFocus(addMediaFocus);
+    if (kind === "city") {
+      setEditingParkId(null);
+      setEditingCityId(id);
+      return;
+    }
+    setEditingCityId(null);
+    setEditingParkId(id);
   }
 
   async function handleRemoveItem(item: HubGalleryItem) {
@@ -286,6 +347,8 @@ export function ProfileMediaGallery({
       return;
     }
 
+    notifyProfileDataChanged();
+    refreshTravelStateAfterSave();
     router.refresh();
   }
 
@@ -326,6 +389,15 @@ export function ProfileMediaGallery({
         <div className="city-page__hub-photo-gallery profile-media-box">
           {hideHeading ? null : (
             <div className="profile-media-box__head">
+              {showAddButton && isOwnProfile ? (
+                <button
+                  type="button"
+                  className="profile-media-box__add"
+                  onClick={openAddPicker}
+                >
+                  {profileMessages.ownerAdd}
+                </button>
+              ) : null}
               <h2 id={headingId} className="profile-media-box__title">
                 {heading}
               </h2>
@@ -367,14 +439,97 @@ export function ProfileMediaGallery({
         />
       ) : null}
 
+      {addPickerOpen ? (
+        <div className="profile-followers-modal profile-media-add-picker" role="presentation">
+          <button
+            type="button"
+            className="profile-followers-modal__backdrop"
+            aria-label={labels.close}
+            onClick={() => setAddPickerOpen(false)}
+          />
+          <div
+            className="profile-followers-modal__sheet profile-media-add-picker__sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="profile-media-add-picker-title"
+          >
+            <div className="profile-destination-edit-modal__head">
+              <h2
+                id="profile-media-add-picker-title"
+                className="profile-followers-modal__title"
+              >
+                {variant === "photos"
+                  ? profileMessages.addMediaPhotoTitle
+                  : profileMessages.addMediaInstagramTitle}
+              </h2>
+              <button
+                type="button"
+                className="profile-followers-modal__close"
+                onClick={() => setAddPickerOpen(false)}
+                aria-label={labels.close}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            {visitedCities.length > 0 || visitedParks.length > 0 ? (
+              <>
+                <p className="profile-media-add-picker__hint">
+                  {profileMessages.addMediaPickHint}
+                </p>
+                <div className="profile-media-add-picker__search">
+                  <input
+                    type="search"
+                    value={addPickerQuery}
+                    onChange={(event) => setAddPickerQuery(event.target.value)}
+                    placeholder={profileMessages.addMediaSearchPlaceholder}
+                    className="profile-media-add-picker__search-input"
+                    autoFocus
+                  />
+                </div>
+                {pickerEntries.length > 0 ? (
+                  <ul className="profile-media-add-picker__list scrollbar-thin">
+                    {pickerEntries.map((entry) => (
+                      <li key={`${entry.kind}-${entry.id}`}>
+                        <button
+                          type="button"
+                          className="profile-media-add-picker__item"
+                          onClick={() => openAddForPin(entry.kind, entry.id)}
+                        >
+                          <span className="profile-media-add-picker__name">{entry.name}</span>
+                          <span className="profile-media-add-picker__meta">
+                            {entry.countryName}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="profile-media-add-picker__hint">
+                    {profileMessages.addMediaSearchEmpty}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="profile-media-add-picker__hint">
+                {profileMessages.addMediaNoPins}
+              </p>
+            )}
+          </div>
+        </div>
+      ) : null}
+
       {isOwnProfile ? (
         <ProfileDestinationEditModal
           city={editingCity}
           park={editingPark}
           visitedCountries={visitedCountries}
+          mediaFocus={editMediaFocus}
           onClose={() => {
             setEditingCityId(null);
             setEditingParkId(null);
+            setEditMediaFocus(undefined);
           }}
         />
       ) : null}

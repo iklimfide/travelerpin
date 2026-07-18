@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 import type { EnrichedNotificationRow } from "@/types/database";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
@@ -10,7 +11,11 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from "@/lib/client/notification-actions";
-import { formatMessage, notificationMessages, shareMessages, useAppMessages } from "@/lib/i18n/client-messages";
+import {
+  formatMessage,
+  useAppMessages,
+  type AppMessages,
+} from "@/lib/i18n/client-messages";
 import {
   notificationActorProfileHref,
   notificationTargetHref,
@@ -23,10 +28,23 @@ import {
   notificationGroupPinPlaces,
   type NotificationGroup,
 } from "@/lib/utils/notification-groups";
+import { getLocalizedCityName } from "@/lib/i18n/place-names";
+
+type NotificationMessages = AppMessages["notifications"];
+
+function withTurkishLocative(placeName: string): string {
+  const letters = placeName.toLocaleLowerCase("tr-TR").replace(/[^a-zçğıöşü]/g, "");
+  const lastLetter = letters.at(-1) ?? "";
+  const lastVowel = [...letters].reverse().find((letter) => "aeıioöuü".includes(letter));
+  const vowel = lastVowel && "eiöü".includes(lastVowel) ? "e" : "a";
+  const consonant = "fstkçşhp".includes(lastLetter) ? "t" : "d";
+  return `${placeName}'${consonant}${vowel}`;
+}
 
 function resolveActorName(
   notification: EnrichedNotificationRow,
-  payload: NotificationPayload
+  payload: NotificationPayload,
+  messages: NotificationMessages
 ): string {
   if (notification.type === "system") {
     return payload.actorDisplayName ?? SYSTEM_NOTIFICATION_SENDER.displayName;
@@ -40,18 +58,30 @@ function resolveActorName(
         )
       : undefined) ??
     payload.actorUsername ??
-    "A traveler"
+    messages.aTraveler
   );
 }
 
-function formatGroupBody(group: NotificationGroup): string {
+function formatGroupBody(
+  group: NotificationGroup,
+  messages: NotificationMessages,
+  locale: "en" | "tr"
+): string {
   const notification = group.representative;
   const payload = notification.payload as NotificationPayload;
-  const name = resolveActorName(notification, payload);
-  const place = payload.placeName ?? "a place";
+  const name = resolveActorName(notification, payload, messages);
+  const rawPlace = payload.placeName ?? messages.aPlace;
+  const localizedPlace =
+    notification.type === "pin_city"
+      ? getLocalizedCityName(payload.countryCode ?? "", rawPlace, locale)
+      : rawPlace;
+  const place =
+    notification.type === "pin_city" && locale === "tr"
+      ? withTurkishLocative(localizedPlace)
+      : localizedPlace;
 
   if (group.pinCount > 1) {
-    return formatMessage(notificationMessages.pin_batch, {
+    return formatMessage(messages.pin_batch, {
       name,
       count: group.pinCount,
     });
@@ -59,15 +89,15 @@ function formatGroupBody(group: NotificationGroup): string {
 
   switch (notification.type) {
     case "follow":
-      return formatMessage(notificationMessages.follow, { name });
+      return formatMessage(messages.follow, { name });
     case "pin_country":
-      return formatMessage(notificationMessages.pin_country, { name, place });
+      return formatMessage(messages.pin_country, { name, place });
     case "pin_city":
-      return formatMessage(notificationMessages.pin_city, { name, place });
+      return formatMessage(messages.pin_city, { name, place });
     case "pin_park":
-      return formatMessage(notificationMessages.pin_park, { name, place });
+      return formatMessage(messages.pin_park, { name, place });
     case "pin_media":
-      return formatMessage(notificationMessages.pin_media, { name, place });
+      return formatMessage(messages.pin_media, { name, place });
     case "system": {
       const message =
         typeof payload.message === "string" && payload.message.trim()
@@ -78,13 +108,13 @@ function formatGroupBody(group: NotificationGroup): string {
           ? payload.title.trim()
           : "";
       if (title && message && title !== message) {
-        return formatMessage(notificationMessages.system_with_title, {
+        return formatMessage(messages.system_with_title, {
           name,
           title,
           message,
         });
       }
-      return formatMessage(notificationMessages.system, {
+      return formatMessage(messages.system, {
         name,
         message: message || title || "",
       });
@@ -94,18 +124,22 @@ function formatGroupBody(group: NotificationGroup): string {
   }
 }
 
-function formatWhen(iso: string): string {
+function formatWhen(
+  iso: string,
+  locale: string,
+  messages: NotificationMessages
+): string {
   const date = new Date(iso);
   const now = Date.now();
   const diffMs = now - date.getTime();
   const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return "Just now";
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1) return messages.justNow;
+  if (minutes < 60) return formatMessage(messages.minutesAgo, { count: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return formatMessage(messages.hoursAgo, { count: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return date.toLocaleDateString();
+  if (days < 7) return formatMessage(messages.daysAgo, { count: days });
+  return date.toLocaleDateString(locale);
 }
 
 function resolveActorAvatar(
@@ -135,7 +169,8 @@ function resolveActorUsername(
 
 function resolveActorDisplayName(
   notification: EnrichedNotificationRow,
-  payload: NotificationPayload
+  payload: NotificationPayload,
+  messages: NotificationMessages
 ): string {
   if (notification.type === "system") {
     return payload.actorDisplayName ?? SYSTEM_NOTIFICATION_SENDER.displayName;
@@ -147,7 +182,7 @@ function resolveActorDisplayName(
       notification.actorProfile.username
     );
   }
-  return payload.actorUsername ?? "Traveler";
+  return payload.actorUsername ?? messages.traveler;
 }
 
 type NotificationsPanelProps = {
@@ -164,6 +199,8 @@ export function NotificationsPanel({
   initialUnreadCount = 0,
 }: NotificationsPanelProps) {
   const { share: shareMessages, notifications: notificationMessages } = useAppMessages();
+  const locale = useLocale();
+  const appLocale = locale === "tr" ? "tr" : "en";
   const router = useRouter();
   const [notifications, setNotifications] = useState<EnrichedNotificationRow[]>(
     initialNotifications ?? []
@@ -177,8 +214,19 @@ export function NotificationsPanel({
 
   const groups = useMemo(() => groupNotifications(notifications), [notifications]);
   const detailPlaces = useMemo(
-    () => (detailGroup ? notificationGroupPinPlaces(detailGroup, notifications) : []),
-    [detailGroup, notifications]
+    () =>
+      detailGroup
+        ? notificationGroupPinPlaces(detailGroup, notifications, {
+            country: notificationMessages.country,
+            city: notificationMessages.city,
+            park: notificationMessages.park,
+            place: notificationMessages.place,
+            aPlace: notificationMessages.aPlace,
+            localizeCity: (countryCode, cityName) =>
+              getLocalizedCityName(countryCode, cityName, appLocale),
+          })
+        : [],
+    [appLocale, detailGroup, notifications, notificationMessages]
   );
 
   useEffect(() => {
@@ -279,7 +327,11 @@ export function NotificationsPanel({
     ? (detailGroup.representative.payload as NotificationPayload)
     : null;
   const detailName = detailGroup
-    ? resolveActorName(detailGroup.representative, detailPayload ?? {})
+    ? resolveActorName(
+        detailGroup.representative,
+        detailPayload ?? {},
+        notificationMessages
+      )
     : "";
 
   return (
@@ -411,7 +463,11 @@ export function NotificationsPanel({
                   ? true
                   : Boolean(notificationTargetHref(notification));
               const username = resolveActorUsername(notification, payload);
-              const displayName = resolveActorDisplayName(notification, payload);
+              const displayName = resolveActorDisplayName(
+                notification,
+                payload,
+                notificationMessages
+              );
 
               return (
                 <li key={group.key}>
@@ -429,8 +485,12 @@ export function NotificationsPanel({
                     />
                     <span className="notifications-item__body">
                       <span className="notifications-item__copy">
-                        <span className="notifications-item__text">{formatGroupBody(group)}</span>{" "}
-                        <span className="notifications-item__time">{formatWhen(group.created_at)}</span>
+                        <span className="notifications-item__text">
+                          {formatGroupBody(group, notificationMessages, appLocale)}
+                        </span>{" "}
+                        <span className="notifications-item__time">
+                          {formatWhen(group.created_at, locale, notificationMessages)}
+                        </span>
                       </span>
                     </span>
                     {href ? <span className="notifications-item__chevron" aria-hidden>›</span> : null}

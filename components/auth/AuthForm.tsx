@@ -425,8 +425,9 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
               rel="noopener noreferrer"
               className="font-medium text-wbs-blue hover:text-wbs-blue-hover"
             >
-              {footerMessages.privacy}
+              {t("acceptPrivacyPolicy")}
             </Link>
+            {t("acceptTermsSuffix")}
             .
           </span>
         </label>

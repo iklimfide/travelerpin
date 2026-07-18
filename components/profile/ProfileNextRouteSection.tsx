@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -70,6 +71,7 @@ export function ProfileNextRouteSection({
   isOwnProfile,
 }: ProfileNextRouteSectionProps) {
   const { profile: profileMessages, nextRoute: nextRouteMessages } = useAppMessages();
+  const locale = useLocale() === "tr" ? "tr" : "en";
   const router = useRouter();
   const pathname = usePathname() ?? "/";
   const initialResolved = useMemo(
@@ -236,7 +238,7 @@ export function ProfileNextRouteSection({
         ) : (
           <ul className="profile-next-route-list">
             {stops.map((stop, index) => {
-              const { title, subtitle, countryCode } = getNextRouteStopDisplay(stop);
+              const { title, subtitle, countryCode } = getNextRouteStopDisplay(stop, locale);
               const flagUrl = countryCode ? countryCodeToFlagUrl(countryCode) : "";
 
               return (

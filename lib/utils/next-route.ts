@@ -1,5 +1,7 @@
 import { getCountryName } from "@/lib/data/countries";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
+import { defaultLocale, type Locale } from "@/lib/i18n/config";
+import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import { countryPath } from "@/lib/seo/site";
 import { canonicalCityKey, canonicalCityName } from "@/lib/utils/city-aliases";
 import { cityPlacePath } from "@/lib/utils/hub-place-path";
@@ -148,19 +150,24 @@ export function areNextRouteStopsEqual(a: NextRouteStop[], b: NextRouteStop[]): 
   return true;
 }
 
-export function getNextRouteStopDisplay(stop: NextRouteStop): NextRouteStopDisplay {
+export function getNextRouteStopDisplay(
+  stop: NextRouteStop,
+  locale: Locale = defaultLocale
+): NextRouteStopDisplay {
   const countryCode = stop.countryCode?.toUpperCase() ?? "";
-  const countryName = stop.countryName ?? (countryCode ? getCountryName(countryCode) : stop.name);
+  const countryName = countryCode
+    ? getCountryName(countryCode, locale)
+    : stop.countryName ?? stop.name;
 
   if (stop.kind === "city") {
     return {
-      title: canonicalCityName(countryCode, stop.name),
+      title: getLocalizedCityName(countryCode, stop.name, locale),
       subtitle: countryName,
       countryCode,
     };
   }
 
-  const title = stop.name || countryName;
+  const title = countryCode ? countryName : stop.name || countryName;
   return {
     title,
     subtitle: title !== countryName ? countryName : null,

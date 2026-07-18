@@ -1,5 +1,5 @@
 import { BRAND } from "@/lib/constants";
-import { defaultLocale, type Locale } from "@/lib/i18n/config";
+import type { Locale } from "@/lib/i18n/config";
 
 export function getSiteUrl(): string {
   let url: string;
@@ -16,23 +16,24 @@ export function getSiteUrl(): string {
   return url;
 }
 
-export function profilePath(username: string, locale: Locale = defaultLocale): string {
-  const base = `/${username.toLowerCase()}`;
-  if (locale === defaultLocale) return base;
-  return `/${locale}${base}`;
+export function profilePath(username: string, _locale?: Locale): string {
+  void _locale;
+  return `/${username.toLowerCase()}`;
 }
 
-export function profileAllPath(username: string, locale: Locale = defaultLocale): string {
-  return `${profilePath(username, locale)}/all`;
+export function profileAllPath(username: string, _locale?: Locale): string {
+  void _locale;
+  return `${profilePath(username)}/all`;
 }
 
 export function profileMediaPath(
   username: string,
   tab: "photos" | "instagram" = "photos",
   page = 1,
-  locale: Locale = defaultLocale
+  _locale?: Locale
 ): string {
-  const path = `${profilePath(username, locale)}/media`;
+  void _locale;
+  const path = `${profilePath(username)}/media`;
   if (tab === "photos" && page <= 1) return path;
 
   const params = new URLSearchParams();
@@ -43,13 +44,15 @@ export function profileMediaPath(
   return query ? `${path}?${query}` : path;
 }
 
-export function profileUrl(username: string, locale: Locale = defaultLocale): string {
-  return `${getSiteUrl()}${profilePath(username, locale)}`;
+export function profileUrl(username: string, _locale?: Locale): string {
+  void _locale;
+  return `${getSiteUrl()}${profilePath(username)}`;
 }
 
 /** Profile URL with a stable share query param to bust link-preview caches. */
-export function profileShareUrl(username: string, locale: Locale = defaultLocale): string {
-  return profileUrl(username, locale);
+export function profileShareUrl(username: string, _locale?: Locale): string {
+  void _locale;
+  return profileUrl(username);
 }
 
 export function countryPath(slug: string): string {

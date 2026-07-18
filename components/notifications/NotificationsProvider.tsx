@@ -66,6 +66,23 @@ export function NotificationsProvider({ username, children }: NotificationsProvi
     };
   }, []);
 
+  // Cached list renders instantly on open; fetch fresh data in the background
+  // so new activity (follows, pins) shows up without a reload.
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+
+    void fetchNotifications(40, { force: true }).then((result) => {
+      if (cancelled || !result.ok) return;
+      setPrefetchedNotifications(result.notifications);
+      setPrefetchedUnreadCount(result.unreadCount);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
   const close = useCallback(() => {
     setOpen(false);
     if (routeOpen) {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { VisitMonthYearSelect } from "@/components/dashboard/VisitMonthYearSelect";
 import { VisitYearsMultiSelect } from "@/components/dashboard/VisitYearsMultiSelect";
 import { LIMITS } from "@/lib/constants";
-import { cityMessages, formatMessage, useAppMessages } from "@/lib/i18n/client-messages";
+import { formatMessage, useAppMessages, type AppMessages } from "@/lib/i18n/client-messages";
 import { formatVisitMonthYear, normalizeVisitDates } from "@/lib/utils/visit-date";
 
 type CityVisitDatesEditorProps = {
@@ -16,9 +16,11 @@ type CityVisitDatesEditorProps = {
 function CityVisitDatesMonthEditor({
   value,
   onChange,
+  cityMessages,
 }: {
   value: string[];
   onChange: (dates: string[]) => void;
+  cityMessages: AppMessages["city"];
 }) {
   const [slots, setSlots] = useState<(string | null)[]>(() =>
     value.length > 0 ? [...value] : [null]
@@ -114,5 +116,7 @@ export function CityVisitDatesEditor({ value, onChange, hideHint = false }: City
     return <VisitYearsMultiSelect value={value} onChange={onChange} />;
   }
 
-  return <CityVisitDatesMonthEditor value={value} onChange={onChange} />;
+  return (
+    <CityVisitDatesMonthEditor value={value} onChange={onChange} cityMessages={cityMessages} />
+  );
 }
