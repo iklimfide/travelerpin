@@ -251,12 +251,19 @@
 }
 
 .profile-hero-title h1 {
-  font-size: clamp(22px, 6.2vw, 28px);
+  font-size: clamp(14px, 5.2vw, 28px);
   line-height: 1.12;
   letter-spacing: -0.8px;
   font-weight: 800;
   margin-bottom: 6px;
   text-shadow: 0 1px 10px rgba(15, 23, 42, 0.28);
+}
+
+.profile-hero-title__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .profile-hero-title p {

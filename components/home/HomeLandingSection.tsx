@@ -7,6 +7,7 @@ import { loadDemoPublicProfilePage } from "@/lib/data/jennifer-demo-page";
 import { buildProfileDescription } from "@/lib/seo/profile";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { worldCoveragePercent } from "@/lib/utils/profile-page";
+import { profilePath } from "@/lib/seo/site";
 
 const LANDING_GRID_CLASS =
   "grid items-stretch gap-[34px] lg:grid-cols-[0.9fr_1.1fr] lg:gap-10 xl:gap-12";
@@ -18,6 +19,7 @@ export async function HomeLandingSection() {
   const displayName = resolveProfileDisplayName(data.profile.display_name, data.profile.username);
   const profileDescription = buildProfileDescription(displayName, data.stats);
   const isOwnProfile = data.currentUsername === data.profile.username;
+  const demoProfileHref = profilePath(DEMO_PERSONA.username);
 
   return (
     <section className={LANDING_GRID_CLASS}>
@@ -40,6 +42,7 @@ export async function HomeLandingSection() {
           isOwnProfile={isOwnProfile}
           isGuest={!data.isLoggedIn}
           embedded
+          profilePageHref={demoProfileHref}
         />
       </div>
     </section>
