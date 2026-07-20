@@ -15,6 +15,7 @@ import {
   getSiteUrl,
 } from "@/lib/seo/site";
 import { loadPublicProfileMetadata } from "@/lib/supabase/profile-page-data";
+import "@/app/styles/profile.css";
 
 type LayoutProps = {
   children: React.ReactNode;

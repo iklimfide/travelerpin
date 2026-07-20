@@ -10,6 +10,7 @@ import {
   staticOpenGraphImages,
   staticTwitterImages,
 } from "@/lib/seo/og";
+import "@/app/styles/profile.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
