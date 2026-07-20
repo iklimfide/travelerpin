@@ -88,6 +88,15 @@ export function clearDelayedSharePrompt(): void {
   }
 }
 
+/** True when a delayed post-pin share prompt is stored (due or not yet). */
+export function hasScheduledDelayedSharePrompt(): boolean {
+  try {
+    return Boolean(localStorage.getItem(DELAYED_KEY));
+  } catch {
+    return false;
+  }
+}
+
 export function clearSharePromptThrottle(): void {
   clearDelayedSharePrompt();
 }

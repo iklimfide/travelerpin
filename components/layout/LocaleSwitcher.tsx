@@ -10,6 +10,7 @@ import {
 } from "@/lib/i18n/config";
 import { usePathname } from "@/lib/i18n/navigation";
 import { isPublicProfilePath, stripLocalePrefix } from "@/lib/i18n/pathname";
+import { getOwnUsername } from "@/lib/client/session-page-cache";
 
 type Props = {
   className?: string;
@@ -47,6 +48,8 @@ function navigateToLocale(pathname: string, code: Locale) {
 
 /** Persist owner share-preview locale when signed in (best-effort). */
 async function persistProfileLocale(code: Locale): Promise<void> {
+  // Guests always 401 — skip the Fluid Function invocation entirely.
+  if (!getOwnUsername()) return;
   try {
     await fetch("/api/profile", {
       method: "PATCH",
@@ -55,7 +58,7 @@ async function persistProfileLocale(code: Locale): Promise<void> {
       keepalive: true,
     });
   } catch {
-    // Guest / offline — UI cookie still applies for browsing.
+    // Offline — UI cookie still applies for browsing.
   }
 }
 

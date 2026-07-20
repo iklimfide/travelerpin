@@ -46,6 +46,7 @@ function TopTenCard({
             {item.href ? (
               <Link
                 href={item.href}
+                prefetch={false}
                 className="font-semibold text-[#2563eb] transition-colors hover:text-[#1d4ed8] hover:underline"
               >
                 {item.name}

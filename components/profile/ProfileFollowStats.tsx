@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuthModal } from "@/components/auth/AuthModalProvider";
 import { ProfileFollowListModal } from "@/components/profile/ProfileFollowListModal";
-import { fetchProfileFollowers, fetchProfileFollowing } from "@/lib/client/follow-actions";
 import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
 import { formatMessage, type AppMessages, useAppMessages } from "@/lib/i18n/client-messages";
-import type { ProfileFollowerSummary, ProfileFollowListType } from "@/types/database";
+import type { ProfileFollowListType } from "@/types/database";
 
 function followerCountLabel(profile: AppMessages["profile"], count: number): string {
   if (count === 1) return profile.followersOne;
@@ -27,11 +26,6 @@ type ProfileFollowStatsProps = {
   className?: string;
   /** When set (home demo card), counts link to the profile instead of opening list modals. */
   profileHref?: string;
-};
-
-type PrefetchedFollowList = {
-  members: ProfileFollowerSummary[];
-  demo: boolean;
 };
 
 function FollowStatButton({
@@ -68,8 +62,6 @@ export function ProfileFollowStats({
   const { profile: profileMessages } = useAppMessages();
   const authModal = useAuthModal();
   const [openList, setOpenList] = useState<ProfileFollowListType | null>(null);
-  const [prefetchedFollowers, setPrefetchedFollowers] = useState<PrefetchedFollowList | null>(null);
-  const [prefetchedFollowing, setPrefetchedFollowing] = useState<PrefetchedFollowList | null>(null);
 
   const isDemoProfile = isDemoProfileUsername(username);
 
@@ -81,36 +73,6 @@ export function ProfileFollowStats({
     }
     setOpenList(type);
   }
-
-  useEffect(() => {
-    let cancelled = false;
-
-    if (profileHref || isDemoProfileUsername(username)) return;
-
-    if (followerCount > 0) {
-      void fetchProfileFollowers(username).then((result) => {
-        if (cancelled || !result.ok) return;
-        setPrefetchedFollowers({
-          members: result.followers,
-          demo: result.demo === true,
-        });
-      });
-    }
-
-    if (followingCount > 0) {
-      void fetchProfileFollowing(username).then((result) => {
-        if (cancelled || !result.ok) return;
-        setPrefetchedFollowing({
-          members: result.following,
-          demo: result.demo === true,
-        });
-      });
-    }
-
-    return () => {
-      cancelled = true;
-    };
-  }, [followerCount, followingCount, username, profileHref]);
 
   if (followerCount <= 0 && followingCount <= 0) return null;
 
@@ -174,16 +136,6 @@ export function ProfileFollowStats({
           username={username}
           displayName={displayName}
           listType={openList}
-          initialMembers={
-            openList === "followers"
-              ? prefetchedFollowers?.members
-              : prefetchedFollowing?.members
-          }
-          initialDemo={
-            openList === "followers"
-              ? prefetchedFollowers?.demo
-              : prefetchedFollowing?.demo
-          }
           open
           onClose={() => setOpenList(null)}
         />

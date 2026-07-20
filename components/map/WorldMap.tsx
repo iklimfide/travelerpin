@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { geoCentroid, geoNaturalEarth1, geoPath } from "d3-geo";
 import type { Feature, Geometry, FeatureCollection } from "geojson";
 import countriesLib from "i18n-iso-countries";
@@ -81,12 +81,7 @@ export function WorldMap({
   continent = DEFAULT_MAP_CONTINENT,
   mainlandWorld = false,
 }: WorldMapProps) {
-  const [mapReady, setMapReady] = useState(false);
   const [hoveredCountryId, setHoveredCountryId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setMapReady(true);
-  }, []);
 
   const countryFeatures = useMemo(() => buildCountryFeatures(), []);
 
@@ -227,8 +222,7 @@ export function WorldMap({
         <rect width={WIDTH} height={HEIGHT} fill={MAP_CSS.background} />
 
         <g>
-          {mapReady &&
-            visibleFeatures.map((country, index) => {
+          {visibleFeatures.map((country, index) => {
             const id =
               country.id != null && country.id !== ""
                 ? String(country.id)
@@ -316,8 +310,7 @@ export function WorldMap({
             );
           })}
 
-          {mapReady &&
-            !mainlandWorld &&
+          {!mainlandWorld &&
             visitedPinPositions.map((pin) => (
               <MapCountryPin
                 key={`pin-${pin.id}`}
@@ -327,7 +320,7 @@ export function WorldMap({
               />
             ))}
 
-          {mapReady && hoveredCountryLabel && (
+          {hoveredCountryLabel && (
             <MapCountryLabel
               x={hoveredCountryLabel.x}
               y={hoveredCountryLabel.y}

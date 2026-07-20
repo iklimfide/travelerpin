@@ -7,6 +7,7 @@ import {
   clearDelayedSharePrompt,
   fetchSharePromptEligibility,
   getDueDelayedSharePrompt,
+  hasScheduledDelayedSharePrompt,
   registerSharePinPromptHandler,
   scheduleDelayedSharePrompt,
   setSharePromptMode,
@@ -73,6 +74,7 @@ export function SharePinPromptProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     let inFlight = false;
+    let intervalId: number | null = null;
 
     async function handleOffer(offer: SharePinOffer) {
       if (cancelled || inFlight || showingRef.current) return;
@@ -86,6 +88,7 @@ export function SharePinPromptProvider({ children }: { children: ReactNode }) {
 
         if (result.mode === "after_30m") {
           scheduleDelayedSharePrompt(offer);
+          ensureInterval();
           return;
         }
 
@@ -98,7 +101,14 @@ export function SharePinPromptProvider({ children }: { children: ReactNode }) {
     async function checkDelayedPrompt() {
       if (cancelled || showingRef.current || inFlight) return;
       const offer = getDueDelayedSharePrompt();
-      if (!offer) return;
+      if (!offer) {
+        // Keep polling while a delay is still scheduled; stop only when cleared.
+        if (!hasScheduledDelayedSharePrompt() && intervalId != null) {
+          window.clearInterval(intervalId);
+          intervalId = null;
+        }
+        return;
+      }
 
       inFlight = true;
       try {
@@ -115,12 +125,20 @@ export function SharePinPromptProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    registerSharePinPromptHandler(handleOffer);
-    void checkDelayedPrompt();
+    function ensureInterval() {
+      if (intervalId != null) return;
+      intervalId = window.setInterval(() => {
+        void checkDelayedPrompt();
+      }, 30_000);
+    }
 
-    const intervalId = window.setInterval(() => {
+    registerSharePinPromptHandler(handleOffer);
+
+    // Only poll when a delayed prompt is already scheduled (or due).
+    if (hasScheduledDelayedSharePrompt()) {
+      ensureInterval();
       void checkDelayedPrompt();
-    }, 30_000);
+    }
 
     function onFocus() {
       void checkDelayedPrompt();
@@ -138,7 +156,7 @@ export function SharePinPromptProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
       registerSharePinPromptHandler(null);
-      window.clearInterval(intervalId);
+      if (intervalId != null) window.clearInterval(intervalId);
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisibility);
     };
