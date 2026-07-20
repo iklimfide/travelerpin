@@ -1,8 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Link } from "@/lib/i18n/navigation";
 import { useEffect, useState } from "react";
-import { TravelMapView } from "@/components/map/TravelMapView";
 import { VisitedCountryFlags } from "@/components/map/VisitedCountryFlags";
 import { DEMO_VISITED_COUNTRIES, DEMO_VISITED_COUNTRY_CODES } from "@/lib/data/demo-countries";
 import { DEMO_WISHLIST_COUNTRY_CODES } from "@/lib/data/demo-wishlist";
@@ -12,6 +12,20 @@ import {
 } from "@/lib/client/share-map-showcase";
 import { worldCoveragePercent } from "@/lib/utils/profile-page";
 import type { VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
+
+/** Map chunk is heavy (d3/topojson) — keep it off the critical profile paint path. */
+const TravelMapView = dynamic(
+  () =>
+    import("@/components/map/TravelMapView").then((mod) => mod.TravelMapView),
+  {
+    ssr: false,
+    loading: () => (
+      <div id="travel-map" aria-hidden>
+        <div />
+      </div>
+    ),
+  }
+);
 
 type ProfileMapPanelProps = {
   visitedCountryCodes: string[];

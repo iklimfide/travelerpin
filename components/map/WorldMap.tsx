@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { geoCentroid, geoNaturalEarth1, geoPath } from "d3-geo";
 import type { Feature, Geometry, FeatureCollection } from "geojson";
 import countriesLib from "i18n-iso-countries";
@@ -73,6 +73,12 @@ function buildProjection(
   return projection.fitExtent(extent, target);
 }
 
+const EMPTY_FEATURES: Feature<Geometry>[] = [];
+const EMPTY_FEATURE_COLLECTION: FeatureCollection = {
+  type: "FeatureCollection",
+  features: EMPTY_FEATURES,
+};
+
 export function WorldMap({
   visitedCountryCodes,
   wishlistCountryCodes = [],
@@ -81,11 +87,25 @@ export function WorldMap({
   continent = DEFAULT_MAP_CONTINENT,
   mainlandWorld = false,
 }: WorldMapProps) {
+  // Defer geometry + path DOM until after first paint. Sync work here tanks
+  // mobile TBT/Speed Index when the map mounts with the profile shell.
+  const [mapReady, setMapReady] = useState(false);
   const [hoveredCountryId, setHoveredCountryId] = useState<string | null>(null);
 
-  const countryFeatures = useMemo(() => buildCountryFeatures(), []);
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => {
+      setMapReady(true);
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, []);
+
+  const countryFeatures = useMemo(
+    () => (mapReady ? buildCountryFeatures() : EMPTY_FEATURES),
+    [mapReady]
+  );
 
   const mainlandFeatures = useMemo(() => {
+    if (!mapReady) return EMPTY_FEATURES;
     const clipped: Feature<Geometry>[] = [];
 
     for (const country of countryFeatures) {
@@ -100,39 +120,47 @@ export function WorldMap({
     }
 
     return clipped;
-  }, [countryFeatures]);
+  }, [countryFeatures, mapReady]);
 
   const worldLand = useMemo((): FeatureCollection => {
+    if (!mapReady) return EMPTY_FEATURE_COLLECTION;
     return { type: "FeatureCollection", features: mainlandFeatures };
-  }, [mainlandFeatures]);
+  }, [mainlandFeatures, mapReady]);
 
   const visibleFeatures = useMemo(() => {
+    if (!mapReady) return EMPTY_FEATURES;
     if (mainlandWorld) {
       const mainland = filterMainlandWorldFeatures(mainlandFeatures);
       if (continent === "world") return mainland;
       return filterVisibleForContinent(continent, mainland);
     }
     return filterVisibleForContinent(continent, mainlandFeatures);
-  }, [continent, mainlandFeatures, mainlandWorld]);
+  }, [continent, mainlandFeatures, mainlandWorld, mapReady]);
 
   const fitFeatures = useMemo(() => {
+    if (!mapReady) return EMPTY_FEATURES;
     if (mainlandWorld && continent === "world") return visibleFeatures;
     return selectFitFeatures(continent, visibleFeatures);
-  }, [continent, visibleFeatures, mainlandWorld]);
+  }, [continent, visibleFeatures, mainlandWorld, mapReady]);
 
   const fitLand = useMemo((): FeatureCollection => {
+    if (!mapReady) return EMPTY_FEATURE_COLLECTION;
     return { type: "FeatureCollection", features: fitFeatures };
-  }, [fitFeatures]);
+  }, [fitFeatures, mapReady]);
 
   const projection = useMemo(
-    () => buildProjection(continent, worldLand, fitLand, mainlandWorld),
-    [continent, worldLand, fitLand, mainlandWorld]
+    () =>
+      mapReady
+        ? buildProjection(continent, worldLand, fitLand, mainlandWorld)
+        : geoNaturalEarth1(),
+    [continent, worldLand, fitLand, mainlandWorld, mapReady]
   );
 
   const pathGenerator = useMemo(() => geoPath(projection), [projection]);
 
   const countryById = useMemo(() => {
     const map = new Map<string, Feature<Geometry>>();
+    if (!mapReady) return map;
     visibleFeatures.forEach((country, index) => {
       const id =
         country.id != null && country.id !== ""
@@ -141,20 +169,21 @@ export function WorldMap({
       map.set(id, country);
     });
     return map;
-  }, [visibleFeatures]);
+  }, [visibleFeatures, mapReady]);
 
   const visitedNumericIds = useMemo(
-    () => countryCodesToNumericIds(visitedCountryCodes),
-    [visitedCountryCodes]
+    () => (mapReady ? countryCodesToNumericIds(visitedCountryCodes) : new Set<string>()),
+    [visitedCountryCodes, mapReady]
   );
 
   const wishlistNumericIds = useMemo(
-    () => countryCodesToNumericIds(wishlistCountryCodes),
-    [wishlistCountryCodes]
+    () => (mapReady ? countryCodesToNumericIds(wishlistCountryCodes) : new Set<string>()),
+    [wishlistCountryCodes, mapReady]
   );
 
   const visitedPinPositions = useMemo(() => {
     const positions: { id: string; x: number; y: number }[] = [];
+    if (!mapReady) return positions;
 
     visibleFeatures.forEach((country, index) => {
       if (country.id == null || country.id === "") return;
@@ -175,7 +204,7 @@ export function WorldMap({
     });
 
     return positions;
-  }, [visibleFeatures, projection, pathGenerator, visitedNumericIds]);
+  }, [visibleFeatures, projection, pathGenerator, visitedNumericIds, mapReady]);
 
   const handleCountryClick = useCallback(
     (country: Feature<Geometry>, id: string) => {

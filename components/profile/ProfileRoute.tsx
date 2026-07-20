@@ -20,8 +20,6 @@ import { computeTravelStats, getVisitedCountryCodes } from "@/lib/utils/stats";
 
 type ProfileRouteProps = {
   username: string;
-  /** Server-loaded payload so the first paint includes hero/map (no skeleton waterfall). */
-  initialData?: PublicProfilePageData | null;
 };
 
 function applyOptimisticRemovals(
@@ -79,16 +77,14 @@ function applyTravelStateToProfile(
   };
 }
 
-export function ProfileRoute({ username, initialData = null }: ProfileRouteProps) {
+export function ProfileRoute({ username }: ProfileRouteProps) {
   const normalized = username.trim().toLowerCase();
   const cachedSnapshot = useCachedProfile(normalized);
-  const [data, setData] = useState<PublicProfilePageData | null>(
-    () => initialData ?? null
-  );
+  const [data, setData] = useState<PublicProfilePageData | null>(null);
   const [missing, setMissing] = useState(false);
-  const [loading, setLoading] = useState(() => !initialData && !cachedSnapshot);
+  const [loading, setLoading] = useState(() => !cachedSnapshot);
 
-  const displayData = data ?? cachedSnapshot ?? initialData;
+  const displayData = data ?? cachedSnapshot;
 
   const loadProfile = useCallback(
     async (forceNetwork = false) => {
@@ -127,36 +123,19 @@ export function ProfileRoute({ username, initialData = null }: ProfileRouteProps
     [normalized]
   );
 
-  // Seed client cache from SSR so soft navigations / owner tools stay in sync.
-  useEffect(() => {
-    if (!initialData) return;
-    writeProfileCache(normalized, initialData);
-    setData(initialData);
-    setMissing(false);
-    setLoading(false);
-  }, [initialData, normalized]);
-
   useEffect(() => {
     if (!cachedSnapshot) return;
-    // Prefer fresh SSR / in-memory state over an older session cache.
-    if (initialData || data) return;
     setData(cachedSnapshot);
     setMissing(false);
     setLoading(false);
-  }, [cachedSnapshot, data, initialData]);
+  }, [cachedSnapshot]);
 
   useEffect(() => {
-    // SSR already painted the profile — skip the client waterfall (and the
-    // duplicate Fluid invocation). Soft navigations get fresh `initialData`
-    // from the server component; own-profile edits use stale/travel events.
-    if (initialData) {
-      return;
-    }
-
     if (readProfileCache(normalized)) {
       setLoading(false);
-      // Session-cache hits for other profiles have no stale signal — revalidate
-      // in the background so visitors see new Instagram links, bio changes, etc.
+      // Own profile cache is invalidated by stale/travel-state events; other
+      // profiles have no such signal — revalidate them in the background so
+      // visitors see new Instagram links, bio changes, etc.
       if (getOwnUsername() !== normalized) {
         void loadProfile(true);
       }
@@ -172,7 +151,7 @@ export function ProfileRoute({ username, initialData = null }: ProfileRouteProps
     return () => {
       cancelled = true;
     };
-  }, [loadProfile, normalized, initialData]);
+  }, [loadProfile, normalized]);
 
   useEffect(() => {
     function onProfileStale(event: Event) {
