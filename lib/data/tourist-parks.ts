@@ -13775,6 +13775,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": -68.397222222
   },
   {
+    "parkType": "national_park",
+    "countryCode": "CA",
+    "countryName": "Canada",
+    "name": "Niagara Falls",
+    "latitude": 43.0827,
+    "longitude": -79.0742
+  },
+  {
     "parkType": "botanical_garden",
     "countryCode": "CA",
     "countryName": "Canada",
@@ -47375,6 +47383,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "longitude": 8.81291
   },
   {
+    "parkType": "national_park",
+    "countryCode": "CH",
+    "countryName": "Switzerland",
+    "name": "Rheinfall",
+    "latitude": 47.6779,
+    "longitude": 8.6153
+  },
+  {
     "parkType": "botanical_garden",
     "countryCode": "CH",
     "countryName": "Switzerland",
@@ -49581,6 +49597,14 @@ export const TOURIST_PARKS: TouristPark[] = [
     "name": "Dilek Peninsula-Büyük Menderes Delta",
     "latitude": 37.66892778,
     "longitude": 27.16175556
+  },
+  {
+    "parkType": "national_park",
+    "countryCode": "TR",
+    "countryName": "Türkiye",
+    "name": "Düden Waterfalls",
+    "latitude": 36.8865,
+    "longitude": 30.657
   },
   {
     "parkType": "national_park",

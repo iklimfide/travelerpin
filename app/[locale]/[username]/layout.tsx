@@ -42,7 +42,6 @@ export async function generateMetadata({ params }: LayoutProps): Promise<Metadat
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
   const mapOwnerName = mapTitleOwnerName(displayName, locale);
   const title = tShare("pageTitle", { name: mapOwnerName });
-  const shareTitle = tShare("ogTitle", { name: displayName });
   const ogDescription = tShare("ogDescription");
   const description = buildProfileDescription(displayName, stats, {
     captionOwn: tShare("captionOwn"),
@@ -60,7 +59,7 @@ export async function generateMetadata({ params }: LayoutProps): Promise<Metadat
     openGraph: {
       type: "website",
       locale: locale === "tr" ? "tr_TR" : "en_US",
-      title: shareTitle,
+      title,
       description: ogDescription,
       url: buildProfileUrl(profile.username, locale),
       siteName: BRAND.name,
@@ -68,7 +67,7 @@ export async function generateMetadata({ params }: LayoutProps): Promise<Metadat
     },
     twitter: {
       card: "summary_large_image",
-      title: shareTitle,
+      title,
       description: ogDescription,
       images: staticTwitterImages(),
     },
