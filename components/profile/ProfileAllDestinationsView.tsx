@@ -19,6 +19,7 @@ import { commonMessages, countryMessages, formatMessage, modalMessages, profileD
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
 import { profilePath } from "@/lib/seo/site";
+import { withProfilePublicPreview } from "@/lib/profile/public-preview";
 import {
   countryHasMappedPlaces,
   isCountryRemoveBlockedByPlacesError,
@@ -42,6 +43,7 @@ type ProfileAllDestinationsViewProps = {
   username: string;
   displayName: string;
   isOwnProfile: boolean;
+  previewAsPublic?: boolean;
   destinations: ProfileAllDestinations;
   visitedCountries: VisitedCountry[];
   visitedCities: VisitedCity[];
@@ -159,6 +161,7 @@ export function ProfileAllDestinationsView({
   username,
   displayName,
   isOwnProfile,
+  previewAsPublic = false,
   destinations,
   visitedCountries,
   visitedCities,
@@ -422,10 +425,15 @@ export function ProfileAllDestinationsView({
     <div className="profile-page profile-all-page">
       <div className="profile-shell">
         <div className="profile-all-header">
-          <Link href={profilePath(username)} className="profile-all-back">
+          <Link
+            href={withProfilePublicPreview(profilePath(username), previewAsPublic)}
+            className="profile-all-back"
+          >
             ← {profileMessages.allDestinationsBack}
           </Link>
-          <h1 className="profile-all-title">{title}</h1>
+          <h1 className="profile-all-title" title={title}>
+            {title}
+          </h1>
         </div>
 
         {totalCount === 0 && !hasMapContent ? (

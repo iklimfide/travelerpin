@@ -40,7 +40,9 @@
     "addVisited": "Ziyaret edildi",
     "nextRoute": "Sonraki Rota",
     "wishlist": "İstek listesi",
-    "myParks": "Parklarım"
+    "myParks": "Parklarım",
+    "viewAsVisitor": "Başkasının gözünden gör",
+    "exitPublicPreview": "Önizlemeden çık"
   },
   "notifications": {
     "title": "Bildirimler",
@@ -393,6 +395,8 @@
     "yourJourney": "Yolculuğun",
     "visitorIntro": "{name} seyahatlerini pinledi ve paylaştı. Sen de seyahat haritanı oluşturup paylaşabilirsin.",
     "createYourMap": "Haritanı oluştur",
+    "publicPreviewBanner": "Profilinizi ziyaretçilerin gördüğü gibi görüntülüyorsunuz.",
+    "publicPreviewExit": "Önizlemeden çık",
     "visited": "ziyaret etti",
     "wantsToVisit": "ziyaret etmek istiyor",
     "wishlistCountries": "Ziyaret etmek istiyor",

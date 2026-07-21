@@ -7,12 +7,19 @@ import { getCachedCityHeroImageMap } from "@/lib/city/city-hero-images";
 import { buildProfileAllDestinations } from "@/lib/utils/profile-all-destinations";
 import { parseNextRoute } from "@/lib/utils/next-route";
 import { DEFAULT_DESCRIPTION, profileAllPath } from "@/lib/seo/site";
+import {
+  applyPublicPreviewToProfileData,
+  filterWishlistForProfileView,
+  isProfilePublicPreview,
+} from "@/lib/profile/public-preview";
 import { loadPublicProfilePage } from "@/lib/supabase/profile-page-data";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
+import { ProfilePublicPreviewBanner } from "@/components/profile/ProfilePublicPreviewBanner";
 
 type PageProps = {
   params: Promise<{ username: string }>;
+  searchParams: Promise<{ view?: string }>;
 };
 
 export const revalidate = false;
@@ -42,8 +49,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function ProfileAllDestinationsPage({ params }: PageProps) {
+export default async function ProfileAllDestinationsPage({ params, searchParams }: PageProps) {
   const { username } = await params;
+  const query = await searchParams;
   const locale = (await getLocale()) === "tr" ? "tr" : "en";
   const data = await loadPublicProfilePage(username);
 
@@ -52,43 +60,47 @@ export default async function ProfileAllDestinationsPage({ params }: PageProps) 
   }
 
   const { profile, currentUsername } = data;
-  const isOwnProfile = currentUsername === profile.username;
+  const isAccountOwner =
+    currentUsername != null &&
+    currentUsername.toLowerCase() === profile.username.toLowerCase();
+  const previewAsPublic = isAccountOwner && isProfilePublicPreview(query);
+  const isOwnProfile = isAccountOwner && !previewAsPublic;
   const displayName = resolveProfileDisplayName(profile.display_name, profile.username);
-  const wishlistPublic = profile.wishlist_public;
-  const visibleWishlistCountries =
-    isOwnProfile || wishlistPublic ? data.wishlistCountries : [];
-  const visibleWishlistCodes =
-    isOwnProfile || wishlistPublic ? data.wishlistCodes : [];
+  const viewData = previewAsPublic ? applyPublicPreviewToProfileData(data) : data;
+  const { wishlistCountries: visibleWishlistCountries, wishlistCodes: visibleWishlistCodes } =
+    filterWishlistForProfileView(viewData, isOwnProfile);
 
   const cityHeroImages = await getCachedCityHeroImageMap();
   const destinations = buildProfileAllDestinations(
-    data.visitedCountries,
-    data.visitedCities,
-    data.visitedParks,
+    viewData.visitedCountries,
+    viewData.visitedCities,
+    viewData.visitedParks,
     visibleWishlistCountries,
-    data.visitedCodes,
+    viewData.visitedCodes,
     profile.residence,
     locale,
     cityHeroImages
   );
 
-  const view = (
-    <ProfileAllDestinationsView
-      username={profile.username}
-      displayName={displayName}
-      isOwnProfile={isOwnProfile}
-      destinations={destinations}
-      visitedCountries={data.visitedCountries}
-      visitedCities={data.visitedCities}
-      visitedParks={data.visitedParks}
-      visitedCodes={data.visitedCodes}
-      wishlistCodes={visibleWishlistCodes}
-      wishlistCountries={visibleWishlistCountries}
-      isLoggedIn={data.isLoggedIn}
-      stats={data.stats}
-      initialNextRouteStops={parseNextRoute(profile.next_route)}
-    />
+  return (
+    <>
+      {previewAsPublic ? <ProfilePublicPreviewBanner username={profile.username} /> : null}
+      <ProfileAllDestinationsView
+        username={profile.username}
+        displayName={displayName}
+        isOwnProfile={isOwnProfile}
+        previewAsPublic={previewAsPublic}
+        destinations={destinations}
+        visitedCountries={viewData.visitedCountries}
+        visitedCities={viewData.visitedCities}
+        visitedParks={viewData.visitedParks}
+        visitedCodes={viewData.visitedCodes}
+        wishlistCodes={visibleWishlistCodes}
+        wishlistCountries={visibleWishlistCountries}
+        isLoggedIn={viewData.isLoggedIn}
+        stats={viewData.stats}
+        initialNextRouteStops={parseNextRoute(profile.next_route)}
+      />
+    </>
   );
-
-  return view;
 }

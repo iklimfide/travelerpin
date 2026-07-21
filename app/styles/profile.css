@@ -25,6 +25,43 @@
   width: 100%;
 }
 
+.profile-public-preview-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 10px var(--profile-inset, 8px);
+  background: #eff6ff;
+  border-bottom: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.profile-public-preview-banner__text {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-public-preview-banner__exit {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.profile-public-preview-banner__exit:hover {
+  background: #1d4ed8;
+}
+
 .profile-page--embedded {
   display: flex;
   flex-direction: column;
@@ -2005,10 +2042,15 @@
 
 .profile-all-title {
   margin-top: 12px;
-  font-size: 28px;
+  max-width: 100%;
+  font-size: clamp(17px, 4.6vw, 28px);
   font-weight: 800;
   letter-spacing: -0.6px;
   color: var(--profile-text);
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .profile-all-main {
@@ -2026,12 +2068,16 @@
 
 .profile-all-nav__title {
   margin: 0 0 14px;
+  max-width: 100%;
   text-align: center;
-  font-size: 18px;
+  font-size: clamp(15px, 4vw, 18px);
   font-weight: 800;
   letter-spacing: -0.35px;
   color: var(--profile-text);
-  line-height: 1.2;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .profile-all-tabs {
@@ -3343,7 +3389,8 @@
   }
 
   .profile-all-page .profile-all-title {
-    font-size: clamp(26px, 2.2vw, 34px);
+    font-size: clamp(22px, 2vw, 34px);
+    white-space: nowrap;
   }
 
   .profile-all-page .profile-all-map {

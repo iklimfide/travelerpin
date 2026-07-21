@@ -15,6 +15,7 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
 import { resolvePublicMediaImageUrl } from "@/lib/storage/hub-photo-url";
 import { profileAllPath } from "@/lib/seo/site";
+import { withProfilePublicPreview } from "@/lib/profile/public-preview";
 import type { TravelStats } from "@/types/database";
 
 type ProfileIdentityCardProps = {
@@ -45,6 +46,7 @@ type ProfileIdentityCardProps = {
   } | null;
   canFollow?: boolean;
   isLoggedIn?: boolean;
+  previewAsPublic?: boolean;
 };
 
 export function ProfileIdentityCard({
@@ -65,11 +67,12 @@ export function ProfileIdentityCard({
   followState,
   canFollow = false,
   isLoggedIn = false,
+  previewAsPublic = false,
 }: ProfileIdentityCardProps) {
   const t = useTranslateProfile();
   const localeRaw = useLocale();
   const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
-  const allHref = profileAllPath(username);
+  const allHref = withProfilePublicPreview(profileAllPath(username), previewAsPublic);
   const [avatarLightboxOpen, setAvatarLightboxOpen] = useState(false);
   const avatarImageSrc = resolvePublicMediaImageUrl(avatarUrl) ?? avatarUrl;
   const canExpandAvatar = Boolean(avatarImageSrc);

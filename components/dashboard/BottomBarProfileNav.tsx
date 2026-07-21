@@ -1,17 +1,20 @@
 "use client";
 
-import { useContext, useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "@/lib/i18n/navigation";
 import { usePathname } from "next/navigation";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
 import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
-import { NotificationsContext } from "@/components/notifications/NotificationsProvider";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 import { isKamikazeMasterProfile } from "@/lib/kamikaze/master";
 import { profilePath } from "@/lib/seo/site";
+import {
+  isProfilePublicPreview,
+  profilePublicPreviewHref,
+} from "@/lib/profile/public-preview";
 import { clearAllSessionPageCaches } from "@/lib/client/session-page-cache";
 
 type BottomBarProfileNavProps = {
@@ -114,6 +117,18 @@ function ParksIcon() {
   );
 }
 
+function ViewAsVisitorIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path
+        d="M2.5 12.5s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="12.5" r="2.5" />
+    </svg>
+  );
+}
+
 function LogOutIcon() {
   const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
   return (
@@ -131,19 +146,6 @@ function YpIcon() {
     <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
       <rect x="4" y="4" width="16" height="16" rx="2.5" />
       <path d="M8 9h8M8 12.5h5M8 16h3" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function BellMenuIcon() {
-  const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages } = useAppMessages();
-  return (
-    <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden fill="none" stroke="currentColor" strokeWidth={1.8}>
-      <path
-        d="M12 3a5 5 0 0 0-5 5v2.2c0 .7-.2 1.4-.6 2L5 14.5h14l-1.4-2.3c-.4-.6-.6-1.3-.6-2V8a5 5 0 0 0-5-5Z"
-        strokeLinejoin="round"
-      />
-      <path d="M10 17.5a2 2 0 0 0 4 0" strokeLinecap="round" />
     </svg>
   );
 }
@@ -179,12 +181,12 @@ export function BottomBarProfileNav({
 }: BottomBarProfileNavProps) {
   const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages, settings: settingsMessages } = useAppMessages();
   const pathname = usePathname();
-  const notifications = useContext(NotificationsContext);
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null);
+  const [publicPreviewActive, setPublicPreviewActive] = useState(false);
 
   const username = ownProfile?.username ?? null;
   const profileHref = username ? profilePath(username) : loginHref;
@@ -207,6 +209,14 @@ export function BottomBarProfileNav({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setPublicPreviewActive(
+      isProfilePublicPreview(params) &&
+        (pathname === profileHref || pathname.startsWith(`${profileHref}/`))
+    );
+  }, [pathname, profileHref]);
 
   useEffect(() => {
     if (!open) return;
@@ -281,6 +291,24 @@ export function BottomBarProfileNav({
       }
     : undefined;
 
+  const publicPreviewMenuItem = (
+    <Link
+      href={publicPreviewActive ? profileHref : profilePublicPreviewHref(username)}
+      role="menuitem"
+      className={`dashboard-profile-menu__item${
+        publicPreviewActive ? " dashboard-profile-menu__item--active" : ""
+      }`}
+      onClick={() => setOpen(false)}
+    >
+      <span className="dashboard-profile-menu__icon" aria-hidden>
+        <ViewAsVisitorIcon />
+      </span>
+      {publicPreviewActive
+        ? dashboardNavMessages.exitPublicPreview
+        : dashboardNavMessages.viewAsVisitor}
+    </Link>
+  );
+
   const menuLayer =
     open && menuPosition && mounted
       ? createPortal(
@@ -312,6 +340,7 @@ export function BottomBarProfileNav({
                     </span>
                     {dashboardNavMessages.profile}
                   </Link>
+                  {publicPreviewMenuItem}
                   {showBarDestinationsInMenu && mapHref ? (
                     <Link
                       href={mapHref}
@@ -390,40 +419,6 @@ export function BottomBarProfileNav({
                       {dashboardNavMessages.yp}
                     </Link>
                   ) : null}
-                  {notifications ? (
-                    <button
-                      type="button"
-                      role="menuitem"
-                      className={`dashboard-profile-menu__item${
-                        notifications.isOpen ? " dashboard-profile-menu__item--active" : ""
-                      }`}
-                      onClick={() => {
-                        setOpen(false);
-                        notifications.openNotifications();
-                      }}
-                    >
-                      <span className="dashboard-profile-menu__icon" aria-hidden>
-                        <BellMenuIcon />
-                      </span>
-                      {dashboardNavMessages.notifications}
-                    </button>
-                  ) : (
-                    <Link
-                      href="/notifications"
-                      role="menuitem"
-                      className={`dashboard-profile-menu__item${
-                        pathname.startsWith("/notifications")
-                          ? " dashboard-profile-menu__item--active"
-                          : ""
-                      }`}
-                      onClick={() => setOpen(false)}
-                    >
-                      <span className="dashboard-profile-menu__icon" aria-hidden>
-                        <BellMenuIcon />
-                      </span>
-                      {dashboardNavMessages.notifications}
-                    </Link>
-                  )}
                   <Link
                     href="/settings"
                     role="menuitem"
@@ -476,6 +471,7 @@ export function BottomBarProfileNav({
                     </span>
                     {dashboardNavMessages.profile}
                   </Link>
+                  {publicPreviewMenuItem}
                   {onNextRouteClick ? (
                     <button
                       type="button"
@@ -539,40 +535,6 @@ export function BottomBarProfileNav({
                       {dashboardNavMessages.yp}
                     </Link>
                   ) : null}
-                  {notifications ? (
-                    <button
-                      type="button"
-                      role="menuitem"
-                      className={`dashboard-profile-menu__item${
-                        notifications.isOpen ? " dashboard-profile-menu__item--active" : ""
-                      }`}
-                      onClick={() => {
-                        setOpen(false);
-                        notifications.openNotifications();
-                      }}
-                    >
-                      <span className="dashboard-profile-menu__icon" aria-hidden>
-                        <BellMenuIcon />
-                      </span>
-                      {dashboardNavMessages.notifications}
-                    </button>
-                  ) : (
-                    <Link
-                      href="/notifications"
-                      role="menuitem"
-                      className={`dashboard-profile-menu__item${
-                        pathname.startsWith("/notifications")
-                          ? " dashboard-profile-menu__item--active"
-                          : ""
-                      }`}
-                      onClick={() => setOpen(false)}
-                    >
-                      <span className="dashboard-profile-menu__icon" aria-hidden>
-                        <BellMenuIcon />
-                      </span>
-                      {dashboardNavMessages.notifications}
-                    </Link>
-                  )}
                   <Link
                     href="/settings"
                     role="menuitem"

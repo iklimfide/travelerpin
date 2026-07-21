@@ -15,6 +15,7 @@ import { ProfileTravelUpdateCard } from "@/components/profile/ProfileTravelUpdat
 import { ProfileNextRouteSection } from "@/components/profile/ProfileNextRouteSection";
 import { ProfileVisitorDestinations } from "@/components/profile/ProfileVisitorDestinations";
 import { ProfileTripsRow } from "@/components/profile/ProfileTripsRow";
+import { ProfilePublicPreviewBanner } from "@/components/profile/ProfilePublicPreviewBanner";
 import {
   buildProfileTrips,
 } from "@/lib/utils/profile-page";
@@ -25,6 +26,7 @@ import { parseNextRoute } from "@/lib/utils/next-route";
 import { useTranslateCommon, useTranslateHome, useTranslateProfile } from "@/lib/i18n/client-messages";
 import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
 import { profileAllPath, profilePath } from "@/lib/seo/site";
+import { withProfilePublicPreview } from "@/lib/profile/public-preview";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
 
 type PublicProfileViewClientProps = {
@@ -34,6 +36,7 @@ type PublicProfileViewClientProps = {
   ownerTools?: ReactNode;
   embedded?: boolean;
   profilePageHref?: string;
+  previewAsPublic?: boolean;
 };
 
 export function PublicProfileViewClient({
@@ -43,6 +46,7 @@ export function PublicProfileViewClient({
   ownerTools,
   embedded = false,
   profilePageHref,
+  previewAsPublic = false,
 }: PublicProfileViewClientProps) {
   const t = useTranslateProfile();
   const tHome = useTranslateHome();
@@ -132,6 +136,7 @@ export function PublicProfileViewClient({
 
   const profileBody = (
     <div className={`profile-page${embedded ? " profile-page--embedded" : ""}`}>
+      {previewAsPublic ? <ProfilePublicPreviewBanner username={profile.username} /> : null}
       <div className="profile-shell">
         <div
           id={`profile-story-capture-${profile.username.toLowerCase()}`}
@@ -172,6 +177,7 @@ export function PublicProfileViewClient({
               followState={followState}
               canFollow={canFollow}
               isLoggedIn={isLoggedIn}
+              previewAsPublic={previewAsPublic}
             />
 
             {hasMapContent ? (
@@ -207,7 +213,7 @@ export function PublicProfileViewClient({
                   canEditMap={isOwnProfile}
                   countryCount={stats.countries}
                   exploredBadgeLabel={t("mapExploredBadge")}
-                  allHref={profileAllPath(profile.username)}
+                  allHref={withProfilePublicPreview(profileAllPath(profile.username), previewAsPublic)}
                   allAriaLabel={t("mapViewAll")}
                 />
               </div>
@@ -237,7 +243,11 @@ export function PublicProfileViewClient({
                 trips={trips}
                 title={isOwnProfile ? t("myTrips") : t("visitorTrips", { name: displayName })}
                 allLabel={t("tripsAll")}
-                allHref={hasMapContent ? profileAllPath(profile.username) : undefined}
+                allHref={
+                  hasMapContent
+                    ? withProfilePublicPreview(profileAllPath(profile.username), previewAsPublic)
+                    : undefined
+                }
                 clampToPrimaryColumn={!isOwnProfile}
                 badgeLabels={{
                   recent: t("tripBadgeRecent"),

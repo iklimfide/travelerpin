@@ -40,7 +40,9 @@
     "addVisited": "Visited",
     "nextRoute": "Next Route",
     "wishlist": "Wishlist",
-    "myParks": "My parks"
+    "myParks": "My parks",
+    "viewAsVisitor": "View as visitor",
+    "exitPublicPreview": "Exit visitor preview"
   },
   "notifications": {
     "title": "Notifications",
@@ -393,6 +395,8 @@
     "yourJourney": "Your journey",
     "visitorIntro": "{name} pinned their travels and shared them. You can create and share your travel map too.",
     "createYourMap": "Create your map",
+    "publicPreviewBanner": "You're viewing your profile as visitors see it.",
+    "publicPreviewExit": "Exit preview",
     "visited": "visited",
     "wantsToVisit": "wants to visit",
     "wishlistCountries": "Want to visit",
