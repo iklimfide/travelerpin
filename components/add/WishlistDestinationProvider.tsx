@@ -12,6 +12,10 @@ import {
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { WishlistDestinationModal } from "@/components/add/WishlistDestinationModal";
+import { stripLocalePrefix } from "@/lib/i18n/pathname";
+
+const WISHLIST_ROUTE = "/c/wishlist";
+const MODAL_RETURN_BLOCKLIST = new Set([WISHLIST_ROUTE, "/c/next", "/c/add"]);
 
 type WishlistDestinationContextValue = {
   open: () => void;
@@ -35,8 +39,11 @@ export function useWishlistDestination(): WishlistDestinationContextValue {
 
 function sanitizeNext(next: string | null | undefined): string | null {
   if (!next) return null;
-  if (next.startsWith("/")) return next;
-  return null;
+  if (!next.startsWith("/")) return null;
+
+  const bare = stripLocalePrefix(next.split("?")[0] || next);
+  if (MODAL_RETURN_BLOCKLIST.has(bare)) return null;
+  return stripLocalePrefix(next.split("?")[0] || next);
 }
 
 export function WishlistDestinationProvider({ children }: { children: ReactNode }) {
@@ -53,8 +60,9 @@ function WishlistDestinationProviderInner({ children }: { children: ReactNode })
   const searchParams = useSearchParams();
 
   const [softOpen, setSoftOpen] = useState(false);
+  const barePathname = stripLocalePrefix(pathname ?? "/");
   const nextFromUrl = sanitizeNext(searchParams?.get("next") ?? null);
-  const routeOpen = pathname === "/c/wishlist";
+  const routeOpen = barePathname === WISHLIST_ROUTE;
   const open = routeOpen || softOpen;
 
   useEffect(() => {
@@ -63,13 +71,13 @@ function WishlistDestinationProviderInner({ children }: { children: ReactNode })
 
   const close = useCallback(() => {
     setSoftOpen(false);
-    if (pathname !== "/c/wishlist") return;
+    if (barePathname !== WISHLIST_ROUTE) return;
 
     const target = nextFromUrl ?? "/";
     void Promise.resolve().then(() => {
       router.replace(target);
     });
-  }, [router, pathname, nextFromUrl]);
+  }, [router, barePathname, nextFromUrl]);
 
   const openModal = useCallback(() => {
     setSoftOpen(true);

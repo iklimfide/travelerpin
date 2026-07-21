@@ -12,6 +12,10 @@ import {
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { NextRouteDestinationModal } from "@/components/add/NextRouteDestinationModal";
+import { stripLocalePrefix } from "@/lib/i18n/pathname";
+
+const NEXT_ROUTE = "/c/next";
+const MODAL_RETURN_BLOCKLIST = new Set([NEXT_ROUTE, "/c/wishlist", "/c/add"]);
 
 type NextRouteDestinationContextValue = {
   open: () => void;
@@ -35,8 +39,11 @@ export function useNextRouteDestination(): NextRouteDestinationContextValue {
 
 function sanitizeNext(next: string | null | undefined): string | null {
   if (!next) return null;
-  if (next.startsWith("/")) return next;
-  return null;
+  if (!next.startsWith("/")) return null;
+
+  const bare = stripLocalePrefix(next.split("?")[0] || next);
+  if (MODAL_RETURN_BLOCKLIST.has(bare)) return null;
+  return stripLocalePrefix(next.split("?")[0] || next);
 }
 
 export function NextRouteDestinationProvider({ children }: { children: ReactNode }) {
@@ -53,8 +60,9 @@ function NextRouteDestinationProviderInner({ children }: { children: ReactNode }
   const searchParams = useSearchParams();
 
   const [softOpen, setSoftOpen] = useState(false);
+  const barePathname = stripLocalePrefix(pathname ?? "/");
   const nextFromUrl = sanitizeNext(searchParams?.get("next") ?? null);
-  const routeOpen = pathname === "/c/next";
+  const routeOpen = barePathname === NEXT_ROUTE;
   const open = routeOpen || softOpen;
 
   useEffect(() => {
@@ -63,13 +71,13 @@ function NextRouteDestinationProviderInner({ children }: { children: ReactNode }
 
   const close = useCallback(() => {
     setSoftOpen(false);
-    if (pathname !== "/c/next") return;
+    if (barePathname !== NEXT_ROUTE) return;
 
     const target = nextFromUrl ?? "/";
     void Promise.resolve().then(() => {
       router.replace(target);
     });
-  }, [router, pathname, nextFromUrl]);
+  }, [router, barePathname, nextFromUrl]);
 
   const openModal = useCallback(() => {
     setSoftOpen(true);

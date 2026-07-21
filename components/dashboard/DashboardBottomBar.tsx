@@ -152,9 +152,7 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
       router.push(loginHrefFor(currentPath));
       return;
     }
-    // Open from cache immediately; URL update is secondary.
     openNextRouteDestination();
-    router.push(`/c/next?next=${encodeURIComponent(currentPath)}`);
   }
 
   function handleWishlistClick() {
@@ -163,7 +161,6 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
       return;
     }
     openWishlistDestination();
-    router.push(`/c/wishlist?next=${encodeURIComponent(currentPath)}`);
   }
 
   function handleMyParksClick() {

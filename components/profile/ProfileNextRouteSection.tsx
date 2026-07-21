@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
-import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
 import { useNextRouteDestination } from "@/components/add/NextRouteDestinationProvider";
@@ -72,8 +71,6 @@ export function ProfileNextRouteSection({
 }: ProfileNextRouteSectionProps) {
   const { profile: profileMessages, nextRoute: nextRouteMessages } = useAppMessages();
   const locale = useLocale() === "tr" ? "tr" : "en";
-  const router = useRouter();
-  const pathname = usePathname() ?? "/";
   const initialResolved = useMemo(
     () => resolveInitialStops(initialStops, isOwnProfile),
     [initialStops, isOwnProfile]
@@ -224,7 +221,6 @@ export function ProfileNextRouteSection({
                 className="profile-owner-section__btn profile-owner-section__btn--add"
                 onClick={() => {
                   openNextRouteDestination();
-                  router.push(`/c/next?next=${encodeURIComponent(pathname)}`);
                 }}
               >
                 {profileMessages.ownerAdd}
