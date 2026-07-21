@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ProfileJsonLd } from "@/components/profile/ProfileJsonLd";
@@ -38,9 +37,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
   return (
     <>
-      <Suspense fallback={null}>
-        <ProfileJsonLd username={username} />
-      </Suspense>
+      <ProfileJsonLd profile={data.profile} profileDescription={profileDescription} />
       <ProfileServerBridge
         username={data.profile.username}
         initialData={data}

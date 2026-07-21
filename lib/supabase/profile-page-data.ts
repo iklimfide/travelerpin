@@ -145,35 +145,32 @@ export function getCachedPublicProfileBundle(
 }
 
 /** Cached public profile + stats for OG metadata (no auth round-trip). */
-export async function loadPublicProfileMetadata(
-  username: string
-): Promise<{ profile: PublicProfile; stats: TravelStats } | null> {
-  const demo = await loadDemoPublicProfilePage(username);
-  if (demo) {
-    return { profile: demo.profile, stats: demo.stats };
-  }
+export const loadPublicProfileMetadata = cache(
+  async (username: string): Promise<{ profile: PublicProfile; stats: TravelStats } | null> => {
+    const demo = await loadDemoPublicProfilePage(username);
+    if (demo) {
+      return { profile: demo.profile, stats: demo.stats };
+    }
 
-  const bundle = await getCachedPublicProfileBundle(username);
-  if (!bundle) return null;
+    const bundle = await getCachedPublicProfileBundle(username);
+    if (!bundle) return null;
 
-  let profile = bundle.profile;
-  const publicSupabase = createPublicSupabaseClient();
-  if (publicSupabase) {
-    const freshPresentation = await fetchFreshProfilePresentation(publicSupabase, profile.id);
+    let profile = bundle.profile;
+    const freshPresentation = await fetchFreshProfilePresentation(profile.id);
     if (freshPresentation) {
       profile = { ...profile, ...freshPresentation };
     }
-  }
 
-  return {
-    profile,
-    stats: computeTravelStats(
-      bundle.visitedCountries,
-      bundle.visitedCities,
-      bundle.visitedParks
-    ),
-  };
-}
+    return {
+      profile,
+      stats: computeTravelStats(
+        bundle.visitedCountries,
+        bundle.visitedCities,
+        bundle.visitedParks
+      ),
+    };
+  }
+);
 
 /**
  * Public profile page loader. Demo username always uses in-memory sample data.
@@ -198,22 +195,21 @@ export const loadPublicProfilePage = cache(
     let { visitedCountries, visitedCities, visitedParks } = bundle;
     let wishlistCountries = bundle.publicWishlistCountries;
 
-    if (publicSupabase) {
-      const freshPresentation = await fetchFreshProfilePresentation(publicSupabase, profile.id);
-      if (freshPresentation) {
-        profile = {
-          ...profile,
-          ...freshPresentation,
-          next_route: freshPresentation.next_route ?? profile.next_route,
-        };
+    const freshPresentation = await fetchFreshProfilePresentation(profile.id);
+    if (freshPresentation) {
+      profile = {
+        ...profile,
+        ...freshPresentation,
+        next_route: freshPresentation.next_route ?? profile.next_route,
+      };
 
-        if (
-          freshPresentation.wishlist_public &&
-          !bundle.profile.wishlist_public &&
-          wishlistCountries.length === 0
-        ) {
-          wishlistCountries = await loadWishlistCountries(publicSupabase, profile, false);
-        }
+      if (
+        freshPresentation.wishlist_public &&
+        !bundle.profile.wishlist_public &&
+        wishlistCountries.length === 0 &&
+        publicSupabase
+      ) {
+        wishlistCountries = await loadWishlistCountries(publicSupabase, profile, false);
       }
     }
 

@@ -1,5 +1,7 @@
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { WishlistCountry, NextRouteStop } from "@/types/database";
+import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { parseNextRoute } from "@/lib/utils/next-route";
 import { normalizeUsernameInput } from "@/lib/utils/username";
 
@@ -56,7 +58,7 @@ function mapExtendedRow(row: Record<string, unknown>): PublicProfile {
 }
 
 /** Profile presentation fields change independently of pin rows — keep them out of stale pin cache. */
-export async function fetchFreshProfilePresentation(
+async function fetchFreshProfilePresentationQuery(
   supabase: SupabaseClient,
   profileId: string
 ): Promise<Partial<PublicProfile> | null> {
@@ -87,6 +89,15 @@ export async function fetchFreshProfilePresentation(
 
   return null;
 }
+
+/** Request-scoped dedup when layout metadata and page loader run in the same render. */
+export const fetchFreshProfilePresentation = cache(
+  async (profileId: string): Promise<Partial<PublicProfile> | null> => {
+    const supabase = createPublicSupabaseClient();
+    if (!supabase) return null;
+    return fetchFreshProfilePresentationQuery(supabase, profileId);
+  }
+);
 
 /** Load profile for public pages; tolerates missing profile-detail migration. */
 export async function fetchPublicProfile(

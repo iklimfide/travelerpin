@@ -61,6 +61,7 @@ html.light {
 }
 
 html {
+  font-size: 17px;
   overflow-x: hidden;
   max-width: 100%;
 }
