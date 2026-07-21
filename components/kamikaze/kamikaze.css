@@ -571,6 +571,138 @@
   outline-offset: 1px;
 }
 
+.yp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.yp-section + .yp-section {
+  margin-top: 1.25rem;
+}
+
+.yp-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.yp-table-wrap {
+  overflow-x: auto;
+}
+
+.yp-table--city-images .yp-table__thumb {
+  width: 6.75rem;
+  padding-right: 0.35rem;
+  vertical-align: middle;
+}
+
+.yp-city-thumb-wrap {
+  position: relative;
+  width: 6.25rem;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.4rem;
+  border: 1px solid var(--yp-border);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.yp-city-thumb {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.yp-city-name {
+  font-weight: 600;
+}
+
+.yp-badge--muted {
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  color: var(--yp-muted);
+}
+
+.yp-actions--compact {
+  gap: 0.3rem;
+}
+
+.yp-actions--compact .yp-btn {
+  padding: 0.35rem 0.55rem;
+  font-size: 0.78rem;
+}
+
+.yp-city-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+  gap: 0.85rem;
+  padding: 0.9rem;
+  align-items: start;
+}
+
+.yp-city-image-card {
+  border: 1px solid var(--yp-border);
+  border-radius: 0.55rem;
+  overflow: hidden;
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+}
+
+.yp-city-image-card__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+  flex: none;
+}
+
+.yp-city-image-card__media img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.yp-city-image-card__body {
+  padding: 0.6rem 0.65rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.yp-city-image-card__title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.yp-city-image-card__meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--yp-muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
 @media (max-width: 800px) {
   .yp-shell {
     grid-template-columns: 1fr;

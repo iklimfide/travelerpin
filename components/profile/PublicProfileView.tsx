@@ -7,7 +7,7 @@ import { ProfileIdentityCard } from "@/components/profile/ProfileIdentityCard";
 import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
 import { ProfileSquareCaptureHeader } from "@/components/profile/ProfileSquareCaptureHeader";
 import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections";
-import { BRAND } from "@/lib/constants";
+import { getCachedCityHeroImageMap } from "@/lib/city/city-hero-images";
 import { isDemoProfileUsername } from "@/lib/data/jennifer-demo-page";
 import {
   BADGE_TIER_THEMES,
@@ -89,13 +89,15 @@ export async function PublicProfileView({
     visitedParks.length > 0 ||
     visibleWishlistCodes.length > 0;
 
+  const cityHeroImages = await getCachedCityHeroImageMap();
   const trips = buildProfileTrips(
     visitedCountries,
     visitedCities,
     visitedParks,
     profile.residence,
     visitedCodes,
-    locale === "tr" ? "tr" : "en"
+    locale === "tr" ? "tr" : "en",
+    cityHeroImages
   );
   const mediaPins = buildProfileMediaPins(visitedCities, visitedParks, profile);
   const isDemoProfile = isDemoProfileUsername(profile.username);

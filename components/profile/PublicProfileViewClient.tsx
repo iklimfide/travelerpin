@@ -2,7 +2,7 @@
 
 import { Link } from "@/lib/i18n/navigation";
 import { useLocale } from "next-intl";
-import type { ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { HomeFeaturesClient } from "@/components/home/HomeFeaturesClient";
 import { ProfileHeroCover } from "@/components/profile/ProfileHeroCover";
 import { ProfileIdentityCard } from "@/components/profile/ProfileIdentityCard";
@@ -76,13 +76,42 @@ export function PublicProfileViewClient({
     visitedParks.length > 0 ||
     visibleWishlistCodes.length > 0;
 
-  const trips = buildProfileTrips(
-    visitedCountries,
-    visitedCities,
-    visitedParks,
-    profile.residence,
-    visitedCodes,
-    locale
+  const [cityHeroImages, setCityHeroImages] = useState<Map<string, string>>(() => new Map());
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/city-hero-images")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        if (cancelled || !payload?.images) return;
+        setCityHeroImages(new Map(Object.entries(payload.images as Record<string, string>)));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const trips = useMemo(
+    () =>
+      buildProfileTrips(
+        visitedCountries,
+        visitedCities,
+        visitedParks,
+        profile.residence,
+        visitedCodes,
+        locale,
+        cityHeroImages
+      ),
+    [
+      visitedCountries,
+      visitedCities,
+      visitedParks,
+      profile.residence,
+      visitedCodes,
+      locale,
+      cityHeroImages,
+    ]
   );
   const mediaPins = buildProfileMediaPins(visitedCities, visitedParks, profile);
   const isDemoProfile = isDemoProfileUsername(profile.username);

@@ -61,7 +61,8 @@ export function buildProfileAllDestinations(
   wishlistCountries: WishlistCountry[],
   visitedCodes: string[],
   residence?: string | null,
-  locale: Locale = defaultLocale
+  locale: Locale = defaultLocale,
+  cityHeroImages?: ReadonlyMap<string, string>
 ): ProfileAllDestinations {
   const residenceCountryCode = resolveResidenceCountryCode(residence);
   const countryList = buildVisitedCountryList(
@@ -171,7 +172,8 @@ export function buildProfileAllDestinations(
       [],
       residence,
       visitedCodes,
-      locale
+      locale,
+      cityHeroImages
     ).filter((trip) => trip.kind === "city"),
     parks,
     wishlist,

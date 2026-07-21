@@ -1,4 +1,5 @@
 import { getCountryName } from "@/lib/data/countries";
+import { resolveCityHeroImageUrl } from "@/lib/city/city-hero-images";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findCityHubSlug } from "@/lib/data/city-hubs";
@@ -157,7 +158,8 @@ export function buildProfileTrips(
   parks: VisitedPark[] = [],
   residence?: string | null,
   visitedCodes: string[] = [],
-  locale: Locale = defaultLocale
+  locale: Locale = defaultLocale,
+  cityHeroImages?: ReadonlyMap<string, string>
 ): ProfileTrip[] {
   const countryList = buildVisitedCountryList(
     visitedCountries,
@@ -226,7 +228,9 @@ export function buildProfileTrips(
       countryCode: city.country_code,
       countryName: getCountryName(city.country_code, locale),
       countrySlug: countryHubSlug(city.country_code),
-      imageUrl: DEFAULT_CITY_HERO_IMAGE,
+      imageUrl: cityHeroImages
+        ? resolveCityHeroImageUrl(city.country_code, canonical, cityHeroImages)
+        : DEFAULT_CITY_HERO_IMAGE,
       note: city.note,
       createdAt: city.created_at,
       badge: tripBadge(city, city.created_at === recentThreshold),

@@ -10,7 +10,7 @@ import { HubPageTopBar } from "@/components/hub/HubPageTopBar";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { getCountryName } from "@/lib/data/countries";
 import { ensureParkHubFromTouristPark } from "@/lib/data/park-hubs";
-import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
+import { getCityHeroImageUrl } from "@/lib/city/city-hero-images";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import { countryPath, parkPath } from "@/lib/seo/site";
@@ -88,7 +88,7 @@ export async function CityPageContent({
   const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
   const displayName = getLocalizedCityName(hub.countryCode, hub.name, locale);
   const countryDisplayName = getCountryName(hub.countryCode, locale);
-  const heroUrl = DEFAULT_CITY_HERO_IMAGE;
+  const heroUrl = await getCityHeroImageUrl(hub.countryCode, hub.name);
   const featuredPin = memoryPins[0] ?? null;
 
   const rows: { label: string; value: ReactNode }[] = [];

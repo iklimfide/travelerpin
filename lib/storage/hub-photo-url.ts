@@ -16,7 +16,7 @@ export function toHubPhotoSrc(mediaUrl: string | null | undefined): string | nul
   }
 
   if (isR2PublicMediaUrl(mediaUrl)) {
-    return null;
+    return mediaUrl;
   }
 
   return mediaUrl;

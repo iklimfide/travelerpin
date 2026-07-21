@@ -7,7 +7,13 @@ const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 const r2Hostname = getR2PublicHostname();
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["sharp"],
+  serverExternalPackages: [
+    "sharp",
+    "@img/colour",
+    "@img/sharp-wasm32",
+    "@img/sharp-win32-x64",
+    "detect-libc",
+  ],
   // Soft-nav revisits (profile/settings/modals) stay instant until pin/settings change.
   // Page bodies still hydrate from localStorage; this only caches the thin RSC shell.
   experimental: {

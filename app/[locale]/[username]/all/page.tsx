@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { ProfileAllDestinationsView } from "@/components/profile/ProfileAllDestinationsView";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
+import { getCachedCityHeroImageMap } from "@/lib/city/city-hero-images";
 import { buildProfileAllDestinations } from "@/lib/utils/profile-all-destinations";
 import { parseNextRoute } from "@/lib/utils/next-route";
 import { DEFAULT_DESCRIPTION, profileAllPath } from "@/lib/seo/site";
@@ -59,6 +60,7 @@ export default async function ProfileAllDestinationsPage({ params }: PageProps) 
   const visibleWishlistCodes =
     isOwnProfile || wishlistPublic ? data.wishlistCodes : [];
 
+  const cityHeroImages = await getCachedCityHeroImageMap();
   const destinations = buildProfileAllDestinations(
     data.visitedCountries,
     data.visitedCities,
@@ -66,7 +68,8 @@ export default async function ProfileAllDestinationsPage({ params }: PageProps) 
     visibleWishlistCountries,
     data.visitedCodes,
     profile.residence,
-    locale
+    locale,
+    cityHeroImages
   );
 
   const view = (
