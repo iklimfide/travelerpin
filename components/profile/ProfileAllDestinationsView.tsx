@@ -506,6 +506,8 @@ export function ProfileAllDestinationsView({
         <ProfileNextRouteSection
           initialStops={initialNextRouteStops}
           isOwnProfile={isOwnProfile}
+          visitedCountries={visitedCountries}
+          visitedCities={visitedCities}
         />
       </div>
 

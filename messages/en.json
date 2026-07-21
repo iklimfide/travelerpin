@@ -112,7 +112,11 @@
     "searching": "Searching…",
     "routeStopCount": "{count} stops on your route",
     "saveHint": "Reorder or edit your route, then tap Save.",
-    "saveFailed": "Could not save your route. Please try again."
+    "saveFailed": "Could not save your route. Please try again.",
+    "markVisited": "Mark as visited",
+    "markVisitedDone": "Visited",
+    "markedVisitedToast": "Added to visited places",
+    "markVisitedFailed": "Could not mark as visited. Please try again."
   },
   "nextRouteDestination": {
     "selectCountryTitle": "Add countries and cities to your next route",
@@ -891,8 +895,8 @@
     "parkSaveHint": "Open a country, tick parks, then tap Save to pin them.",
     "saveFailed": "Could not save your selections. Please try again.",
     "loginRequired": "Sign in to save places to your map.",
-    "missingPlacePrompt": "Can't find your city or park in the list? Email us at",
-    "missingPlacePromptSuffix": "and we'll add it.",
+    "missingPlacePrompt": "Can't find your city or park in the list?",
+    "missingPlaceContactLink": "Contact us",
     "regions": {
       "africa": "Africa",
       "asia": "Asia",

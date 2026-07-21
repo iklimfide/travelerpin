@@ -89,19 +89,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  for (const park of inserted ?? []) {
-    revalidateParkHubForPin(park.country_code, park.park_name);
-    await publishParkHubOnPin(supabase, park);
-    await notifyFollowersAfterParkPin(supabase, user.id, park);
-  }
-  if ((inserted ?? []).length > 0) {
-    await revalidateProfileForPin(supabase, user.id);
+  const insertedParks = inserted ?? [];
+  if (insertedParks.length > 0) {
+    after(async () => {
+      for (const park of insertedParks) {
+        revalidateParkHubForPin(park.country_code, park.park_name);
+        await publishParkHubOnPin(supabase, park);
+        await notifyFollowersAfterParkPin(supabase, user.id, park);
+      }
+      await revalidateProfileForPin(supabase, user.id);
+    });
   }
 
   return NextResponse.json({
-    added: inserted?.length ?? 0,
+    added: insertedParks.length,
     skipped: parks.length - toInsert.length,
-    parks: inserted,
+    parks: insertedParks,
   });
 }
 
@@ -158,7 +161,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: deleteError.message }, { status: 500 });
   }
 
-  await revalidateProfileForPin(supabase, user.id);
+  after(() => revalidateProfileForPin(supabase, user.id));
 
   after(async () => {
     for (const row of rows) {

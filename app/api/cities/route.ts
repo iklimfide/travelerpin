@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { revalidateCityHubForPin } from "@/lib/cache/revalidate-city-hub";
 import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
@@ -75,10 +75,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: formatVisitedCitySaveError(error.message) }, { status: 500 });
   }
 
-  revalidateCityHubForPin(city.country_code, city.city_name);
-  await revalidateProfileForPin(supabase, user.id);
-  await publishCityHubOnPin(supabase, city);
-  await notifyFollowersAfterCityPin(supabase, user.id, city);
+  after(async () => {
+    revalidateCityHubForPin(city.country_code, city.city_name);
+    await revalidateProfileForPin(supabase, user.id);
+    await publishCityHubOnPin(supabase, city);
+    await notifyFollowersAfterCityPin(supabase, user.id, city);
+  });
 
   return NextResponse.json(city);
 }

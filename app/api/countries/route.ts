@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { createClient } from "@/lib/supabase/server";
 import { countrySchema } from "@/lib/validations/country";
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     .eq("user_id", user.id)
     .eq("country_code", code);
 
-  await revalidateProfileForPin(supabase, user.id);
+  after(() => revalidateProfileForPin(supabase, user.id));
 
   return NextResponse.json(country);
 }

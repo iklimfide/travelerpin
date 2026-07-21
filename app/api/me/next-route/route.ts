@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { parseNextRoute } from "@/lib/utils/next-route";
 import { nextRouteUpdateSchema } from "@/lib/validations/next-route";
@@ -76,7 +76,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Failed to save route" }, { status: 500 });
     }
 
-    await revalidateProfileForPin(supabase, user.id);
+    after(() => revalidateProfileForPin(supabase, user.id));
 
     return NextResponse.json({ stops });
   } catch (error) {

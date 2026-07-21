@@ -9,8 +9,8 @@ import {
   cityMatchesLocalizedSearch,
   getLocalizedCityName,
 } from "@/lib/i18n/place-names";
+import { Link } from "@/lib/i18n/navigation";
 import { catalogCountryCode, flagCountryCode } from "@/lib/data/uk-nations";
-import { CONTACT_EMAIL } from "@/lib/legal/contact";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { compareCitiesForAddModal } from "@/lib/add/city-list-sort";
 import { canonicalCityKey, citiesAreSame } from "@/lib/utils/city-aliases";
@@ -55,10 +55,9 @@ function MissingPlaceContactNotice({ className }: { className?: string }) {
   return (
     <p className={`add-destination-empty add-destination-empty--contact${className ? ` ${className}` : ""}`}>
       {addDestinationMessages.missingPlacePrompt}{" "}
-      <a href={`mailto:${CONTACT_EMAIL}`} className="add-destination-empty__email">
-        {CONTACT_EMAIL}
-      </a>{" "}
-      {addDestinationMessages.missingPlacePromptSuffix}
+      <Link href="/contact" className="add-destination-empty__email">
+        {addDestinationMessages.missingPlaceContactLink}
+      </Link>
     </p>
   );
 }

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
 import { publishCityHubOnPin } from "@/lib/supabase/published-hubs";
@@ -72,8 +72,10 @@ export async function POST(request: Request) {
       .eq("user_id", user.id)
       .eq("country_code", code);
 
-    await notifyFollowersAfterCountryPin(supabase, user.id, country);
-    await revalidateProfileForPin(supabase, user.id);
+    after(async () => {
+      await notifyFollowersAfterCountryPin(supabase, user.id, country);
+      await revalidateProfileForPin(supabase, user.id);
+    });
 
     return NextResponse.json({ country, added: true, alreadyHad: false });
   }
@@ -108,8 +110,8 @@ export async function POST(request: Request) {
       city_name: data.city_name,
       country_code: code,
       country_name: data.country_name,
-      latitude: data.latitude,
-      longitude: data.longitude,
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
       note: null,
       media_type: null,
       media_url: null,
@@ -122,10 +124,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: cityError.message }, { status: 500 });
   }
 
-  revalidateCityHubForPin(city.country_code, city.city_name);
-  await revalidateProfileForPin(supabase, user.id);
-  await publishCityHubOnPin(supabase, city);
-  await notifyFollowersAfterCityPin(supabase, user.id, city);
+  after(async () => {
+    revalidateCityHubForPin(city.country_code, city.city_name);
+    await revalidateProfileForPin(supabase, user.id);
+    await publishCityHubOnPin(supabase, city);
+    await notifyFollowersAfterCityPin(supabase, user.id, city);
+  });
 
   return NextResponse.json({ city, added: true, alreadyHad: false });
 }

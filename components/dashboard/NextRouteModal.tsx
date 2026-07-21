@@ -12,10 +12,10 @@ import { useAppMessages } from "@/lib/i18n/client-messages";
 import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import type { Locale } from "@/lib/i18n/config";
 import {
-  notifyNextRouteChanged,
   readOwnNextRouteCache,
 } from "@/lib/client/session-page-cache";
-import { fetchNextRoute } from "@/lib/client/next-route-state";
+import { fetchNextRoute, persistNextRouteStops } from "@/lib/client/next-route-state";
+import { useToast } from "@/components/ui/ToastProvider";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import {
   areNextRouteStopsEqual,
@@ -180,8 +180,8 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [savedStops, setSavedStops] = useState<NextRouteStop[]>(() => cachedStops ?? []);
-  const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const toast = useToast();
   const hasRouteRef = useRef(cachedStops !== null);
 
   const trimmedQuery = query.trim();
@@ -192,11 +192,11 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !saving) onClose();
+      if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose, saving]);
+  }, [open, onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -310,35 +310,23 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
     setStops((prev) => updater(prev));
   }, []);
 
-  const handleSave = useCallback(async () => {
-    if (saving || !hasUnsavedChanges) return;
+  const handleSave = useCallback(() => {
+    if (!hasUnsavedChanges) return;
 
-    setSaving(true);
+    const previousStops = savedStops;
+    const pendingStops = stops;
+
+    setSavedStops(pendingStops);
     setSaveError(null);
+    onClose();
 
-    try {
-      const res = await fetch("/api/me/next-route", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stops }),
-      });
-
-      if (!res.ok) {
-        setSaveError(nextRouteMessages.saveFailed);
-        return;
-      }
-
-      const data = (await res.json()) as { stops?: unknown };
-      const saved = parseNextRoute(data.stops);
-      setStops(saved);
-      setSavedStops(saved);
-      notifyNextRouteChanged(saved);
-    } catch {
-      setSaveError(nextRouteMessages.saveFailed);
-    } finally {
-      setSaving(false);
-    }
-  }, [hasUnsavedChanges, saving, stops]);
+    persistNextRouteStops(pendingStops, {
+      previousStops,
+      onError: (message) => {
+        toast.show(message || nextRouteMessages.saveFailed, 2500);
+      },
+    });
+  }, [hasUnsavedChanges, nextRouteMessages.saveFailed, onClose, savedStops, stops, toast]);
 
   const addToRoute = useCallback(
     (result: SearchResult) => {
@@ -447,7 +435,6 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
         className="save-destination-modal__backdrop"
         aria-label={nextRouteMessages.close}
         onClick={onClose}
-        disabled={saving}
       />
 
       <div
@@ -468,7 +455,6 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
             className="save-destination-modal__close"
             onClick={onClose}
             aria-label={nextRouteMessages.close}
-            disabled={saving}
           >
             ✕
           </button>
@@ -643,10 +629,10 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
             <button
               type="button"
               className="save-destination-modal__save-btn"
-              disabled={loadingRoute || !hasUnsavedChanges || saving}
-              onClick={() => void handleSave()}
+              disabled={loadingRoute || !hasUnsavedChanges}
+              onClick={handleSave}
             >
-              {saving ? commonMessages.loading : commonMessages.save}
+              {commonMessages.save}
             </button>
           </div>
         ) : (

@@ -11,10 +11,12 @@ import {
 } from "@/lib/client/session-page-cache";
 import {
   fetchNextRoute,
+  mergePendingNextRouteStops,
+  persistNextRouteStops,
   routeCityKeys,
   routeCountryCodes,
-  savePendingNextRouteStops,
 } from "@/lib/client/next-route-state";
+import { useToast } from "@/components/ui/ToastProvider";
 import {
   getAddRegionForCountryCode,
   type AddRegionId,
@@ -51,9 +53,9 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
   const [pendingCityKeys, setPendingCityKeys] = useState<Set<string>>(new Set());
   const [returnExpandedRegion, setReturnExpandedRegion] = useState<AddRegionId | null>(null);
   const [loadingState, setLoadingState] = useState(() => cachedStops === null);
-  const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const toast = useToast();
   const hasRouteStateRef = useRef(cachedStops !== null);
 
   useEffect(() => {
@@ -127,12 +129,12 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape" && !saving) onClose();
+      if (event.key === "Escape") onClose();
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose, saving]);
+  }, [onClose]);
 
   const existingCityNames = useMemo(() => {
     if (step.kind !== "cities") return [];
@@ -202,42 +204,39 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
     });
   }
 
-  async function handleSave() {
-    if (pendingSelectionCount === 0 || saving) return;
+  function handleSave() {
+    if (pendingSelectionCount === 0) return;
 
-    setSaving(true);
-    setSaveError(null);
+    const { stops: nextStops, savedCount } = mergePendingNextRouteStops({
+      existingStops: routeStops,
+      pendingCountryCodes,
+      pendingCityKeys,
+    });
 
-    try {
-      const result = await savePendingNextRouteStops({
-        existingStops: routeStops,
-        pendingCountryCodes,
-        pendingCityKeys,
-      });
-
-      if (!result.ok) {
-        setSaveError(
-          result.error.toLowerCase().includes("unauthorized")
-            ? nextRouteDestinationMessages.loginRequired
-            : result.error
-        );
-        return;
-      }
-
-      if (result.savedCount === 0) {
-        setPendingCountryCodes(new Set());
-        setPendingCityKeys(new Set());
-        return;
-      }
-
-      applyRouteStops(result.stops);
+    if (savedCount === 0) {
       setPendingCountryCodes(new Set());
       setPendingCityKeys(new Set());
-    } catch {
-      setSaveError(nextRouteDestinationMessages.saveFailed);
-    } finally {
-      setSaving(false);
+      return;
     }
+
+    const previousStops = routeStops;
+    applyRouteStops(nextStops);
+    setPendingCountryCodes(new Set());
+    setPendingCityKeys(new Set());
+    setSaveError(null);
+    onClose();
+
+    persistNextRouteStops(nextStops, {
+      previousStops,
+      onError: (message) => {
+        toast.show(
+          message.toLowerCase().includes("unauthorized")
+            ? nextRouteDestinationMessages.loginRequired
+            : message || nextRouteDestinationMessages.saveFailed,
+          2500
+        );
+      },
+    });
   }
 
   if (!mounted) return null;
@@ -249,7 +248,6 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
         className="add-destination-modal__backdrop"
         aria-label={nextRouteDestinationMessages.close}
         onClick={onClose}
-        disabled={saving}
       />
       <div
         className="add-destination-modal__sheet"
@@ -288,7 +286,6 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
             className="add-destination-modal__close"
             aria-label={nextRouteDestinationMessages.close}
             onClick={onClose}
-            disabled={saving}
           >
             ✕
           </button>
@@ -328,11 +325,11 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
           <button
             type="button"
             className="add-destination-save"
-            disabled={pendingSelectionCount === 0 || saving}
-            onClick={() => void handleSave()}
+            disabled={pendingSelectionCount === 0}
+            onClick={handleSave}
           >
-            {saving ? commonMessages.loading : commonMessages.save}
-            {!saving && pendingSelectionCount > 0 ? ` (${pendingSelectionCount})` : ""}
+            {commonMessages.save}
+            {pendingSelectionCount > 0 ? ` (${pendingSelectionCount})` : ""}
           </button>
         </div>
       </div>

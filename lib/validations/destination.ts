@@ -6,8 +6,8 @@ export const quickDestinationSchema = z.object({
   city_name: z.string().min(1).max(100).transform(formatCityDisplayName),
   country_code: z.string().length(2),
   country_name: z.string().min(1),
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
 });
 
 export type QuickDestinationInput = z.infer<typeof quickDestinationSchema>;

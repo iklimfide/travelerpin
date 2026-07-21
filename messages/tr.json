@@ -112,7 +112,11 @@
     "searching": "Aranıyor…",
     "routeStopCount": "Rotanda {count} durak var",
     "saveHint": "Rotanı yeniden sırala veya düzenle, sonra Kaydet'e dokun.",
-    "saveFailed": "Rotan kaydedilemedi. Lütfen tekrar deneyin."
+    "saveFailed": "Rotan kaydedilemedi. Lütfen tekrar deneyin.",
+    "markVisited": "Ziyaret ettim",
+    "markVisitedDone": "Ziyaret edildi",
+    "markedVisitedToast": "Ziyaret edilenlere eklendi",
+    "markVisitedFailed": "Ziyaret edilenlere eklenemedi. Lütfen tekrar deneyin."
   },
   "nextRouteDestination": {
     "selectCountryTitle": "Sonraki rotana ülkeler ve şehirler ekle",
@@ -890,8 +894,8 @@
     "parkSaveHint": "Bir ülke aç, parkları işaretle, sonra pinlemek için Kaydet'e dokun.",
     "saveFailed": "Seçimlerin kaydedilemedi. Lütfen tekrar deneyin.",
     "loginRequired": "Yerleri haritana kaydetmek için giriş yap.",
-    "missingPlacePrompt": "Şehrini veya parkını listede bulamıyor musun? Bize e-posta gönder:",
-    "missingPlacePromptSuffix": "ve ekleyelim.",
+    "missingPlacePrompt": "Şehrini veya parkını listede bulamıyor musun?",
+    "missingPlaceContactLink": "İletişim",
     "regions": {
       "africa": "Afrika",
       "asia": "Asya",

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { revalidateParkHubForPin } from "@/lib/cache/revalidate-park-hub";
 import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
@@ -79,10 +79,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parkError.message }, { status: 500 });
   }
 
-  revalidateParkHubForPin(park.country_code, park.park_name);
-  await revalidateProfileForPin(supabase, user.id);
-  await publishParkHubOnPin(supabase, park);
-  await notifyFollowersAfterParkPin(supabase, user.id, park);
+  after(async () => {
+    revalidateParkHubForPin(park.country_code, park.park_name);
+    await revalidateProfileForPin(supabase, user.id);
+    await publishParkHubOnPin(supabase, park);
+    await notifyFollowersAfterParkPin(supabase, user.id, park);
+  });
 
   return NextResponse.json({ park, added: true, alreadyHad: false });
 }

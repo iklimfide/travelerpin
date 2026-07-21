@@ -322,6 +322,8 @@ export async function PublicProfileView({
               <ProfileNextRouteSection
                 initialStops={parseNextRoute(profile.next_route)}
                 isOwnProfile={isOwnProfile}
+                visitedCountries={visitedCountries}
+                visitedCities={visitedCities}
               />
 
               {!isOwnProfile && isGuest && hasMapContent ? (

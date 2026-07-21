@@ -13,20 +13,57 @@ import {
   readOwnNextRouteCache,
   writeOwnNextRouteCache,
 } from "@/lib/client/session-page-cache";
-import { fetchNextRoute } from "@/lib/client/next-route-state";
+import { fetchNextRoute, persistMarkNextRouteStopVisited } from "@/lib/client/next-route-state";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
+import { canonicalCityKey } from "@/lib/utils/city-aliases";
 import {
   areNextRouteStopsEqual,
   getNextRouteStopDisplay,
   parseNextRoute,
+  stopDedupeKey,
 } from "@/lib/utils/next-route";
-import type { NextRouteStop } from "@/types/database";
+import { useToast } from "@/components/ui/ToastProvider";
+import type { NextRouteStop, VisitedCity, VisitedCountry } from "@/types/database";
 
 type ProfileNextRouteSectionProps = {
   initialStops?: NextRouteStop[];
   isOwnProfile: boolean;
+  visitedCountries?: VisitedCountry[];
+  visitedCities?: VisitedCity[];
 };
+
+function isRouteStopVisited(
+  stop: NextRouteStop,
+  visitedCountries: VisitedCountry[],
+  visitedCities: VisitedCity[],
+  extraVisitedKeys: Set<string>
+): boolean {
+  const key = stopDedupeKey(stop);
+  if (extraVisitedKeys.has(key)) return true;
+
+  const code = stop.countryCode?.toUpperCase();
+  if (!code) return false;
+
+  if (stop.kind === "city") {
+    const cityKey = canonicalCityKey(code, stop.name);
+    return visitedCities.some(
+      (city) =>
+        city.country_code.toUpperCase() === code &&
+        canonicalCityKey(city.country_code, city.city_name) === cityKey
+    );
+  }
+
+  if (
+    visitedCities.some((city) => city.country_code.toUpperCase() === code)
+  ) {
+    return true;
+  }
+
+  return visitedCountries.some(
+    (country) => country.country_code.toUpperCase() === code
+  );
+}
 
 function resolveInitialStops(
   initialStops: NextRouteStop[] | undefined,
@@ -68,8 +105,11 @@ function mergeIncomingStops(
 export function ProfileNextRouteSection({
   initialStops = [],
   isOwnProfile,
+  visitedCountries = [],
+  visitedCities = [],
 }: ProfileNextRouteSectionProps) {
   const { profile: profileMessages, nextRoute: nextRouteMessages } = useAppMessages();
+  const toast = useToast();
   const locale = useLocale() === "tr" ? "tr" : "en";
   const initialResolved = useMemo(
     () => resolveInitialStops(initialStops, isOwnProfile),
@@ -81,6 +121,9 @@ export function ProfileNextRouteSection({
   const stopsRef = useRef(initialResolved.stops);
   const [loadingOwnRoute, setLoadingOwnRoute] = useState(
     () => isOwnProfile && !initialResolved.fromCache && initialResolved.stops.length === 0
+  );
+  const [locallyVisitedKeys, setLocallyVisitedKeys] = useState<Set<string>>(
+    () => new Set()
   );
 
   const applyStops = useCallback((incoming: NextRouteStop[], options?: { replace?: boolean }) => {
@@ -161,6 +204,44 @@ export function ProfileNextRouteSection({
     };
   }, [applyStops, isOwnProfile, loadOwnRoute]);
 
+  const handleMarkVisited = useCallback(
+    (stop: NextRouteStop) => {
+      const visited = isRouteStopVisited(
+        stop,
+        visitedCountries,
+        visitedCities,
+        locallyVisitedKeys
+      );
+
+      const previousStops = stopsRef.current;
+      const nextStops = previousStops.filter((entry) => entry.id !== stop.id);
+
+      applyStops(nextStops, { replace: true });
+      setLocallyVisitedKeys((prev) => new Set(prev).add(stopDedupeKey(stop)));
+
+      persistMarkNextRouteStopVisited({
+        stop,
+        currentStops: previousStops,
+        alreadyVisited: visited,
+        onError: (message) => {
+          toast.show(message || nextRouteMessages.markVisitedFailed, 2500);
+        },
+        onAdded: () => {
+          toast.show(nextRouteMessages.markedVisitedToast, 1000);
+        },
+      });
+    },
+    [
+      applyStops,
+      locallyVisitedKeys,
+      nextRouteMessages.markVisitedFailed,
+      nextRouteMessages.markedVisitedToast,
+      toast,
+      visitedCities,
+      visitedCountries,
+    ]
+  );
+
   useEffect(() => {
     function scrollToSection() {
       if (window.location.hash !== "#profile-next-route") return;
@@ -236,6 +317,12 @@ export function ProfileNextRouteSection({
             {stops.map((stop, index) => {
               const { title, subtitle, countryCode } = getNextRouteStopDisplay(stop, locale);
               const flagUrl = countryCode ? countryCodeToFlagUrl(countryCode) : "";
+              const visited = isRouteStopVisited(
+                stop,
+                visitedCountries,
+                visitedCities,
+                locallyVisitedKeys
+              );
 
               return (
                 <li key={stop.id} className="profile-next-route-item">
@@ -269,6 +356,29 @@ export function ProfileNextRouteSection({
                       ) : null}
                     </span>
                   </div>
+                  {isOwnProfile ? (
+                    <div className="profile-next-route-actions">
+                      <button
+                        type="button"
+                        className={`save-destination-modal__check${
+                          visited ? " save-destination-modal__check--on" : ""
+                        }`}
+                        onClick={() => handleMarkVisited(stop)}
+                        aria-label={
+                          visited
+                            ? nextRouteMessages.markVisitedDone
+                            : nextRouteMessages.markVisited
+                        }
+                        title={
+                          visited
+                            ? nextRouteMessages.markVisitedDone
+                            : nextRouteMessages.markVisited
+                        }
+                      >
+                        ✓
+                      </button>
+                    </div>
+                  ) : null}
                 </li>
               );
             })}

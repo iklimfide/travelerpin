@@ -321,6 +321,8 @@ export function PublicProfileViewClient({
               <ProfileNextRouteSection
                 initialStops={parseNextRoute(profile.next_route)}
                 isOwnProfile={isOwnProfile}
+                visitedCountries={visitedCountries}
+                visitedCities={visitedCities}
               />
 
               {!isOwnProfile && isGuest && hasMapContent ? (

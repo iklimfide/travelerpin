@@ -91,8 +91,7 @@ export async function POST(request: Request) {
 
   const insertedCities = inserted ?? [];
   if (insertedCities.length > 0) {
-    // Bust profile cache before the client refetches so My cities stays in sync.
-    await revalidateProfileForPin(supabase, user.id);
+    after(() => revalidateProfileForPin(supabase, user.id));
 
     after(async () => {
       for (const city of insertedCities) {

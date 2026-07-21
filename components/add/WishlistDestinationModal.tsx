@@ -10,7 +10,8 @@ import {
   type TravelStateData,
 } from "@/lib/client/session-page-cache";
 import { fetchTravelState } from "@/lib/client/travel-state";
-import { savePendingWishlistChanges } from "@/lib/client/wishlist-state";
+import { persistWishlistChanges } from "@/lib/client/wishlist-state";
+import { useToast } from "@/components/ui/ToastProvider";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 import type { CountryOption } from "@/lib/data/countries";
 import { isUkNationCode, isUkNationVisited } from "@/lib/data/uk-nations";
@@ -49,9 +50,9 @@ export function WishlistDestinationModal({ onClose }: WishlistDestinationModalPr
   const [pendingCountryCodes, setPendingCountryCodes] = useState<Set<string>>(new Set());
   const [pendingRemoveCountryCodes, setPendingRemoveCountryCodes] = useState<Set<string>>(new Set());
   const [loadingState, setLoadingState] = useState(() => !cached);
-  const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const toast = useToast();
   const hasStateRef = useRef(Boolean(cached));
 
   useEffect(() => {
@@ -126,12 +127,12 @@ export function WishlistDestinationModal({ onClose }: WishlistDestinationModalPr
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape" && !saving) onClose();
+      if (event.key === "Escape") onClose();
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose, saving]);
+  }, [onClose]);
 
   const pendingSelectionCount = useMemo(() => {
     const pendingAdds = [...pendingCountryCodes].filter((code) => {
@@ -182,37 +183,36 @@ export function WishlistDestinationModal({ onClose }: WishlistDestinationModalPr
     });
   }
 
-  async function handleSave() {
-    if (pendingSelectionCount === 0 || saving) return;
+  function handleSave() {
+    if (pendingSelectionCount === 0) return;
 
-    setSaving(true);
+    const pendingAdds = new Set(pendingCountryCodes);
+    const pendingRemoves = new Set(pendingRemoveCountryCodes);
+
+    setPendingCountryCodes(new Set());
+    setPendingRemoveCountryCodes(new Set());
     setSaveError(null);
+    onClose();
 
-    try {
-      const result = await savePendingWishlistChanges({
-        pendingCountryCodes,
-        pendingRemoveCountryCodes,
+    persistWishlistChanges(
+      {
+        pendingCountryCodes: pendingAdds,
+        pendingRemoveCountryCodes: pendingRemoves,
         wishlistCountries,
         wishlistCodes,
         visitedCodes,
-      });
-
-      if (!result.ok) {
-        setSaveError(
-          result.error.toLowerCase().includes("unauthorized")
-            ? wishlistDestinationMessages.loginRequired
-            : result.error
-        );
-        return;
+      },
+      {
+        onError: (message) => {
+          toast.show(
+            message.toLowerCase().includes("unauthorized")
+              ? wishlistDestinationMessages.loginRequired
+              : message || wishlistDestinationMessages.saveFailed,
+            2500
+          );
+        },
       }
-
-      setPendingCountryCodes(new Set());
-      setPendingRemoveCountryCodes(new Set());
-    } catch {
-      setSaveError(wishlistDestinationMessages.saveFailed);
-    } finally {
-      setSaving(false);
-    }
+    );
   }
 
   if (!mounted) return null;
@@ -224,7 +224,6 @@ export function WishlistDestinationModal({ onClose }: WishlistDestinationModalPr
         className="add-destination-modal__backdrop"
         aria-label={wishlistDestinationMessages.close}
         onClick={onClose}
-        disabled={saving}
       />
       <div
         className="add-destination-modal__sheet"
@@ -241,7 +240,6 @@ export function WishlistDestinationModal({ onClose }: WishlistDestinationModalPr
             className="add-destination-modal__close"
             aria-label={wishlistDestinationMessages.close}
             onClick={onClose}
-            disabled={saving}
           >
             ✕
           </button>
@@ -278,11 +276,11 @@ export function WishlistDestinationModal({ onClose }: WishlistDestinationModalPr
           <button
             type="button"
             className="add-destination-save"
-            disabled={pendingSelectionCount === 0 || saving}
-            onClick={() => void handleSave()}
+            disabled={pendingSelectionCount === 0}
+            onClick={handleSave}
           >
-            {saving ? commonMessages.loading : commonMessages.save}
-            {!saving && pendingSelectionCount > 0 ? ` (${pendingSelectionCount})` : ""}
+            {commonMessages.save}
+            {pendingSelectionCount > 0 ? ` (${pendingSelectionCount})` : ""}
           </button>
         </div>
       </div>

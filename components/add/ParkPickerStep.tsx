@@ -4,8 +4,8 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AddDestinationCheckbox } from "@/components/add/AddDestinationCheckbox";
 import { addDestinationMessages, mapMessages, parkMessages, useAppMessages } from "@/lib/i18n/client-messages";
+import { Link } from "@/lib/i18n/navigation";
 import { flagCountryCode } from "@/lib/data/uk-nations";
-import { CONTACT_EMAIL } from "@/lib/legal/contact";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { formatKnownPlaceName } from "@/lib/utils/city-name";
 import { shortParkLabel } from "@/lib/utils/park-name";
@@ -42,10 +42,9 @@ function MissingPlaceContactNotice({ className }: { className?: string }) {
   return (
     <p className={`add-destination-empty add-destination-empty--contact${className ? ` ${className}` : ""}`}>
       {addDestinationMessages.missingPlacePrompt}{" "}
-      <a href={`mailto:${CONTACT_EMAIL}`} className="add-destination-empty__email">
-        {CONTACT_EMAIL}
-      </a>{" "}
-      {addDestinationMessages.missingPlacePromptSuffix}
+      <Link href="/contact" className="add-destination-empty__email">
+        {addDestinationMessages.missingPlaceContactLink}
+      </Link>
     </p>
   );
 }
