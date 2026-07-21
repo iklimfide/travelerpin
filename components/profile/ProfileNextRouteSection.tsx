@@ -276,17 +276,7 @@ export function ProfileNextRouteSection({
         <div className="profile-owner-section__header profile-next-route-box__header">
           <div className="profile-next-route-box__header-side">
             {isOwnProfile ? (
-              stops.length > 0 ? (
-                <button
-                  type="button"
-                  className="profile-owner-section__btn"
-                  onClick={() => openNextRouteModal("route")}
-                >
-                  {profileMessages.sortRoute}
-                </button>
-              ) : (
-                <span className="profile-next-route-box__header-spacer" aria-hidden />
-              )
+              <span className="profile-next-route-box__header-spacer" aria-hidden />
             ) : null}
           </div>
           <div className="profile-owner-section__intro profile-next-route-box__intro">
@@ -297,15 +287,26 @@ export function ProfileNextRouteSection({
           </div>
           <div className="profile-next-route-box__header-side profile-next-route-box__header-side--end">
             {isOwnProfile ? (
-              <button
-                type="button"
-                className="profile-owner-section__btn profile-owner-section__btn--add"
-                onClick={() => {
-                  openNextRouteDestination();
-                }}
-              >
-                {profileMessages.ownerAdd}
-              </button>
+              <div className="profile-next-route-box__header-actions">
+                {stops.length > 0 ? (
+                  <button
+                    type="button"
+                    className="profile-owner-section__btn profile-owner-section__btn--sort"
+                    onClick={() => openNextRouteModal("route")}
+                  >
+                    {profileMessages.sortRoute}
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  className="profile-owner-section__btn profile-owner-section__btn--add"
+                  onClick={() => {
+                    openNextRouteDestination();
+                  }}
+                >
+                  {profileMessages.ownerAdd}
+                </button>
+              </div>
             ) : null}
           </div>
         </div>

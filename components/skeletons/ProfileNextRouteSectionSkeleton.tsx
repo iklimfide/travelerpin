@@ -12,14 +12,17 @@ export function ProfileNextRouteSectionSkeleton({ rows = 3 }: { rows?: number })
       <div className="profile-owner-section profile-next-route-box">
         <div className="profile-owner-section__header profile-next-route-box__header">
           <div className="profile-next-route-box__header-side">
-            <Skeleton className="profile-next-route-skeleton-btn" />
+            <span className="profile-next-route-box__header-spacer" aria-hidden />
           </div>
           <div className="profile-owner-section__intro profile-next-route-box__intro">
             <Skeleton className="profile-next-route-skeleton-title" />
             <Skeleton className="profile-next-route-skeleton-count" />
           </div>
           <div className="profile-next-route-box__header-side profile-next-route-box__header-side--end">
-            <Skeleton className="profile-next-route-skeleton-btn profile-next-route-skeleton-btn--add" />
+            <div className="profile-next-route-box__header-actions">
+              <Skeleton className="profile-next-route-skeleton-btn profile-next-route-skeleton-btn--sort" />
+              <Skeleton className="profile-next-route-skeleton-btn profile-next-route-skeleton-btn--add" />
+            </div>
           </div>
         </div>
 

@@ -2613,6 +2613,14 @@
   justify-content: flex-end;
 }
 
+.profile-next-route-box__header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .profile-next-route-box__header-spacer {
   display: block;
   width: 88px;
@@ -2636,6 +2644,10 @@
 
 .profile-next-route-skeleton-btn--add {
   width: 64px;
+}
+
+.profile-next-route-skeleton-btn--sort {
+  width: 96px;
 }
 
 .profile-next-route-skeleton-title {
@@ -2841,6 +2853,18 @@
 }
 
 .profile-owner-section__btn--add:hover {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.profile-owner-section__btn--sort {
+  border-color: #bfdbfe;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.profile-owner-section__btn--sort:hover {
   border-color: #1d4ed8;
   background: #1d4ed8;
   color: #ffffff;
