@@ -1757,6 +1757,9 @@
 }
 
 .profile-trip-image__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center;
   transform: scale(1.2);
@@ -1931,10 +1934,6 @@
   height: 100%;
   object-fit: cover;
   border-radius: 0;
-}
-
-.profile-trip-badge--wishlist {
-  color: #b45309;
 }
 
 .profile-all-page .profile-shell {

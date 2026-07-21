@@ -6,14 +6,12 @@ import type { ProfileWishlistDestination } from "@/lib/utils/profile-all-destina
 
 type ProfileWishlistDestinationCardProps = {
   country: ProfileWishlistDestination;
-  wantLabel: string;
   layout?: "row" | "grid";
   actions?: ReactNode;
 };
 
 export function ProfileWishlistDestinationCard({
   country,
-  wantLabel,
   layout = "grid",
   actions,
 }: ProfileWishlistDestinationCardProps) {
@@ -32,7 +30,6 @@ export function ProfileWishlistDestinationCard({
             height={72}
           />
         </div>
-        <span className="profile-trip-badge profile-trip-badge--wishlist">{wantLabel}</span>
       </div>
       <div className="profile-trip-body">
         <h3>

@@ -235,8 +235,8 @@ export const loadPublicProfilePage = cache(
             currentUsername != null &&
             currentUsername.toLowerCase() === profile.username.toLowerCase();
 
-          // Private wishlist is owner-only and not in the public pin cache.
-          if (isOwnProfile && !profile.wishlist_public) {
+          // Wishlist for the owner must not wait on the public profile cache.
+          if (isOwnProfile) {
             wishlistCountries = await loadWishlistCountries(supabase, profile, true);
           }
 

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { ProfileCityLink, ProfileCountryLink, ProfileParkLink } from "@/components/profile/ProfilePlaceLink";
 import { profileCardGradient } from "@/components/profile/profile-card-gradient";
@@ -32,11 +31,11 @@ export function ProfileTripCard({
         }
       >
         {trip.imageUrl ? (
-          <Image
+          // Plain img — proxy URLs use /api/hub-photo?key=… which next/image rejects on production.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={trip.imageUrl}
             alt=""
-            fill
-            sizes="200px"
             className="profile-trip-image__photo object-cover"
           />
         ) : trip.kind === "country" ? (

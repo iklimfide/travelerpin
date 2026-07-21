@@ -392,7 +392,6 @@ export function ProfileAllDestinationsView({
       <ProfileWishlistDestinationCard
         key={country.id}
         country={country}
-        wantLabel={profileMessages.wantsToVisit}
         actions={
           ownerActions ? (
             <ProfileDestinationCardActions
