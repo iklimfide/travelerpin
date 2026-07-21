@@ -4,6 +4,8 @@ import { LegalPageShell } from "@/components/legal/LegalPageShell";
 import { BRAND } from "@/lib/constants";
 import { CONTACT_EMAIL } from "@/lib/legal/contact";
 
+const linkClassName = "text-lg font-medium text-[#2563eb] hover:text-[#1d4ed8]";
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("legal");
   return {
@@ -14,6 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ContactPage() {
   const t = await getTranslations("legal");
+  const brandVars = { brand: BRAND.name };
 
   return (
     <LegalPageShell title={t("contactTitle")}>
@@ -22,30 +25,20 @@ export default async function ContactPage() {
       <section>
         <h2 className="mb-2 text-lg font-semibold text-foreground">{t("contactEmailLabel")}</h2>
         <p>
-          <a
-            href={`mailto:${CONTACT_EMAIL}`}
-            className="text-lg font-medium text-[#2563eb] hover:text-[#1d4ed8]"
-          >
+          <a href={`mailto:${CONTACT_EMAIL}`} className={linkClassName}>
             {CONTACT_EMAIL}
           </a>
         </p>
       </section>
 
       <section>
-        <h2 className="mb-2 text-lg font-semibold text-foreground">What to include</h2>
-        <p>
-          For account or privacy requests, please use the email address linked to your {BRAND.name}{" "}
-          account if possible. For bug reports, a short description and the page URL help us respond
-          faster.
-        </p>
+        <h2 className="mb-2 text-lg font-semibold text-foreground">{t("contactWhatToIncludeTitle")}</h2>
+        <p>{t("contactWhatToIncludeBody", brandVars)}</p>
       </section>
 
       <section>
-        <h2 className="mb-2 text-lg font-semibold text-foreground">Response time</h2>
-        <p>
-          We read every message and aim to reply within a few business days. Support is currently
-          offered in English.
-        </p>
+        <h2 className="mb-2 text-lg font-semibold text-foreground">{t("contactResponseTitle")}</h2>
+        <p>{t("contactResponseBody")}</p>
       </section>
     </LegalPageShell>
   );
