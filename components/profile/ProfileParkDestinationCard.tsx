@@ -18,8 +18,14 @@ export function ProfileParkDestinationCard({
 }: ProfileParkDestinationCardProps) {
   return (
     <article className={`profile-trip${layout === "grid" ? " profile-trip--grid" : ""}`}>
-      <div className="profile-trip-image">
-        <Image src={park.imageUrl} alt="" fill sizes="245px" className="object-cover" />
+      <div className="profile-trip-image profile-trip-image--park">
+        <Image
+          src={park.imageUrl}
+          alt=""
+          fill
+          sizes="245px"
+          className="profile-trip-image__photo object-cover"
+        />
         <span className="profile-trip-badge">{parkTypeLabel(park.parkType)}</span>
       </div>
       <div className="profile-trip-body">

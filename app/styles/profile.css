@@ -1918,6 +1918,10 @@
   place-items: center;
 }
 
+.profile-trip-image--park .profile-trip-image__photo {
+  object-position: top center;
+}
+
 .profile-trip-flag {
   display: block;
   width: 72px;

@@ -23,7 +23,13 @@ export function ProfileTripCard({
       className={`profile-trip${layout === "grid" ? " profile-trip--grid" : ""}`}
     >
       <div
-        className={`profile-trip-image${trip.kind === "country" ? " profile-trip-image--country" : ""}`}
+        className={`profile-trip-image${
+          trip.kind === "country"
+            ? " profile-trip-image--country"
+            : trip.kind === "park"
+              ? " profile-trip-image--park"
+              : ""
+        }`}
         style={
           trip.kind === "country" && !trip.imageUrl
             ? { background: profileCardGradient(trip.countryCode) }
