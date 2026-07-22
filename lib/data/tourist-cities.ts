@@ -13911,6 +13911,12 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "IT",
+    "name": "Venice",
+    "latitude": 45.4408,
+    "longitude": 12.3155
+  },
+  {
+    "countryCode": "IT",
     "name": "Verona",
     "latitude": 45.4299,
     "longitude": 10.9844

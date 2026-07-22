@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/i18n/config";
 import { defaultLocale } from "@/lib/i18n/config";
+import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
 import { normalizeCityKey } from "@/lib/utils/city-name";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
 import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
@@ -223,6 +224,37 @@ for (const [countryCode, englishHint, turkish] of CITY_TR_ENTRIES) {
   (TR_CITY_KEY_TO_CANONICAL[countryCode] ??= {})[hintKey] = canonical;
 }
 
+export function cityNameTrOverrideKey(countryCode: string, cityName: string): string {
+  const code = countryCode.toUpperCase();
+  const canonical = canonicalCityName(code, cityName);
+  return `${code}:${catalogNameKey(canonical, code)}`;
+}
+
+function getStaticTurkishCityName(countryCode: string, canonical: string, rawName?: string): string {
+  const code = countryCode.toUpperCase();
+  const key = normalizeCityKey(canonical);
+  return (
+    CITY_NAMES_TR[code]?.[key] ??
+    CITY_NAMES_TR[code]?.[normalizeCityKey(rawName ?? canonical)] ??
+    canonical
+  );
+}
+
+/** YP DB override first, else curated TR catalog; null when TR label equals EN canonical. */
+export function resolveCityNameTr(
+  countryCode: string,
+  cityName: string,
+  overrides?: ReadonlyMap<string, string> | null
+): string | null {
+  const code = countryCode.toUpperCase();
+  const canonical = canonicalCityName(code, cityName);
+  const fromDb = overrides?.get(cityNameTrOverrideKey(code, canonical));
+  if (fromDb) return fromDb;
+
+  const localized = getStaticTurkishCityName(code, canonical, cityName);
+  return localized !== canonical ? localized : null;
+}
+
 /**
  * Display name for a city in the active locale.
  * Canonical EN identity (slugs/DB) stays unchanged — this is UI-only.
@@ -230,18 +262,13 @@ for (const [countryCode, englishHint, turkish] of CITY_TR_ENTRIES) {
 export function getLocalizedCityName(
   countryCode: string,
   cityName: string,
-  locale: Locale = defaultLocale
+  locale: Locale = defaultLocale,
+  nameTrOverrides?: ReadonlyMap<string, string> | null
 ): string {
   const canonical = canonicalCityName(countryCode, cityName);
   if (locale !== "tr") return canonical;
 
-  const code = countryCode.toUpperCase();
-  const key = normalizeCityKey(canonical);
-  return (
-    CITY_NAMES_TR[code]?.[key] ??
-    CITY_NAMES_TR[code]?.[normalizeCityKey(cityName)] ??
-    canonical
-  );
+  return resolveCityNameTr(countryCode, canonical, nameTrOverrides) ?? canonical;
 }
 
 /** Match a city against a search query using both canonical and localized labels. */
@@ -249,12 +276,16 @@ export function cityMatchesLocalizedSearch(
   countryCode: string,
   cityName: string,
   query: string,
-  locale: Locale = defaultLocale
+  locale: Locale = defaultLocale,
+  options?: { nameTr?: string | null; nameTrOverrides?: ReadonlyMap<string, string> | null }
 ): boolean {
   const canonical = canonicalCityName(countryCode, cityName);
   if (matchesPlaceNameSearch(canonical, query)) return true;
   if (locale === "tr") {
-    const localized = getLocalizedCityName(countryCode, canonical, "tr");
+    const localized =
+      options?.nameTr ??
+      resolveCityNameTr(countryCode, canonical, options?.nameTrOverrides) ??
+      getStaticTurkishCityName(countryCode, canonical, cityName);
     if (localized !== canonical && matchesPlaceNameSearch(localized, query)) {
       return true;
     }

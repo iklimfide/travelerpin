@@ -8,6 +8,7 @@ import { matchesParkTypeFilter } from "@/lib/utils/park-type";
 import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
 import { sortCitiesForAddModal } from "@/lib/add/city-list-sort";
 import { catalogNameKey, type CatalogOverlayKind } from "@/lib/kamikaze/catalog-keys";
+import { resolveCityNameTr } from "@/lib/i18n/place-names";
 import type { ParkType } from "@/types/database";
 
 export { sortCitiesForAddModal };
@@ -220,6 +221,17 @@ export function cityNameTrOverrideMap(
     map.set(`${code}:${catalogNameKey(row.name_key, code)}`, tr);
   }
   return map;
+}
+
+export function attachCityNameTr<T extends { countryCode: string; name: string }>(
+  cities: T[],
+  overlay: CatalogOverlaySnapshot
+): Array<T & { nameTr: string | null }> {
+  const overrides = cityNameTrOverrideMap(overlay);
+  return cities.map((city) => ({
+    ...city,
+    nameTr: resolveCityNameTr(city.countryCode, city.name, overrides),
+  }));
 }
 
 /** Lookup keys: country code → Turkish display label. */

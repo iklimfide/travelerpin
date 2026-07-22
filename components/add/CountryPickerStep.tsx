@@ -25,6 +25,7 @@ import type { CountryOption } from "@/lib/data/countries";
 
 type SearchCityResult = {
   cityName: string;
+  displayName?: string;
   countryCode: string;
   countryName: string;
 };
@@ -277,11 +278,10 @@ export function CountryPickerStep({
     const locked = onMap && !allowToggleOnMap;
     const checked = (onMap && !pendingRemove) || pendingAdd;
     const pending = pendingAdd || pendingRemove;
-    const displayName = getLocalizedCityName(
-      city.countryCode,
-      city.cityName,
-      locale
-    );
+    const displayName =
+      locale === "tr" && city.displayName
+        ? city.displayName
+        : getLocalizedCityName(city.countryCode, city.cityName, locale);
     const countryLabel = formatKnownPlaceName(city.countryName);
 
     function toggle() {

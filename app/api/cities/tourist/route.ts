@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCityCatalog } from "@/lib/add/city-catalog";
 import {
   applyCityOverlayToCatalogCities,
+  attachCityNameTr,
   buildCityTiers,
   getCatalogOverlayFresh,
   sortCitiesForAddModal,
@@ -20,8 +21,11 @@ export async function GET(request: Request) {
 
   const catalog = getCityCatalog(country, q);
   const overlay = await getCatalogOverlayFresh();
-  const allCities = sortCitiesForAddModal(
-    applyCityOverlayToCatalogCities(catalog.allCities, overlay, country, q)
+  const allCities = attachCityNameTr(
+    sortCitiesForAddModal(
+      applyCityOverlayToCatalogCities(catalog.allCities, overlay, country, q)
+    ),
+    overlay
   );
 
   const tiers =

@@ -4,12 +4,16 @@ import { searchTouristCitiesInCountries, TOURIST_CITIES } from "@/lib/data/touri
 import { searchTouristParksInCountries } from "@/lib/data/tourist-park-search";
 import {
   applyParkOverlay,
+  cityNameTrOverrideMap,
   exclusionSet,
   getCatalogOverlay,
 } from "@/lib/kamikaze/catalog-overlay";
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
 import { isLocale, type Locale, defaultLocale } from "@/lib/i18n/config";
-import { findCanonicalCitiesByLocalizedQuery } from "@/lib/i18n/place-names";
+import {
+  findCanonicalCitiesByLocalizedQuery,
+  getLocalizedCityName,
+} from "@/lib/i18n/place-names";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
 import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
 import { createClient } from "@/lib/supabase/server";
@@ -50,6 +54,7 @@ export async function GET(request: Request) {
 
   const overlay = await getCatalogOverlay();
   const cityExcluded = exclusionSet(overlay, "city");
+  const nameTrOverrides = cityNameTrOverrideMap(overlay);
 
   const baseCities = searchTouristCitiesInCountries(COUNTRY_CODES, q, 40).filter(
     (city) =>
@@ -86,6 +91,32 @@ export async function GET(request: Request) {
     if (baseCities.length >= 40) break;
   }
 
+  if (locale === "tr") {
+    for (const row of overlay.nameTr) {
+      if (!matchesPlaceNameSearch(row.name_tr, q)) continue;
+      const code = row.country_code.toUpperCase();
+      const rowKey = catalogNameKey(row.name_key, code);
+      const key = `${code}:${rowKey}`;
+      if (cityKeys.has(key) || cityExcluded.has(key)) continue;
+
+      const fromCatalog = TOURIST_CITIES.find(
+        (city) =>
+          city.countryCode.toUpperCase() === code &&
+          catalogNameKey(city.name, code) === rowKey
+      );
+      if (!fromCatalog) continue;
+
+      baseCities.push({
+        countryCode: code,
+        name: canonicalCityName(code, fromCatalog.name),
+        latitude: fromCatalog.latitude,
+        longitude: fromCatalog.longitude,
+      });
+      cityKeys.add(key);
+      if (baseCities.length >= 40) break;
+    }
+  }
+
   for (const row of overlay.cities) {
     const code = row.country_code.toUpperCase();
     const key = `${code}:${catalogNameKey(row.name, code)}`;
@@ -115,6 +146,7 @@ export async function GET(request: Request) {
 
   const cities = [...deduped.values()].slice(0, 24).map((city) => ({
     cityName: city.name,
+    displayName: getLocalizedCityName(city.countryCode, city.name, locale, nameTrOverrides),
     countryCode: city.countryCode,
     countryName: getCountryName(city.countryCode, locale),
     latitude: city.latitude,

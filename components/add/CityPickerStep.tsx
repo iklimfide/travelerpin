@@ -23,6 +23,7 @@ type CatalogCity = {
   longitude: number;
   highlighted: boolean;
   isCapital: boolean;
+  nameTr?: string | null;
 };
 
 type CityTier = {
@@ -139,7 +140,9 @@ export function CityPickerStep({
 
     const filtered = isFiltering
       ? flat.filter((city) =>
-          cityMatchesLocalizedSearch(countryCode, city.name, filter, locale)
+          cityMatchesLocalizedSearch(countryCode, city.name, filter, locale, {
+            nameTr: city.nameTr,
+          })
         )
       : flat;
 
@@ -195,7 +198,10 @@ export function CityPickerStep({
     const locked = onMap && !allowToggleOnMap;
     const checked = (onMap && !pendingRemove) || pendingAdd;
     const pending = pendingAdd || pendingRemove;
-    const displayName = getLocalizedCityName(city.countryCode, city.name, locale);
+    const displayName =
+      locale === "tr" && city.nameTr
+        ? city.nameTr
+        : getLocalizedCityName(city.countryCode, city.name, locale);
 
     function toggle() {
       if (locked) return;

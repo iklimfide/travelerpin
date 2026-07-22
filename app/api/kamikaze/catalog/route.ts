@@ -24,7 +24,7 @@ import {
   type YpCatalogParkRow,
 } from "@/lib/kamikaze/catalog-overlay";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
-import { getLocalizedCityName } from "@/lib/i18n/place-names";
+import { resolveCityNameTr } from "@/lib/i18n/place-names";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
 import { PARK_TYPES, type ParkType } from "@/types/database";
@@ -57,18 +57,12 @@ function resolveCityCapital(countryCode: string, name: string): boolean {
 }
 
 /** Prefer YP DB override, else curated place-names catalog when it differs from EN. */
-function resolveCityNameTr(
+function resolveCityNameTrForCatalog(
   countryCode: string,
   name: string,
   overrides: Map<string, string>
 ): string | null {
-  const code = countryCode.toUpperCase();
-  const canonical = canonicalCityName(code, name);
-  const fromDb = overrides.get(`${code}:${catalogNameKey(canonical, code)}`);
-  if (fromDb) return fromDb;
-  const localized = getLocalizedCityName(code, canonical, "tr");
-  if (localized && localized !== canonical) return localized;
-  return null;
+  return resolveCityNameTr(countryCode, name, overrides);
 }
 
 type CountryListRow = {
@@ -111,7 +105,7 @@ function withCityNameTr(
 ): CityListRow {
   return {
     ...row,
-    nameTr: resolveCityNameTr(row.countryCode, row.name, overrides),
+    nameTr: resolveCityNameTrForCatalog(row.countryCode, row.name, overrides),
   };
 }
 
@@ -123,7 +117,7 @@ function cityNameMatchesSearch(
 ): boolean {
   if (q.length < 2) return true;
   if (matchesPlaceNameSearch(name, q)) return true;
-  const nameTr = resolveCityNameTr(countryCode, name, nameTrOverrides);
+  const nameTr = resolveCityNameTrForCatalog(countryCode, name, nameTrOverrides);
   return nameTr ? matchesPlaceNameSearch(nameTr, q) : false;
 }
 
