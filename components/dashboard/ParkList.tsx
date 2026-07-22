@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useLocale } from "next-intl";
 import { ParkForm } from "@/components/dashboard/ParkForm";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
 import { ProfileCountryLink, ProfileParkLink } from "@/components/profile/ProfilePlaceLink";
@@ -9,7 +10,7 @@ import { deleteParksBatch } from "@/lib/client/park-actions";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findParkHubSlug } from "@/lib/data/park-hubs";
 import { formatMessage, useAppMessages } from "@/lib/i18n/client-messages";
-import { formatCityDisplayName } from "@/lib/utils/city-name";
+import { getLocalizedParkName } from "@/lib/i18n/park-place-names";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import type { VisitedCountry, VisitedPark } from "@/types/database";
 
@@ -30,7 +31,7 @@ type ParkListProps = {
   embedded?: boolean;
 };
 
-function sortParks(parks: VisitedPark[], countryFilter: string): VisitedPark[] {
+function sortParks(parks: VisitedPark[], countryFilter: string, locale: "en" | "tr"): VisitedPark[] {
   return [...parks].sort((a, b) => {
     if (countryFilter === ALL_COUNTRIES) {
       const byCountry = a.country_name.localeCompare(b.country_name, undefined, {
@@ -40,12 +41,17 @@ function sortParks(parks: VisitedPark[], countryFilter: string): VisitedPark[] {
     }
     const byType = a.park_type.localeCompare(b.park_type);
     if (byType !== 0) return byType;
-    return a.park_name.localeCompare(b.park_name, undefined, { sensitivity: "base" });
+    return getLocalizedParkName(a.country_code, a.park_name, locale).localeCompare(
+      getLocalizedParkName(b.country_code, b.park_name, locale),
+      locale === "tr" ? "tr" : "en",
+      { sensitivity: "base" }
+    );
   });
 }
 
 export function ParkList({ parks, countries, embedded = false }: ParkListProps) {
   const { common: commonMessages, park: parkMessages, modal: modalMessages } = useAppMessages();
+  const locale = useLocale() === "tr" ? "tr" : "en";
   const modal = useModal();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
@@ -74,8 +80,8 @@ export function ParkList({ parks, countries, embedded = false }: ParkListProps) 
         ? parks
         : parks.filter((park) => park.country_code.toUpperCase() === countryFilter);
 
-    return sortParks(list, countryFilter);
-  }, [parks, countryFilter]);
+    return sortParks(list, countryFilter, locale);
+  }, [parks, countryFilter, locale]);
 
   const selectedCount = useMemo(
     () => filteredParks.filter((park) => selectedIds.has(park.id)).length,
@@ -260,7 +266,11 @@ export function ParkList({ parks, countries, embedded = false }: ParkListProps) 
                 }
               >
                 {filteredParks.map((park) => {
-                  const parkDisplayName = formatCityDisplayName(park.park_name);
+                  const parkDisplayName = getLocalizedParkName(
+                    park.country_code,
+                    park.park_name,
+                    locale
+                  );
                   const parkSlug = findParkHubSlug(park.park_name, park.country_code);
                   const countrySlug = resolveCountryHubSlug(park.country_code, park.country_name);
                   const fullTitle =

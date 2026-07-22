@@ -9,6 +9,12 @@ import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
 import { sortCitiesForAddModal } from "@/lib/add/city-list-sort";
 import { sortParksForAddModal } from "@/lib/add/park-list-sort";
 import { catalogNameKey, type CatalogOverlayKind } from "@/lib/kamikaze/catalog-keys";
+import { defaultLocale, type Locale } from "@/lib/i18n/config";
+import {
+  findCanonicalParksByLocalizedQuery,
+  parkMatchesLocalizedSearch,
+  resolveParkNameTr,
+} from "@/lib/i18n/park-place-names";
 import { resolveCityNameTr } from "@/lib/i18n/place-names";
 import type { ParkType } from "@/types/database";
 
@@ -275,6 +281,15 @@ export function attachCityNameTr<T extends { countryCode: string; name: string }
   }));
 }
 
+export function attachParkNameTr<T extends { countryCode: string; name: string }>(
+  parks: T[]
+): Array<T & { nameTr: string | null }> {
+  return parks.map((park) => ({
+    ...park,
+    nameTr: resolveParkNameTr(park.countryCode, park.name),
+  }));
+}
+
 /** Lookup keys: country code → Turkish display label. */
 export function countryNameTrOverrideMap(
   overlay: CatalogOverlaySnapshot
@@ -393,10 +408,12 @@ export function applyParkOverlay(
     query?: string;
     parkType?: ParkType;
     limit?: number;
+    locale?: Locale;
   }
 ): Array<TouristPark & { highlighted: boolean }> {
   const excluded = exclusionSet(overlay, "park");
   const q = options?.query?.trim() ?? "";
+  const locale = options?.locale ?? defaultLocale;
   const allowed =
     options?.countryCodes?.map((c) => c.toUpperCase()) ??
     (options?.countryCode ? [options.countryCode.toUpperCase()] : null);
@@ -419,7 +436,7 @@ export function applyParkOverlay(
     const key = `${code}:${catalogNameKey(row.name)}`;
     // YP park rows are not suppressed by exclusions (same ghost-row rule as cities).
     if (existingKeys.has(key)) continue;
-    if (q.length >= 2 && !matchesPlaceNameSearch(row.name, q)) continue;
+    if (q.length >= 2 && !parkMatchesLocalizedSearch(code, row.name, q, locale)) continue;
 
     results.push({
       parkType: row.park_type,
@@ -433,7 +450,30 @@ export function applyParkOverlay(
   }
 
   if (q.length >= 2) {
-    results = results.filter((park) => matchesPlaceNameSearch(park.name, q));
+    results = results.filter((park) =>
+      parkMatchesLocalizedSearch(park.countryCode, park.name, q, locale)
+    );
+
+    if (locale === "tr") {
+      for (const hit of findCanonicalParksByLocalizedQuery(q, locale)) {
+        const code = hit.countryCode.toUpperCase();
+        if (allowedSet && !allowedSet.has(code)) continue;
+        const key = `${code}:${catalogNameKey(hit.parkName, code)}`;
+        if (existingKeys.has(key) || isExcluded(excluded, code, hit.parkName)) continue;
+
+        const fromCatalog = parks.find(
+          (park) =>
+            park.countryCode === code &&
+            catalogNameKey(park.name, code) === catalogNameKey(hit.parkName, code)
+        );
+        if (!fromCatalog || !matchesParkTypeFilter(fromCatalog.parkType, options?.parkType)) {
+          continue;
+        }
+
+        results.push(fromCatalog);
+        existingKeys.add(key);
+      }
+    }
   }
 
   const withPopular = applyParkPopularOverrides(results, overlay);

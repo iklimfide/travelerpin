@@ -35,6 +35,7 @@ import {
 import { useAppMessages } from "@/lib/i18n/client-messages";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalizedCityName } from "@/lib/i18n/place-names";
+import { getLocalizedParkName } from "@/lib/i18n/park-place-names";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { parkTypeLabel } from "@/lib/utils/park-type";
@@ -221,7 +222,7 @@ function visitedParkToRow(park: VisitedPark, locale: Locale): DestinationRow {
   return {
     id: destinationId("park", park.country_code, park.park_name, park.park_type as ParkType),
     kind: "park",
-    title: park.park_name,
+    title: getLocalizedParkName(park.country_code, park.park_name, locale),
     subtitle: `${getCountryName(park.country_code, locale)} · ${parkTypeLabel(park.park_type)}`,
     countryCode: park.country_code,
     countryName: getCountryName(park.country_code, locale),
@@ -244,7 +245,7 @@ function parkToRow(park: SearchParkResult | PopularPark, locale: Locale): Destin
   return {
     id: destinationId("park", park.countryCode, park.parkName, park.parkType),
     kind: "park",
-    title: "label" in park ? park.label : park.parkName,
+    title: getLocalizedParkName(park.countryCode, park.parkName, locale),
     subtitle: `${countryName} · ${parkTypeLabel(park.parkType)}`,
     countryCode: park.countryCode,
     countryName,

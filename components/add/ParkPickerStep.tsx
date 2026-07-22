@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import { useLocale } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AddDestinationCheckbox } from "@/components/add/AddDestinationCheckbox";
 import { addDestinationMessages, mapMessages, parkMessages, useAppMessages } from "@/lib/i18n/client-messages";
+import { getLocalizedParkName } from "@/lib/i18n/park-place-names";
 import { Link } from "@/lib/i18n/navigation";
 import { flagCountryCode } from "@/lib/data/uk-nations";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
-import { formatKnownPlaceName } from "@/lib/utils/city-name";
 import { shortParkLabel } from "@/lib/utils/park-name";
 import { compareParksForAddModal } from "@/lib/add/park-list-sort";
 import { matchesParkTypeFilter, parkTypeLabel } from "@/lib/utils/park-type";
@@ -18,6 +19,7 @@ export type CatalogPark = {
   parkType: ParkType;
   countryCode: string;
   name: string;
+  nameTr?: string | null;
   latitude: number;
   longitude: number;
   highlighted?: boolean;
@@ -61,6 +63,7 @@ export function ParkPickerStep({
   onTogglePark,
 }: ParkPickerStepProps) {
   const { map: mapMessages, park: parkMessages, addDestination: addDestinationMessages } = useAppMessages();
+  const locale = useLocale() === "tr" ? "tr" : "en";
   const [parks, setParks] = useState<CatalogPark[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
@@ -85,7 +88,7 @@ export function ParkPickerStep({
       setLoading(true);
     }
 
-    const params = new URLSearchParams({ country: countryCode.toUpperCase() });
+    const params = new URLSearchParams({ country: countryCode.toUpperCase(), locale });
     const q = filter.trim();
     if (q.length >= MIN_FILTER_LENGTH) {
       params.set("q", q);
@@ -112,7 +115,7 @@ export function ParkPickerStep({
       });
 
     return () => controller.abort();
-  }, [countryCode, filter, isFiltering]);
+  }, [countryCode, filter, isFiltering, locale]);
 
   const displayParks = useMemo(() => {
     let next = parks;
@@ -132,8 +135,8 @@ export function ParkPickerStep({
     const locked = onMap && !allowToggleOnMap;
     const checked = (onMap && !pendingRemove) || pendingAdd;
     const pending = pendingAdd || pendingRemove;
-    const fullName = formatKnownPlaceName(park.name);
-    const displayName = shortParkLabel(park.name);
+    const fullName = getLocalizedParkName(countryCode, park.name, locale);
+    const displayName = shortParkLabel(fullName);
     const typeLabel = parkTypeLabel(park.parkType);
 
     function toggle() {

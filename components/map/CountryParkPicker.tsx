@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocale } from "next-intl";
 import { addPark, addParksBatch } from "@/lib/client/park-actions";
 import { formatMessage, useAppMessages } from "@/lib/i18n/client-messages";
+import { getLocalizedParkName, parkMatchesLocalizedSearch } from "@/lib/i18n/park-place-names";
 import { matchesParkTypeFilter, parkTypeLabel } from "@/lib/utils/park-type";
-import { formatCityDisplayName, formatKnownPlaceName } from "@/lib/utils/city-name";
+import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { shortParkLabel } from "@/lib/utils/park-name";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -44,6 +46,7 @@ export function CountryParkPicker({
   onAdded,
 }: CountryParkPickerProps) {
   const { common: commonMessages, map: mapMessages, park: parkMessages } = useAppMessages();
+  const locale = useLocale() === "tr" ? "tr" : "en";
   const modal = useModal();
   const toast = useToast();
 
@@ -92,16 +95,19 @@ export function CountryParkPicker({
     }
 
     if (q.length >= MIN_FILTER_LENGTH) {
-      parks = parks.filter((park) => {
-        const name = park.name.toLocaleLowerCase("tr");
-        return name.includes(q) || name.split(/\s+/).some((word) => word.startsWith(q));
-      });
+      parks = parks.filter((park) =>
+        parkMatchesLocalizedSearch(countryCode, park.name, filter, locale)
+      );
     }
 
     return [...parks].sort((a, b) =>
-      a.name.localeCompare(b.name, "tr", { sensitivity: "base" })
+      getLocalizedParkName(countryCode, a.name, locale).localeCompare(
+        getLocalizedParkName(countryCode, b.name, locale),
+        "tr",
+        { sensitivity: "base" }
+      )
     );
-  }, [allParks, filter, typeFilter]);
+  }, [allParks, countryCode, filter, locale, typeFilter]);
 
   const selectableParks = useMemo(() => {
     return displayParks.filter((park) => !existingKeys.has(parkKey(park).toLowerCase()));
@@ -124,11 +130,13 @@ export function CountryParkPicker({
     const exactInList = allParks.some(
       (park) =>
         matchesParkTypeFilter(park.parkType, customParkType) &&
-        park.name.toLocaleLowerCase("tr") === normalized
+        (park.name.toLocaleLowerCase("tr") === normalized ||
+          getLocalizedParkName(countryCode, park.name, locale).toLocaleLowerCase("tr") ===
+            normalized)
     );
 
     return !exactInList;
-  }, [allParks, customParkType, displayParks.length, existingKeys, trimmedFilter]);
+  }, [allParks, countryCode, customParkType, displayParks.length, existingKeys, locale, trimmedFilter]);
 
   const handleAddCustomPark = useCallback(async () => {
     if (trimmedFilter.length < MIN_FILTER_LENGTH) return;
@@ -341,8 +349,8 @@ export function CountryParkPicker({
             const onMap = existingKeys.has(parkKey(park).toLowerCase());
             const checked = onMap || selectedIds.has(id);
             const typeLabel = parkTypeLabel(park.parkType);
-            const fullName = formatKnownPlaceName(park.name);
-            const displayName = shortParkLabel(park.name);
+            const fullName = getLocalizedParkName(countryCode, park.name, locale);
+            const displayName = shortParkLabel(fullName);
 
             return (
               <li key={id} className="border-b border-slate-800/80 last:border-b-0">

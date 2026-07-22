@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocale } from "next-intl";
 import { POPULAR_PARKS, type PopularPark } from "@/lib/data/popular-parks";
 import { quickAddPark, quickRemovePark } from "@/lib/client/park-destination-actions";
+import { getLocalizedParkName } from "@/lib/i18n/park-place-names";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -37,6 +39,7 @@ export function MapPopularParks({
   onRemoved,
 }: MapPopularParksProps) {
   const { map: mapMessages, park: parkMessages } = useAppMessages();
+  const locale = useLocale() === "tr" ? "tr" : "en";
   const toast = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -65,12 +68,13 @@ export function MapPopularParks({
   const filteredParks = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return POPULAR_PARKS;
-    return POPULAR_PARKS.filter((park) =>
-      `${park.label} ${park.parkName} ${park.countryName} ${park.countryCode} ${parkTypeLabel(park.parkType)}`
+    return POPULAR_PARKS.filter((park) => {
+      const localized = getLocalizedParkName(park.countryCode, park.parkName, locale);
+      return `${park.label} ${park.parkName} ${localized} ${park.countryName} ${park.countryCode} ${parkTypeLabel(park.parkType)}`
         .toLowerCase()
-        .includes(q)
-    );
-  }, [query]);
+        .includes(q);
+    });
+  }, [locale, query]);
 
   useEffect(() => {
     if (!open) return;
@@ -154,7 +158,8 @@ export function MapPopularParks({
     const id = parkId(park);
     const added = addedIds.has(id);
     const busy = busyId === id;
-    const displayName = `${park.label} (${park.countryCode})`;
+    const localizedName = getLocalizedParkName(park.countryCode, park.parkName, locale);
+    const displayName = `${localizedName} (${park.countryCode})`;
 
     return (
       <li key={id}>

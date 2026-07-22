@@ -4,7 +4,7 @@ import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findParkHubSlug } from "@/lib/data/park-hubs";
 import { defaultLocale, type Locale } from "@/lib/i18n/config";
 import type { ParkType, VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
-import { formatCityDisplayName } from "@/lib/utils/city-name";
+import { getLocalizedParkName } from "@/lib/i18n/park-place-names";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
 import {
   buildProfileTrips,
@@ -132,10 +132,16 @@ export function buildProfileAllDestinations(
 
   const parks: ProfileParkDestination[] = deprioritizeResidenceCountry(
     [...visitedParks]
-      .sort((a, b) => a.park_name.localeCompare(b.park_name, undefined, { sensitivity: "base" }))
+      .sort((a, b) =>
+        getLocalizedParkName(a.country_code, a.park_name, locale).localeCompare(
+          getLocalizedParkName(b.country_code, b.park_name, locale),
+          locale === "tr" ? "tr" : "en",
+          { sensitivity: "base" }
+        )
+      )
       .map((park) => ({
         id: park.id,
-        parkName: formatCityDisplayName(park.park_name),
+        parkName: getLocalizedParkName(park.country_code, park.park_name, locale),
         parkSlug: findParkHubSlug(park.park_name, park.country_code),
         countryCode: park.country_code,
         countryName: getCountryName(park.country_code, locale),

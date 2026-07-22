@@ -6,6 +6,7 @@ import { findCityHubSlug } from "@/lib/data/city-hubs";
 import { findParkHubSlug } from "@/lib/data/park-hubs";
 import { defaultLocale, type Locale } from "@/lib/i18n/config";
 import { getLocalizedCityName } from "@/lib/i18n/place-names";
+import { getLocalizedParkName } from "@/lib/i18n/park-place-names";
 import { buildVisitedCountryList } from "@/lib/map/travel-lists";
 import { buildCitySlug } from "@/lib/utils/city-slug";
 import type { ParkType } from "@/lib/data/tourist-park-search";
@@ -240,7 +241,7 @@ export function buildProfileTrips(
   const parkTrips: ProfileTrip[] = parks.map((park) => ({
     id: park.id,
     kind: "park",
-    placeName: formatCityDisplayName(park.park_name),
+    placeName: getLocalizedParkName(park.country_code, park.park_name, locale),
     citySlug: null,
     parkSlug: findParkHubSlug(park.park_name, park.country_code),
     parkType: park.park_type,

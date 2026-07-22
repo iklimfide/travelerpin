@@ -14,6 +14,7 @@ import {
   findCanonicalCitiesByLocalizedQuery,
   getLocalizedCityName,
 } from "@/lib/i18n/place-names";
+import { getLocalizedParkName } from "@/lib/i18n/park-place-names";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
 import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
 import { createClient } from "@/lib/supabase/server";
@@ -154,11 +155,12 @@ export async function GET(request: Request) {
   }));
 
   const parks = applyParkOverlay(
-    searchTouristParksInCountries(COUNTRY_CODES, q, 24),
+    searchTouristParksInCountries(COUNTRY_CODES, q, 24, locale),
     overlay,
-    { countryCodes: COUNTRY_CODES, query: q, limit: 24 }
+    { countryCodes: COUNTRY_CODES, query: q, limit: 24, locale }
   ).map((park) => ({
     parkName: park.name,
+    displayName: getLocalizedParkName(park.countryCode, park.name, locale),
     parkType: park.parkType,
     countryCode: park.countryCode,
     countryName: getCountryName(park.countryCode, locale),
