@@ -10,6 +10,7 @@ import {
   SHARE_MAP_SHOWCASE_END_EVENT,
   SHARE_MAP_SHOWCASE_START_EVENT,
 } from "@/lib/client/share-map-showcase";
+import { useAnimatedCount } from "@/lib/hooks/useAnimatedCount";
 import { worldCoveragePercent } from "@/lib/utils/profile-page";
 import type { VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 
@@ -45,6 +46,8 @@ type ProfileMapPanelProps = {
   /** Whole map + flags panel links here (e.g. profile /all). */
   allHref?: string;
   allAriaLabel?: string;
+  /** Animate the explored % badge from zero (homepage demo). */
+  animateCountryCount?: boolean;
 };
 
 export function ProfileMapPanel({
@@ -63,8 +66,10 @@ export function ProfileMapPanel({
   detailHref = "#travel-map",
   allHref,
   allAriaLabel,
+  animateCountryCount = false,
 }: ProfileMapPanelProps) {
-  const coverage = worldCoveragePercent(countryCount);
+  const displayCountryCount = useAnimatedCount(countryCount, animateCountryCount);
+  const coverage = worldCoveragePercent(displayCountryCount);
   const showHead = Boolean(title || detailLabel);
   const [shareShowcaseMap, setShareShowcaseMap] = useState(false);
 

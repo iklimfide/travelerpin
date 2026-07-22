@@ -275,23 +275,25 @@ export function PublicProfileViewClient({
                 id={`profile-square-capture-${profile.username.toLowerCase()}`}
                 className="profile-square-capture"
               >
-                <ProfileSquareCaptureHeader
-                  avatarUrl={profile.avatar_url}
-                  displayName={displayName}
-                  username={profile.username}
-                  countryCount={data.stats.countries}
-                  instagramUrl={profile.instagram_url}
-                  instagramSampleNotice={
-                    isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
-                  }
-                  stats={data.stats}
-                  labels={{
-                    countries: t("statCountriesShort"),
-                    cities: t("statCitiesShort"),
-                    nationalParks: t("statNationalParksShort"),
-                    themeParks: t("statThemeParksShort"),
-                  }}
-                />
+                {fullData ? (
+                  <ProfileSquareCaptureHeader
+                    avatarUrl={profile.avatar_url}
+                    displayName={displayName}
+                    username={profile.username}
+                    countryCount={data.stats.countries}
+                    instagramUrl={profile.instagram_url}
+                    instagramSampleNotice={
+                      isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
+                    }
+                    stats={data.stats}
+                    labels={{
+                      countries: t("statCountriesShort"),
+                      cities: t("statCitiesShort"),
+                      nationalParks: t("statNationalParksShort"),
+                      themeParks: t("statThemeParksShort"),
+                    }}
+                  />
+                ) : null}
                 <ProfileMapPanel
                   visitedCountryCodes={mapVisitedCodes}
                   wishlistCountryCodes={visibleWishlistCodes}

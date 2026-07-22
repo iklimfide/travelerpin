@@ -45,6 +45,8 @@ type PublicProfileViewProps = {
   /** When set (e.g. home demo), avatar, name, and hero title link to the full profile. */
   profilePageHref?: string;
   previewAsPublic?: boolean;
+  /** Animate stat counters from zero (homepage embedded demo). */
+  animateStats?: boolean;
 };
 
 export async function PublicProfileView({
@@ -56,6 +58,7 @@ export async function PublicProfileView({
   embedded = false,
   profilePageHref,
   previewAsPublic = false,
+  animateStats = false,
 }: PublicProfileViewProps) {
   const [t, tHome, tCommon, tBadge, locale] = await Promise.all([
     getTranslations("profile"),
@@ -166,6 +169,7 @@ export async function PublicProfileView({
               canFollow={canFollow}
               isLoggedIn={isLoggedIn}
               previewAsPublic={previewAsPublic}
+              animateStats={animateStats}
             />
 
             {hasMapContent ? (
@@ -203,6 +207,7 @@ export async function PublicProfileView({
                   exploredBadgeLabel={t("mapExploredBadge")}
                   allHref={withProfilePublicPreview(profileAllPath(profile.username), previewAsPublic)}
                   allAriaLabel={t("mapViewAll")}
+                  animateCountryCount={animateStats}
                 />
               </div>
             ) : (

@@ -15,6 +15,7 @@ import { isLocale, type Locale } from "@/lib/i18n/config";
 import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
 import { resolvePublicMediaImageUrl } from "@/lib/storage/hub-photo-url";
 import { profileAllPath } from "@/lib/seo/site";
+import { useAnimatedCount } from "@/lib/hooks/useAnimatedCount";
 import { withProfilePublicPreview } from "@/lib/profile/public-preview";
 import type { TravelStats } from "@/types/database";
 
@@ -47,6 +48,8 @@ type ProfileIdentityCardProps = {
   canFollow?: boolean;
   isLoggedIn?: boolean;
   previewAsPublic?: boolean;
+  /** Count up from zero on mount (homepage demo). */
+  animateStats?: boolean;
 };
 
 export function ProfileIdentityCard({
@@ -68,8 +71,22 @@ export function ProfileIdentityCard({
   canFollow = false,
   isLoggedIn = false,
   previewAsPublic = false,
+  animateStats = false,
 }: ProfileIdentityCardProps) {
   const t = useTranslateProfile();
+  const animatedCountries = useAnimatedCount(stats.countries, animateStats);
+  const animatedCities = useAnimatedCount(stats.cities, animateStats);
+  const animatedNationalParks = useAnimatedCount(stats.nationalParks, animateStats);
+  const animatedThemeParks = useAnimatedCount(stats.themeParks, animateStats);
+  const displayStats: TravelStats = animateStats
+    ? {
+        countries: animatedCountries,
+        cities: animatedCities,
+        nationalParks: animatedNationalParks,
+        themeParks: animatedThemeParks,
+      }
+    : stats;
+  const displayCountryCount = animateStats ? animatedCountries : countryCount;
   const localeRaw = useLocale();
   const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
   const allHref = withProfilePublicPreview(profileAllPath(username), previewAsPublic);
@@ -166,7 +183,7 @@ export function ProfileIdentityCard({
       )}
 
       <div className="mt-2 flex justify-center">
-        <TravelerBadge countryCount={countryCount} className="traveler-badge--profile-card" />
+        <TravelerBadge countryCount={displayCountryCount} className="traveler-badge--profile-card" />
       </div>
 
       {instagramUrl ? (
@@ -182,13 +199,13 @@ export function ProfileIdentityCard({
         className="profile-metrics profile-metrics-link"
         aria-label={t("allDestinationsTitle", { name: mapTitleOwnerName(displayName, locale) })}
       >
-        <ProfileWorldProgress countryCount={countryCount} />
+        <ProfileWorldProgress countryCount={displayCountryCount} />
 
         <ProfileStatCounters
-          countries={stats.countries}
-          cities={stats.cities}
-          nationalParks={stats.nationalParks}
-          themeParks={stats.themeParks}
+          countries={displayStats.countries}
+          cities={displayStats.cities}
+          nationalParks={displayStats.nationalParks}
+          themeParks={displayStats.themeParks}
           countriesLabel={labels.countries}
           citiesLabel={labels.cities}
           nationalParksLabel={labels.nationalParks}

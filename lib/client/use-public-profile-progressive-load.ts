@@ -13,11 +13,9 @@ export function usePublicProfileProgressiveLoad(
   enabled: boolean
 ) {
   const normalized = shell.profile.username.trim().toLowerCase();
-  const [fullData, setFullData] = useState<PublicProfilePageData | null>(() => {
-    if (!enabled) return null;
-    return readProfileCache(normalized);
-  });
-  const [loading, setLoading] = useState(() => enabled && !readProfileCache(normalized));
+  // Never read session cache during render — SSR and the first client pass must match.
+  const [fullData, setFullData] = useState<PublicProfilePageData | null>(null);
+  const [loading, setLoading] = useState(enabled);
 
   const load = useCallback(
     async (forceNetwork = false) => {

@@ -42,6 +42,7 @@ export async function HomeLandingSection() {
           isOwnProfile={isOwnProfile}
           isGuest={!data.isLoggedIn}
           embedded
+          animateStats
           profilePageHref={demoProfileHref}
         />
       </div>
