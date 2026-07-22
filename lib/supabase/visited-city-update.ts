@@ -5,7 +5,7 @@ import {
   isVisitDatesSchemaError,
   legacyMediaFromPinMediaFields,
   omitRowColumns,
-  photoUrlsInRow,
+  photoUrlInRow,
   type PinMediaRowPayload,
 } from "@/lib/supabase/pin-media-schema";
 
