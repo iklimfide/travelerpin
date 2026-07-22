@@ -22,6 +22,19 @@ const COUNTRY_ALIASES: Record<string, Record<string, string>> = {
     [normalizeCityKey("Pattaya City")]: normalizeCityKey("Pattaya"),
     [normalizeCityKey("Pa Tong")]: normalizeCityKey("Patong"),
   },
+  GR: {
+    [normalizeCityKey("Thessaloníki")]: normalizeCityKey("Thessaloniki"),
+    [normalizeCityKey("Irákleion")]: normalizeCityKey("Heraklion"),
+    [normalizeCityKey("Irakleion")]: normalizeCityKey("Heraklion"),
+    [normalizeCityKey("Pátra")]: normalizeCityKey("Patras"),
+    [normalizeCityKey("Patra")]: normalizeCityKey("Patras"),
+    [normalizeCityKey("Meis")]: normalizeCityKey("Kastellorizo"),
+    [normalizeCityKey("Rodos")]: normalizeCityKey("Rhodes"),
+    [normalizeCityKey("Midilli")]: normalizeCityKey("Mytilene"),
+    [normalizeCityKey("Sisam")]: normalizeCityKey("Samos"),
+    [normalizeCityKey("Sakız")]: normalizeCityKey("Chios"),
+    [normalizeCityKey("İstanköy")]: normalizeCityKey("Kos"),
+  },
 };
 
 const CANONICAL_DISPLAY: Record<string, Record<string, string>> = {
@@ -45,6 +58,14 @@ const CANONICAL_DISPLAY: Record<string, Record<string, string>> = {
   TH: {
     [normalizeCityKey("Pattaya")]: "Pattaya",
     [normalizeCityKey("Patong")]: "Patong",
+  },
+  GR: {
+    [normalizeCityKey("Thessaloniki")]: "Thessaloniki",
+    [normalizeCityKey("Heraklion")]: "Heraklion",
+    [normalizeCityKey("Patras")]: "Patras",
+    [normalizeCityKey("Kastellorizo")]: "Kastellorizo",
+    [normalizeCityKey("Rhodes")]: "Rhodes",
+    [normalizeCityKey("Mytilene")]: "Mytilene",
   },
 };
 

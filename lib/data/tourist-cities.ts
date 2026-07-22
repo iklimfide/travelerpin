@@ -9297,7 +9297,19 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "GR",
-    "name": "Irákleion",
+    "name": "Chios",
+    "latitude": 38.3678,
+    "longitude": 26.1358
+  },
+  {
+    "countryCode": "GR",
+    "name": "Corfu",
+    "latitude": 39.6243,
+    "longitude": 19.9217
+  },
+  {
+    "countryCode": "GR",
+    "name": "Heraklion",
     "latitude": 35.3279,
     "longitude": 25.1434
   },
@@ -9309,13 +9321,37 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "GR",
+    "name": "Kastellorizo",
+    "latitude": 36.15,
+    "longitude": 29.5833
+  },
+  {
+    "countryCode": "GR",
+    "name": "Kos",
+    "latitude": 36.8932,
+    "longitude": 27.2885
+  },
+  {
+    "countryCode": "GR",
     "name": "Lárisa",
     "latitude": 39.6369,
     "longitude": 22.4176
   },
   {
     "countryCode": "GR",
-    "name": "Pátra",
+    "name": "Mykonos",
+    "latitude": 37.4467,
+    "longitude": 25.3289
+  },
+  {
+    "countryCode": "GR",
+    "name": "Mytilene",
+    "latitude": 39.1042,
+    "longitude": 26.5583
+  },
+  {
+    "countryCode": "GR",
+    "name": "Patras",
     "latitude": 38.2444,
     "longitude": 21.7344
   },
@@ -9327,7 +9363,25 @@ export const TOURIST_CITIES: TouristCity[] = [
   },
   {
     "countryCode": "GR",
-    "name": "Thessaloníki",
+    "name": "Rhodes",
+    "latitude": 36.4349,
+    "longitude": 28.2176
+  },
+  {
+    "countryCode": "GR",
+    "name": "Samos",
+    "latitude": 37.756,
+    "longitude": 26.978
+  },
+  {
+    "countryCode": "GR",
+    "name": "Santorini",
+    "latitude": 36.4167,
+    "longitude": 25.4317
+  },
+  {
+    "countryCode": "GR",
+    "name": "Thessaloniki",
     "latitude": 40.6436,
     "longitude": 22.9309
   },

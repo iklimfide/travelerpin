@@ -54,3 +54,25 @@ export function createEmptyProfilePageData(
     canFollow: false,
   };
 }
+
+export function mergeTravelStateIntoProfilePageData(
+  data: PublicProfilePageData,
+  travel: {
+    visitedCountries: PublicProfilePageData["visitedCountries"];
+    visitedCities: PublicProfilePageData["visitedCities"];
+    visitedParks: PublicProfilePageData["visitedParks"];
+    wishlistCountries: PublicProfilePageData["wishlistCountries"];
+    visitedCodes: PublicProfilePageData["visitedCodes"];
+    stats: PublicProfilePageData["stats"];
+  }
+): PublicProfilePageData {
+  return {
+    ...data,
+    visitedCountries: travel.visitedCountries,
+    visitedCities: travel.visitedCities,
+    visitedParks: travel.visitedParks,
+    wishlistCountries: travel.wishlistCountries,
+    visitedCodes: travel.visitedCodes,
+    stats: travel.stats,
+  };
+}

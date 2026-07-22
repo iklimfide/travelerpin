@@ -7,6 +7,7 @@ import { addParksBatch, deleteParksBatch } from "@/lib/client/park-actions";
 import { getCountryName } from "@/lib/data/countries";
 import { canonicalCityName, citiesAreSame } from "@/lib/utils/city-aliases";
 import {
+  hydrateTravelStateCache,
   notifyTravelStateUpdated,
   readTravelStateCache,
   getOwnUserId,
@@ -45,14 +46,20 @@ function normalizeTravelStateData(raw: Partial<TravelStateData>): TravelStateDat
   };
 }
 
-async function fetchTravelStateFromNetwork(): Promise<FetchTravelStateResult> {
+async function fetchTravelStateFromNetwork(options?: {
+  notify?: boolean;
+}): Promise<FetchTravelStateResult> {
   const res = await fetch("/api/me/travel-state");
   if (!res.ok) {
     return { ok: false, status: res.status };
   }
 
   const data = normalizeTravelStateData((await res.json()) as Partial<TravelStateData>);
-  notifyTravelStateUpdated(data);
+  if (options?.notify === false) {
+    hydrateTravelStateCache(data);
+  } else {
+    notifyTravelStateUpdated(data);
+  }
   return { ok: true, data, fromCache: false };
 }
 
@@ -62,7 +69,7 @@ export function prefetchTravelState(): void {
   if (!getOwnUserId()) return;
   if (readTravelStateCache()) return;
 
-  void fetchTravelState({ preferCache: true }).catch(() => {
+  void fetchTravelState({ preferCache: true, silent: true }).catch(() => {
     // Modal or map will retry on demand.
   });
 }
@@ -70,9 +77,12 @@ export function prefetchTravelState(): void {
 export async function fetchTravelState(options?: {
   preferCache?: boolean;
   force?: boolean;
+  /** Write caches only — no TRAVEL_STATE_UPDATED broadcast (avoids profile refresh loops). */
+  silent?: boolean;
 }): Promise<FetchTravelStateResult> {
   const preferCache = options?.preferCache ?? true;
   const force = options?.force ?? false;
+  const silent = options?.silent ?? false;
 
   // Cache hit: no network until a pin/mutation forces refresh.
   if (preferCache && !force) {
@@ -83,7 +93,7 @@ export async function fetchTravelState(options?: {
   }
 
   try {
-    return await fetchTravelStateFromNetwork();
+    return await fetchTravelStateFromNetwork({ notify: !silent });
   } catch {
     return { ok: false, status: 503 };
   }

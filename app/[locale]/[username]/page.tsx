@@ -45,10 +45,7 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
   return (
     <>
       <ProfileJsonLd profile={shell.profile} profileDescription={profileDescription} />
-      <ProfileServerBridge
-        username={shell.profile.username}
-        enableLiveRefresh={isOwnProfile}
-      />
+      <ProfileServerBridge username={shell.profile.username} />
       <PublicProfileViewClient
         shell={shell}
         progressiveLoad

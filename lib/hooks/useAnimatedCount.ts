@@ -18,20 +18,21 @@ export function useAnimatedCount(target: number, enabled = true): number {
     }
 
     setDisplay(0);
-    const steps = Math.min(target, 24);
-    const stepMs = Math.max(35, Math.round(650 / steps));
-    const increment = Math.max(1, Math.ceil(target / steps));
-    let current = 0;
+    const durationMs = 650;
+    const start = performance.now();
+    let frameId = 0;
 
-    const id = window.setInterval(() => {
-      current = Math.min(target, current + increment);
-      setDisplay(current);
-      if (current >= target) {
-        window.clearInterval(id);
+    function tick(now: number) {
+      const progress = Math.min(1, (now - start) / durationMs);
+      const eased = 1 - (1 - progress) ** 2;
+      setDisplay(Math.round(target * eased));
+      if (progress < 1) {
+        frameId = window.requestAnimationFrame(tick);
       }
-    }, stepMs);
+    }
 
-    return () => window.clearInterval(id);
+    frameId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frameId);
   }, [enabled, target]);
 
   return display;

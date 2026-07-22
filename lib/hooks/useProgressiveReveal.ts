@@ -25,7 +25,7 @@ export function useProgressiveReveal<T>(
       return;
     }
     setVisibleCount(Math.min(initial, items.length));
-  }, [enabled, initial, items]);
+  }, [enabled, initial, items.length]);
 
   useEffect(() => {
     if (!enabled || visibleCount >= items.length) return;

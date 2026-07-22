@@ -360,8 +360,7 @@ export function invalidateTravelStateCache(): void {
 }
 
 export function notifyTravelStateUpdated(data: TravelStateData): void {
-  writeTravelStateCache(data);
-  syncOwnProfileCacheFromTravelState(data);
+  hydrateTravelStateCache(data);
 
   if (typeof window === "undefined") return;
   window.dispatchEvent(
@@ -369,6 +368,12 @@ export function notifyTravelStateUpdated(data: TravelStateData): void {
       detail: { data },
     })
   );
+}
+
+/** Update caches without broadcasting — used for login prefetch / background sync. */
+export function hydrateTravelStateCache(data: TravelStateData): void {
+  writeTravelStateCache(data);
+  syncOwnProfileCacheFromTravelState(data);
 }
 
 export function invalidateOwnProfileCache(): void {

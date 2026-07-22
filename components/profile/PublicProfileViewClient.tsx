@@ -13,6 +13,7 @@ import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections"
 import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
 import { usePublicProfileProgressiveLoad } from "@/lib/client/use-public-profile-progressive-load";
 import { useAnimatedCount } from "@/lib/hooks/useAnimatedCount";
+import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 import { useProgressiveReveal } from "@/lib/hooks/useProgressiveReveal";
 import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
 import { ProfileTravelUpdateCard } from "@/components/profile/ProfileTravelUpdateCard";
@@ -38,7 +39,6 @@ import {
   type PublicProfileShellData,
 } from "@/lib/supabase/profile-page-types";
 
-const INITIAL_MAP_FLAGS = 5;
 const INITIAL_TRIPS = 3;
 
 type PublicProfileViewClientProps = {
@@ -68,6 +68,7 @@ export function PublicProfileViewClient({
   const tHome = useTranslateHome();
   const tCommon = useTranslateCommon();
   const locale = useLocale() === "tr" ? "tr" : "en";
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const progressive = progressiveLoad && Boolean(shell);
   const loadShell =
@@ -89,7 +90,7 @@ export function PublicProfileViewClient({
   }, [fullData, previewAsPublic, rawData]);
 
   const statTargets = fullData?.stats ?? EMPTY_TRAVEL_STATS;
-  const animateStats = progressive;
+  const animateStats = progressive && !prefersReducedMotion;
   const animatedCountries = useAnimatedCount(statTargets.countries, animateStats);
   const animatedCities = useAnimatedCount(statTargets.cities, animateStats);
   const animatedNationalParks = useAnimatedCount(statTargets.nationalParks, animateStats);
@@ -124,23 +125,12 @@ export function PublicProfileViewClient({
   const visibleWishlistCodes =
     isOwnProfile || wishlistPublic ? wishlistCodes : [];
 
-  const revealPins = progressive && Boolean(fullData);
-  const progressiveCountries = useProgressiveReveal(visitedCountries, {
-    enabled: revealPins,
-    initial: INITIAL_MAP_FLAGS,
-  });
-  const progressiveCodes = useProgressiveReveal(visitedCodes, {
-    enabled: revealPins,
-    initial: INITIAL_MAP_FLAGS,
-  });
-
-  const mapVisitedCountries = revealPins ? progressiveCountries : visitedCountries;
-  const mapVisitedCodes = revealPins ? progressiveCodes : visitedCodes;
+  const revealPins = progressive && Boolean(fullData) && !prefersReducedMotion;
+  // Map SVG repaints are expensive in Firefox — show all country fills at once.
+  const mapPinsReady = Boolean(fullData);
+  const mapVisitedCountries = mapPinsReady ? visitedCountries : [];
+  const mapVisitedCodes = mapPinsReady ? visitedCodes : [];
   const mapCountryCount = animateStats ? animatedCountries : data.stats.countries;
-  const pinsFullyRevealed =
-    !revealPins ||
-    (progressiveCodes.length >= visitedCodes.length &&
-      progressiveCountries.length >= visitedCountries.length);
 
   const hasMapContent =
     pinsLoading ||
@@ -299,8 +289,8 @@ export function PublicProfileViewClient({
                   wishlistCountryCodes={visibleWishlistCodes}
                   visitedCountries={mapVisitedCountries}
                   wishlistCountries={visibleWishlistCountries}
-                  visitedCities={pinsFullyRevealed ? visitedCities : []}
-                  visitedParks={pinsFullyRevealed ? visitedParks : []}
+                  visitedCities={mapPinsReady ? visitedCities : []}
+                  visitedParks={mapPinsReady ? visitedParks : []}
                   isLoggedIn={isLoggedIn}
                   canEditMap={isOwnProfile}
                   countryCount={mapCountryCount}

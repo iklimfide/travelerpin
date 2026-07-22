@@ -93,10 +93,20 @@ export function WorldMap({
   const [hoveredCountryId, setHoveredCountryId] = useState<string | null>(null);
 
   useEffect(() => {
-    const id = window.requestAnimationFrame(() => {
-      setMapReady(true);
+    let cancelled = false;
+    let frame = 0;
+
+    // Two frames: let the shell paint before d3 path work (helps Firefox jank).
+    frame = window.requestAnimationFrame(() => {
+      frame = window.requestAnimationFrame(() => {
+        if (!cancelled) setMapReady(true);
+      });
     });
-    return () => window.cancelAnimationFrame(id);
+
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   const countryFeatures = useMemo(
