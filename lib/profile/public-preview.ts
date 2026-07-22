@@ -1,4 +1,4 @@
-import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
+import type { PublicProfilePageData } from "@/lib/supabase/profile-page-types";
 import { profilePath } from "@/lib/seo/site";
 import { getWishlistCountryCodes } from "@/lib/utils/stats";
 

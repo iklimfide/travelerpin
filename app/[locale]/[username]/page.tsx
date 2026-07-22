@@ -1,17 +1,16 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ProfileJsonLd } from "@/components/profile/ProfileJsonLd";
-import { ProfileOwnerTools } from "@/components/dashboard/ProfileOwnerTools";
 import { ProfileServerBridge } from "@/components/profile/ProfileServerBridge";
-import { PublicProfileView } from "@/components/profile/PublicProfileView";
+import { PublicProfileViewClient } from "@/components/profile/PublicProfileViewClient";
 import { defaultLocale, isLocale, type Locale } from "@/lib/i18n/config";
 import { buildProfileDescription } from "@/lib/seo/profile";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
+import { isProfilePublicPreview } from "@/lib/profile/public-preview";
 import {
-  applyPublicPreviewToProfileData,
-  isProfilePublicPreview,
-} from "@/lib/profile/public-preview";
-import { loadPublicProfilePage } from "@/lib/supabase/profile-page-data";
+  EMPTY_TRAVEL_STATS,
+  loadPublicProfileShell,
+} from "@/lib/supabase/profile-page-data";
 
 type PageProps = {
   params: Promise<{ username: string }>;
@@ -21,54 +20,41 @@ type PageProps = {
 export default async function PublicProfilePage({ params, searchParams }: PageProps) {
   const { username } = await params;
   const query = await searchParams;
-  const data = await loadPublicProfilePage(username);
-  if (!data) notFound();
+  const shell = await loadPublicProfileShell(username);
+  if (!shell) notFound();
 
   const displayName = resolveProfileDisplayName(
-    data.profile.display_name,
-    data.profile.username
+    shell.profile.display_name,
+    shell.profile.username
   );
-  const locale: Locale = isLocale(data.profile.locale) ? data.profile.locale : defaultLocale;
+  const locale: Locale = isLocale(shell.profile.locale) ? shell.profile.locale : defaultLocale;
   const tShare = await getTranslations({ locale, namespace: "share" });
-  const profileDescription = buildProfileDescription(displayName, data.stats, {
+  const profileDescription = buildProfileDescription(displayName, EMPTY_TRAVEL_STATS, {
     captionOwn: tShare("captionOwn"),
     captionGuest: tShare("captionGuest", { name: displayName }),
     captionDescription: tShare("captionDescription"),
   });
 
   const isAccountOwner =
-    data.currentUsername != null &&
-    data.currentUsername.toLowerCase() === data.profile.username.toLowerCase();
+    shell.currentUsername != null &&
+    shell.currentUsername.toLowerCase() === shell.profile.username.toLowerCase();
   const previewAsPublic = isAccountOwner && isProfilePublicPreview(query);
   const isOwnProfile = isAccountOwner && !previewAsPublic;
-  const isGuest = !data.isLoggedIn;
-  const viewData = previewAsPublic ? applyPublicPreviewToProfileData(data) : data;
+  const isGuest = !shell.isLoggedIn;
 
   return (
     <>
-      <ProfileJsonLd profile={data.profile} profileDescription={profileDescription} />
+      <ProfileJsonLd profile={shell.profile} profileDescription={profileDescription} />
       <ProfileServerBridge
-        username={data.profile.username}
-        initialData={data}
+        username={shell.profile.username}
         enableLiveRefresh={isOwnProfile}
       />
-      <PublicProfileView
-        data={viewData}
-        profileDescription={profileDescription}
+      <PublicProfileViewClient
+        shell={shell}
+        progressiveLoad
         isOwnProfile={isOwnProfile}
         isGuest={isGuest}
         previewAsPublic={previewAsPublic}
-        ownerTools={
-          isOwnProfile ? (
-            <ProfileOwnerTools
-              visitedCountries={data.visitedCountries}
-              visitedCities={data.visitedCities}
-              visitedParks={data.visitedParks}
-              wishlistCountries={data.wishlistCountries}
-              visitedCodes={data.visitedCodes}
-            />
-          ) : undefined
-        }
       />
     </>
   );

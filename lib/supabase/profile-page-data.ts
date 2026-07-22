@@ -13,15 +13,17 @@ import {
   getVisitedCountryCodes,
   getWishlistCountryCodes,
 } from "@/lib/utils/stats";
-import type {
-  TravelStats,
-  VisitedCity,
-  VisitedCountry,
-  VisitedPark,
-  WishlistCountry,
-  ProfileFollowState,
-} from "@/types/database";
+import {
+  type PublicProfilePageData,
+  type PublicProfileShellData,
+} from "@/lib/supabase/profile-page-types";
 import { getAuthUser } from "@/lib/supabase/auth";
+
+export type { PublicProfilePageData, PublicProfileShellData } from "@/lib/supabase/profile-page-types";
+export {
+  EMPTY_TRAVEL_STATS,
+  createEmptyProfilePageData,
+} from "@/lib/supabase/profile-page-types";
 import { profileCacheTag } from "@/lib/cache/revalidate-profile";
 import {
   DEMO_PUBLIC_PROFILE_BUNDLE,
@@ -31,21 +33,14 @@ import {
 import { loadProfileFollowState } from "@/lib/supabase/profile-follows";
 import { parseNextRoute } from "@/lib/utils/next-route";
 import { dedupeVisitedCitiesForDisplay } from "@/lib/utils/visited-city-normalize";
-
-export type PublicProfilePageData = {
-  profile: PublicProfile;
-  visitedCountries: VisitedCountry[];
-  visitedCities: VisitedCity[];
-  visitedParks: VisitedPark[];
-  wishlistCountries: WishlistCountry[];
-  stats: TravelStats;
-  visitedCodes: string[];
-  wishlistCodes: string[];
-  isLoggedIn: boolean;
-  currentUsername: string | null;
-  followState: ProfileFollowState | null;
-  canFollow: boolean;
-};
+import type {
+  ProfileFollowState,
+  TravelStats,
+  VisitedCity,
+  VisitedCountry,
+  VisitedPark,
+  WishlistCountry,
+} from "@/types/database";
 
 type PublicProfileBundle = {
   profile: PublicProfile;
@@ -168,6 +163,68 @@ export const loadPublicProfileMetadata = cache(
         bundle.visitedCities,
         bundle.visitedParks
       ),
+    };
+  }
+);
+
+/**
+ * Fast profile shell for first paint — presentation fields only, no pin bundle.
+ * Full travel data is loaded client-side via `/api/profile/[username]/page-data`.
+ */
+export const loadPublicProfileShell = cache(
+  async (username: string): Promise<PublicProfileShellData | null> => {
+    const demo = await loadDemoPublicProfilePage(username);
+    if (demo) {
+      return {
+        profile: demo.profile,
+        isLoggedIn: demo.isLoggedIn,
+        currentUsername: demo.currentUsername,
+      };
+    }
+
+    const publicSupabase = createPublicSupabaseClient();
+    if (!publicSupabase) return null;
+
+    const [profileRow, authUser] = await Promise.all([
+      fetchPublicProfile(publicSupabase, username),
+      getAuthUser(),
+    ]);
+    if (!profileRow) return null;
+
+    let profile = {
+      ...profileRow,
+      next_route: parseNextRoute(profileRow.next_route),
+    };
+    const freshPresentation = await fetchFreshProfilePresentation(profile.id);
+    if (freshPresentation) {
+      profile = {
+        ...profile,
+        ...freshPresentation,
+        next_route: freshPresentation.next_route ?? profile.next_route,
+      };
+    }
+
+    let currentUsername: string | null = null;
+    if (authUser) {
+      try {
+        const supabase = await createClient();
+        if (supabase) {
+          const { data: currentProfile } = await supabase
+            .from("profiles")
+            .select("username")
+            .eq("id", authUser.id)
+            .maybeSingle();
+          currentUsername = currentProfile?.username ?? null;
+        }
+      } catch (error) {
+        console.error("loadPublicProfileShell auth lookup failed:", error);
+      }
+    }
+
+    return {
+      profile,
+      isLoggedIn: !!authUser,
+      currentUsername,
     };
   }
 );

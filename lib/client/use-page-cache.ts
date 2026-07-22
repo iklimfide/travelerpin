@@ -9,7 +9,7 @@ import {
   readSettingsCache,
   type CachedSettingsPayload,
 } from "@/lib/client/session-page-cache";
-import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
+import type { PublicProfilePageData } from "@/lib/supabase/profile-page-types";
 
 function subscribePageCache(onChange: () => void): () => void {
   if (typeof window === "undefined") return () => {};

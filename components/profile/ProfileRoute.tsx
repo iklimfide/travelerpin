@@ -15,7 +15,7 @@ import {
   type TravelStateData,
 } from "@/lib/client/session-page-cache";
 import { useCachedProfile } from "@/lib/client/use-page-cache";
-import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
+import type { PublicProfilePageData } from "@/lib/supabase/profile-page-types";
 import { computeTravelStats, getVisitedCountryCodes } from "@/lib/utils/stats";
 
 type ProfileRouteProps = {

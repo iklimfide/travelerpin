@@ -9,12 +9,12 @@ import {
   writeProfileCache,
   type ProfileDataStaleDetail,
 } from "@/lib/client/session-page-cache";
-import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
+import type { PublicProfilePageData } from "@/lib/supabase/profile-page-types";
 
 type Props = {
   username: string;
-  /** First paint payload — keeps soft-nav / owner tools in sync with SSR. */
-  initialData: PublicProfilePageData;
+  /** First paint payload — optional when travel data loads progressively on the client. */
+  initialData?: PublicProfilePageData;
   /** Own profile: refresh RSC tree after pin/travel edits. */
   enableLiveRefresh?: boolean;
 };
@@ -32,6 +32,7 @@ export function ProfileServerBridge({
   const normalized = username.trim().toLowerCase();
 
   useEffect(() => {
+    if (!initialData) return;
     writeProfileCache(normalized, initialData);
   }, [initialData, normalized]);
 

@@ -1,5 +1,5 @@
 import type { ProfileSettingsRow } from "@/lib/supabase/profile-settings";
-import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
+import type { PublicProfilePageData } from "@/lib/supabase/profile-page-types";
 import type {
   NextRouteStop,
   TravelStats,
