@@ -1,8 +1,16 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { ProfileFollowButton } from "@/components/profile/ProfileFollowButton";
 import { ProfileFollowStats } from "@/components/profile/ProfileFollowStats";
+import { readFollowStateCache, writeFollowStateCache } from "@/lib/client/follow-cache";
+import { readProfileCache } from "@/lib/client/session-page-cache";
+
+type FollowState = {
+  isFollowing: boolean;
+  followerCount: number;
+  followingCount: number;
+};
 
 type ProfileActionButtonsProps = {
   username: string;
@@ -24,11 +32,34 @@ export function ProfileActionButtons({
   username,
   displayName,
   followUsername,
-  followState,
+  followState: followStateProp,
   canFollow = false,
   isLoggedIn = false,
   profileHref,
 }: ProfileActionButtonsProps) {
+  const [cachedFollowState, setCachedFollowState] = useState<FollowState | null>(null);
+
+  useEffect(() => {
+    const fromSession = readFollowStateCache(username);
+    if (fromSession) {
+      setCachedFollowState(fromSession);
+      return;
+    }
+
+    const fromProfile = readProfileCache(username)?.followState;
+    if (fromProfile) {
+      writeFollowStateCache(username, fromProfile);
+      setCachedFollowState(fromProfile);
+    }
+  }, [username]);
+
+  useEffect(() => {
+    if (!followStateProp) return;
+    writeFollowStateCache(username, followStateProp);
+    setCachedFollowState(followStateProp);
+  }, [followStateProp, username]);
+
+  const followState = followStateProp ?? cachedFollowState;
   const showFollow = Boolean(followUsername && followState);
   const showStats = Boolean(followState);
   const statsUsername = showFollow ? followUsername! : username;

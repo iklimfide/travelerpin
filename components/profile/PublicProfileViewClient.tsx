@@ -257,8 +257,8 @@ export function PublicProfileViewClient({
                 nationalParks: t("statNationalParksShort"),
                 themeParks: t("statThemeParksShort"),
               }}
-              followUsername={!isOwnProfile && fullData ? profile.username : undefined}
-              followState={fullData ? followState : null}
+              followUsername={!isOwnProfile ? profile.username : undefined}
+              followState={followState}
               canFollow={fullData ? canFollow : false}
               isLoggedIn={isLoggedIn}
               previewAsPublic={previewAsPublic}

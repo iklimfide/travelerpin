@@ -283,12 +283,15 @@
   left: auto;
   bottom: auto;
   margin-top: 10px;
-  max-width: min(100%, 340px);
+  width: 100%;
+  max-width: 100%;
+  container-type: inline-size;
   color: white;
 }
 
 .profile-hero-title h1 {
-  font-size: clamp(14px, 5.2vw, 28px);
+  /* ~40 Latin chars at 800 weight; scales down on narrow heroes. */
+  font-size: min(28px, max(10px, calc(100cqw / 25)));
   line-height: 1.12;
   letter-spacing: -0.8px;
   font-weight: 800;
@@ -297,8 +300,6 @@
 }
 
 .profile-hero-title__text {
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
 }
@@ -3267,7 +3268,7 @@
   }
 
   .profile-page--route .profile-hero-title h1 {
-    font-size: clamp(26px, 2.2vw, 34px);
+    font-size: min(34px, max(14px, calc(100cqw / 22)));
     margin-bottom: 8px;
   }
 

@@ -10,6 +10,8 @@ import {
   type ProfileDataStaleDetail,
   type TravelStateData,
 } from "@/lib/client/session-page-cache";
+import { writeFollowStateCache } from "@/lib/client/follow-cache";
+import { prefetchProfileFollowLists } from "@/lib/client/follow-actions";
 import {
   createEmptyProfilePageData,
   mergeTravelStateIntoProfilePageData,
@@ -77,6 +79,14 @@ export function usePublicProfileProgressiveLoad(
         if (cached) {
           setFullData(cached);
           setLoading(false);
+          if (cached.followState) {
+            writeFollowStateCache(normalized, cached.followState);
+            prefetchProfileFollowLists(
+              normalized,
+              cached.followState.followerCount,
+              cached.followState.followingCount
+            );
+          }
           return;
         }
       }
@@ -95,6 +105,14 @@ export function usePublicProfileProgressiveLoad(
 
         const payload = (await res.json()) as PublicProfilePageData;
         writeProfileCache(normalized, payload);
+        if (payload.followState) {
+          writeFollowStateCache(normalized, payload.followState);
+          prefetchProfileFollowLists(
+            normalized,
+            payload.followState.followerCount,
+            payload.followState.followingCount
+          );
+        }
         setFullData(payload);
       } catch {
         // Keep shell visible if the background fetch fails.
@@ -112,6 +130,14 @@ export function usePublicProfileProgressiveLoad(
     if (cached) {
       setFullData(cached);
       setLoading(false);
+      if (cached.followState) {
+        writeFollowStateCache(normalized, cached.followState);
+        prefetchProfileFollowLists(
+          normalized,
+          cached.followState.followerCount,
+          cached.followState.followingCount
+        );
+      }
       if (getOwnUsername() !== normalized) {
         void load(true);
       }

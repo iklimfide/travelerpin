@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@/lib/i18n/navigation";
 import { useAuthModal } from "@/components/auth/AuthModalProvider";
 import { ProfileFollowListModal } from "@/components/profile/ProfileFollowListModal";
+import { prefetchProfileFollowLists } from "@/lib/client/follow-actions";
 import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
 import { formatMessage, type AppMessages, useAppMessages } from "@/lib/i18n/client-messages";
 import type { ProfileFollowListType } from "@/types/database";
@@ -64,6 +65,11 @@ export function ProfileFollowStats({
   const [openList, setOpenList] = useState<ProfileFollowListType | null>(null);
 
   const isDemoProfile = isDemoProfileUsername(username);
+
+  useEffect(() => {
+    if (profileHref || isDemoProfile) return;
+    prefetchProfileFollowLists(username, followerCount, followingCount);
+  }, [profileHref, isDemoProfile, username, followerCount, followingCount]);
 
   function handleStatClick(type: ProfileFollowListType) {
     // Demo profiles have no real follow lists — invite the visitor to sign up instead.

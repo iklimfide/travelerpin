@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@/lib/i18n/navigation";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { readFollowListCache } from "@/lib/client/follow-cache";
 import { fetchProfileFollowers, fetchProfileFollowing } from "@/lib/client/follow-actions";
 import { formatMessage, useAppMessages } from "@/lib/i18n/client-messages";
 import type { ProfileFollowerSummary, ProfileFollowListType } from "@/types/database";
@@ -17,6 +18,13 @@ type ProfileFollowListModalProps = {
   onClose: () => void;
 };
 
+function readCachedMembers(
+  username: string,
+  listType: ProfileFollowListType
+): { members: ProfileFollowerSummary[]; demo?: boolean } | null {
+  return readFollowListCache(username, listType);
+}
+
 export function ProfileFollowListModal({
   username,
   displayName,
@@ -27,9 +35,14 @@ export function ProfileFollowListModal({
   onClose,
 }: ProfileFollowListModalProps) {
   const { share: shareMessages, profile: profileMessages } = useAppMessages();
-  const [members, setMembers] = useState<ProfileFollowerSummary[]>(initialMembers ?? []);
-  const [loading, setLoading] = useState(false);
-  const [demo, setDemo] = useState(initialDemo);
+  const cachedOnOpen = open ? readCachedMembers(username, listType) : null;
+  const [members, setMembers] = useState<ProfileFollowerSummary[]>(
+    () => initialMembers ?? cachedOnOpen?.members ?? []
+  );
+  const [loading, setLoading] = useState(
+    () => open && !initialMembers && !cachedOnOpen
+  );
+  const [demo, setDemo] = useState(initialDemo || cachedOnOpen?.demo === true);
   const [error, setError] = useState<string | null>(null);
 
   const isFollowers = listType === "followers";
@@ -64,6 +77,15 @@ export function ProfileFollowListModal({
       setMembers(initialMembers);
       setDemo(initialDemo);
       setLoading(false);
+      return;
+    }
+
+    const cached = readCachedMembers(username, listType);
+    if (cached) {
+      setMembers(cached.members);
+      setDemo(cached.demo === true);
+      setLoading(false);
+      setError(null);
       return;
     }
 
@@ -105,7 +127,7 @@ export function ProfileFollowListModal({
     return () => {
       cancelled = true;
     };
-  }, [open, username, isFollowers, initialMembers, initialDemo]);
+  }, [open, username, listType, isFollowers, initialMembers, initialDemo]);
 
   if (!open) return null;
 
