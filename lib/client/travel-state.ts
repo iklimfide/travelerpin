@@ -2,7 +2,7 @@ import {
   addCitiesBatch,
   deleteCitiesBatch,
 } from "@/lib/client/city-actions";
-import { addVisitedCountry } from "@/lib/client/country-actions";
+import { addVisitedCountry, removeVisitedCountry } from "@/lib/client/country-actions";
 import { addParksBatch, deleteParksBatch } from "@/lib/client/park-actions";
 import { getCountryName } from "@/lib/data/countries";
 import { canonicalCityName, citiesAreSame } from "@/lib/utils/city-aliases";
@@ -112,14 +112,22 @@ export async function savePendingDestinations(params: {
   pendingCountryCodes: Iterable<string>;
   pendingCities: Iterable<PendingCitySelection>;
   pendingRemoveCityIds?: Iterable<string>;
+  pendingRemoveCountryIds?: Iterable<string>;
   visitedCodes: ReadonlySet<string>;
   visitedCities: VisitedCity[];
 }): Promise<{ ok: true; savedCount: number } | { ok: false; error: string }> {
   const pendingCountryCodes = [...params.pendingCountryCodes];
   const pendingCities = [...params.pendingCities];
   const pendingRemoveCityIds = [...(params.pendingRemoveCityIds ?? [])];
+  const pendingRemoveCountryIds = [...(params.pendingRemoveCountryIds ?? [])];
 
   let savedCount = 0;
+
+  for (const visitedId of pendingRemoveCountryIds) {
+    const result = await removeVisitedCountry(visitedId);
+    if (!result.ok) return result;
+    savedCount += 1;
+  }
 
   if (pendingRemoveCityIds.length > 0) {
     const result = await deleteCitiesBatch({ ids: pendingRemoveCityIds });

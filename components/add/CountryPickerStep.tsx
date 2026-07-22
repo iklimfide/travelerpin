@@ -20,6 +20,7 @@ import { flagCountryCode, isUkNationCode, isUkNationVisited, matchesUkCityCountr
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { citiesAreSame } from "@/lib/utils/city-aliases";
 import { formatKnownPlaceName } from "@/lib/utils/city-name";
+import { isCountryOnlyPinRemovable } from "@/lib/utils/country-remove";
 import type { CountryOption } from "@/lib/data/countries";
 
 type SearchCityResult = {
@@ -34,6 +35,10 @@ type CountryPickerStepProps = {
   activeCountryCodes?: Set<string>;
   pendingCountryCodes: Set<string>;
   pendingRemoveCountryCodes?: Set<string>;
+  /** Allow unchecking country-only pins (no cities/parks) from the first step. */
+  allowRemoveCountryOnly?: boolean;
+  visitedCountries?: Array<{ country_code: string; id: string }>;
+  visitedParks?: Array<{ country_code: string }>;
   onToggleCountry: (country: CountryOption) => void;
   onOpenCountry: (country: CountryOption) => void;
   countriesOnly?: boolean;
@@ -126,6 +131,9 @@ export function CountryPickerStep({
   activeCountryCodes,
   pendingCountryCodes,
   pendingRemoveCountryCodes,
+  allowRemoveCountryOnly = false,
+  visitedCountries = [],
+  visitedParks = [],
   onToggleCountry,
   onOpenCountry,
   countriesOnly = false,
@@ -151,9 +159,13 @@ export function CountryPickerStep({
   }
 
   function countryTileState(code: string) {
-    const locked = isInCodeSet(code, visitedCodes);
+    const onMap = isInCodeSet(code, visitedCodes);
     const pendingAdd = pendingCountryCodes.has(code);
     const pendingRemove = pendingRemoveCountryCodes?.has(code) ?? false;
+    const removable =
+      allowRemoveCountryOnly &&
+      isCountryOnlyPinRemovable(code, visitedCodes, visitedCountries, visitedCities, visitedParks);
+    const locked = onMap && !removable;
 
     if (activeCountryCodes) {
       const saved = isInCodeSet(code, activeCountryCodes);
@@ -166,8 +178,8 @@ export function CountryPickerStep({
 
     return {
       locked,
-      checked: locked || pendingAdd,
-      pending: pendingAdd && !locked,
+      checked: (onMap && !pendingRemove) || pendingAdd,
+      pending: pendingAdd || pendingRemove,
     };
   }
   const [query, setQuery] = useState("");

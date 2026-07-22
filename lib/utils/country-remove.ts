@@ -1,3 +1,5 @@
+import { isUkNationCode, isUkNationVisited } from "@/lib/data/uk-nations";
+
 export function countryHasMappedPlaces(
   countryCode: string,
   cities: { country_code: string }[],
@@ -8,6 +10,28 @@ export function countryHasMappedPlaces(
     cities.some((city) => city.country_code.toUpperCase() === code) ||
     parks.some((park) => park.country_code.toUpperCase() === code)
   );
+}
+
+export function isCountryOnVisitedMap(
+  countryCode: string,
+  visitedCodes: ReadonlySet<string>
+): boolean {
+  const code = countryCode.toUpperCase();
+  return isUkNationCode(code) ? isUkNationVisited(code, visitedCodes) : visitedCodes.has(code);
+}
+
+/** Country row exists with no cities/parks — safe to uncheck in Add modal. */
+export function isCountryOnlyPinRemovable(
+  countryCode: string,
+  visitedCodes: ReadonlySet<string>,
+  visitedCountries: { country_code: string; id: string }[],
+  visitedCities: { country_code: string }[],
+  visitedParks: { country_code: string }[] = []
+): boolean {
+  if (!isCountryOnVisitedMap(countryCode, visitedCodes)) return false;
+  if (countryHasMappedPlaces(countryCode, visitedCities, visitedParks)) return false;
+  const code = countryCode.toUpperCase();
+  return visitedCountries.some((country) => country.country_code.toUpperCase() === code);
 }
 
 export function isCountryRemoveBlockedByPlacesError(error: string | undefined): boolean {
