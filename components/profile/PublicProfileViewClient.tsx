@@ -12,6 +12,7 @@ import { ProfileSquareCaptureHeader } from "@/components/profile/ProfileSquareCa
 import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections";
 import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
 import { usePublicProfileProgressiveLoad } from "@/lib/client/use-public-profile-progressive-load";
+import { fetchHeroImageMaps } from "@/lib/client/hero-images-cache";
 import { useAnimatedCount } from "@/lib/hooks/useAnimatedCount";
 import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 import { useProgressiveReveal } from "@/lib/hooks/useProgressiveReveal";
@@ -141,16 +142,17 @@ export function PublicProfileViewClient({
   const showEmptyMapState = !pinsLoading && !hasMapContent;
 
   const [cityHeroImages, setCityHeroImages] = useState<Map<string, string>>(() => new Map());
+  const [parkHeroImages, setParkHeroImages] = useState<Map<string, string>>(() => new Map());
 
   useEffect(() => {
     if (progressive && !fullData) return;
 
     let cancelled = false;
-    fetch("/api/city-hero-images")
-      .then((response) => (response.ok ? response.json() : null))
-      .then((payload) => {
-        if (cancelled || !payload?.images) return;
-        setCityHeroImages(new Map(Object.entries(payload.images as Record<string, string>)));
+    void fetchHeroImageMaps()
+      .then(({ cityHeroImages: cityMap, parkHeroImages: parkMap }) => {
+        if (cancelled) return;
+        if (cityMap.size > 0) setCityHeroImages(cityMap);
+        if (parkMap.size > 0) setParkHeroImages(parkMap);
       })
       .catch(() => {});
     return () => {
@@ -167,7 +169,8 @@ export function PublicProfileViewClient({
         profile.residence,
         visitedCodes,
         locale,
-        cityHeroImages
+        cityHeroImages,
+        parkHeroImages
       ),
     [
       visitedCountries,
@@ -177,6 +180,7 @@ export function PublicProfileViewClient({
       visitedCodes,
       locale,
       cityHeroImages,
+      parkHeroImages,
     ]
   );
   const visibleTrips = useProgressiveReveal(trips, {

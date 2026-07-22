@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const LINKS = [
   { href: "/kamikaze/catalog", label: "Katalog" },
   { href: "/kamikaze/cities", label: "Şehirler" },
+  { href: "/kamikaze/parks", label: "Parklar" },
   { href: "/kamikaze/users", label: "Kullanıcılar" },
   { href: "/kamikaze/stats", label: "İstatistikler" },
   { href: "/kamikaze/notifications", label: "Bildirim gönder" },

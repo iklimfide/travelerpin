@@ -1,6 +1,7 @@
 import type { Locale } from "@/lib/i18n/config";
 import { defaultLocale } from "@/lib/i18n/config";
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
+import type { ParkType } from "@/types/database";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { normalizeCityKey } from "@/lib/utils/city-name";
 import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
@@ -89,10 +90,14 @@ for (const [countryCode, englishHint, turkish] of PARK_TR_ENTRIES) {
   (TR_PARK_KEY_TO_CANONICAL[countryCode] ??= {})[hintKey] = canonical;
 }
 
-export function parkNameTrOverrideKey(countryCode: string, parkName: string): string {
+export function parkNameTrOverrideKey(
+  countryCode: string,
+  parkName: string,
+  parkType: ParkType
+): string {
   const code = countryCode.toUpperCase();
   const canonical = formatCityDisplayName(parkName);
-  return `${code}:${catalogNameKey(canonical, code)}`;
+  return `${code}:${catalogNameKey(canonical, code)}:${parkType}`;
 }
 
 function getStaticTurkishParkName(
@@ -110,9 +115,19 @@ function getStaticTurkishParkName(
 }
 
 /** Curated TR catalog; null when TR label equals EN canonical. */
-export function resolveParkNameTr(countryCode: string, parkName: string): string | null {
+export function resolveParkNameTr(
+  countryCode: string,
+  parkName: string,
+  overrides?: ReadonlyMap<string, string> | null,
+  parkType?: ParkType
+): string | null {
   const code = countryCode.toUpperCase();
   const canonical = formatCityDisplayName(parkName);
+  if (overrides && parkType) {
+    const fromDb = overrides.get(parkNameTrOverrideKey(code, canonical, parkType));
+    if (fromDb) return fromDb;
+  }
+
   const localized = getStaticTurkishParkName(code, canonical, parkName);
   return localized !== canonical ? localized : null;
 }
@@ -124,12 +139,21 @@ export function resolveParkNameTr(countryCode: string, parkName: string): string
 export function getLocalizedParkName(
   countryCode: string,
   parkName: string,
-  locale: Locale = defaultLocale
+  locale: Locale = defaultLocale,
+  options?: {
+    nameTr?: string | null;
+    nameTrOverrides?: ReadonlyMap<string, string> | null;
+    parkType?: ParkType;
+  }
 ): string {
   const canonical = formatCityDisplayName(parkName);
   if (locale !== "tr") return canonical;
 
-  return resolveParkNameTr(countryCode, canonical) ?? canonical;
+  return (
+    options?.nameTr ??
+    resolveParkNameTr(countryCode, canonical, options?.nameTrOverrides, options?.parkType) ??
+    canonical
+  );
 }
 
 /** Match a park against a search query using both canonical and localized labels. */
@@ -138,14 +162,19 @@ export function parkMatchesLocalizedSearch(
   parkName: string,
   query: string,
   locale: Locale = defaultLocale,
-  options?: { nameTr?: string | null }
+  options?: { nameTr?: string | null; nameTrOverrides?: ReadonlyMap<string, string> | null; parkType?: ParkType }
 ): boolean {
   const canonical = formatCityDisplayName(parkName);
   if (matchesPlaceNameSearch(canonical, query)) return true;
   if (locale === "tr") {
     const localized =
       options?.nameTr ??
-      resolveParkNameTr(countryCode, canonical) ??
+      resolveParkNameTr(
+        countryCode,
+        canonical,
+        options?.nameTrOverrides,
+        options?.parkType
+      ) ??
       getStaticTurkishParkName(countryCode, canonical, parkName);
     if (localized !== canonical && matchesPlaceNameSearch(localized, query)) {
       return true;

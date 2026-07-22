@@ -1,7 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
-import { isPublicProfilePath, stripLocalePrefix } from "@/lib/i18n/pathname";
+import { isPublicProfilePath, isProfileShapedPath, stripLocalePrefix } from "@/lib/i18n/pathname";
+import { isPlausibleProfileUsername } from "@/lib/utils/username";
 import { routing } from "@/lib/i18n/routing";
 import { fetchWithTimeout } from "@/lib/supabase/fetch";
 import { updateSession } from "@/lib/supabase/middleware";
@@ -136,6 +137,14 @@ export default async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = barePath;
     return NextResponse.redirect(url, 301);
+  }
+
+  // Old blog slugs, bots, and malformed usernames — 404 before RSC + Supabase.
+  if (isProfileShapedPath(barePath)) {
+    const username = barePath.split("/").filter(Boolean)[0] ?? "";
+    if (!isPlausibleProfileUsername(username)) {
+      return new NextResponse("Not Found", { status: 404 });
+    }
   }
 
   if (profilePath.locale && isPublicProfilePath(profilePath.barePath)) {

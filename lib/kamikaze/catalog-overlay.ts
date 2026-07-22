@@ -103,6 +103,16 @@ export type YpCityNameTrRow = {
   updated_at: string;
 };
 
+export type YpParkNameTrRow = {
+  id: string;
+  country_code: string;
+  name_key: string;
+  park_type: ParkType;
+  name_tr: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type YpCountryNameTrRow = {
   id: string;
   country_code: string;
@@ -118,6 +128,7 @@ export type CatalogOverlaySnapshot = {
   popularity: YpCityPopularityRow[];
   parkPopularity: YpParkPopularityRow[];
   nameTr: YpCityNameTrRow[];
+  parkNameTr: YpParkNameTrRow[];
   countryNameTr: YpCountryNameTrRow[];
 };
 
@@ -131,6 +142,7 @@ async function fetchCatalogOverlayUncached(): Promise<CatalogOverlaySnapshot> {
       popularity: [],
       parkPopularity: [],
       nameTr: [],
+      parkNameTr: [],
       countryNameTr: [],
     };
   }
@@ -142,6 +154,7 @@ async function fetchCatalogOverlayUncached(): Promise<CatalogOverlaySnapshot> {
     popularityRes,
     parkPopularityRes,
     nameTrRes,
+    parkNameTrRes,
     countryNameTrRes,
   ] = await Promise.all([
     client.from("yp_catalog_cities").select("*").order("created_at", { ascending: false }),
@@ -150,6 +163,7 @@ async function fetchCatalogOverlayUncached(): Promise<CatalogOverlaySnapshot> {
     client.from("yp_city_popularity").select("*").order("updated_at", { ascending: false }),
     client.from("yp_park_popularity").select("*").order("updated_at", { ascending: false }),
     client.from("yp_city_name_tr").select("*").order("updated_at", { ascending: false }),
+    client.from("yp_park_name_tr").select("*").order("updated_at", { ascending: false }),
     client.from("yp_country_name_tr").select("*").order("updated_at", { ascending: false }),
   ]);
 
@@ -179,6 +193,7 @@ async function fetchCatalogOverlayUncached(): Promise<CatalogOverlaySnapshot> {
       : ((parkPopularityRes.data ?? []) as YpParkPopularityRow[]),
     // Table may be missing until migration 035 is applied.
     nameTr: nameTrRes.error ? [] : ((nameTrRes.data ?? []) as YpCityNameTrRow[]),
+    parkNameTr: parkNameTrRes.error ? [] : ((parkNameTrRes.data ?? []) as YpParkNameTrRow[]),
     // Table may be missing until migration 036 is applied.
     countryNameTr: countryNameTrRes.error
       ? []
@@ -281,12 +296,27 @@ export function attachCityNameTr<T extends { countryCode: string; name: string }
   }));
 }
 
-export function attachParkNameTr<T extends { countryCode: string; name: string }>(
-  parks: T[]
+export function parkNameTrOverrideMap(
+  overlay: CatalogOverlaySnapshot
+): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const row of overlay.parkNameTr) {
+    const code = row.country_code.toUpperCase();
+    const tr = row.name_tr.trim();
+    if (!tr) continue;
+    map.set(`${code}:${catalogNameKey(row.name_key, code)}:${row.park_type}`, tr);
+  }
+  return map;
+}
+
+export function attachParkNameTr<T extends { countryCode: string; name: string; parkType: ParkType }>(
+  parks: T[],
+  overlay: CatalogOverlaySnapshot
 ): Array<T & { nameTr: string | null }> {
+  const overrides = parkNameTrOverrideMap(overlay);
   return parks.map((park) => ({
     ...park,
-    nameTr: resolveParkNameTr(park.countryCode, park.name),
+    nameTr: resolveParkNameTr(park.countryCode, park.name, overrides, park.parkType),
   }));
 }
 

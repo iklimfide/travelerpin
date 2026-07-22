@@ -32,6 +32,7 @@ import {
 } from "@/lib/data/jennifer-demo-page";
 import { loadProfileFollowState } from "@/lib/supabase/profile-follows";
 import { parseNextRoute } from "@/lib/utils/next-route";
+import { isPlausibleProfileUsername } from "@/lib/utils/username";
 import { dedupeVisitedCitiesForDisplay } from "@/lib/utils/visited-city-normalize";
 import type {
   ProfileFollowState,
@@ -103,6 +104,7 @@ export function getCachedPublicProfileBundle(
   username: string
 ): Promise<PublicProfileBundle | null> {
   const key = username.trim().toLowerCase();
+  if (!isPlausibleProfileUsername(key)) return Promise.resolve(null);
 
   // Sample profile is code-only — never touch Supabase for @jennifer.
   if (isDemoProfileUsername(key)) {
@@ -142,6 +144,8 @@ export function getCachedPublicProfileBundle(
 /** Cached public profile + stats for OG metadata (no auth round-trip). */
 export const loadPublicProfileMetadata = cache(
   async (username: string): Promise<{ profile: PublicProfile; stats: TravelStats } | null> => {
+    if (!isPlausibleProfileUsername(username)) return null;
+
     const demo = await loadDemoPublicProfilePage(username);
     if (demo) {
       return { profile: demo.profile, stats: demo.stats };
@@ -173,6 +177,8 @@ export const loadPublicProfileMetadata = cache(
  */
 export const loadPublicProfileShell = cache(
   async (username: string): Promise<PublicProfileShellData | null> => {
+    if (!isPlausibleProfileUsername(username)) return null;
+
     const demo = await loadDemoPublicProfilePage(username);
     if (demo) {
       return {
@@ -235,6 +241,8 @@ export const loadPublicProfileShell = cache(
  */
 export const loadPublicProfilePage = cache(
   async (username: string): Promise<PublicProfilePageData | null> => {
+    if (!isPlausibleProfileUsername(username)) return null;
+
     const demo = await loadDemoPublicProfilePage(username);
     if (demo) return demo;
 

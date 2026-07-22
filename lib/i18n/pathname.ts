@@ -1,4 +1,5 @@
 import { locales } from "./config";
+import { isPlausibleProfileUsername } from "@/lib/utils/username";
 
 /**
  * First path segments that are never public profile usernames.
@@ -54,21 +55,27 @@ export function stripLocalePrefix(pathname: string): string {
 }
 
 /**
- * Public profile routes stay locale-unprefixed in the browser URL:
- * `/arif`, `/arif/all`, `/arif/media`.
+ * Path looks like `/user` or `/user/all` — may still fail username format checks.
  */
-export function isPublicProfilePath(pathname: string): boolean {
+export function isProfileShapedPath(pathname: string): boolean {
   const bare = stripLocalePrefix(pathname.split("?")[0] || pathname);
   const segments = bare.split("/").filter(Boolean);
-  if (
-    segments.length === 0 ||
-    NON_PROFILE_FIRST_SEGMENTS.has(segments[0].toLowerCase())
-  ) {
-    return false;
-  }
+  if (segments.length === 0) return false;
+  if (NON_PROFILE_FIRST_SEGMENTS.has(segments[0].toLowerCase())) return false;
   return (
     segments.length === 1 ||
     (segments.length === 2 &&
       (segments[1] === "all" || segments[1] === "media"))
   );
+}
+
+/**
+ * Public profile routes stay locale-unprefixed in the browser URL:
+ * `/arif`, `/arif/all`, `/arif/media`.
+ */
+export function isPublicProfilePath(pathname: string): boolean {
+  if (!isProfileShapedPath(pathname)) return false;
+  const bare = stripLocalePrefix(pathname.split("?")[0] || pathname);
+  const username = bare.split("/").filter(Boolean)[0];
+  return isPlausibleProfileUsername(username);
 }

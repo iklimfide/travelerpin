@@ -1,9 +1,13 @@
 "use client";
 
 import { Link } from "@/lib/i18n/navigation";
-import { useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useState, type ReactNode } from "react";
 import { useLocale } from "next-intl";
+import { deleteCitiesBatch } from "@/lib/client/city-actions";
+import { removeVisitedCountry, removeWishlistCountry } from "@/lib/client/country-actions";
+import { fetchHeroImageMaps } from "@/lib/client/hero-images-cache";
+import { deleteParksBatch } from "@/lib/client/park-actions";
+import { useProfileStaleReload } from "@/lib/client/use-profile-stale-reload";
 import { ProfileAllDestinationsListModal } from "@/components/profile/ProfileAllDestinationsListModal";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
 import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
@@ -19,13 +23,22 @@ import { commonMessages, countryMessages, formatMessage, modalMessages, profileD
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
 import { profilePath } from "@/lib/seo/site";
-import { withProfilePublicPreview } from "@/lib/profile/public-preview";
+import {
+  applyPublicPreviewToProfileData,
+  filterWishlistForProfileView,
+  withProfilePublicPreview,
+} from "@/lib/profile/public-preview";
+import {
+  buildProfileAllDestinations,
+  type ProfileAllDestinations,
+} from "@/lib/utils/profile-all-destinations";
+import type { PublicProfilePageData } from "@/lib/supabase/profile-page-types";
+import { parseNextRoute } from "@/lib/utils/next-route";
 import {
   countryHasMappedPlaces,
   isCountryRemoveBlockedByPlacesError,
 } from "@/lib/utils/country-remove";
 import { findCountryBackingCity } from "@/lib/utils/country-pin";
-import type { ProfileAllDestinations } from "@/lib/utils/profile-all-destinations";
 import type { ProfileTrip } from "@/lib/utils/profile-page";
 import type {
   NextRouteStop,
@@ -174,16 +187,60 @@ export function ProfileAllDestinationsView({
   initialNextRouteStops,
 }: ProfileAllDestinationsViewProps) {
   const { common: commonMessages, country: countryMessages, profile: profileMessages, modal: modalMessages, saveDestination: saveDestinationMessages } = useAppMessages();
-  const router = useRouter();
   const localeRaw = useLocale();
   const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
   const modal = useModal();
   const toast = useToast();
+  const [viewDestinations, setViewDestinations] = useState(destinations);
+  const [viewVisitedCountries, setViewVisitedCountries] = useState(visitedCountries);
+  const [viewVisitedCities, setViewVisitedCities] = useState(visitedCities);
+  const [viewVisitedParks, setViewVisitedParks] = useState(visitedParks);
+  const [viewVisitedCodes, setViewVisitedCodes] = useState(visitedCodes);
+  const [viewWishlistCodes, setViewWishlistCodes] = useState(wishlistCodes);
+  const [viewWishlistCountries, setViewWishlistCountries] = useState(wishlistCountries);
+  const [viewStats, setViewStats] = useState(stats);
+  const [viewNextRouteStops, setViewNextRouteStops] = useState(initialNextRouteStops);
   const [editingCityId, setEditingCityId] = useState<string | null>(null);
   const [editingParkId, setEditingParkId] = useState<string | null>(null);
   const [editingCountryCode, setEditingCountryCode] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ProfileAllTab>("countries");
   const [openModalTab, setOpenModalTab] = useState<ProfileAllTab | null>(null);
+
+  const applyPageData = useCallback(
+    async (data: PublicProfilePageData) => {
+      const viewData = previewAsPublic ? applyPublicPreviewToProfileData(data) : data;
+      const { wishlistCountries: visibleWishlist, wishlistCodes: visibleWishlistCodes } =
+        filterWishlistForProfileView(viewData, isOwnProfile);
+      const { cityHeroImages, parkHeroImages } = await fetchHeroImageMaps();
+
+      setViewVisitedCountries(viewData.visitedCountries);
+      setViewVisitedCities(viewData.visitedCities);
+      setViewVisitedParks(viewData.visitedParks);
+      setViewVisitedCodes(viewData.visitedCodes);
+      setViewWishlistCodes(visibleWishlistCodes);
+      setViewWishlistCountries(visibleWishlist);
+      setViewStats(viewData.stats);
+      setViewNextRouteStops(parseNextRoute(viewData.profile.next_route));
+      setViewDestinations(
+        buildProfileAllDestinations(
+          viewData.visitedCountries,
+          viewData.visitedCities,
+          viewData.visitedParks,
+          visibleWishlist,
+          viewData.visitedCodes,
+          viewData.profile.residence,
+          locale,
+          cityHeroImages,
+          parkHeroImages
+        )
+      );
+    },
+    [isOwnProfile, locale, previewAsPublic]
+  );
+
+  useProfileStaleReload(username, true, (data) => {
+    void applyPageData(data);
+  });
 
   const title = formatMessage(profileMessages.allDestinationsTitle, {
     name: mapTitleOwnerName(displayName, locale),
@@ -196,21 +253,21 @@ export function ProfileAllDestinationsView({
   };
 
   const totalCount =
-    destinations.countries.length +
-    destinations.cities.length +
-    destinations.parks.length +
-    destinations.wishlist.length;
+    viewDestinations.countries.length +
+    viewDestinations.cities.length +
+    viewDestinations.parks.length +
+    viewDestinations.wishlist.length;
 
   const hasMapContent =
-    visitedCountries.length > 0 ||
-    visitedCities.length > 0 ||
-    visitedParks.length > 0 ||
-    wishlistCodes.length > 0;
+    viewVisitedCountries.length > 0 ||
+    viewVisitedCities.length > 0 ||
+    viewVisitedParks.length > 0 ||
+    viewWishlistCodes.length > 0;
 
-  const editingCity = visitedCities.find((city) => city.id === editingCityId);
-  const editingPark = visitedParks.find((park) => park.id === editingParkId);
+  const editingCity = viewVisitedCities.find((city) => city.id === editingCityId);
+  const editingPark = viewVisitedParks.find((park) => park.id === editingParkId);
   const editingCountryBackingCity = editingCountryCode
-    ? findCountryBackingCity(editingCountryCode, visitedCities)
+    ? findCountryBackingCity(editingCountryCode, viewVisitedCities)
     : null;
   const isEditingDestination = Boolean(editingCityId || editingParkId || editingCountryCode);
 
@@ -230,13 +287,10 @@ export function ProfileAllDestinationsView({
     });
     if (!confirmed) return;
 
-    const res = await fetch(`/api/cities/${id}`, { method: "DELETE" });
-    if (!res.ok) {
-      const data = await res.json();
-      await modal.alert(data.error ?? "Failed to delete city", { variant: "error" });
-      return;
+    const result = await deleteCitiesBatch({ ids: [id] });
+    if (!result.ok) {
+      await modal.alert(result.error ?? "Failed to delete city", { variant: "error" });
     }
-    router.refresh();
   }
 
   async function handleDeletePark(id: string) {
@@ -246,13 +300,10 @@ export function ProfileAllDestinationsView({
     });
     if (!confirmed) return;
 
-    const res = await fetch(`/api/parks/${id}`, { method: "DELETE" });
-    if (!res.ok) {
-      const data = await res.json();
-      await modal.alert(data.error ?? "Failed to delete park", { variant: "error" });
-      return;
+    const result = await deleteParksBatch({ ids: [id] });
+    if (!result.ok) {
+      await modal.alert(result.error ?? "Failed to delete park", { variant: "error" });
     }
-    router.refresh();
   }
 
   async function handleRemoveCountry(country: ProfileAllDestinations["countries"][number]) {
@@ -260,7 +311,7 @@ export function ProfileAllDestinationsView({
       country.cityCount > 0 ||
       country.parkCount > 0 ||
       country.visitedViaPlacesOnly ||
-      countryHasMappedPlaces(country.code, visitedCities, visitedParks);
+      countryHasMappedPlaces(country.code, viewVisitedCities, viewVisitedParks);
 
     if (blockedByPlaces) {
       toast.show(countryMessages.removePlacesFirst);
@@ -274,17 +325,14 @@ export function ProfileAllDestinationsView({
     });
     if (!confirmed) return;
 
-    const res = await fetch(`/api/countries/${country.visitedId}`, { method: "DELETE" });
-    if (!res.ok) {
-      const data = await res.json();
-      if (isCountryRemoveBlockedByPlacesError(data.error)) {
+    const result = await removeVisitedCountry(country.visitedId);
+    if (!result.ok) {
+      if (isCountryRemoveBlockedByPlacesError(result.error)) {
         toast.show(countryMessages.removePlacesFirst);
         return;
       }
-      await modal.alert(data.error ?? "Failed to remove country", { variant: "error" });
-      return;
+      await modal.alert(result.error ?? "Failed to remove country", { variant: "error" });
     }
-    router.refresh();
   }
 
   async function handleRemoveWishlist(id: string) {
@@ -294,13 +342,10 @@ export function ProfileAllDestinationsView({
     });
     if (!confirmed) return;
 
-    const res = await fetch(`/api/wishlist/countries/${id}`, { method: "DELETE" });
-    if (!res.ok) {
-      const data = await res.json();
-      await modal.alert(data.error ?? "Failed to remove from wishlist", { variant: "error" });
-      return;
+    const result = await removeWishlistCountry(id);
+    if (!result.ok) {
+      await modal.alert(result.error ?? "Failed to remove from wishlist", { variant: "error" });
     }
-    router.refresh();
   }
 
   const hasNavContent = totalCount > 0;
@@ -312,10 +357,10 @@ export function ProfileAllDestinationsView({
       }
     : null;
 
-  const countriesPreview = previewItems(destinations.countries);
-  const citiesPreview = previewItems(destinations.cities);
-  const parksPreview = previewItems(destinations.parks);
-  const wishlistPreview = previewItems(destinations.wishlist);
+  const countriesPreview = previewItems(viewDestinations.countries);
+  const citiesPreview = previewItems(viewDestinations.cities);
+  const parksPreview = previewItems(viewDestinations.parks);
+  const wishlistPreview = previewItems(viewDestinations.wishlist);
 
   function renderCountryCards(items: ProfileAllDestinations["countries"]) {
     return items.map((country) => (
@@ -411,13 +456,13 @@ export function ProfileAllDestinationsView({
   function renderModalItems(tab: ProfileAllTab) {
     switch (tab) {
       case "countries":
-        return renderCountryCards(destinations.countries);
+        return renderCountryCards(viewDestinations.countries);
       case "cities":
-        return renderCityCards(destinations.cities);
+        return renderCityCards(viewDestinations.cities);
       case "parks":
-        return renderParkCards(destinations.parks);
+        return renderParkCards(viewDestinations.parks);
       case "wishlist":
-        return renderWishlistCards(destinations.wishlist);
+        return renderWishlistCards(viewDestinations.wishlist);
     }
   }
 
@@ -443,15 +488,15 @@ export function ProfileAllDestinationsView({
             {hasMapContent ? (
               <div className="profile-all-map">
                 <ProfileMapPanel
-                  visitedCountryCodes={visitedCodes}
-                  wishlistCountryCodes={wishlistCodes}
-                  visitedCountries={visitedCountries}
-                  wishlistCountries={wishlistCountries}
-                  visitedCities={visitedCities}
-                  visitedParks={visitedParks}
+                  visitedCountryCodes={viewVisitedCodes}
+                  wishlistCountryCodes={viewWishlistCodes}
+                  visitedCountries={viewVisitedCountries}
+                  wishlistCountries={viewWishlistCountries}
+                  visitedCities={viewVisitedCities}
+                  visitedParks={viewVisitedParks}
                   isLoggedIn={isLoggedIn}
                   canEditMap={isOwnProfile}
-                  countryCount={stats.countries}
+                  countryCount={viewStats.countries}
                   exploredBadgeLabel={profileMessages.mapExploredBadge}
                 />
               </div>
@@ -473,7 +518,7 @@ export function ProfileAllDestinationsView({
                 <DestinationSection
                   id={sectionId("countries")}
                   title={profileMessages.allDestinationsCountries}
-                  count={destinations.countries.length}
+                  count={viewDestinations.countries.length}
                   onOpenAll={() => setOpenModalTab("countries")}
                 >
                   {renderCountryCards(countriesPreview)}
@@ -482,7 +527,7 @@ export function ProfileAllDestinationsView({
                 <DestinationSection
                   id={sectionId("cities")}
                   title={profileMessages.allDestinationsCities}
-                  count={destinations.cities.length}
+                  count={viewDestinations.cities.length}
                   onOpenAll={() => setOpenModalTab("cities")}
                 >
                   {renderCityCards(citiesPreview)}
@@ -491,7 +536,7 @@ export function ProfileAllDestinationsView({
                 <DestinationSection
                   id={sectionId("parks")}
                   title={profileMessages.allDestinationsParks}
-                  count={destinations.parks.length}
+                  count={viewDestinations.parks.length}
                   onOpenAll={() => setOpenModalTab("parks")}
                 >
                   {renderParkCards(parksPreview)}
@@ -500,7 +545,7 @@ export function ProfileAllDestinationsView({
                 <DestinationSection
                   id={sectionId("wishlist")}
                   title={profileMessages.wishlistCountries}
-                  count={destinations.wishlist.length}
+                  count={viewDestinations.wishlist.length}
                   onOpenAll={() => setOpenModalTab("wishlist")}
                 >
                   {renderWishlistCards(wishlistPreview)}
@@ -511,10 +556,10 @@ export function ProfileAllDestinationsView({
         )}
 
         <ProfileNextRouteSection
-          initialStops={initialNextRouteStops}
+          initialStops={viewNextRouteStops}
           isOwnProfile={isOwnProfile}
-          visitedCountries={visitedCountries}
-          visitedCities={visitedCities}
+          visitedCountries={viewVisitedCountries}
+          visitedCities={viewVisitedCities}
         />
       </div>
 
@@ -532,7 +577,7 @@ export function ProfileAllDestinationsView({
         park={editingPark ?? null}
         countryCode={editingCountryCode}
         countryBackingCity={editingCountryBackingCity}
-        visitedCountries={visitedCountries}
+        visitedCountries={viewVisitedCountries}
         onClose={() => {
           setEditingCityId(null);
           setEditingParkId(null);

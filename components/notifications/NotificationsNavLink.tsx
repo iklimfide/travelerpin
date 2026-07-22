@@ -1,12 +1,11 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { Link } from "@/lib/i18n/navigation";
 import { usePathname } from "next/navigation";
 import {
   NotificationsContext,
 } from "@/components/notifications/NotificationsProvider";
-import { fetchUnreadNotificationCount } from "@/lib/client/notification-actions";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 
 function BellIcon() {
@@ -28,21 +27,7 @@ export function NotificationsNavLink({ variant = "bottomBar" }: NotificationsNav
   const pathname = usePathname();
   const notifications = useContext(NotificationsContext);
   const active = pathname.startsWith("/notifications");
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      const count = await fetchUnreadNotificationCount();
-      if (!cancelled) setUnreadCount(count);
-    }
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, [pathname, notifications?.isOpen]);
+  const unreadCount = notifications?.unreadCount ?? 0;
 
   const isHero = variant === "hero";
   const buttonClass = isHero

@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { ProfileAllDestinationsView } from "@/components/profile/ProfileAllDestinationsView";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { getCachedCityHeroImageMap } from "@/lib/city/city-hero-images";
+import { getCachedParkHeroImageMap } from "@/lib/park/park-hero-images";
 import { buildProfileAllDestinations } from "@/lib/utils/profile-all-destinations";
 import { parseNextRoute } from "@/lib/utils/next-route";
 import { DEFAULT_DESCRIPTION, profileAllPath } from "@/lib/seo/site";
@@ -70,7 +71,10 @@ export default async function ProfileAllDestinationsPage({ params, searchParams 
   const { wishlistCountries: visibleWishlistCountries, wishlistCodes: visibleWishlistCodes } =
     filterWishlistForProfileView(viewData, isOwnProfile);
 
-  const cityHeroImages = await getCachedCityHeroImageMap();
+  const [cityHeroImages, parkHeroImages] = await Promise.all([
+    getCachedCityHeroImageMap(),
+    getCachedParkHeroImageMap(),
+  ]);
   const destinations = buildProfileAllDestinations(
     viewData.visitedCountries,
     viewData.visitedCities,
@@ -79,7 +83,8 @@ export default async function ProfileAllDestinationsPage({ params, searchParams 
     viewData.visitedCodes,
     profile.residence,
     locale,
-    cityHeroImages
+    cityHeroImages,
+    parkHeroImages
   );
 
   return (

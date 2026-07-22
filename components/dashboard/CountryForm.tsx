@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { addVisitedCountry } from "@/lib/client/country-actions";
 import { buildPinMediaPayload } from "@/components/dashboard/PinMediaFields";
@@ -31,7 +30,6 @@ export function CountryForm({
   onCancel,
   mediaFocus,
 }: CountryFormProps) {
-  const router = useRouter();
   const modal = useModal();
   const locale = useLocale() === "tr" ? "tr" : "en";
   const countryName = getCountryName(countryCode, locale);
@@ -104,7 +102,6 @@ export function CountryForm({
 
       notifyProfileDataChanged();
       onSuccess?.();
-      router.refresh();
     } finally {
       setLoading(false);
     }

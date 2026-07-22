@@ -1,5 +1,6 @@
 import { getCountryName } from "@/lib/data/countries";
 import { resolveCityHeroImageUrl } from "@/lib/city/city-hero-images";
+import { resolveParkHeroImageUrl } from "@/lib/park/park-hero-images";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { resolveCountryHubSlug } from "@/lib/data/country-hubs";
 import { findCityHubSlug } from "@/lib/data/city-hubs";
@@ -60,7 +61,18 @@ export type LatestVisitedCountry = {
   countrySlug: string | null;
 };
 
-function parkTripImage(park: VisitedPark): string {
+function parkTripImage(
+  park: VisitedPark,
+  parkHeroImages?: ReadonlyMap<string, string>
+): string {
+  if (parkHeroImages) {
+    return resolveParkHeroImageUrl(
+      park.country_code,
+      park.park_name,
+      park.park_type,
+      parkHeroImages
+    );
+  }
   return getDefaultParkHeroImage(park.park_type);
 }
 
@@ -160,7 +172,8 @@ export function buildProfileTrips(
   residence?: string | null,
   visitedCodes: string[] = [],
   locale: Locale = defaultLocale,
-  cityHeroImages?: ReadonlyMap<string, string>
+  cityHeroImages?: ReadonlyMap<string, string>,
+  parkHeroImages?: ReadonlyMap<string, string>
 ): ProfileTrip[] {
   const countryList = buildVisitedCountryList(
     visitedCountries,
@@ -248,7 +261,7 @@ export function buildProfileTrips(
     countryCode: park.country_code,
     countryName: getCountryName(park.country_code, locale),
     countrySlug: countryHubSlug(park.country_code),
-    imageUrl: parkTripImage(park),
+    imageUrl: parkTripImage(park, parkHeroImages),
     note: park.note,
     createdAt: park.created_at,
     badge: null,

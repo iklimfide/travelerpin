@@ -1,8 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { addCity } from "@/lib/client/city-actions";
+import { addCity, deleteCitiesBatch } from "@/lib/client/city-actions";
 import { addWishlistCountry, removeWishlistCountry } from "@/lib/client/country-actions";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -40,7 +39,6 @@ export function CityPageActions({
   loginHref,
   labels,
 }: CityPageActionsProps) {
-  const router = useRouter();
   const modal = useModal();
   const toast = useToast();
   const authGate = useAuthGate();
@@ -65,10 +63,9 @@ export function CityPageActions({
     setBusy(true);
     try {
       if (cityOnMap && state.cityId) {
-        const res = await fetch(`/api/cities/${state.cityId}`, { method: "DELETE" });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          await modal.alert((data.error as string) ?? "Failed to remove city", { variant: "error" });
+        const result = await deleteCitiesBatch({ ids: [state.cityId] });
+        if (!result.ok) {
+          await modal.alert(result.error ?? "Failed to remove city", { variant: "error" });
           return;
         }
         setState((current) => ({ ...current, cityId: null }));
@@ -101,7 +98,6 @@ export function CityPageActions({
         }));
         toast.show(labels.cityAdded);
       }
-      router.refresh();
     } finally {
       setBusy(false);
     }
@@ -131,7 +127,6 @@ export function CityPageActions({
         }
         toast.show(labels.wishlistAdded);
       }
-      router.refresh();
     } finally {
       setBusy(false);
     }

@@ -304,6 +304,14 @@
   min-width: 0;
 }
 
+.yp-panel__title-start {
+  min-width: 0;
+}
+
+.yp-tabs--inline {
+  margin-bottom: 0;
+}
+
 .yp-table {
   width: 100%;
   border-collapse: collapse;
@@ -396,6 +404,47 @@
 
 .yp-form-grid .yp-field--wide {
   grid-column: 1 / -1;
+}
+
+@media (min-width: 801px) {
+  .yp-form-grid--inline {
+    grid-template-columns: 13rem 11rem 10.5rem;
+    justify-content: start;
+  }
+
+  .yp-form-grid--inline-park {
+    grid-template-columns: 11rem 9rem 10rem 10rem;
+  }
+
+  .yp-form-grid--inline .yp-field {
+    min-width: 0;
+  }
+
+  .yp-form-grid--aux {
+    grid-template-columns: 7.5rem 7.5rem auto auto;
+    align-items: end;
+    justify-content: start;
+  }
+
+  .yp-form-actions--inline {
+    padding: 0;
+    align-self: end;
+  }
+
+  .yp-toolbar--inline .yp-field--filter-country {
+    flex: 0 0 10.5rem;
+    width: 10.5rem;
+  }
+
+  .yp-toolbar--inline .yp-field--filter-q {
+    flex: 0 0 13rem;
+    width: 13rem;
+  }
+
+  .yp-toolbar--inline .yp-field--filter-popular {
+    flex: 0 0 9.5rem;
+    width: 9.5rem;
+  }
 }
 
 .yp-form-actions {

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { ShareSheetModal } from "@/components/share/ShareSheetModal";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 import { finalizeTravelShare } from "@/lib/client/travel-share-snapshot";
@@ -21,11 +20,10 @@ export function ShareProfile({
   isOwnProfile = false,
 }: ShareProfileProps) {
   const { share: shareMessages } = useAppMessages();
-  const router = useRouter();
 
   async function handleShareComplete() {
     if (!isOwnProfile) return;
-    await finalizeTravelShare(() => router.refresh(), username);
+    await finalizeTravelShare(username);
   }
 
   const { open, setOpen, shareLinks, handleCopy } = useShareProfile({

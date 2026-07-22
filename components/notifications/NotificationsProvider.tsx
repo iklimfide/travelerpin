@@ -20,6 +20,7 @@ type NotificationsContextValue = {
   openNotifications: () => void;
   isOpen: boolean;
   triggerRef: RefObject<HTMLButtonElement | null>;
+  unreadCount: number;
 };
 
 export const NotificationsContext = createContext<NotificationsContextValue | null>(null);
@@ -99,7 +100,9 @@ export function NotificationsProvider({ username, children }: NotificationsProvi
   }, []);
 
   return (
-    <NotificationsContext.Provider value={{ openNotifications, isOpen: open, triggerRef }}>
+    <NotificationsContext.Provider
+      value={{ openNotifications, isOpen: open, triggerRef, unreadCount: prefetchedUnreadCount }}
+    >
       {children}
       <NotificationsModal
         open={open}

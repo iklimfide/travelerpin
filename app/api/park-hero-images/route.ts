@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
 import {
-  getCachedCityHeroImageMap,
-  serializeCityHeroImageMap,
-  type CityHeroImageRow,
-} from "@/lib/city/city-hero-images";
+  getCachedParkHeroImageMap,
+  serializeParkHeroImageMap,
+} from "@/lib/park/park-hero-images";
 
 const HERO_IMAGES_CACHE_CONTROL = "public, s-maxage=300, stale-while-revalidate=600";
 
 export async function GET() {
-  const heroMap = await getCachedCityHeroImageMap();
+  const heroMap = await getCachedParkHeroImageMap();
   return NextResponse.json(
     {
-      images: serializeCityHeroImageMap(heroMap),
+      images: serializeParkHeroImageMap(heroMap),
     },
     {
       headers: {
@@ -20,5 +19,3 @@ export async function GET() {
     }
   );
 }
-
-export type { CityHeroImageRow };

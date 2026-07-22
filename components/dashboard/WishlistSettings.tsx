@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useModal } from "@/components/ui/ModalProvider";
+import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 
 type WishlistSettingsProps = {
@@ -12,7 +12,6 @@ type WishlistSettingsProps = {
 export function WishlistSettings({ wishlistPublic }: WishlistSettingsProps) {
   const { wishlist: wishlistMessages } = useAppMessages();
   const modal = useModal();
-  const router = useRouter();
   const [enabled, setEnabled] = useState(wishlistPublic);
   const [loading, setLoading] = useState(false);
 
@@ -34,7 +33,7 @@ export function WishlistSettings({ wishlistPublic }: WishlistSettingsProps) {
         return;
       }
 
-      router.refresh();
+      notifyProfileDataChanged();
     } finally {
       setLoading(false);
     }

@@ -1,7 +1,6 @@
 "use client";
 
 import { Link } from "@/lib/i18n/navigation";
-import { useRouter } from "next/navigation";
 import { useCallback, useState, type ReactNode } from "react";
 import { ShareSheetModal } from "@/components/share/ShareSheetModal";
 import { ShareTravelUpdateModal } from "@/components/share/ShareTravelUpdateModal";
@@ -101,15 +100,14 @@ export function ProfileTravelUpdateCard({
   persistShareSnapshot = true,
 }: ProfileTravelUpdateCardProps) {
   const { profile: profileMessages } = useAppMessages();
-  const router = useRouter();
   const [updateOpen, setUpdateOpen] = useState(false);
   const hasUpdate = delta.hasChanges;
   const allHref = profileAllPath(username);
 
   const handleShareComplete = useCallback(async () => {
     if (!persistShareSnapshot) return;
-    await finalizeTravelShare(() => router.refresh(), username);
-  }, [persistShareSnapshot, router, username]);
+    await finalizeTravelShare(username);
+  }, [persistShareSnapshot, username]);
 
   const { open, setOpen, shareLinks, handleCopy } = useShareProfile({
     username,

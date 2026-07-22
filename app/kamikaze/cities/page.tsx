@@ -1,5 +1,5 @@
-import { KamikazeCityImagesPanel } from "@/components/kamikaze/KamikazeCityImagesPanel";
+import { KamikazeCitiesPanel } from "@/components/kamikaze/KamikazeCitiesPanel";
 
 export default function KamikazeCityImagesPage() {
-  return <KamikazeCityImagesPanel />;
+  return <KamikazeCitiesPanel />;
 }

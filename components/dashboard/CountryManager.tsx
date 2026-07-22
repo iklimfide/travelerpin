@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -48,7 +47,6 @@ export function CountryManager({
   onEditCountryCities,
 }: CountryManagerProps) {
   const { country: countryMessages, wishlist: wishlistMessages, modal: modalMessages } = useAppMessages();
-  const router = useRouter();
   const modal = useModal();
   const toast = useToast();
   const locale = useLocale() === "tr" ? "tr" : "en";
@@ -191,7 +189,6 @@ export function CountryManager({
         if (checked) {
           setCityPickerTarget({ code: row.code, name: row.name });
         }
-        router.refresh();
       }
     } finally {
       setBusyCode(null);
@@ -203,8 +200,7 @@ export function CountryManager({
     setBusyCode(row.code);
 
     try {
-      const ok = checked ? await addWishlist(row.code) : await removeWishlist(row);
-      if (ok) router.refresh();
+      await (checked ? addWishlist(row.code) : removeWishlist(row));
     } finally {
       setBusyCode(null);
     }
@@ -322,7 +318,6 @@ export function CountryManager({
           existingCityNames={existingCityNamesForPicker}
           onAdded={() => {
             setCityPickerTarget(null);
-            router.refresh();
           }}
           onClose={() => setCityPickerTarget(null)}
         />

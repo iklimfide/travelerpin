@@ -5,6 +5,7 @@ import { findParkHubSlug } from "@/lib/data/park-hubs";
 import { defaultLocale, type Locale } from "@/lib/i18n/config";
 import type { ParkType, VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 import { getLocalizedParkName } from "@/lib/i18n/park-place-names";
+import { resolveParkHeroImageUrl } from "@/lib/park/park-hero-images";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
 import {
   buildProfileTrips,
@@ -62,7 +63,8 @@ export function buildProfileAllDestinations(
   visitedCodes: string[],
   residence?: string | null,
   locale: Locale = defaultLocale,
-  cityHeroImages?: ReadonlyMap<string, string>
+  cityHeroImages?: ReadonlyMap<string, string>,
+  parkHeroImages?: ReadonlyMap<string, string>
 ): ProfileAllDestinations {
   const residenceCountryCode = resolveResidenceCountryCode(residence);
   const countryList = buildVisitedCountryList(
@@ -146,7 +148,14 @@ export function buildProfileAllDestinations(
         countryCode: park.country_code,
         countryName: getCountryName(park.country_code, locale),
         countrySlug: countryHubSlug(park.country_code),
-        imageUrl: getDefaultParkHeroImage(park.park_type),
+        imageUrl: parkHeroImages
+          ? resolveParkHeroImageUrl(
+              park.country_code,
+              park.park_name,
+              park.park_type,
+              parkHeroImages
+            )
+          : getDefaultParkHeroImage(park.park_type),
         parkType: park.park_type,
         note: park.note,
       })),
@@ -179,7 +188,8 @@ export function buildProfileAllDestinations(
       residence,
       visitedCodes,
       locale,
-      cityHeroImages
+      cityHeroImages,
+      parkHeroImages
     ).filter((trip) => trip.kind === "city"),
     parks,
     wishlist,

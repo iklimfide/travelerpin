@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { ProfileInstagramLinkCard } from "@/components/profile/ProfileInstagramLinkCard";
@@ -230,7 +229,6 @@ export function ProfileMediaGallery({
 }: ProfileMediaGalleryProps) {
   const { modal: modalMessages, profile: profileMessages } = useAppMessages();
   const locale = useLocale() as Locale;
-  const router = useRouter();
   const modal = useModal();
   const [expandedItem, setExpandedItem] = useState<HubGalleryItem | null>(null);
   const [editingCityId, setEditingCityId] = useState<string | null>(null);
@@ -349,7 +347,6 @@ export function ProfileMediaGallery({
 
     notifyProfileDataChanged();
     refreshTravelStateAfterSave();
-    router.refresh();
   }
 
   const canShowViewAll = showViewAll ?? Boolean(onViewAll || viewAllHref);

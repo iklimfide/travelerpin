@@ -7,8 +7,8 @@ import { ParkPageNav } from "@/components/park/ParkPageNav";
 import { ParkPagePinStatsBlock } from "@/components/park/ParkPagePinStatsBlock";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { countryPath, parkCategoryPath, parkPath } from "@/lib/seo/site";
+import { getParkHeroImageUrl } from "@/lib/park/park-hero-images";
 import { parkCategorySlugForParkType } from "@/lib/utils/park-category";
-import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import type { ParkHub } from "@/lib/data/park-hubs";
 import type { ParkVisitorState } from "@/lib/data/park-visitor-state";
@@ -61,7 +61,7 @@ type ParkPageContentProps = {
   };
 };
 
-export function ParkPageContent({
+export async function ParkPageContent({
   hub,
   travelers,
   wishlistTravelers = [],
@@ -73,7 +73,7 @@ export function ParkPageContent({
   pinCountItems = [],
   labels,
 }: ParkPageContentProps) {
-  const heroUrl = getDefaultParkHeroImage(hub.parkType);
+  const heroUrl = await getParkHeroImageUrl(hub.countryCode, hub.name, hub.parkType);
   const featuredPin = memoryPins[0] ?? null;
 
   const rows = [

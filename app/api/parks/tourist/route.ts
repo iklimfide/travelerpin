@@ -39,7 +39,8 @@ export async function GET(request: Request) {
       parkType: type ?? undefined,
       limit: 100,
       locale,
-    })
+    }),
+    overlay
   );
 
   return NextResponse.json(

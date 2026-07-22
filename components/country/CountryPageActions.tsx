@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   addVisitedCountry,
@@ -38,7 +37,6 @@ export function CountryPageActions({
   loginHref,
   labels,
 }: CountryPageActionsProps) {
-  const router = useRouter();
   const modal = useModal();
   const toast = useToast();
   const authGate = useAuthGate();
@@ -63,10 +61,6 @@ export function CountryPageActions({
     optimisticWishlist !== null ? optimisticWishlist : Boolean(state.wishlistId);
   const visitedLocked = state.visitedViaPlacesOnly;
   const wishlistDisabled = onMap;
-
-  function refreshInBackground() {
-    void Promise.resolve().then(() => router.refresh());
-  }
 
   function handleVisited() {
     if (!state.isLoggedIn) {
@@ -113,7 +107,6 @@ export function CountryPageActions({
           return;
         }
         setOptimisticOnMap(null);
-        refreshInBackground();
       });
       return;
     }
@@ -152,7 +145,6 @@ export function CountryPageActions({
         visitedId: result.id,
         isOnMap: true,
       }));
-      refreshInBackground();
     });
   }
 
@@ -183,7 +175,6 @@ export function CountryPageActions({
           await modal.alert(result.error, { variant: "error" });
           return;
         }
-        refreshInBackground();
       });
       return;
     }
@@ -208,7 +199,6 @@ export function CountryPageActions({
 
       setOptimisticWishlist(null);
       setState((current) => ({ ...current, wishlistId: result.id }));
-      refreshInBackground();
     });
   }
 

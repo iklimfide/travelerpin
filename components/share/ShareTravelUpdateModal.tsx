@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { finalizeTravelShare } from "@/lib/client/travel-share-snapshot";
 import { captureProfileStoryCard } from "@/lib/client/capture-profile-story-card";
 import {
@@ -30,7 +29,6 @@ export function ShareTravelUpdateModal({
   persistShareSnapshot = true,
 }: ShareTravelUpdateModalProps) {
   const { share: shareMessages, profile: profileMessages } = useAppMessages();
-  const router = useRouter();
   const [downloading, setDownloading] = useState<"square" | "story" | null>(null);
   const hasUpdate = delta.hasChanges;
 
@@ -54,8 +52,8 @@ export function ShareTravelUpdateModal({
   const completeShare = useCallback(async () => {
     onClose();
     if (!persistShareSnapshot) return;
-    await finalizeTravelShare(() => router.refresh(), username);
-  }, [onClose, persistShareSnapshot, router, username]);
+    await finalizeTravelShare(username);
+  }, [onClose, persistShareSnapshot, username]);
 
   async function downloadImage(format: "square" | "story") {
     const captureId =

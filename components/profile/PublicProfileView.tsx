@@ -8,6 +8,7 @@ import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
 import { ProfileSquareCaptureHeader } from "@/components/profile/ProfileSquareCaptureHeader";
 import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections";
 import { getCachedCityHeroImageMap } from "@/lib/city/city-hero-images";
+import { getCachedParkHeroImageMap } from "@/lib/park/park-hero-images";
 import { isDemoProfileUsername } from "@/lib/data/jennifer-demo-page";
 import {
   BADGE_TIER_THEMES,
@@ -96,7 +97,10 @@ export async function PublicProfileView({
     visitedParks.length > 0 ||
     visibleWishlistCodes.length > 0;
 
-  const cityHeroImages = await getCachedCityHeroImageMap();
+  const [cityHeroImages, parkHeroImages] = await Promise.all([
+    getCachedCityHeroImageMap(),
+    getCachedParkHeroImageMap(),
+  ]);
   const trips = buildProfileTrips(
     visitedCountries,
     visitedCities,
@@ -104,7 +108,8 @@ export async function PublicProfileView({
     profile.residence,
     visitedCodes,
     locale === "tr" ? "tr" : "en",
-    cityHeroImages
+    cityHeroImages,
+    parkHeroImages
   );
   const mediaPins = buildProfileMediaPins(visitedCities, visitedParks, profile);
   const isDemoProfile = isDemoProfileUsername(profile.username);

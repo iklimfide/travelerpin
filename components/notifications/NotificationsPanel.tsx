@@ -319,7 +319,6 @@ export function NotificationsPanel({
         }))
       );
       setUnreadCount(0);
-      router.refresh();
     });
   }
 

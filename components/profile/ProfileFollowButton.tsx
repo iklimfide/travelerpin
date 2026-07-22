@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { useAuthGate } from "@/components/auth/useAuthGate";
 import { ProfileFollowStats } from "@/components/profile/ProfileFollowStats";
 import { followProfile, unfollowProfile } from "@/lib/client/follow-actions";
@@ -32,7 +31,6 @@ export function ProfileFollowButton({
   showStats = true,
 }: ProfileFollowButtonProps) {
   const { profile: profileMessages } = useAppMessages();
-  const router = useRouter();
   const { requireLogin } = useAuthGate();
   const [isFollowing, setIsFollowing] = useState(initialFollowing);
   const [followerCount, setFollowerCount] = useState(initialFollowerCount);
@@ -55,7 +53,6 @@ export function ProfileFollowButton({
 
       setIsFollowing(result.following);
       setFollowerCount(result.followerCount);
-      router.refresh();
     });
   }
 

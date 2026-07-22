@@ -1,3 +1,5 @@
+import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
+
 export async function saveTravelShareSnapshot(): Promise<boolean> {
   try {
     const response = await fetch("/api/me/travel-share-snapshot", { method: "POST" });
@@ -7,11 +9,8 @@ export async function saveTravelShareSnapshot(): Promise<boolean> {
   }
 }
 
-/** Save snapshot, then refresh on the next tick. */
-export async function finalizeTravelShare(
-  refresh: () => void,
-  _username: string
-): Promise<void> {
+/** Save snapshot, then refresh profile caches client-side (no RSC reload). */
+export async function finalizeTravelShare(username?: string | null): Promise<void> {
   await saveTravelShareSnapshot();
-  queueMicrotask(() => refresh());
+  notifyProfileDataChanged(username);
 }

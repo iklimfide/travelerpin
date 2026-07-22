@@ -1,8 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { addPark } from "@/lib/client/park-actions";
+import { addPark, deleteParksBatch } from "@/lib/client/park-actions";
 import { addWishlistCountry, removeWishlistCountry } from "@/lib/client/country-actions";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -42,7 +41,6 @@ export function ParkPageActions({
   loginHref,
   labels,
 }: ParkPageActionsProps) {
-  const router = useRouter();
   const modal = useModal();
   const toast = useToast();
   const authGate = useAuthGate();
@@ -67,10 +65,9 @@ export function ParkPageActions({
     setBusy(true);
     try {
       if (parkOnMap && state.parkId) {
-        const res = await fetch(`/api/parks/${state.parkId}`, { method: "DELETE" });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          await modal.alert((data.error as string) ?? "Failed to remove park", { variant: "error" });
+        const result = await deleteParksBatch({ ids: [state.parkId] });
+        if (!result.ok) {
+          await modal.alert(result.error ?? "Failed to remove park", { variant: "error" });
           return;
         }
         setState((current) => ({ ...current, parkId: null }));
@@ -98,7 +95,6 @@ export function ParkPageActions({
         }));
         toast.show(labels.parkAdded);
       }
-      router.refresh();
     } finally {
       setBusy(false);
     }
@@ -128,7 +124,6 @@ export function ParkPageActions({
         }
         toast.show(labels.wishlistAdded);
       }
-      router.refresh();
     } finally {
       setBusy(false);
     }

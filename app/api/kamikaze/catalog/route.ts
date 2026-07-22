@@ -18,6 +18,7 @@ import {
   getCatalogOverlayFresh,
   popularityOverrideMap,
   parkPopularityOverrideMap,
+  parkNameTrOverrideMap,
   resolveParkPopular,
   cityNameTrOverrideMap,
   countryNameTrOverrideMap,
@@ -27,6 +28,7 @@ import {
 } from "@/lib/kamikaze/catalog-overlay";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
 import { resolveCityNameTr } from "@/lib/i18n/place-names";
+import { resolveParkNameTr } from "@/lib/i18n/park-place-names";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
 import { PARK_TYPES, type ParkType } from "@/types/database";
@@ -46,6 +48,7 @@ type CityListRow = {
 
 type ParkListRow = {
   name: string;
+  nameTr: string | null;
   parkType: ParkType;
   countryCode: string;
   countryName: string;
@@ -77,6 +80,38 @@ function resolveCityNameTrForCatalog(
   overrides: Map<string, string>
 ): string | null {
   return resolveCityNameTr(countryCode, name, overrides);
+}
+
+function resolveParkNameTrForCatalog(
+  countryCode: string,
+  name: string,
+  parkType: ParkType,
+  overrides: Map<string, string>
+): string | null {
+  return resolveParkNameTr(countryCode, name, overrides, parkType);
+}
+
+function withParkNameTr(
+  row: Omit<ParkListRow, "nameTr">,
+  overrides: Map<string, string>
+): ParkListRow {
+  return {
+    ...row,
+    nameTr: resolveParkNameTrForCatalog(row.countryCode, row.name, row.parkType, overrides),
+  };
+}
+
+function parkNameMatchesSearch(
+  countryCode: string,
+  name: string,
+  parkType: ParkType,
+  q: string,
+  nameTrOverrides: Map<string, string>
+): boolean {
+  if (q.length < 2) return true;
+  if (matchesPlaceNameSearch(name, q)) return true;
+  const nameTr = resolveParkNameTrForCatalog(countryCode, name, parkType, nameTrOverrides);
+  return nameTr ? matchesPlaceNameSearch(nameTr, q) : false;
 }
 
 type CountryListRow = {
@@ -216,6 +251,7 @@ function buildPopularOnlyParkRows(
   overlay: Awaited<ReturnType<typeof getCatalogOverlay>>,
   excludedKeys: Set<string>,
   overrides: Map<string, boolean>,
+  nameTrOverrides: Map<string, string>,
   country: string,
   q: string
 ): ParkListRow[] {
@@ -238,18 +274,25 @@ function buildPopularOnlyParkRows(
         catalogNameKey(park.name) === nameKey
     );
     if (ypMatch) {
-      if (q.length >= 2 && !matchesPlaceNameSearch(ypMatch.name, q)) continue;
-      rows.push({
-        id: ypMatch.id,
-        name: ypMatch.name,
-        parkType,
-        countryCode: code,
-        countryName: ypMatch.country_name,
-        latitude: ypMatch.latitude,
-        longitude: ypMatch.longitude,
-        source: "yp",
-        popular: true,
-      });
+      if (q.length >= 2 && !parkNameMatchesSearch(code, ypMatch.name, parkType, q, nameTrOverrides)) {
+        continue;
+      }
+      rows.push(
+        withParkNameTr(
+          {
+            id: ypMatch.id,
+            name: ypMatch.name,
+            parkType,
+            countryCode: code,
+            countryName: ypMatch.country_name,
+            latitude: ypMatch.latitude,
+            longitude: ypMatch.longitude,
+            source: "yp",
+            popular: true,
+          },
+          nameTrOverrides
+        )
+      );
       continue;
     }
 
@@ -262,18 +305,25 @@ function buildPopularOnlyParkRows(
         catalogNameKey(park.name) === nameKey
     );
     if (!staticMatch) continue;
-    if (q.length >= 2 && !matchesPlaceNameSearch(staticMatch.name, q)) continue;
+    if (q.length >= 2 && !parkNameMatchesSearch(code, staticMatch.name, parkType, q, nameTrOverrides)) {
+      continue;
+    }
 
-    rows.push({
-      name: staticMatch.name,
-      parkType: staticMatch.parkType,
-      countryCode: code,
-      countryName: getCountryName(code),
-      latitude: staticMatch.latitude,
-      longitude: staticMatch.longitude,
-      source: "static",
-      popular: true,
-    });
+    rows.push(
+      withParkNameTr(
+        {
+          name: staticMatch.name,
+          parkType: staticMatch.parkType,
+          countryCode: code,
+          countryName: getCountryName(code),
+          latitude: staticMatch.latitude,
+          longitude: staticMatch.longitude,
+          source: "static",
+          popular: true,
+        },
+        nameTrOverrides
+      )
+    );
   }
 
   return dedupeParkListRows(rows);
@@ -411,49 +461,120 @@ export async function GET(request: Request) {
       ? popularFilterRaw
       : null;
 
-  // YP additions only (newest first) — used by Şehir ekle / Park ekle tabs.
+  // YP additions only — paginated browse (Şehirler hub) or full dump (Park ekle tab).
   // Do not hide YP rows via exclusions: exclusions only suppress static catalog
   // twins. Filtering YP here created "ghost" rows (in DB, invisible in UI, blocks insert).
   if (searchParams.get("ypOnly") === "1") {
     const overlayFresh = await getCatalogOverlayFresh();
+    const offsetRaw = Number(searchParams.get("offset") ?? "0");
+    const limitRaw = Number(searchParams.get("limit") ?? "80");
+    const offset =
+      Number.isFinite(offsetRaw) && offsetRaw > 0 ? Math.floor(offsetRaw) : 0;
+    const limit = Number.isFinite(limitRaw)
+      ? Math.min(200, Math.max(1, Math.floor(limitRaw)))
+      : 80;
+    const paginate = searchParams.has("offset") || searchParams.has("limit");
 
     if (kind === "city") {
       const overrides = popularityOverrideMap(overlayFresh);
       const nameTrOverrides = cityNameTrOverrideMap(overlayFresh);
-      const results = overlayFresh.cities.map((row) =>
-        withCityNameTr(
-          {
-            id: row.id,
-            name: row.name,
-            countryCode: row.country_code.toUpperCase(),
-            countryName: row.country_name,
-            latitude: row.latitude,
-            longitude: row.longitude,
-            source: "yp" as const,
-            popular: resolveCityPopular(row.country_code, row.name, overrides),
-            capital: resolveCityCapital(row.country_code, row.name),
-          },
-          nameTrOverrides
+
+      const filtered = overlayFresh.cities.filter((row) => {
+        const code = row.country_code.toUpperCase();
+        if (country && code !== country) return false;
+        return cityNameMatchesSearch(code, row.name, q, nameTrOverrides);
+      });
+
+      const rows = sortCityListRows(
+        applyPopularFilter(
+          filtered.map((row) =>
+            withCityNameTr(
+              {
+                id: row.id,
+                name: row.name,
+                countryCode: row.country_code.toUpperCase(),
+                countryName: row.country_name,
+                latitude: row.latitude,
+                longitude: row.longitude,
+                source: "yp" as const,
+                popular: resolveCityPopular(row.country_code, row.name, overrides),
+                capital: resolveCityCapital(row.country_code, row.name),
+              },
+              nameTrOverrides
+            )
+          ),
+          popularFilter
         )
       );
-      // overlay.cities is already created_at desc.
-      return NextResponse.json({ kind: "city", results, ypOnly: true });
+
+      if (!paginate) {
+        return NextResponse.json({ kind: "city", results: rows, ypOnly: true });
+      }
+
+      const page = rows.slice(offset, offset + limit);
+      const nextOffset = offset + page.length;
+      return NextResponse.json({
+        kind: "city",
+        results: page,
+        total: rows.length,
+        hasMore: nextOffset < rows.length,
+        nextOffset,
+        ypOnly: true,
+        popularFilter,
+      });
     }
 
     const parkOverrides = parkPopularityOverrideMap(overlayFresh);
-    const results = overlayFresh.parks.map((row) => ({
-      id: row.id,
-      name: row.name,
-      parkType: row.park_type,
-      countryCode: row.country_code.toUpperCase(),
-      countryName: row.country_name,
-      latitude: row.latitude,
-      longitude: row.longitude,
-      source: "yp" as const,
-      popular: resolveParkPopular(row.country_code, row.name, row.park_type, parkOverrides),
-      createdAt: row.created_at,
-    }));
-    return NextResponse.json({ kind: "park", results, ypOnly: true });
+    const parkNameTrOverrides = parkNameTrOverrideMap(overlayFresh);
+
+    const filtered = overlayFresh.parks.filter((row) => {
+      const code = row.country_code.toUpperCase();
+      if (country && code !== country) return false;
+      return parkNameMatchesSearch(code, row.name, row.park_type, q, parkNameTrOverrides);
+    });
+
+    const rows = sortParkListRows(
+      applyPopularFilter(
+        filtered.map((row) =>
+          withParkNameTr(
+            {
+              id: row.id,
+              name: row.name,
+              parkType: row.park_type,
+              countryCode: row.country_code.toUpperCase(),
+              countryName: row.country_name,
+              latitude: row.latitude,
+              longitude: row.longitude,
+              source: "yp" as const,
+              popular: resolveParkPopular(
+                row.country_code,
+                row.name,
+                row.park_type,
+                parkOverrides
+              ),
+            },
+            parkNameTrOverrides
+          )
+        ),
+        popularFilter
+      )
+    );
+
+    if (!paginate) {
+      return NextResponse.json({ kind: "park", results: rows, ypOnly: true });
+    }
+
+    const page = rows.slice(offset, offset + limit);
+    const nextOffset = offset + page.length;
+    return NextResponse.json({
+      kind: "park",
+      results: page,
+      total: rows.length,
+      hasMore: nextOffset < rows.length,
+      nextOffset,
+      ypOnly: true,
+      popularFilter,
+    });
   }
 
   const overlay = await getCatalogOverlay();
@@ -582,12 +703,20 @@ export async function GET(request: Request) {
       .map((row) => `${row.country_code.toUpperCase()}:${row.name_key}`)
   );
   const parkOverrides = parkPopularityOverrideMap(overlay);
+  const parkNameTrOverrides = parkNameTrOverrideMap(overlay);
 
   const popularOnlyBrowse = popularFilter === "popular" && !country && q.length < 2;
 
   if (popularOnlyBrowse) {
     const all = sortParkListRows(
-      buildPopularOnlyParkRows(overlay, excludedKeys, parkOverrides, country, q)
+      buildPopularOnlyParkRows(
+        overlay,
+        excludedKeys,
+        parkOverrides,
+        parkNameTrOverrides,
+        country,
+        q
+      )
     );
     const page = all.slice(offset, offset + limit);
     const nextOffset = offset + page.length;
@@ -605,11 +734,10 @@ export async function GET(request: Request) {
   const additions = overlay.parks.filter((row) => {
     const code = row.country_code.toUpperCase();
     if (country && code !== country) return false;
-    if (q.length >= 2 && !matchesPlaceNameSearch(row.name, q)) return false;
-    return true;
+    return parkNameMatchesSearch(code, row.name, row.park_type, q, parkNameTrOverrides);
   });
 
-  let staticMatches: ParkListRow[] = [];
+  let staticMatches: Array<Omit<ParkListRow, "nameTr">> = [];
 
   if (q.length >= 2 || country) {
     staticMatches = TOURIST_PARKS.filter((park) => {
@@ -617,8 +745,13 @@ export async function GET(request: Request) {
         return false;
       }
       if (country && park.countryCode !== country) return false;
-      if (q.length >= 2 && !matchesPlaceNameSearch(park.name, q)) return false;
-      return true;
+      return parkNameMatchesSearch(
+        park.countryCode,
+        park.name,
+        park.parkType,
+        q,
+        parkNameTrOverrides
+      );
     }).map((park) => ({
       name: park.name,
       parkType: park.parkType,
@@ -631,20 +764,31 @@ export async function GET(request: Request) {
     }));
   }
 
-  const additionRows: ParkListRow[] = additions.map((row) => ({
-    id: row.id,
-    name: row.name,
-    parkType: row.park_type,
-    countryCode: row.country_code,
-    countryName: row.country_name,
-    latitude: row.latitude,
-    longitude: row.longitude,
-    source: "yp" as const,
-    popular: resolveParkPopular(row.country_code, row.name, row.park_type, parkOverrides),
-  }));
+  const additionRows: ParkListRow[] = additions.map((row) =>
+    withParkNameTr(
+      {
+        id: row.id,
+        name: row.name,
+        parkType: row.park_type,
+        countryCode: row.country_code,
+        countryName: row.country_name,
+        latitude: row.latitude,
+        longitude: row.longitude,
+        source: "yp" as const,
+        popular: resolveParkPopular(row.country_code, row.name, row.park_type, parkOverrides),
+      },
+      parkNameTrOverrides
+    )
+  );
 
   const all = sortParkListRows(
-    applyPopularFilter(dedupeParkListRows([...additionRows, ...staticMatches]), popularFilter)
+    applyPopularFilter(
+      dedupeParkListRows([
+        ...additionRows,
+        ...staticMatches.map((row) => withParkNameTr(row, parkNameTrOverrides)),
+      ]),
+      popularFilter
+    )
   );
   const page = all.slice(offset, offset + limit);
   const nextOffset = offset + page.length;
@@ -706,6 +850,7 @@ type CatalogBody =
   | {
       action: "add_park";
       name: string;
+      nameTr?: string | null;
       countryCode: string;
       parkType: ParkType;
       latitude?: number | string | null;
@@ -753,6 +898,7 @@ type CatalogBody =
       countryCode: string;
       name: string;
       nameTr: string | null;
+      parkType?: ParkType;
     }
   | {
       action: "set_country_name_tr";
@@ -968,6 +1114,14 @@ export async function POST(request: Request) {
       );
       if (popularError) {
         return NextResponse.json({ error: popularError, park: data }, { status: 400 });
+      }
+    }
+
+    const nameTr = body.nameTr?.trim() ? body.nameTr.trim() : null;
+    if (nameTr) {
+      const trError = await upsertParkNameTr(countryCode, name, body.parkType, nameTr);
+      if (trError) {
+        return NextResponse.json({ error: trError, park: data }, { status: 400 });
       }
     }
 
@@ -1275,6 +1429,42 @@ export async function POST(request: Request) {
           return NextResponse.json({ error: trError }, { status: 400 });
         }
       }
+    } else if (body.kind === "park") {
+      const parkType = body.parkType;
+      if (!parkType || !PARK_TYPES.includes(parkType)) {
+        return NextResponse.json({ error: "Park türü gerekli" }, { status: 400 });
+      }
+      if (oldKey !== newKey) {
+        const { data: oldTr } = await admin
+          .from("yp_park_name_tr")
+          .select("name_tr")
+          .eq("country_code", countryCode)
+          .eq("name_key", oldKey)
+          .eq("park_type", parkType)
+          .maybeSingle();
+        if (oldTr?.name_tr) {
+          await admin
+            .from("yp_park_name_tr")
+            .delete()
+            .eq("country_code", countryCode)
+            .eq("name_key", oldKey)
+            .eq("park_type", parkType);
+          if (body.nameTr === undefined) {
+            await upsertParkNameTr(countryCode, newName, parkType, String(oldTr.name_tr));
+          }
+        }
+      }
+      if (body.nameTr !== undefined) {
+        const trError = await upsertParkNameTr(
+          countryCode,
+          newName,
+          parkType,
+          body.nameTr?.trim() ? body.nameTr : null
+        );
+        if (trError) {
+          return NextResponse.json({ error: trError }, { status: 400 });
+        }
+      }
     }
 
     await revalidateCatalogOverlay();
@@ -1285,15 +1475,30 @@ export async function POST(request: Request) {
     const countryCode = body.countryCode?.trim().toUpperCase();
     const name = body.name?.trim();
     if (!countryCode || countryCode.length !== 2 || !name) {
-      return NextResponse.json({ error: "Ülke ve şehir adı gerekli" }, { status: 400 });
+      return NextResponse.json({ error: "Ülke ve ad gerekli" }, { status: 400 });
     }
-    const trError = await upsertCityNameTr(
-      countryCode,
-      name,
-      body.nameTr?.trim() ? body.nameTr : null
-    );
-    if (trError) {
-      return NextResponse.json({ error: trError }, { status: 400 });
+    if (body.parkType) {
+      if (!PARK_TYPES.includes(body.parkType)) {
+        return NextResponse.json({ error: "Geçersiz park türü" }, { status: 400 });
+      }
+      const trError = await upsertParkNameTr(
+        countryCode,
+        name,
+        body.parkType,
+        body.nameTr?.trim() ? body.nameTr : null
+      );
+      if (trError) {
+        return NextResponse.json({ error: trError }, { status: 400 });
+      }
+    } else {
+      const trError = await upsertCityNameTr(
+        countryCode,
+        name,
+        body.nameTr?.trim() ? body.nameTr : null
+      );
+      if (trError) {
+        return NextResponse.json({ error: trError }, { status: 400 });
+      }
     }
     await revalidateCatalogOverlay();
     return NextResponse.json({ ok: true });
@@ -1440,6 +1645,68 @@ export async function POST(request: Request) {
     });
     if (error && isMissingRelationError(error.message)) {
       return "yp_city_name_tr tablosu yok — migration 035 uygulanmalı";
+    }
+    return error?.message ?? null;
+  }
+
+  async function upsertParkNameTr(
+    countryCodeRaw: string,
+    nameRaw: string,
+    parkTypeRaw: ParkType,
+    nameTrRaw: string | null
+  ): Promise<string | null> {
+    const countryCode = countryCodeRaw.trim().toUpperCase();
+    const name = nameRaw.trim();
+    if (!countryCode || countryCode.length !== 2 || !name) {
+      return "Geçersiz TR adı isteği";
+    }
+    if (!PARK_TYPES.includes(parkTypeRaw)) {
+      return "Geçersiz park türü";
+    }
+
+    const nameKey = catalogNameKey(name, countryCode);
+    const nameTr = nameTrRaw?.trim() ?? "";
+
+    if (!nameTr) {
+      await admin
+        .from("yp_park_name_tr")
+        .delete()
+        .eq("country_code", countryCode)
+        .eq("name_key", nameKey)
+        .eq("park_type", parkTypeRaw);
+      return null;
+    }
+
+    const displayTr = formatCityDisplayName(nameTr);
+    const now = new Date().toISOString();
+    const { data: existing } = await admin
+      .from("yp_park_name_tr")
+      .select("id")
+      .eq("country_code", countryCode)
+      .eq("name_key", nameKey)
+      .eq("park_type", parkTypeRaw)
+      .maybeSingle();
+
+    if (existing?.id) {
+      const { error } = await admin
+        .from("yp_park_name_tr")
+        .update({ name_tr: displayTr, updated_at: now })
+        .eq("id", existing.id);
+      if (error && isMissingRelationError(error.message)) {
+        return "yp_park_name_tr tablosu yok — migration 041 uygulanmalı";
+      }
+      return error?.message ?? null;
+    }
+
+    const { error } = await admin.from("yp_park_name_tr").insert({
+      country_code: countryCode,
+      name_key: nameKey,
+      park_type: parkTypeRaw,
+      name_tr: displayTr,
+      updated_at: now,
+    });
+    if (error && isMissingRelationError(error.message)) {
+      return "yp_park_name_tr tablosu yok — migration 041 uygulanmalı";
     }
     return error?.message ?? null;
   }

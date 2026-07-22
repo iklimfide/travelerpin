@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { CityForm } from "@/components/dashboard/CityForm";
 import { CountryForm } from "@/components/dashboard/CountryForm";
 import { ParkForm } from "@/components/dashboard/ParkForm";
@@ -28,7 +27,6 @@ export function ProfileDestinationEditModal({
   mediaFocus,
 }: ProfileDestinationEditModalProps) {
   const { country: countryMessages, city: cityMessages, share: shareMessages, park: parkMessages } = useAppMessages();
-  const router = useRouter();
   const open = Boolean(city || park || countryCode);
 
   useEffect(() => {
@@ -48,7 +46,6 @@ export function ProfileDestinationEditModal({
 
   function handleSuccess() {
     onClose();
-    router.refresh();
   }
 
   return (
