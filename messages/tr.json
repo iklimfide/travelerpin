@@ -325,15 +325,6 @@
     "noInstagramPostsYet": "Bu park için henüz Instagram gönderisi eklenmedi.",
     "noPhotosYet": "Bu park için henüz fotoğraf eklenmedi."
   },
-  "parksListing": {
-    "home": "Ana sayfa",
-    "themeParksTitle": "Tema parkları",
-    "themeParksDescription": "Gezginlerin TravelerPin'de pinlediği tema parklarını keşfet.",
-    "nationalParksTitle": "Doğa & Parklar",
-    "nationalParksDescription": "Gezginlerin TravelerPin'de pinlediği Doğa & Parklar destinasyonlarını keşfet.",
-    "parkCount": "{count, plural, one {# park} other {# park}}",
-    "inCountry": "{country} içinde"
-  },
   "auth": {
     "email": "E-posta",
     "password": "Şifre",

@@ -325,15 +325,6 @@
     "noInstagramPostsYet": "No Instagram posts added for this park yet.",
     "noPhotosYet": "No photos added for this park yet."
   },
-  "parksListing": {
-    "home": "Home",
-    "themeParksTitle": "Theme parks",
-    "themeParksDescription": "Explore theme parks travelers pin on TravelerPin.",
-    "nationalParksTitle": "Natura&Parks",
-    "nationalParksDescription": "Explore Natura&Parks travelers pin on TravelerPin.",
-    "parkCount": "{count, plural, one {# park} other {# parks}}",
-    "inCountry": "in {country}"
-  },
   "auth": {
     "email": "Email",
     "password": "Password",

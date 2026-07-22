@@ -68,22 +68,9 @@ export function ProfileActionButtons({
 
   return (
     <>
-      {showStats ? (
-        <div className="absolute top-[14px] left-[14px] z-10 max-w-[min(40%,10rem)] rounded-2xl bg-[#e8eef5] px-2.5 py-1.5 shadow-sm [&_.profile-follow-count--compact]:!text-left">
-          <ProfileFollowStats
-            username={statsUsername}
-            displayName={displayName}
-            followerCount={followState!.followerCount}
-            followingCount={followState!.followingCount}
-            className="profile-follow-stats--compact !items-start"
-            profileHref={profileHref}
-          />
-        </div>
-      ) : null}
-
       {showFollow ? (
-        <div className="profile-actions z-10 !top-[3.25rem]">
-          <div className="profile-actions__end ml-auto">
+        <div className="profile-actions pointer-events-none z-10 !top-[3.25rem]">
+          <div className="profile-actions__end pointer-events-auto ml-auto">
             <Suspense fallback={null}>
               <ProfileFollowButton
                 username={followUsername!}
@@ -98,6 +85,19 @@ export function ProfileActionButtons({
               />
             </Suspense>
           </div>
+        </div>
+      ) : null}
+
+      {showStats ? (
+        <div className="absolute top-[14px] left-[14px] z-20 max-w-[min(40%,10rem)] rounded-2xl bg-[#e8eef5] px-2.5 py-1.5 shadow-sm [&_.profile-follow-count--compact]:!text-left">
+          <ProfileFollowStats
+            username={statsUsername}
+            displayName={displayName}
+            followerCount={followState!.followerCount}
+            followingCount={followState!.followingCount}
+            className="profile-follow-stats--compact !items-start"
+            profileHref={profileHref}
+          />
         </div>
       ) : null}
     </>

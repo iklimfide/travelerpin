@@ -3,7 +3,7 @@ import type { CityHub } from "@/lib/data/city-hubs";
 import { isMissingColumnSchemaError } from "@/lib/supabase/pin-media-schema";
 import type { MediaType } from "@/types/database";
 
-const MEDIA_FIELDS = "media_type, media_url, media_preview_url, photo_url, instagram_urls";
+const MEDIA_FIELDS = "media_type, media_url, media_preview_url, photo_url, photo_urls, instagram_urls";
 const PROFILE_JOIN =
   "profiles!inner(username, display_name, avatar_url, instagram_url)";
 const PROFILE_JOIN_LEGACY = "profiles!inner(username, display_name, avatar_url)";

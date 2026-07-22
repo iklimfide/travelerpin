@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { LIMITS } from "@/lib/constants";
 import { useTranslateCommon, useTranslatePark } from "@/lib/i18n/client-messages";
 import { addPark } from "@/lib/client/park-actions";
@@ -10,7 +11,7 @@ import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { buildPinMediaPayload, PinMediaFields } from "@/components/dashboard/PinMediaFields";
 import { ProfilePinEditFields } from "@/components/profile/ProfilePinEditFields";
-import { readInstagramUrls, readPhotoUrl, withInstagramDraftField } from "@/lib/utils/pin-media";
+import { readInstagramUrls, readPhotoUrl, pinPhotoMediaChanged, withInstagramDraftField } from "@/lib/utils/pin-media";
 import { isValidInstagramUrl } from "@/lib/utils/instagram";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -61,6 +62,7 @@ export function ParkForm({
   const tCommon = useTranslateCommon();
   const modal = useModal();
   const toast = useToast();
+  const router = useRouter();
   const abortRef = useRef<AbortController | null>(null);
   const lastPromptKeyRef = useRef<string | null>(null);
 
@@ -432,6 +434,16 @@ export function ParkForm({
 
       toast.show(isEdit ? t("saveSuccess") : t("parkAdded"));
       notifyProfileDataChanged();
+      if (
+        pinPhotoMediaChanged({
+          photoFile,
+          removePhoto,
+          previousPhotoUrl: savedPhotoUrl,
+          nextPhotoUrl: mediaResult.photo_url,
+        })
+      ) {
+        router.refresh();
+      }
       onSuccess?.();
     } finally {
       setLoading(false);

@@ -79,14 +79,6 @@ export function parkUrl(slug: string): string {
   return `${getSiteUrl()}${parkPath(slug)}`;
 }
 
-export function parkCategoryPath(category: "theme-parks" | "national-parks"): string {
-  return `/parks/${category}`;
-}
-
-export function parkCategoryUrl(category: "theme-parks" | "national-parks"): string {
-  return `${getSiteUrl()}${parkCategoryPath(category)}`;
-}
-
 export function buildParkPageTitle(parkName: string): string {
   return `${parkName} Travel Map`;
 }

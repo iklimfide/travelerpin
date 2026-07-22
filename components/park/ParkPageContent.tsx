@@ -6,9 +6,8 @@ import { ParkPageActions } from "@/components/park/ParkPageActions";
 import { ParkPageNav } from "@/components/park/ParkPageNav";
 import { ParkPagePinStatsBlock } from "@/components/park/ParkPagePinStatsBlock";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
-import { countryPath, parkCategoryPath, parkPath } from "@/lib/seo/site";
+import { countryPath, parkPath } from "@/lib/seo/site";
 import { getParkHeroImageUrl } from "@/lib/park/park-hero-images";
-import { parkCategorySlugForParkType } from "@/lib/utils/park-category";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import type { ParkHub } from "@/lib/data/park-hubs";
 import type { ParkVisitorState } from "@/lib/data/park-visitor-state";
@@ -87,14 +86,7 @@ export async function ParkPageContent({
     },
     {
       label: labels.parkType,
-      value: (
-        <Link
-          href={parkCategoryPath(parkCategorySlugForParkType(hub.parkType))}
-          className="city-page__link"
-        >
-          {parkTypeLabel(hub.parkType)}
-        </Link>
-      ),
+      value: parkTypeLabel(hub.parkType),
     },
   ];
 

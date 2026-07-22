@@ -40,6 +40,18 @@ export function pinHasMedia(row: PinMediaRow | null | undefined): boolean {
   return Boolean(readPhotoUrl(row)) || readInstagramUrls(row).length > 0;
 }
 
+/** True when a save changed the pin's uploaded photo (upload, replace, or remove). */
+export function pinPhotoMediaChanged(input: {
+  photoFile: File | null;
+  removePhoto: boolean;
+  previousPhotoUrl: string | null;
+  nextPhotoUrl: string | null;
+}): boolean {
+  if (input.photoFile) return true;
+  if (input.removePhoto && input.previousPhotoUrl) return true;
+  return input.nextPhotoUrl !== input.previousPhotoUrl;
+}
+
 export function normalizeInstagramUrlList(urls: string[] | null | undefined): string[] {
   const seen = new Set<string>();
   const result: string[] = [];

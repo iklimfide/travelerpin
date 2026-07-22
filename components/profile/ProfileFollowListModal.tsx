@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "@/lib/i18n/navigation";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { readFollowListCache } from "@/lib/client/follow-cache";
@@ -44,31 +45,28 @@ export function ProfileFollowListModal({
   );
   const [demo, setDemo] = useState(initialDemo || cachedOnOpen?.demo === true);
   const [error, setError] = useState<string | null>(null);
-
+  const [mounted, setMounted] = useState(false);
   const isFollowers = listType === "followers";
-  const title = isFollowers
-    ? formatMessage(profileMessages.followersTitleNamed, { name: displayName })
-    : formatMessage(profileMessages.followingTitleNamed, { name: displayName });
-  const loadingMessage = isFollowers
-    ? profileMessages.followersLoading
-    : profileMessages.followingLoading;
-  const emptyMessage = demo
-    ? isFollowers
-      ? profileMessages.followersDemoEmpty
-      : profileMessages.followingDemoEmpty
-    : isFollowers
-      ? profileMessages.followersEmpty
-      : profileMessages.followingEmpty;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
     }
 
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
   }, [open, onClose]);
 
   useEffect(() => {
@@ -129,11 +127,25 @@ export function ProfileFollowListModal({
     };
   }, [open, username, listType, isFollowers, initialMembers, initialDemo]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
+
+  const title = isFollowers
+    ? formatMessage(profileMessages.followersTitleNamed, { name: displayName })
+    : formatMessage(profileMessages.followingTitleNamed, { name: displayName });
+  const loadingMessage = isFollowers
+    ? profileMessages.followersLoading
+    : profileMessages.followingLoading;
+  const emptyMessage = demo
+    ? isFollowers
+      ? profileMessages.followersDemoEmpty
+      : profileMessages.followingDemoEmpty
+    : isFollowers
+      ? profileMessages.followersEmpty
+      : profileMessages.followingEmpty;
 
   const titleId = `profile-follow-list-title-${listType}`;
 
-  return (
+  return createPortal(
     <div className="profile-followers-modal" role="presentation">
       <button
         type="button"
@@ -193,6 +205,7 @@ export function ProfileFollowListModal({
           </ul>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

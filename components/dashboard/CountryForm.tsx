@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { addVisitedCountry } from "@/lib/client/country-actions";
 import { buildPinMediaPayload } from "@/components/dashboard/PinMediaFields";
@@ -10,7 +11,7 @@ import { getCountryName } from "@/lib/data/countries";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { isValidInstagramUrl } from "@/lib/utils/instagram";
 import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
-import { readInstagramUrls, readPhotoUrl, withInstagramDraftField } from "@/lib/utils/pin-media";
+import { readInstagramUrls, readPhotoUrl, pinPhotoMediaChanged, withInstagramDraftField } from "@/lib/utils/pin-media";
 import type { VisitedCity, VisitedCountry } from "@/types/database";
 
 type CountryFormProps = {
@@ -31,6 +32,7 @@ export function CountryForm({
   mediaFocus,
 }: CountryFormProps) {
   const modal = useModal();
+  const router = useRouter();
   const locale = useLocale() === "tr" ? "tr" : "en";
   const countryName = getCountryName(countryCode, locale);
 
@@ -101,6 +103,16 @@ export function CountryForm({
       }
 
       notifyProfileDataChanged();
+      if (
+        pinPhotoMediaChanged({
+          photoFile,
+          removePhoto,
+          previousPhotoUrl: savedPhotoUrl,
+          nextPhotoUrl: mediaResult.photo_url,
+        })
+      ) {
+        router.refresh();
+      }
       onSuccess?.();
     } finally {
       setLoading(false);

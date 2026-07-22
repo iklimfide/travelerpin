@@ -3,10 +3,6 @@ import type { ParkType } from "@/lib/data/tourist-park-search";
 import { getCountryHubByCode } from "@/lib/data/country-hubs";
 import { buildParkSlug } from "@/lib/utils/park-slug";
 import { parkPinMatchesHub, uniqueParkSearchNames } from "@/lib/utils/park-hub-match";
-import {
-  parkHubMatchesCategory,
-  type ParkCategorySlug,
-} from "@/lib/utils/park-category";
 
 export type ParkHub = {
   slug: string;
@@ -106,12 +102,6 @@ export function hubFromParkFields(fields: {
     latitude: fields.latitude,
     longitude: fields.longitude,
   });
-}
-
-export function listParkHubsByCategory(category: ParkCategorySlug): ParkHub[] {
-  return [...bySlug.values()]
-    .filter((hub) => isPopularParkHub(hub.slug) && parkHubMatchesCategory(hub, category))
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 }
 
 export function ensureParkHubFromTouristPark(park: {

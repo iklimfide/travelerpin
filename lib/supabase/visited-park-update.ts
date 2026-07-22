@@ -16,7 +16,9 @@ function isVisitDatesUnavailable(message: string): boolean {
 function isPinMediaColumnsUnavailable(message: string): boolean {
   const lower = message.toLowerCase();
   return (
-    (lower.includes("photo_url") || lower.includes("instagram_urls")) &&
+    (lower.includes("photo_url") ||
+      lower.includes("photo_urls") ||
+      lower.includes("instagram_urls")) &&
     (lower.includes("does not exist") ||
       lower.includes("schema cache") ||
       lower.includes("could not find"))

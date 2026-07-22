@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { LIMITS } from "@/lib/constants";
 import { useTranslateCity, useTranslateCommon } from "@/lib/i18n/client-messages";
 import { addCity } from "@/lib/client/city-actions";
@@ -13,7 +14,7 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEditor";
 import { buildPinMediaPayload, PinMediaFields } from "@/components/dashboard/PinMediaFields";
 import { ProfilePinEditFields } from "@/components/profile/ProfilePinEditFields";
-import { readInstagramUrls, readPhotoUrl, withInstagramDraftField } from "@/lib/utils/pin-media";
+import { readInstagramUrls, readPhotoUrl, pinPhotoMediaChanged, withInstagramDraftField } from "@/lib/utils/pin-media";
 import type { VisitedCity, VisitedCountry } from "@/types/database";
 
 type SearchCity = {
@@ -63,6 +64,7 @@ export function CityForm({
   const tCommon = useTranslateCommon();
   const modal = useModal();
   const toast = useToast();
+  const router = useRouter();
   const abortRef = useRef<AbortController | null>(null);
   const lastPromptKeyRef = useRef<string | null>(null);
 
@@ -449,6 +451,16 @@ export function CityForm({
       }
 
       notifyProfileDataChanged();
+      if (
+        pinPhotoMediaChanged({
+          photoFile,
+          removePhoto,
+          previousPhotoUrl: savedPhotoUrl,
+          nextPhotoUrl: mediaResult.photo_url,
+        })
+      ) {
+        router.refresh();
+      }
       onSuccess?.();
     } finally {
       setLoading(false);
