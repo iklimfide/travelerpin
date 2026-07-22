@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { searchTouristParks } from "@/lib/data/tourist-park-search";
 import {
   applyParkOverlay,
-  getCatalogOverlay,
+  getCatalogOverlayFresh,
 } from "@/lib/kamikaze/catalog-overlay";
 import { PARK_TYPES, type ParkType } from "@/types/database";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -21,7 +23,7 @@ export async function GET(request: Request) {
   }
 
   const base = searchTouristParks(country, q, 100, type ?? undefined);
-  const overlay = await getCatalogOverlay();
+  const overlay = await getCatalogOverlayFresh();
   const parks = applyParkOverlay(base, overlay, {
     countryCode: country,
     query: q,
@@ -29,5 +31,17 @@ export async function GET(request: Request) {
     limit: 100,
   });
 
-  return NextResponse.json({ parks });
+  return NextResponse.json(
+    {
+      parks: parks.map((park) => ({
+        parkType: park.parkType,
+        countryCode: park.countryCode,
+        name: park.name,
+        latitude: park.latitude,
+        longitude: park.longitude,
+        highlighted: park.highlighted ?? false,
+      })),
+    },
+    { headers: { "Cache-Control": "no-store" } }
+  );
 }

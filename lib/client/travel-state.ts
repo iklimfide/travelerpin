@@ -6,6 +6,7 @@ import { addVisitedCountry, removeVisitedCountry } from "@/lib/client/country-ac
 import { addParksBatch, deleteParksBatch } from "@/lib/client/park-actions";
 import { getCountryName } from "@/lib/data/countries";
 import { canonicalCityName, citiesAreSame } from "@/lib/utils/city-aliases";
+import { filterPersistedPinIds } from "@/lib/utils/pin-id";
 import {
   hydrateTravelStateCache,
   notifyTravelStateUpdated,
@@ -128,7 +129,7 @@ export async function savePendingDestinations(params: {
 }): Promise<{ ok: true; savedCount: number } | { ok: false; error: string }> {
   const pendingCountryCodes = [...params.pendingCountryCodes];
   const pendingCities = [...params.pendingCities];
-  const pendingRemoveCityIds = [...(params.pendingRemoveCityIds ?? [])];
+  const pendingRemoveCityIds = filterPersistedPinIds(params.pendingRemoveCityIds ?? []);
   const pendingRemoveCountryIds = [...(params.pendingRemoveCountryIds ?? [])];
 
   let savedCount = 0;
@@ -212,7 +213,7 @@ export async function savePendingParks(params: {
   visitedParks: VisitedPark[];
 }): Promise<{ ok: true; savedCount: number } | { ok: false; error: string }> {
   const pendingParks = [...params.pendingParks];
-  const pendingRemoveParkIds = [...(params.pendingRemoveParkIds ?? [])];
+  const pendingRemoveParkIds = filterPersistedPinIds(params.pendingRemoveParkIds ?? []);
 
   if (pendingParks.length === 0 && pendingRemoveParkIds.length === 0) {
     return { ok: true, savedCount: 0 };

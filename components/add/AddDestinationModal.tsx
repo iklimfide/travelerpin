@@ -35,6 +35,7 @@ import { canonicalCityName, citiesAreSame } from "@/lib/utils/city-aliases";
 import { formatKnownPlaceName } from "@/lib/utils/city-name";
 import { isNaturaParkType, isThemeParkType } from "@/lib/utils/park-type";
 import { isCountryOnlyPinRemovable } from "@/lib/utils/country-remove";
+import { filterPersistedPinIds } from "@/lib/utils/pin-id";
 import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
 import { useToast } from "@/components/ui/ToastProvider";
 import "./add-destination.css";
@@ -355,25 +356,29 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
 
   const pendingRemoveCityIds = useMemo(
     () =>
-      [...pendingRemoveCityKeys]
-        .map((key) =>
-          visitedCities.find(
-            (city) => citySelectionKey(city.country_code, city.city_name) === key
-          )?.id
-        )
-        .filter((id): id is string => Boolean(id)),
+      filterPersistedPinIds(
+        [...pendingRemoveCityKeys]
+          .map((key) =>
+            visitedCities.find(
+              (city) => citySelectionKey(city.country_code, city.city_name) === key
+            )?.id
+          )
+          .filter((id): id is string => Boolean(id))
+      ),
     [pendingRemoveCityKeys, visitedCities]
   );
 
   const pendingRemoveParkIds = useMemo(
     () =>
-      [...pendingRemoveParkKeys]
-        .map((key) =>
-          visitedParks.find(
-            (park) => parkSelectionKey(park.park_type, park.park_name) === key
-          )?.id
-        )
-        .filter((id): id is string => Boolean(id)),
+      filterPersistedPinIds(
+        [...pendingRemoveParkKeys]
+          .map((key) =>
+            visitedParks.find(
+              (park) => parkSelectionKey(park.park_type, park.park_name) === key
+            )?.id
+          )
+          .filter((id): id is string => Boolean(id))
+      ),
     [pendingRemoveParkKeys, visitedParks]
   );
 

@@ -86,7 +86,7 @@ export function KamikazeCatalogPanel() {
   const isAddTab = tab === "add-city" || tab === "add-park";
 
   function resultKey(row: CatalogResult): string {
-    return `${row.source}:${row.countryCode}:${row.name}:${row.id ?? ""}`;
+    return `${row.source}:${row.countryCode}:${row.parkType ?? ""}:${row.name}:${row.id ?? ""}`;
   }
 
   const loadAdditions = useCallback(
@@ -158,7 +158,9 @@ export function KamikazeCatalogPanel() {
         });
         if (!isCountriesTab && country) params.set("country", country);
         if (q.trim()) params.set("q", q.trim());
-        if (kind === "city" && popularFilter) params.set("popularFilter", popularFilter);
+        if ((kind === "city" || kind === "park") && popularFilter) {
+          params.set("popularFilter", popularFilter);
+        }
         const res = await fetch(`/api/kamikaze/catalog?${params}`);
         const data = (await res.json()) as {
           results?: CatalogResult[];
@@ -456,13 +458,14 @@ export function KamikazeCatalogPanel() {
   }
 
   async function handleSetPopular(row: CatalogResult, isPopular: boolean) {
-    const key = `popular:${row.countryCode}:${row.name}:${isPopular ? "1" : "0"}`;
+    const key = `popular:${row.countryCode}:${row.parkType ?? ""}:${row.name}:${isPopular ? "1" : "0"}`;
     await postAction(
       {
         action: "set_popular",
         countryCode: row.countryCode,
         name: row.name,
         isPopular,
+        ...(row.parkType ? { parkType: row.parkType } : {}),
       },
       key
     );
@@ -502,13 +505,14 @@ export function KamikazeCatalogPanel() {
   }
 
   async function handleBulkPopular(isPopular: boolean) {
-    if (kind !== "city") return;
+    if (kind !== "city" && kind !== "park") return;
     const selected = selectedRows();
     if (selected.length === 0) return;
+    const label = kind === "park" ? "park" : "şehir";
     const ok = await modal.confirm(
       isPopular
-        ? `${selected.length} şehre Popüler etiketi eklensin mi?`
-        : `${selected.length} şehirden Popüler etiketi kaldırılsın mı?`,
+        ? `${selected.length} ${label}e Popüler etiketi eklensin mi?`
+        : `${selected.length} ${label}den Popüler etiketi kaldırılsın mı?`,
       {
         title: isPopular ? "Toplu popüler ekle" : "Toplu popüler kaldır",
         variant: "info",
@@ -524,6 +528,7 @@ export function KamikazeCatalogPanel() {
         items: selected.map((row) => ({
           countryCode: row.countryCode,
           name: row.name,
+          ...(row.parkType ? { parkType: row.parkType } : {}),
         })),
       },
       isPopular ? "bulk-popular-on" : "bulk-popular-off"
@@ -587,9 +592,11 @@ export function KamikazeCatalogPanel() {
           parkType: formParkType,
           latitude,
           longitude,
+          isPopular: formPopular,
         },
         "add"
       );
+      setFormPopular(false);
       setFormCountry("");
     }
     setFormName("");
@@ -898,6 +905,31 @@ export function KamikazeCatalogPanel() {
                         placeholder="Boş bırakılabilir"
                       />
                     </div>
+                    <div className="yp-field yp-field--wide">
+                      <label htmlFor="yp-add-park-popular">Popüler</label>
+                      <label
+                        htmlFor="yp-add-park-popular"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          textTransform: "none",
+                          letterSpacing: "normal",
+                          fontSize: "0.9rem",
+                          fontWeight: 500,
+                          color: "var(--foreground)",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          id="yp-add-park-popular"
+                          type="checkbox"
+                          checked={formPopular}
+                          onChange={(e) => setFormPopular(e.target.checked)}
+                        />
+                        Popüler etiketi ekle
+                      </label>
+                    </div>
                   </div>
                   <div className="yp-form-actions">
                     <button
@@ -1031,7 +1063,7 @@ export function KamikazeCatalogPanel() {
                 ) : null}
               </div>
             </div>
-            {kind === "city" ? (
+            {(kind === "city" || kind === "park") ? (
               <div className="yp-field">
                 <label htmlFor="yp-cat-popular">Popüler</label>
                 <select
@@ -1062,7 +1094,7 @@ export function KamikazeCatalogPanel() {
               </span>
               {!isCountriesTab && selectedKeys.size > 0 ? (
                 <div className="yp-actions">
-                  {kind === "city" ? (
+                  {(kind === "city" || kind === "park") ? (
                     <>
                       <button
                         type="button"
@@ -1114,7 +1146,9 @@ export function KamikazeCatalogPanel() {
                     ? "Yükleniyor…"
                     : "Sonuç yok."
                   : popularFilter === "popular" && q.length < 2 && !country
-                    ? "Henüz popüler işaretli şehir yok."
+                    ? kind === "park"
+                      ? "Henüz popüler işaretli park yok."
+                      : "Henüz popüler işaretli şehir yok."
                     : q.length < 2 && !country
                       ? "Listelemek için ülke seç, arama yaz veya popüler filtresi kullan."
                       : "Sonuç yok."}
@@ -1211,7 +1245,7 @@ export function KamikazeCatalogPanel() {
                           {kind === "city" && row.capital ? (
                             <span className="yp-badge">Başkent</span>
                           ) : null}{" "}
-                          {kind === "city" && row.popular ? (
+                          {row.popular ? (
                             <span className="yp-badge">Popüler</span>
                           ) : null}
                         </td>
@@ -1233,7 +1267,7 @@ export function KamikazeCatalogPanel() {
                         </td>
                         <td>
                           <div className="yp-actions">
-                            {kind === "city" ? (
+                            {(kind === "city" || kind === "park") ? (
                               row.popular ? (
                                 <button
                                   type="button"

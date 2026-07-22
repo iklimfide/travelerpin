@@ -7,6 +7,7 @@ import type { TouristPark } from "@/lib/data/tourist-parks";
 import { matchesParkTypeFilter } from "@/lib/utils/park-type";
 import { matchesPlaceNameSearch } from "@/lib/utils/place-search";
 import { sortCitiesForAddModal } from "@/lib/add/city-list-sort";
+import { sortParksForAddModal } from "@/lib/add/park-list-sort";
 import { catalogNameKey, type CatalogOverlayKind } from "@/lib/kamikaze/catalog-keys";
 import { resolveCityNameTr } from "@/lib/i18n/place-names";
 import type { ParkType } from "@/types/database";
@@ -77,6 +78,16 @@ export type YpCityPopularityRow = {
   updated_at: string;
 };
 
+export type YpParkPopularityRow = {
+  id: string;
+  country_code: string;
+  name_key: string;
+  park_type: ParkType;
+  is_popular: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type YpCityNameTrRow = {
   id: string;
   country_code: string;
@@ -99,6 +110,7 @@ export type CatalogOverlaySnapshot = {
   parks: YpCatalogParkRow[];
   exclusions: YpCatalogExclusionRow[];
   popularity: YpCityPopularityRow[];
+  parkPopularity: YpParkPopularityRow[];
   nameTr: YpCityNameTrRow[];
   countryNameTr: YpCountryNameTrRow[];
 };
@@ -111,6 +123,7 @@ async function fetchCatalogOverlayUncached(): Promise<CatalogOverlaySnapshot> {
       parks: [],
       exclusions: [],
       popularity: [],
+      parkPopularity: [],
       nameTr: [],
       countryNameTr: [],
     };
@@ -121,6 +134,7 @@ async function fetchCatalogOverlayUncached(): Promise<CatalogOverlaySnapshot> {
     parksRes,
     exclusionsRes,
     popularityRes,
+    parkPopularityRes,
     nameTrRes,
     countryNameTrRes,
   ] = await Promise.all([
@@ -128,6 +142,7 @@ async function fetchCatalogOverlayUncached(): Promise<CatalogOverlaySnapshot> {
     client.from("yp_catalog_parks").select("*").order("created_at", { ascending: false }),
     client.from("yp_catalog_exclusions").select("*").order("created_at", { ascending: false }),
     client.from("yp_city_popularity").select("*").order("updated_at", { ascending: false }),
+    client.from("yp_park_popularity").select("*").order("updated_at", { ascending: false }),
     client.from("yp_city_name_tr").select("*").order("updated_at", { ascending: false }),
     client.from("yp_country_name_tr").select("*").order("updated_at", { ascending: false }),
   ]);
@@ -152,6 +167,10 @@ async function fetchCatalogOverlayUncached(): Promise<CatalogOverlaySnapshot> {
     popularity: popularityRes.error
       ? []
       : ((popularityRes.data ?? []) as YpCityPopularityRow[]),
+    // Table may be missing until migration 039 is applied.
+    parkPopularity: parkPopularityRes.error
+      ? []
+      : ((parkPopularityRes.data ?? []) as YpParkPopularityRow[]),
     // Table may be missing until migration 035 is applied.
     nameTr: nameTrRes.error ? [] : ((nameTrRes.data ?? []) as YpCityNameTrRow[]),
     // Table may be missing until migration 036 is applied.
@@ -207,6 +226,28 @@ export function popularityOverrideMap(
     map.set(`${code}:${catalogNameKey(row.name_key, code)}`, row.is_popular);
   }
   return map;
+}
+
+/** `${COUNTRY}:${name_key}:${park_type}` → force Popular on/off */
+export function parkPopularityOverrideMap(
+  overlay: CatalogOverlaySnapshot
+): Map<string, boolean> {
+  const map = new Map<string, boolean>();
+  for (const row of overlay.parkPopularity) {
+    const code = row.country_code.toUpperCase();
+    map.set(`${code}:${catalogNameKey(row.name_key)}:${row.park_type}`, row.is_popular);
+  }
+  return map;
+}
+
+export function resolveParkPopular(
+  countryCode: string,
+  name: string,
+  parkType: ParkType,
+  overrides: Map<string, boolean>
+): boolean {
+  const code = countryCode.toUpperCase();
+  return overrides.get(`${code}:${catalogNameKey(name)}:${parkType}`) === true;
 }
 
 /** Lookup keys: `${COUNTRY}:${name_key}` → Turkish display label. */
@@ -333,6 +374,16 @@ export function applyCityOverlayToCatalogCities(
   return applyCityPopularOverrides([...extras, ...filtered], overlay);
 }
 
+export function applyParkPopularOverrides<
+  T extends { countryCode: string; name: string; parkType: ParkType; highlighted?: boolean },
+>(parks: T[], overlay: CatalogOverlaySnapshot): Array<T & { highlighted: boolean }> {
+  const overrides = parkPopularityOverrideMap(overlay);
+  return parks.map((park) => ({
+    ...park,
+    highlighted: resolveParkPopular(park.countryCode, park.name, park.parkType, overrides),
+  }));
+}
+
 export function applyParkOverlay(
   parks: TouristPark[],
   overlay: CatalogOverlaySnapshot,
@@ -343,7 +394,7 @@ export function applyParkOverlay(
     parkType?: ParkType;
     limit?: number;
   }
-): TouristPark[] {
+): Array<TouristPark & { highlighted: boolean }> {
   const excluded = exclusionSet(overlay, "park");
   const q = options?.query?.trim() ?? "";
   const allowed =
@@ -385,12 +436,13 @@ export function applyParkOverlay(
     results = results.filter((park) => matchesPlaceNameSearch(park.name, q));
   }
 
-  results.sort((a, b) => a.name.localeCompare(b.name, "tr", { sensitivity: "base" }));
+  const withPopular = applyParkPopularOverrides(results, overlay);
+  const sorted = sortParksForAddModal(withPopular);
 
   if (options?.limit != null) {
-    return results.slice(0, options.limit);
+    return sorted.slice(0, options.limit);
   }
-  return results;
+  return sorted;
 }
 
 export async function revalidateCatalogOverlay(): Promise<void> {

@@ -9,6 +9,7 @@ import { flagCountryCode } from "@/lib/data/uk-nations";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { formatKnownPlaceName } from "@/lib/utils/city-name";
 import { shortParkLabel } from "@/lib/utils/park-name";
+import { compareParksForAddModal } from "@/lib/add/park-list-sort";
 import { matchesParkTypeFilter, parkTypeLabel } from "@/lib/utils/park-type";
 import type { ParkType } from "@/types/database";
 import { AddDestinationCityListSkeleton } from "@/components/skeletons/AddDestinationModalSkeleton";
@@ -19,6 +20,7 @@ export type CatalogPark = {
   name: string;
   latitude: number;
   longitude: number;
+  highlighted?: boolean;
 };
 
 type ParkPickerStepProps = {
@@ -119,9 +121,7 @@ export function ParkPickerStep({
         matchesParkTypeFilter(park.parkType, typeFilter as ParkType)
       );
     }
-    return [...next].sort((a, b) =>
-      a.name.localeCompare(b.name, "tr", { sensitivity: "base" })
-    );
+    return [...next].sort(compareParksForAddModal);
   }, [parks, typeFilter]);
 
   function renderParkRow(park: CatalogPark) {
@@ -174,6 +174,11 @@ export function ParkPickerStep({
               {displayName}
             </span>
             <span className="add-destination-city-row__badge">{typeLabel}</span>
+            {park.highlighted ? (
+              <span className="add-destination-city-row__badge">
+                {addDestinationMessages.popular}
+              </span>
+            ) : null}
           </span>
           {onMap && !pendingRemove ? (
             <span className="add-destination-city-row__meta">{mapMessages.parkOnMap}</span>
