@@ -35,7 +35,6 @@ import { canonicalCityName, citiesAreSame } from "@/lib/utils/city-aliases";
 import { formatKnownPlaceName } from "@/lib/utils/city-name";
 import { isNaturaParkType, isThemeParkType } from "@/lib/utils/park-type";
 import type { VisitedCity, VisitedPark } from "@/types/database";
-import { AddDestinationCountryPickerSkeleton } from "@/components/skeletons/AddDestinationModalSkeleton";
 import { useToast } from "@/components/ui/ToastProvider";
 import "./add-destination.css";
 
@@ -198,7 +197,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
     () => new Set()
   );
   const [returnExpandedRegion, setReturnExpandedRegion] = useState<AddRegionId | null>(null);
-  const [loadingState, setLoadingState] = useState(() => !readTravelStateCache());
+  const [travelStateReady, setTravelStateReady] = useState(() => Boolean(readTravelStateCache()));
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -208,12 +207,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
     setMounted(true);
   }, []);
 
-  const loadTravelState = useCallback(async (options?: { background?: boolean; force?: boolean }) => {
-    const background = options?.background ?? hasTravelStateRef.current;
-    if (!background) {
-      setLoadingState(true);
-    }
-
+  const loadTravelState = useCallback(async (options?: { force?: boolean }) => {
     const result = await fetchTravelState({
       preferCache: !options?.force,
       force: options?.force,
@@ -222,11 +216,10 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
     if (result.ok) {
       applyTravelState(result.data, setVisitedCodes, setVisitedCities, setVisitedParks);
       hasTravelStateRef.current = true;
+      setTravelStateReady(true);
     }
 
-    if (!background) {
-      setLoadingState(false);
-    }
+    return result.ok;
   }, []);
 
   useEffect(() => {
@@ -243,16 +236,17 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
     const cached = readTravelStateCache();
     if (cached) {
       applyTravelState(cached, setVisitedCodes, setVisitedCities, setVisitedParks);
-      setLoadingState(false);
+      setTravelStateReady(true);
       return;
     }
 
-    void loadTravelState({ background: false });
+    setTravelStateReady(false);
+    void loadTravelState();
   }, [loadTravelState, mode]);
 
   useEffect(() => {
     function onProfileStale() {
-      void loadTravelState({ background: true, force: true });
+      void loadTravelState({ force: true });
     }
 
     function onTravelStateUpdated(event: Event) {
@@ -690,9 +684,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
         </div>
 
         <div className="add-destination-modal__body">
-          {loadingState && step.kind === "countries" ? (
-            <AddDestinationCountryPickerSkeleton />
-          ) : step.kind === "countries" ? (
+          {step.kind === "countries" ? (
             <CountryPickerStep
               visitedCodes={isParksMode ? new Set() : visitedCodes}
               countedCodes={isParksMode ? parkCountryCodes : undefined}
@@ -750,7 +742,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
           <button
             type="button"
             className="add-destination-save"
-            disabled={pendingSelectionCount === 0 || saving}
+            disabled={pendingSelectionCount === 0 || saving || !travelStateReady}
             onClick={() => void handleSave()}
           >
             {saving ? commonMessages.loading : commonMessages.save}

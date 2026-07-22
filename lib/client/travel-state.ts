@@ -9,6 +9,7 @@ import { canonicalCityName, citiesAreSame } from "@/lib/utils/city-aliases";
 import {
   notifyTravelStateUpdated,
   readTravelStateCache,
+  getOwnUserId,
   type TravelStateData,
 } from "@/lib/client/session-page-cache";
 import type { ParkType, VisitedCity, VisitedPark } from "@/types/database";
@@ -53,6 +54,17 @@ async function fetchTravelStateFromNetwork(): Promise<FetchTravelStateResult> {
   const data = normalizeTravelStateData((await res.json()) as Partial<TravelStateData>);
   notifyTravelStateUpdated(data);
   return { ok: true, data, fromCache: false };
+}
+
+/** Warm travel-state cache after login so Add modal opens without waiting. */
+export function prefetchTravelState(): void {
+  if (typeof window === "undefined") return;
+  if (!getOwnUserId()) return;
+  if (readTravelStateCache()) return;
+
+  void fetchTravelState({ preferCache: true }).catch(() => {
+    // Modal or map will retry on demand.
+  });
 }
 
 export async function fetchTravelState(options?: {

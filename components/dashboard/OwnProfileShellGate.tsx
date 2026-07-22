@@ -14,6 +14,7 @@ import {
   setOwnUsername,
 } from "@/lib/client/session-page-cache";
 import { createClient } from "@/lib/supabase/client";
+import { prefetchTravelState } from "@/lib/client/travel-state";
 
 export type BottomBarOwnProfile = {
   id: string;
@@ -53,6 +54,7 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
     const provisional = readProvisionalOwnProfile();
     if (provisional) {
       setOwnProfile(provisional);
+      prefetchTravelState();
     }
     setChromeReady(true);
   }, []);
@@ -77,6 +79,7 @@ export function OwnProfileShellGate({ children }: { children: ReactNode }) {
       }
 
       setOwnUserId(user.id);
+      prefetchTravelState();
 
       const { data: profile } = await supabase
         .from("profiles")
