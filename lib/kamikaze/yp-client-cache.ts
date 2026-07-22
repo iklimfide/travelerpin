@@ -84,7 +84,7 @@ export const YP_CACHE_KEYS = {
     popularFilter = ""
   ) => `catalog:v6:${kind}:${scope}:${country}:${q.trim().toLowerCase()}:${popularFilter}`,
   catalogAdditions: (kind: string) => `catalog:additions:v3:${kind}`,
-  users: (query: string) => `users:${query.trim().toLowerCase()}`,
+  users: (query: string) => `users:v2:${query.trim().toLowerCase()}`,
   stats: "stats",
   notifications: "notifications",
 } as const;

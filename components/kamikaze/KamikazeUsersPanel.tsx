@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useModal } from "@/components/ui/ModalProvider";
 import { YP_CACHE_KEYS, ypCacheGet, ypCacheInvalidate, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
+import { resolvePublicMediaImageUrl } from "@/lib/storage/hub-photo-url";
 import { profilePath } from "@/lib/seo/site";
 
 type YpUser = {
@@ -10,6 +11,7 @@ type YpUser = {
   username: string;
   displayName: string | null;
   avatarUrl: string | null;
+  residence: string | null;
   createdAt: string;
   bannedAt: string | null;
   banReason: string | null;
@@ -25,6 +27,130 @@ type UsersCachePayload = {
 };
 
 const PAGE_SIZE = 20;
+
+function usersCacheIsFresh(payload: UsersCachePayload): boolean {
+  return payload.users.every((user) => "residence" in user);
+}
+
+function userInitials(displayName: string | null, username: string): string {
+  const source = (displayName ?? "").trim() || username;
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  }
+  return source.slice(0, 2).toUpperCase();
+}
+
+function UserAvatarCell({ user }: { user: YpUser }) {
+  const imageSrc = resolvePublicMediaImageUrl(user.avatarUrl) ?? user.avatarUrl;
+
+  return (
+    <a
+      className="yp-user-avatar-link"
+      href={profilePath(user.username)}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`@${user.username} profili`}
+    >
+      {imageSrc ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className="yp-user-avatar" src={imageSrc} alt="" />
+      ) : (
+        <span className="yp-user-avatar yp-user-avatar--fallback" aria-hidden>
+          {userInitials(user.displayName, user.username)}
+        </span>
+      )}
+    </a>
+  );
+}
+
+function UserIdentity({ user }: { user: YpUser }) {
+  return (
+    <>
+      <div>
+        <a
+          className="yp-link"
+          href={profilePath(user.username)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <strong>@{user.username}</strong>
+        </a>
+        {user.isMaster ? (
+          <>
+            {" "}
+            <span className="yp-badge">Master</span>
+          </>
+        ) : null}
+      </div>
+      <div className="yp-muted">{user.displayName ?? "—"}</div>
+    </>
+  );
+}
+
+function UserStatus({ user }: { user: YpUser }) {
+  return (
+    <>
+      {user.bannedAt ? (
+        <span className="yp-badge yp-badge--danger">Banlı</span>
+      ) : (
+        "Aktif"
+      )}
+      {user.banReason ? <div className="yp-muted">{user.banReason}</div> : null}
+    </>
+  );
+}
+
+function UserActions({
+  user,
+  busyId,
+  onEdit,
+  onAct,
+}: {
+  user: YpUser;
+  busyId: string | null;
+  onEdit: (user: YpUser) => void;
+  onAct: (action: "ban" | "unban" | "delete", userId: string) => void;
+}) {
+  if (user.isMaster) {
+    return <span className="yp-muted">Korumalı</span>;
+  }
+
+  return (
+    <div className="yp-actions">
+      <button type="button" className="yp-btn" onClick={() => onEdit(user)}>
+        Değiştir
+      </button>
+      {user.bannedAt ? (
+        <button
+          type="button"
+          className="yp-btn"
+          disabled={busyId === `unban:${user.id}`}
+          onClick={() => void onAct("unban", user.id)}
+        >
+          Banı kaldır
+        </button>
+      ) : (
+        <button
+          type="button"
+          className="yp-btn yp-btn--danger"
+          disabled={busyId === `ban:${user.id}`}
+          onClick={() => void onAct("ban", user.id)}
+        >
+          Banla
+        </button>
+      )}
+      <button
+        type="button"
+        className="yp-btn yp-btn--danger"
+        disabled={busyId === `delete:${user.id}`}
+        onClick={() => void onAct("delete", user.id)}
+      >
+        Sil
+      </button>
+    </div>
+  );
+}
 
 export function KamikazeUsersPanel() {
   const modal = useModal();
@@ -65,7 +191,7 @@ export function KamikazeUsersPanel() {
 
       if (mode === "replace" && !options?.force) {
         const cached = ypCacheGet<UsersCachePayload>(cacheKey);
-        if (cached) {
+        if (cached && usersCacheIsFresh(cached)) {
           applyUsersState(cached);
           setLoading(false);
           setError(null);
@@ -249,17 +375,18 @@ export function KamikazeUsersPanel() {
 
       {error ? <p className="yp-error">{error}</p> : null}
 
-      <form className="yp-toolbar" onSubmit={(e) => void search(e)}>
-        <div className="yp-field" style={{ flex: 1, minWidth: "14rem" }}>
+      <form className="yp-toolbar yp-toolbar--inline yp-toolbar--users" onSubmit={(e) => void search(e)}>
+        <div className="yp-field yp-field--filter-q">
           <label htmlFor="yp-user-q">Ara</label>
           <input
             id="yp-user-q"
+            type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="kullanıcı adı, ad veya e-posta"
           />
         </div>
-        <div className="yp-field" style={{ minWidth: "12rem" }}>
+        <div className="yp-field yp-field--ban-reason">
           <label htmlFor="yp-ban-reason">Ban nedeni (isteğe bağlı)</label>
           <input
             id="yp-ban-reason"
@@ -268,9 +395,19 @@ export function KamikazeUsersPanel() {
             placeholder="Yalnızca master görür"
           />
         </div>
-        <button type="submit" className="yp-btn yp-btn--primary" disabled={loading}>
-          {loading ? "Yükleniyor…" : "Ara"}
-        </button>
+        <div className="yp-toolbar__actions">
+          <button type="submit" className="yp-btn yp-btn--primary" disabled={loading}>
+            {loading ? "Yükleniyor…" : "Ara"}
+          </button>
+          <button
+            type="button"
+            className="yp-btn"
+            disabled={loading}
+            onClick={() => void refreshUsers()}
+          >
+            Yenile
+          </button>
+        </div>
       </form>
 
       <div className="yp-panel">
@@ -291,96 +428,98 @@ export function KamikazeUsersPanel() {
           </div>
         ) : (
           <>
-            <table className="yp-table">
-              <thead>
-                <tr>
-                  <th>Kullanıcı</th>
-                  <th>E-posta</th>
-                  <th>Durum</th>
-                  <th>Kayıt</th>
-                  <th>İşlemler</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user.id}>
-                    <td>
-                      <div>
-                        <a
-                          className="yp-link"
-                          href={profilePath(user.username)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <strong>@{user.username}</strong>
-                        </a>
-                        {user.isMaster ? (
-                          <>
-                            {" "}
-                            <span className="yp-badge">Master</span>
-                          </>
-                        ) : null}
-                      </div>
-                      <div className="yp-muted">{user.displayName ?? "—"}</div>
-                    </td>
-                    <td>{user.email ?? "—"}</td>
-                    <td>
-                      {user.bannedAt ? (
-                        <span className="yp-badge yp-badge--danger">Banlı</span>
-                      ) : (
-                        "Aktif"
-                      )}
-                      {user.banReason ? (
-                        <div className="yp-muted">{user.banReason}</div>
-                      ) : null}
-                    </td>
-                    <td>{new Date(user.createdAt).toLocaleDateString("tr-TR")}</td>
-                    <td>
-                      {user.isMaster ? (
-                        <span className="yp-muted">Korumalı</span>
-                      ) : (
-                        <div className="yp-actions">
-                          <button
-                            type="button"
-                            className="yp-btn"
-                            onClick={() => openEdit(user)}
-                          >
-                            Değiştir
-                          </button>
-                          {user.bannedAt ? (
-                            <button
-                              type="button"
-                              className="yp-btn"
-                              disabled={busyId === `unban:${user.id}`}
-                              onClick={() => void act("unban", user.id)}
-                            >
-                              Banı kaldır
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="yp-btn yp-btn--danger"
-                              disabled={busyId === `ban:${user.id}`}
-                              onClick={() => void act("ban", user.id)}
-                            >
-                              Banla
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            className="yp-btn yp-btn--danger"
-                            disabled={busyId === `delete:${user.id}`}
-                            onClick={() => void act("delete", user.id)}
-                          >
-                            Sil
-                          </button>
-                        </div>
-                      )}
-                    </td>
+            <div className="yp-user-cards" aria-label="Kullanıcı listesi">
+              {users.map((user) => (
+                <article key={user.id} className="yp-user-card">
+                  <div className="yp-user-card__head">
+                    <UserAvatarCell user={user} />
+                    <div className="yp-user-card__identity">
+                      <UserIdentity user={user} />
+                    </div>
+                  </div>
+                  <dl className="yp-user-card__meta">
+                    <div className="yp-user-card__meta-row">
+                      <dt>Yaşadığı yer</dt>
+                      <dd>{user.residence?.trim() || "—"}</dd>
+                    </div>
+                    <div className="yp-user-card__meta-row">
+                      <dt>E-posta</dt>
+                      <dd>{user.email ?? "—"}</dd>
+                    </div>
+                    <div className="yp-user-card__meta-row">
+                      <dt>Durum</dt>
+                      <dd>
+                        <UserStatus user={user} />
+                      </dd>
+                    </div>
+                    <div className="yp-user-card__meta-row">
+                      <dt>Kayıt</dt>
+                      <dd>{new Date(user.createdAt).toLocaleDateString("tr-TR")}</dd>
+                    </div>
+                  </dl>
+                  <div className="yp-user-card__actions">
+                    <UserActions
+                      user={user}
+                      busyId={busyId}
+                      onEdit={openEdit}
+                      onAct={act}
+                    />
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="yp-table-wrap yp-table-wrap--desktop-users">
+              <table className="yp-table yp-table--city-images yp-table--users">
+                <colgroup>
+                  <col className="yp-col-avatar" />
+                  <col className="yp-col-user" />
+                  <col className="yp-col-residence" />
+                  <col className="yp-col-email" />
+                  <col className="yp-col-status" />
+                  <col className="yp-col-created" />
+                  <col className="yp-col-actions" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th className="yp-table__avatar">Profil</th>
+                    <th className="yp-table__user">Kullanıcı</th>
+                    <th className="yp-table__residence">Yaşadığı yer</th>
+                    <th className="yp-table__email">E-posta</th>
+                    <th className="yp-table__status">Durum</th>
+                    <th className="yp-table__created">Kayıt</th>
+                    <th className="yp-table__actions">İşlemler</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr key={user.id}>
+                      <td className="yp-table__avatar">
+                        <UserAvatarCell user={user} />
+                      </td>
+                      <td className="yp-table__user">
+                        <UserIdentity user={user} />
+                      </td>
+                      <td className="yp-table__residence">{user.residence?.trim() || "—"}</td>
+                      <td className="yp-table__email">{user.email ?? "—"}</td>
+                      <td className="yp-table__status">
+                        <UserStatus user={user} />
+                      </td>
+                      <td className="yp-table__created">
+                        {new Date(user.createdAt).toLocaleDateString("tr-TR")}
+                      </td>
+                      <td className="yp-table__actions">
+                        <UserActions
+                          user={user}
+                          busyId={busyId}
+                          onEdit={openEdit}
+                          onAct={act}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             {hasMore ? (
               <div className="yp-form-actions">
                 <button

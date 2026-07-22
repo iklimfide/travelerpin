@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useModal } from "@/components/ui/ModalProvider";
 import { YpCountrySelect } from "@/components/kamikaze/YpCountrySelect";
+import { YpImageUrlImportModal } from "@/components/kamikaze/YpImageUrlImportModal";
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
 import { YP_CACHE_KEYS, ypCacheGet, ypCacheInvalidate, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
 import {
@@ -77,6 +78,7 @@ export function KamikazeParksPanel() {
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set());
   const [renameTarget, setRenameTarget] = useState<CatalogParkRow | null>(null);
+  const [urlImportTarget, setUrlImportTarget] = useState<CatalogParkRow | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [renameTrValue, setRenameTrValue] = useState("");
   const fileInputsRef = useRef<Map<string, HTMLInputElement>>(new Map());
@@ -97,6 +99,26 @@ export function KamikazeParksPanel() {
     Boolean(country) ||
     query.trim().length >= MIN_QUERY_LENGTH ||
     Boolean(popularFilter);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/kamikaze/park-images")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { images?: CustomHeroRow[] } | null) => {
+        if (cancelled || !data?.images) return;
+        const next = new Map<string, string>();
+        for (const row of data.images) {
+          next.set(parkHeroLookupKey(row.countryCode, row.parkName, row.parkType), row.imageUrl);
+        }
+        setCustomImages(next);
+      })
+      .catch(() => {
+        /* best-effort */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const loadList = useCallback(
     async (mode: "replace" | "append" = "replace", options?: { force?: boolean; offset?: number }) => {
@@ -283,7 +305,10 @@ export function KamikazeParksPanel() {
     }
   }
 
-  async function uploadImage(row: CatalogParkRow, file: File) {
+  async function postHeroImage(
+    row: CatalogParkRow,
+    payload: { file?: File; imageUrl?: string }
+  ) {
     const key = heroKey(row);
     setBusyKey(key);
     setError(null);
@@ -292,23 +317,41 @@ export function KamikazeParksPanel() {
       formData.set("countryCode", row.countryCode);
       formData.set("parkName", row.name);
       formData.set("parkType", row.parkType);
-      formData.set("file", file);
+      if (payload.file) formData.set("file", payload.file);
+      else if (payload.imageUrl) formData.set("imageUrl", payload.imageUrl);
       const res = await fetch("/api/kamikaze/park-images", { method: "POST", body: formData });
       const data = (await res.json()) as { image?: CustomHeroRow; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Görsel yüklenemedi");
       if (data.image) {
+        const storedUrl = data.image.imageUrl;
         const lookup = parkHeroLookupKey(
           data.image.countryCode,
           data.image.parkName,
           data.image.parkType
         );
-        setCustomImages((prev) => new Map(prev).set(lookup, data.image!.imageUrl));
+        const rowLookup = heroKey(row);
+        setCustomImages((prev) => {
+          const next = new Map(prev);
+          next.set(lookup, storedUrl);
+          next.set(rowLookup, storedUrl);
+          return next;
+        });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Görsel yüklenemedi");
+      const message = err instanceof Error ? err.message : "Görsel yüklenemedi";
+      setError(message);
+      throw err instanceof Error ? err : new Error(message);
     } finally {
       setBusyKey(null);
     }
+  }
+
+  async function uploadImage(row: CatalogParkRow, file: File) {
+    await postHeroImage(row, { file });
+  }
+
+  async function uploadImageFromUrl(row: CatalogParkRow, imageUrl: string) {
+    await postHeroImage(row, { imageUrl });
   }
 
   async function removeImage(row: CatalogParkRow) {
@@ -329,7 +372,14 @@ export function KamikazeParksPanel() {
       if (!res.ok) throw new Error(data.error ?? "Görsel kaldırılamadı");
       setCustomImages((prev) => {
         const next = new Map(prev);
-        next.delete(key);
+        for (const mapKey of prev.keys()) {
+          if (
+            mapKey === key ||
+            mapKey === parkHeroLookupKey(row.countryCode, row.name, row.parkType)
+          ) {
+            next.delete(mapKey);
+          }
+        }
         return next;
       });
     } catch (err) {
@@ -586,6 +636,14 @@ export function KamikazeParksPanel() {
         >
           {busy ? "…" : customUrl ? "Foto değiştir" : "Foto yükle"}
         </button>
+        <button
+          type="button"
+          className="yp-btn"
+          disabled={busy}
+          onClick={() => setUrlImportTarget(row)}
+        >
+          Linkten
+        </button>
         {customUrl ? (
           <button
             type="button"
@@ -608,7 +666,7 @@ export function KamikazeParksPanel() {
 
     return (
       <tr key={key}>
-        <td>
+        <td className="yp-table__check">
           <input
             type="checkbox"
             aria-label={`${row.name} seç`}
@@ -633,7 +691,7 @@ export function KamikazeParksPanel() {
             />
           </div>
         </td>
-        <td>
+        <td className="yp-table__name">
           <a
             href={parkPlacePath(row.name, row.countryCode)}
             className="yp-link yp-city-name"
@@ -644,20 +702,9 @@ export function KamikazeParksPanel() {
           </a>{" "}
           {row.popular ? <span className="yp-badge">Popüler</span> : null}
         </td>
-        <td className="yp-muted">{row.nameTr ?? "—"}</td>
-        <td className="yp-muted">{parkTypeLabel(row.parkType)}</td>
-        <td className="yp-muted">
-          {row.countryName} ({row.countryCode})
-        </td>
-        <td>{row.source === "yp" ? <span className="yp-badge">YP</span> : "Statik"}</td>
-        <td>
-          {customUrl ? (
-            <span className="yp-badge">Özel foto</span>
-          ) : (
-            <span className="yp-badge yp-badge--muted">Varsayılan</span>
-          )}
-        </td>
-        <td>
+        <td className="yp-table__tr yp-muted">{row.nameTr ?? "—"}</td>
+        <td className="yp-table__type yp-muted">{parkTypeLabel(row.parkType)}</td>
+        <td className="yp-table__actions">
           <div className="yp-actions">
             {renderPhotoActions(row)}
             {row.popular ? (
@@ -960,10 +1007,18 @@ export function KamikazeParksPanel() {
         ) : (
           <>
             <div className="yp-table-wrap">
-              <table className="yp-table yp-table--city-images">
+              <table className="yp-table yp-table--city-images yp-table--parks">
+                <colgroup>
+                  <col className="yp-col-check" />
+                  <col className="yp-col-thumb" />
+                  <col className="yp-col-name" />
+                  <col className="yp-col-tr" />
+                  <col className="yp-col-type" />
+                  <col className="yp-col-actions" />
+                </colgroup>
                 <thead>
                   <tr>
-                    <th style={{ width: "2.25rem" }}>
+                    <th className="yp-table__check">
                       <input
                         type="checkbox"
                         aria-label="Tümünü seç"
@@ -974,14 +1029,11 @@ export function KamikazeParksPanel() {
                         }}
                       />
                     </th>
-                    <th>Önizleme</th>
-                    <th>Ad</th>
-                    <th>TR</th>
-                    <th>Tür</th>
-                    <th>Ülke</th>
-                    <th>Kaynak</th>
-                    <th>Foto</th>
-                    <th>İşlemler</th>
+                    <th className="yp-table__thumb">Önizleme</th>
+                    <th className="yp-table__name">Ad</th>
+                    <th className="yp-table__tr">TR</th>
+                    <th className="yp-table__type">Tür</th>
+                    <th className="yp-table__actions">İşlemler</th>
                   </tr>
                 </thead>
                 <tbody>{results.map(renderResultRow)}</tbody>
@@ -1002,6 +1054,20 @@ export function KamikazeParksPanel() {
           </>
         )}
       </div>
+
+      {urlImportTarget ? (
+        <YpImageUrlImportModal
+          key={heroKey(urlImportTarget)}
+          title="Linkten foto ekle"
+          subtitle={`${urlImportTarget.countryName} · ${parkTypeLabel(urlImportTarget.parkType)} · ${urlImportTarget.name}`}
+          busy={busyKey === heroKey(urlImportTarget)}
+          onClose={() => setUrlImportTarget(null)}
+          onSubmit={async (imageUrl) => {
+            await uploadImageFromUrl(urlImportTarget, imageUrl);
+            setUrlImportTarget(null);
+          }}
+        />
+      ) : null}
 
       {renameTarget ? (
         <div className="yp-rename-modal" role="presentation">

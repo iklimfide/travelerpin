@@ -9,7 +9,6 @@ import {
 } from "@/lib/park/park-hero-images";
 import { requireAdminClient, requireKamikazeMasterApi } from "@/lib/kamikaze/auth";
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
-import { LIMITS } from "@/lib/constants";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import {
   deleteR2Objects,
@@ -18,6 +17,10 @@ import {
 } from "@/lib/storage/r2";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { optimizeImageToWebp } from "@/lib/utils/image";
+import {
+  HeroImageInputError,
+  readKamikazeHeroImageInput,
+} from "@/lib/kamikaze/hero-image-input";
 import { PARK_TYPES, type ParkType } from "@/types/database";
 
 function isMissingRelationError(message: string | undefined): boolean {
@@ -95,29 +98,24 @@ export async function POST(request: Request) {
     .toUpperCase();
   const parkNameRaw = String(formData.get("parkName") ?? "").trim();
   const parkType = parseParkType(String(formData.get("parkType") ?? ""));
-  const file = formData.get("file");
 
   if (!countryCode || countryCode.length !== 2 || !parkNameRaw || !parkType) {
     return NextResponse.json({ error: "Ülke, park adı ve tür gerekli" }, { status: 400 });
   }
 
-  if (!file || !(file instanceof File)) {
-    return NextResponse.json({ error: "Görsel dosyası gerekli" }, { status: 400 });
-  }
-
-  if (!file.type.startsWith("image/")) {
-    return NextResponse.json({ error: "Dosya bir görsel olmalı" }, { status: 400 });
-  }
-
-  if (file.size > LIMITS.avatarMaxBytes) {
-    return NextResponse.json({ error: "Görsel en fazla 5 MB olabilir" }, { status: 400 });
+  let imageInput: { buffer: Buffer; contentType: string };
+  try {
+    imageInput = await readKamikazeHeroImageInput(formData);
+  } catch (error) {
+    const message =
+      error instanceof HeroImageInputError ? error.message : "Görsel okunamadı";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 
   try {
     const canonical = canonicalCatalogParkName(parkNameRaw);
     const nameKey = catalogNameKey(canonical, countryCode);
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const optimized = await optimizeImageToWebp(buffer, file.type);
+    const optimized = await optimizeImageToWebp(imageInput.buffer, imageInput.contentType);
 
     await deleteR2Objects(parkHeroR2ObjectKeys(countryCode, parkType, nameKey));
 

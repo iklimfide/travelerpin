@@ -9,7 +9,6 @@ import {
 } from "@/lib/city/city-hero-images";
 import { requireAdminClient, requireKamikazeMasterApi } from "@/lib/kamikaze/auth";
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
-import { LIMITS } from "@/lib/constants";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import {
   deleteR2Objects,
@@ -19,6 +18,10 @@ import {
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { optimizeImageToWebp } from "@/lib/utils/image";
+import {
+  HeroImageInputError,
+  readKamikazeHeroImageInput,
+} from "@/lib/kamikaze/hero-image-input";
 
 function isMissingRelationError(message: string | undefined): boolean {
   if (!message) return false;
@@ -95,29 +98,24 @@ export async function POST(request: Request) {
     .trim()
     .toUpperCase();
   const cityNameRaw = String(formData.get("cityName") ?? "").trim();
-  const file = formData.get("file");
 
   if (!countryCode || countryCode.length !== 2 || !cityNameRaw) {
     return NextResponse.json({ error: "Ülke ve şehir adı gerekli" }, { status: 400 });
   }
 
-  if (!file || !(file instanceof File)) {
-    return NextResponse.json({ error: "Görsel dosyası gerekli" }, { status: 400 });
-  }
-
-  if (!file.type.startsWith("image/")) {
-    return NextResponse.json({ error: "Dosya bir görsel olmalı" }, { status: 400 });
-  }
-
-  if (file.size > LIMITS.avatarMaxBytes) {
-    return NextResponse.json({ error: "Görsel en fazla 5 MB olabilir" }, { status: 400 });
+  let imageInput: { buffer: Buffer; contentType: string };
+  try {
+    imageInput = await readKamikazeHeroImageInput(formData);
+  } catch (error) {
+    const message =
+      error instanceof HeroImageInputError ? error.message : "Görsel okunamadı";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 
   try {
     const canonical = canonicalCatalogCityName(countryCode, formatCityDisplayName(cityNameRaw));
     const nameKey = catalogNameKey(canonical, countryCode);
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const optimized = await optimizeImageToWebp(buffer, file.type);
+    const optimized = await optimizeImageToWebp(imageInput.buffer, imageInput.contentType);
 
     await deleteR2Objects(cityHeroR2ObjectKeys(countryCode, nameKey));
 

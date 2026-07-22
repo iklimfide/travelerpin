@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useModal } from "@/components/ui/ModalProvider";
 import { YpCountrySelect } from "@/components/kamikaze/YpCountrySelect";
+import { YpImageUrlImportModal } from "@/components/kamikaze/YpImageUrlImportModal";
 import { cityHeroLookupKey, toCityHeroDisplayUrl } from "@/lib/city/city-hero-images";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { YP_CACHE_KEYS, ypCacheGet, ypCacheInvalidate, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
@@ -58,6 +59,7 @@ export function KamikazeCitiesPanel() {
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set());
   const [renameTarget, setRenameTarget] = useState<CatalogCityRow | null>(null);
+  const [urlImportTarget, setUrlImportTarget] = useState<CatalogCityRow | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [renameTrValue, setRenameTrValue] = useState("");
   const fileInputsRef = useRef<Map<string, HTMLInputElement>>(new Map());
@@ -77,6 +79,26 @@ export function KamikazeCitiesPanel() {
     Boolean(country) ||
     query.trim().length >= MIN_QUERY_LENGTH ||
     Boolean(popularFilter);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/kamikaze/city-images")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { images?: CustomHeroRow[] } | null) => {
+        if (cancelled || !data?.images) return;
+        const next = new Map<string, string>();
+        for (const row of data.images) {
+          next.set(cityHeroLookupKey(row.countryCode, row.cityName), row.imageUrl);
+        }
+        setCustomImages(next);
+      })
+      .catch(() => {
+        /* best-effort */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const loadList = useCallback(
     async (mode: "replace" | "append" = "replace", options?: { force?: boolean; offset?: number }) => {
@@ -265,7 +287,10 @@ export function KamikazeCitiesPanel() {
     }
   }
 
-  async function uploadImage(row: CatalogCityRow, file: File) {
+  async function postHeroImage(
+    row: CatalogCityRow,
+    payload: { file?: File; imageUrl?: string }
+  ) {
     const key = heroKey(row);
     setBusyKey(key);
     setError(null);
@@ -273,19 +298,37 @@ export function KamikazeCitiesPanel() {
       const formData = new FormData();
       formData.set("countryCode", row.countryCode);
       formData.set("cityName", row.name);
-      formData.set("file", file);
+      if (payload.file) formData.set("file", payload.file);
+      else if (payload.imageUrl) formData.set("imageUrl", payload.imageUrl);
       const res = await fetch("/api/kamikaze/city-images", { method: "POST", body: formData });
       const data = (await res.json()) as { image?: CustomHeroRow; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Görsel yüklenemedi");
       if (data.image) {
+        const storedUrl = data.image.imageUrl;
         const lookup = cityHeroLookupKey(data.image.countryCode, data.image.cityName);
-        setCustomImages((prev) => new Map(prev).set(lookup, data.image!.imageUrl));
+        const rowLookup = heroKey(row);
+        setCustomImages((prev) => {
+          const next = new Map(prev);
+          next.set(lookup, storedUrl);
+          next.set(rowLookup, storedUrl);
+          return next;
+        });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Görsel yüklenemedi");
+      const message = err instanceof Error ? err.message : "Görsel yüklenemedi";
+      setError(message);
+      throw err instanceof Error ? err : new Error(message);
     } finally {
       setBusyKey(null);
     }
+  }
+
+  async function uploadImage(row: CatalogCityRow, file: File) {
+    await postHeroImage(row, { file });
+  }
+
+  async function uploadImageFromUrl(row: CatalogCityRow, imageUrl: string) {
+    await postHeroImage(row, { imageUrl });
   }
 
   async function removeImage(row: CatalogCityRow) {
@@ -302,7 +345,14 @@ export function KamikazeCitiesPanel() {
       if (!res.ok) throw new Error(data.error ?? "Görsel kaldırılamadı");
       setCustomImages((prev) => {
         const next = new Map(prev);
-        next.delete(key);
+        for (const mapKey of prev.keys()) {
+          if (
+            mapKey === key ||
+            mapKey === cityHeroLookupKey(row.countryCode, row.name)
+          ) {
+            next.delete(mapKey);
+          }
+        }
         return next;
       });
     } catch (err) {
@@ -553,6 +603,14 @@ export function KamikazeCitiesPanel() {
           onClick={() => fileInputsRef.current.get(key)?.click()}
         >
           {busy ? "…" : customUrl ? "Foto değiştir" : "Foto yükle"}
+        </button>
+        <button
+          type="button"
+          className="yp-btn"
+          disabled={busy}
+          onClick={() => setUrlImportTarget(row)}
+        >
+          Linkten
         </button>
         {customUrl ? (
           <button
@@ -953,6 +1011,20 @@ export function KamikazeCitiesPanel() {
           </>
         )}
       </div>
+
+      {urlImportTarget ? (
+        <YpImageUrlImportModal
+          key={heroKey(urlImportTarget)}
+          title="Linkten foto ekle"
+          subtitle={`${urlImportTarget.countryName} · ${urlImportTarget.name}`}
+          busy={busyKey === heroKey(urlImportTarget)}
+          onClose={() => setUrlImportTarget(null)}
+          onSubmit={async (imageUrl) => {
+            await uploadImageFromUrl(urlImportTarget, imageUrl);
+            setUrlImportTarget(null);
+          }}
+        />
+      ) : null}
 
       {renameTarget ? (
         <div className="yp-rename-modal" role="presentation">

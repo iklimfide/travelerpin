@@ -14,6 +14,7 @@ type ProfileRow = {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
+  residence: string | null;
   created_at: string;
   banned_at: string | null;
   ban_reason: string | null;
@@ -39,7 +40,7 @@ export async function GET(request: Request) {
 
   let query = admin
     .from("profiles")
-    .select("id, username, display_name, avatar_url, created_at, banned_at, ban_reason");
+    .select("id, username, display_name, avatar_url, residence, created_at, banned_at, ban_reason");
 
   if (safeQ) {
     const emailNeedle = safeQ.toLowerCase();
@@ -96,6 +97,7 @@ export async function GET(request: Request) {
       username: profile.username,
       displayName: profile.display_name,
       avatarUrl: profile.avatar_url,
+      residence: profile.residence,
       createdAt: profile.created_at,
       bannedAt: profile.banned_at,
       banReason: profile.ban_reason,

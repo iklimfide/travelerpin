@@ -2,6 +2,7 @@ import {
   hubPhotoProxyPath,
   isR2PublicMediaUrl,
   parseR2ObjectKey,
+  readMediaCacheBuster,
 } from "@/lib/storage/r2";
 import { readPhotoUrl, type PinMediaRow } from "@/lib/utils/pin-media";
 import type { MediaType } from "@/types/database";
@@ -12,7 +13,7 @@ export function toHubPhotoSrc(mediaUrl: string | null | undefined): string | nul
 
   const key = parseR2ObjectKey(mediaUrl);
   if (key) {
-    return hubPhotoProxyPath(key);
+    return hubPhotoProxyPath(key, readMediaCacheBuster(mediaUrl));
   }
 
   if (isR2PublicMediaUrl(mediaUrl)) {

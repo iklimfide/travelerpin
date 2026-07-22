@@ -162,7 +162,7 @@ export async function deleteR2Objects(keys: string[]): Promise<void> {
 }
 
 /** Known R2 prefixes served through /api/hub-photo when the bucket is private. */
-const R2_PROXY_KEY_PREFIXES = ["avatars/", "city-heroes/"] as const;
+const R2_PROXY_KEY_PREFIXES = ["avatars/", "city-heroes/", "park-heroes/"] as const;
 
 function isR2ProxyKey(key: string): boolean {
   return R2_PROXY_KEY_PREFIXES.some((prefix) => key.startsWith(prefix)) && isSafeR2ObjectKey(key);
@@ -230,6 +230,22 @@ export function getR2PublicHostname(): string | null {
   }
 }
 
-export function hubPhotoProxyPath(key: string): string {
-  return `/api/hub-photo?key=${encodeURIComponent(key)}`;
+export function hubPhotoProxyPath(key: string, cacheBuster?: string | null): string {
+  const params = new URLSearchParams();
+  params.set("key", key);
+  if (cacheBuster) params.set("v", cacheBuster);
+  return `/api/hub-photo?${params.toString()}`;
+}
+
+/** Read ?v= cache-buster from stored media URLs (hero uploads append this on each replace). */
+export function readMediaCacheBuster(publicUrl: string): string | null {
+  try {
+    const parsed = publicUrl.startsWith("http")
+      ? new URL(publicUrl)
+      : new URL(publicUrl, "https://example.invalid");
+    const value = parsed.searchParams.get("v")?.trim();
+    return value || null;
+  } catch {
+    return null;
+  }
 }
