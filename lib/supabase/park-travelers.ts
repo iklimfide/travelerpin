@@ -87,7 +87,7 @@ export async function fetchRecentParkPins(
   hub: ParkHub,
   limit = 12
 ): Promise<HubTravelerPin[]> {
-  const rows = await fetchParkPinRows(supabase, hub.countryCode);
+  const rows = await fetchParkPinRows(supabase, hub.countryCode, 60);
 
   const pins = rows
     .map((row) => rowToPin(row, hub))

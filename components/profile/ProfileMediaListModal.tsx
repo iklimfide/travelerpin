@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 
 type ProfileMediaListModalProps = {
@@ -19,6 +20,12 @@ export function ProfileMediaListModal({
   children,
 }: ProfileMediaListModalProps) {
   const { share: shareMessages } = useAppMessages();
+  const titleId = useId();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open || !closeOnEscape) return;
@@ -31,11 +38,19 @@ export function ProfileMediaListModal({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, onClose, closeOnEscape]);
 
-  if (!open) return null;
+  useEffect(() => {
+    if (!open) return;
 
-  const titleId = "profile-media-list-modal-title";
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
 
-  return (
+  if (!open || !mounted) return null;
+
+  return createPortal(
     <div className="profile-followers-modal profile-media-list-modal" role="presentation">
       <button
         type="button"
@@ -67,6 +82,7 @@ export function ProfileMediaListModal({
 
         <div className="profile-media-list-modal__body">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -272,113 +272,119 @@ export function ProfileNextRouteSection({
 
   return (
     <section id="profile-next-route" className="profile-section profile-next-route">
-      <div className="profile-owner-section profile-next-route-box">
-        <div className="profile-owner-section__header profile-next-route-box__header">
-          {isOwnProfile && stops.length > 0 ? (
-            <div className="profile-next-route-box__header-action profile-next-route-box__header-action--start">
-              <button
-                type="button"
-                className="profile-owner-section__btn profile-owner-section__btn--sort"
-                onClick={() => openNextRouteModal("route")}
-              >
-                {profileMessages.sortRoute}
-              </button>
+      <div className="profile-next-route-box">
+        <div className="profile-next-route-box__hero profile-card-hero">
+          <div className="profile-next-route-box__header">
+            {isOwnProfile && stops.length > 0 ? (
+              <div className="profile-next-route-box__header-action profile-next-route-box__header-action--start">
+                <button
+                  type="button"
+                  className="profile-owner-section__btn profile-owner-section__btn--sort"
+                  onClick={() => openNextRouteModal("route")}
+                >
+                  {profileMessages.sortRoute}
+                </button>
+              </div>
+            ) : null}
+            <div className="profile-next-route-box__intro">
+              <h3 className="profile-next-route-box__title profile-card-hero__title">{profileMessages.nextRouteTitle}</h3>
+              {stopCountLabel ? (
+                <p className="profile-next-route-box__count profile-card-hero__count">{stopCountLabel}</p>
+              ) : null}
             </div>
-          ) : null}
-          <div className="profile-owner-section__intro profile-next-route-box__intro">
-            <h3 className="profile-owner-section__title">{profileMessages.nextRouteTitle}</h3>
-            {stopCountLabel ? (
-              <p className="profile-owner-section__count">{stopCountLabel}</p>
+            {isOwnProfile ? (
+              <div className="profile-next-route-box__header-action profile-next-route-box__header-action--end">
+                <button
+                  type="button"
+                  className="profile-owner-section__btn profile-owner-section__btn--add"
+                  onClick={() => {
+                    openNextRouteDestination();
+                  }}
+                >
+                  {profileMessages.ownerAdd}
+                </button>
+              </div>
             ) : null}
           </div>
-          {isOwnProfile ? (
-            <div className="profile-next-route-box__header-action profile-next-route-box__header-action--end">
-              <button
-                type="button"
-                className="profile-owner-section__btn profile-owner-section__btn--add"
-                onClick={() => {
-                  openNextRouteDestination();
-                }}
-              >
-                {profileMessages.ownerAdd}
-              </button>
-            </div>
-          ) : null}
         </div>
 
         {stops.length === 0 ? (
-          <p className="profile-owner-empty">{profileMessages.nextRouteEmptyOnProfile}</p>
+          <div className="profile-next-route-box__body profile-next-route-box__body--empty">
+            <p className="profile-owner-empty">{profileMessages.nextRouteEmptyOnProfile}</p>
+          </div>
         ) : (
-          <ul className="profile-next-route-list">
-            {stops.map((stop, index) => {
-              const { title, subtitle, countryCode } = getNextRouteStopDisplay(stop, locale);
-              const flagUrl = countryCode ? countryCodeToFlagUrl(countryCode) : "";
-              const visited = isRouteStopVisited(
-                stop,
-                visitedCountries,
-                visitedCities,
-                locallyVisitedKeys
-              );
+          <div className="profile-next-route-box__body">
+            <ol className="profile-next-route-timeline">
+              {stops.map((stop, index) => {
+                const { title, subtitle, countryCode } = getNextRouteStopDisplay(stop, locale);
+                const flagUrl = countryCode ? countryCodeToFlagUrl(countryCode) : "";
+                const visited = isRouteStopVisited(
+                  stop,
+                  visitedCountries,
+                  visitedCities,
+                  locallyVisitedKeys
+                );
 
-              return (
-                <li key={stop.id} className="profile-next-route-item">
-                  <div className="profile-next-route-row">
-                    <span className="profile-next-route-index" aria-hidden>
+                return (
+                  <li key={stop.id} className="profile-next-route-timeline-item">
+                    <span className="profile-next-route-node" aria-hidden>
                       {index + 1}
                     </span>
-                    {flagUrl ? (
-                      <span className="profile-next-route-flag">
-                        <Image
-                          src={flagUrl}
-                          alt=""
-                          width={32}
-                          height={32}
-                          className="rounded-full object-cover"
-                        />
-                      </span>
-                    ) : null}
-                    <span className="profile-next-route-text">
-                      {stop.href ? (
-                        <Link href={stop.href} className="profile-next-route-name profile-next-route-link">
-                          {title}
-                        </Link>
-                      ) : (
-                        <span className="profile-next-route-name">{title}</span>
-                      )}
-                      {subtitle ? (
-                        <span className="profile-next-route-meta" title={subtitle}>
-                          {subtitle}
+                    <div className="profile-next-route-card">
+                      {flagUrl ? (
+                        <span className="profile-next-route-flag">
+                          <Image
+                            src={flagUrl}
+                            alt=""
+                            width={36}
+                            height={36}
+                            className="rounded-full object-cover"
+                          />
                         </span>
                       ) : null}
-                    </span>
-                  </div>
-                  {isOwnProfile ? (
-                    <div className="profile-next-route-actions">
-                      <button
-                        type="button"
-                        className={`save-destination-modal__check${
-                          visited ? " save-destination-modal__check--on" : ""
-                        }`}
-                        onClick={() => handleMarkVisited(stop)}
-                        aria-label={
-                          visited
-                            ? nextRouteMessages.markVisitedDone
-                            : nextRouteMessages.markVisited
-                        }
-                        title={
-                          visited
-                            ? nextRouteMessages.markVisitedDone
-                            : nextRouteMessages.markVisited
-                        }
-                      >
-                        ✓
-                      </button>
+                      <span className="profile-next-route-text">
+                        {stop.href ? (
+                          <Link href={stop.href} className="profile-next-route-name profile-next-route-link">
+                            {title}
+                          </Link>
+                        ) : (
+                          <span className="profile-next-route-name">{title}</span>
+                        )}
+                        {subtitle ? (
+                          <span className="profile-next-route-meta" title={subtitle}>
+                            {subtitle}
+                          </span>
+                        ) : null}
+                      </span>
                     </div>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
+                    {isOwnProfile ? (
+                      <div className="profile-next-route-actions">
+                        <button
+                          type="button"
+                          className={`save-destination-modal__check${
+                            visited ? " save-destination-modal__check--on" : ""
+                          }`}
+                          onClick={() => handleMarkVisited(stop)}
+                          aria-label={
+                            visited
+                              ? nextRouteMessages.markVisitedDone
+                              : nextRouteMessages.markVisited
+                          }
+                          title={
+                            visited
+                              ? nextRouteMessages.markVisitedDone
+                              : nextRouteMessages.markVisited
+                          }
+                        >
+                          ✓
+                        </button>
+                      </div>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
         )}
       </div>
     </section>

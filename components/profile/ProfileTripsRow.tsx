@@ -104,6 +104,7 @@ export function ProfileTripsRow({
 
         <DestinationSection
           id={sectionId("countries")}
+          tab="countries"
           title={profileMessages.allDestinationsCountries}
           count={destinations.countries.length}
           onOpenAll={() => setOpenModalTab("countries")}
@@ -120,6 +121,7 @@ export function ProfileTripsRow({
 
         <DestinationSection
           id={sectionId("cities")}
+          tab="cities"
           title={profileMessages.allDestinationsCities}
           count={destinations.cities.length}
           onOpenAll={() => setOpenModalTab("cities")}
@@ -131,6 +133,7 @@ export function ProfileTripsRow({
 
         <DestinationSection
           id={sectionId("parks")}
+          tab="parks"
           title={profileMessages.allDestinationsParks}
           count={destinations.parks.length}
           onOpenAll={() => setOpenModalTab("parks")}
@@ -142,6 +145,7 @@ export function ProfileTripsRow({
 
         <DestinationSection
           id={sectionId("wishlist")}
+          tab="wishlist"
           title={profileMessages.wishlistCountries}
           count={destinations.wishlist.length}
           onOpenAll={() => setOpenModalTab("wishlist")}

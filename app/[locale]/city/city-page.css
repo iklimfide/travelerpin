@@ -540,6 +540,48 @@
   font-weight: inherit;
 }
 
+.city-page__section-view-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border: none;
+  border-radius: 999px;
+  background: #f5f7fb;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #2563eb;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.city-page__hub-media-head {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.city-page__hub-media-head--has-view-all {
+  padding-right: 72px;
+}
+
+.city-page__hub-media-head .city-page__section-view-all {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.city-page__section-view-all:hover {
+  background: #eff6ff;
+}
+
+.city-page__section-view-all:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
 .city-page__travelers {
   margin: 0;
   list-style: none;
@@ -1467,4 +1509,129 @@ html.dark .city-page__memory-lightbox-note {
   .hub-place-card__action-btn {
     width: calc((100% - 16px) / 3);
   }
+}
+
+/* Media list modal — country / city / park hub pages (matches profile.css) */
+.profile-followers-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 105;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+}
+
+.profile-followers-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  cursor: pointer;
+}
+
+.profile-followers-modal__sheet {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 480px;
+  max-height: min(72vh, 520px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 24px 56px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+}
+
+.profile-followers-modal__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+}
+
+.profile-followers-modal__close {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.profile-followers-modal__close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.profile-media-list-modal {
+  padding: 12px;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.profile-media-list-modal .profile-followers-modal__sheet,
+.profile-media-list-modal__sheet {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+}
+
+.profile-media-list-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 18px 48px 14px;
+  background: #2563eb;
+  border-bottom: none;
+}
+
+.profile-media-list-modal__head .profile-followers-modal__title {
+  color: #fff;
+}
+
+.profile-media-list-modal__head .profile-followers-modal__close {
+  color: #fff;
+}
+
+.profile-media-list-modal__head .profile-followers-modal__close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.profile-media-list-modal__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px;
+  background: #f5f7fb;
+}
+
+.profile-media-list-modal__content .profile-media-box,
+.profile-media-list-modal__content .city-page__hub-photo-gallery {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+}
+
+.profile-media-list-modal__content .city-page__traveler-pictures-grid {
+  padding: 0;
+}
+
+.profile-media-list-modal__content .city-page__section {
+  margin-top: 0;
 }

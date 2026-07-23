@@ -19,14 +19,23 @@ export function sectionId(tab: ProfileVisitedTab): string {
   return `profile-all-${tab}`;
 }
 
+const TAB_ICONS: Record<ProfileVisitedTab, string> = {
+  countries: "🌍",
+  cities: "📍",
+  parks: "🏞️",
+  wishlist: "⭐",
+};
+
 export function DestinationSection({
   id,
+  tab,
   title,
   count,
   onOpenAll,
   children,
 }: {
   id: string;
+  tab: ProfileVisitedTab;
   title: string;
   count: number;
   onOpenAll?: () => void;
@@ -36,11 +45,17 @@ export function DestinationSection({
   const showAllButton = count > 0;
 
   return (
-    <section id={id} className="profile-all-section profile-all-box">
+    <section
+      id={id}
+      className={`profile-all-section profile-all-box profile-all-box--${tab}`}
+    >
       <div className="profile-all-box__head">
         <div className="profile-all-box__title-row">
+          <span className="profile-all-box__icon" aria-hidden>
+            {TAB_ICONS[tab]}
+          </span>
           <h2 className="profile-all-box__title">{title}</h2>
-          <span className="profile-all-section__count">{count}</span>
+          <span className="profile-all-box__count">{count}</span>
         </div>
         {showAllButton ? (
           <button type="button" className="profile-all-box__all" onClick={onOpenAll}>
@@ -48,13 +63,15 @@ export function DestinationSection({
           </button>
         ) : null}
       </div>
-      {count === 0 ? (
-        <p className="profile-all-box__empty">{profileMessages.allDestinationsTabEmpty}</p>
-      ) : (
-        <div className="profile-all-grid profile-all-grid--preview" role="list" aria-label={title}>
-          {children}
-        </div>
-      )}
+      <div className="profile-all-box__content">
+        {count === 0 ? (
+          <p className="profile-all-box__empty">{profileMessages.allDestinationsTabEmpty}</p>
+        ) : (
+          <div className="profile-all-grid profile-all-grid--preview" role="list" aria-label={title}>
+            {children}
+          </div>
+        )}
+      </div>
     </section>
   );
 }
@@ -83,8 +100,8 @@ export function ProfileVisitedDestinationsNav({
   };
 
   return (
-    <div className="profile-all-nav">
-      <h2 className="profile-all-nav__title">{visitedLabel}</h2>
+    <div className="profile-all-nav profile-card-hero">
+      <h2 className="profile-all-nav__title profile-card-hero__title">{visitedLabel}</h2>
       <div className="profile-all-tabs" role="tablist" aria-label="Destination categories">
         {PROFILE_VISITED_TABS.map((item) => (
           <button

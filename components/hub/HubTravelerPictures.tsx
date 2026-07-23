@@ -7,17 +7,20 @@ import { HubMemoryLightbox } from "@/components/hub/HubMemoryLightbox";
 import { HubSectionHeading } from "@/components/hub/HubSectionHeading";
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
 import { hubGalleryPhotoSrc } from "@/lib/storage/hub-photo-url";
-import type { HubGalleryItem, HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
-import { expandHubPinGalleryItems } from "@/lib/supabase/hub-traveler-pin";
+import type { HubGalleryItem } from "@/lib/supabase/hub-traveler-pin";
 
 type HubTravelerPicturesProps = {
   hubName: string;
-  pins: HubTravelerPin[];
+  items: HubGalleryItem[];
   variant: "photos" | "instagram";
   alwaysShow?: boolean;
   emptyLabel?: string;
   headingId: string;
   headingCta?: ReactNode;
+  hideHeading?: boolean;
+  showViewAll?: boolean;
+  viewAllLabel?: string;
+  onViewAll?: () => void;
   labels: {
     photosHeading: string;
     instagramHeading: string;
@@ -82,19 +85,19 @@ function GalleryGrid({
 
 export function HubTravelerPictures({
   hubName,
-  pins,
+  items,
   variant,
   alwaysShow = false,
   emptyLabel,
   headingId,
   headingCta,
+  hideHeading = false,
+  showViewAll = false,
+  viewAllLabel,
+  onViewAll,
   labels,
 }: HubTravelerPicturesProps) {
   const [expandedItem, setExpandedItem] = useState<HubGalleryItem | null>(null);
-  const galleryItems = expandHubPinGalleryItems(pins);
-  const photoItems = galleryItems.filter((item) => item.mediaType === "photo");
-  const instagramItems = galleryItems.filter((item) => item.mediaType === "instagram");
-  const items = variant === "photos" ? photoItems : instagramItems;
   const heading = variant === "photos" ? labels.photosHeading : labels.instagramHeading;
 
   if (items.length === 0 && !alwaysShow) {
@@ -104,7 +107,22 @@ export function HubTravelerPictures({
   return (
     <>
       <section className="city-page__section" aria-labelledby={headingId}>
-        <HubSectionHeading id={headingId} title={heading} cta={headingCta} />
+        {hideHeading ? null : (
+          <div
+            className={
+              showViewAll && onViewAll && viewAllLabel
+                ? "city-page__hub-media-head city-page__hub-media-head--has-view-all"
+                : "city-page__hub-media-head"
+            }
+          >
+            <HubSectionHeading id={headingId} title={heading} cta={headingCta} />
+            {showViewAll && onViewAll && viewAllLabel ? (
+              <button type="button" className="city-page__section-view-all" onClick={onViewAll}>
+                {viewAllLabel}
+              </button>
+            ) : null}
+          </div>
+        )}
         {items.length > 0 ? (
           <div className="city-page__hub-photo-gallery">
             <GalleryGrid

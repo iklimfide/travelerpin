@@ -82,16 +82,24 @@ async function selectWithVariants<T>(
       return (result.data as T[] | null) ?? [];
     }
     lastError = result.error.message;
+    if (isFetchTimeoutError(result.error.message)) {
+      break;
+    }
     if (!isMissingColumnSchemaError(result.error.message)) {
       break;
     }
   }
 
-  if (lastError) {
+  if (lastError && !isFetchTimeoutError(lastError)) {
     console.error("city-pin-select:", lastError);
   }
 
   return [];
+}
+
+function isFetchTimeoutError(message: string): boolean {
+  const lower = message.toLowerCase();
+  return lower.includes("timeout") || lower.includes("aborted");
 }
 
 export async function fetchCityPinRowsByCountry(

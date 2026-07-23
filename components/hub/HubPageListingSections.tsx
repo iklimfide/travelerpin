@@ -5,10 +5,17 @@ import { HubRecentTravelers } from "@/components/hub/HubRecentTravelers";
 import { HubSectionCta } from "@/components/hub/HubSectionCta";
 import { HubTravelerPictures } from "@/components/hub/HubTravelerPictures";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
-import { pinHasInstagramMedia, pinHasPhotoMedia } from "@/lib/supabase/hub-traveler-pin";
-import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
+import { ProfileMediaListModal } from "@/components/profile/ProfileMediaListModal";
+import { useTranslateProfile } from "@/lib/i18n/client-messages";
 import type { CountryTraveler } from "@/lib/supabase/country-travelers";
+import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
+import {
+  PROFILE_MEDIA_PREVIEW_LIMIT,
+  splitProfileMediaItems,
+} from "@/lib/utils/profile-media";
 import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
+
+type HubMediaTab = "photos" | "instagram";
 
 type HubPageListingSectionsLabels = {
   recentTravelers: string;
@@ -96,9 +103,16 @@ export function HubPageListingSections({
   headingIds,
   labels,
 }: HubPageListingSectionsProps) {
+  const tProfile = useTranslateProfile();
   const [editOpen, setEditOpen] = useState(false);
   const [editMediaFocus, setEditMediaFocus] = useState<"photo" | "instagram" | undefined>();
+  const [openModalTab, setOpenModalTab] = useState<HubMediaTab | null>(null);
   const canOpenEdit = canEditMedia && (ownerCity || ownerPark);
+
+  const { photos, instagram } = splitProfileMediaItems(memoryPins);
+  const previewPhotos = photos.slice(0, PROFILE_MEDIA_PREVIEW_LIMIT);
+  const previewInstagram = instagram.slice(0, PROFILE_MEDIA_PREVIEW_LIMIT);
+  const viewAllLabel = tProfile("allDestinationsAll");
 
   function openEditModal(mediaFocus?: "photo" | "instagram") {
     setEditMediaFocus(mediaFocus);
@@ -117,6 +131,11 @@ export function HubPageListingSections({
     viewMap: labels.viewMap,
     close: labels.close,
     instagramPost: labels.instagramPost,
+  };
+
+  const modalTitles: Record<HubMediaTab, string> = {
+    photos: labels.photosHeading,
+    instagram: labels.instagramHeading,
   };
 
   return (
@@ -165,6 +184,10 @@ export function HubPageListingSections({
         headingId={headingIds.photos}
         alwaysShow
         emptyLabel={labels.noPhotosYet}
+        items={previewPhotos}
+        showViewAll={photos.length > 0}
+        viewAllLabel={viewAllLabel}
+        onViewAll={() => setOpenModalTab("photos")}
         headingCta={mediaHeadingCta(
           labels.addYourPhotoCta,
           canEditMedia,
@@ -172,7 +195,6 @@ export function HubPageListingSections({
           loginHref,
           () => openEditModal("photo")
         )}
-        pins={memoryPins.filter((pin) => pinHasPhotoMedia(pin))}
         labels={pictureLabels}
       />
 
@@ -182,6 +204,10 @@ export function HubPageListingSections({
         headingId={headingIds.instagram}
         alwaysShow
         emptyLabel={labels.noInstagramPostsYet}
+        items={previewInstagram}
+        showViewAll={instagram.length > 0}
+        viewAllLabel={viewAllLabel}
+        onViewAll={() => setOpenModalTab("instagram")}
         headingCta={mediaHeadingCta(
           labels.addYourInstagramCta,
           canEditMedia,
@@ -189,9 +215,43 @@ export function HubPageListingSections({
           loginHref,
           () => openEditModal("instagram")
         )}
-        pins={memoryPins.filter((pin) => pinHasInstagramMedia(pin))}
         labels={pictureLabels}
       />
+
+      <ProfileMediaListModal
+        open={openModalTab !== null}
+        title={openModalTab ? modalTitles[openModalTab] : ""}
+        onClose={() => setOpenModalTab(null)}
+      >
+        {openModalTab === "photos" ? (
+          <div className="profile-media-list-modal__content">
+            <HubTravelerPictures
+              hubName={hubName}
+              variant="photos"
+              headingId="hub-media-modal-photos-heading"
+              hideHeading
+              items={photos}
+              alwaysShow
+              emptyLabel={labels.noPhotosYet}
+              labels={pictureLabels}
+            />
+          </div>
+        ) : null}
+        {openModalTab === "instagram" ? (
+          <div className="profile-media-list-modal__content">
+            <HubTravelerPictures
+              hubName={hubName}
+              variant="instagram"
+              headingId="hub-media-modal-instagram-heading"
+              hideHeading
+              items={instagram}
+              alwaysShow
+              emptyLabel={labels.noInstagramPostsYet}
+              labels={pictureLabels}
+            />
+          </div>
+        ) : null}
+      </ProfileMediaListModal>
     </>
   );
 }

@@ -98,14 +98,22 @@ export async function fetchRecentCountryPins(
 ): Promise<HubTravelerPin[]> {
   const code = countryCode.toUpperCase();
 
-  const [cityRows, parkRows] = await Promise.all([
-    fetchCityPinRowsByCountry(supabase, code, 30),
-    fetchParkPinRows(supabase, code, 30),
-  ]);
-
+  const cityRows = await fetchCityPinRowsByCountry(supabase, code, 30);
   const cityPins = cityRows
     .map((row) => cityRowToPin({ ...row, city_name: row.city_name ?? "", visit_dates: row.visit_dates ?? [] }))
     .filter((pin): pin is HubTravelerPin => pin !== null);
+
+  const cityPinsWithContent = pinsWithContent(sortHubTravelerPins(cityPins));
+  if (cityPinsWithContent.length >= limit) {
+    return cityPinsWithContent.slice(0, limit);
+  }
+
+  let parkRows: Awaited<ReturnType<typeof fetchParkPinRows>> = [];
+  try {
+    parkRows = await fetchParkPinRows(supabase, code, 30, { mediaOnly: true });
+  } catch {
+    parkRows = [];
+  }
 
   const parkPins = parkRows
     .map((row) =>

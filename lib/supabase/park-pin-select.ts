@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { isMissingColumnSchemaError } from "@/lib/supabase/pin-media-schema";
 import type { MediaType } from "@/types/database";
 
 const MEDIA_FIELDS = "media_type, media_url, photo_url, instagram_urls";
@@ -32,27 +33,30 @@ export type ParkPinQueryRow = {
   } | null;
 };
 
+export type FetchParkPinRowsOptions = {
+  /** Only rows with a photo or legacy media URL (gallery / hub previews). */
+  mediaOnly?: boolean;
+};
+
+function isFetchTimeoutError(message: string): boolean {
+  const lower = message.toLowerCase();
+  return lower.includes("timeout") || lower.includes("aborted");
+}
+
 async function runParkPinSelect(
   supabase: SupabaseClient,
   code: string,
   select: string,
-  limit: number
+  limit: number,
+  options?: FetchParkPinRowsOptions
 ) {
-  return supabase
-    .from("visited_parks")
-    .select(select)
-    .eq("country_code", code)
-    .order("updated_at", { ascending: false })
-    .limit(limit);
-}
+  let query = supabase.from("visited_parks").select(select).eq("country_code", code);
 
-function isMissingColumnError(message: string): boolean {
-  const lower = message.toLowerCase();
-  return (
-    lower.includes("does not exist") ||
-    lower.includes("schema cache") ||
-    lower.includes("could not find")
-  );
+  if (options?.mediaOnly) {
+    query = query.or("photo_url.not.is.null,media_url.not.is.null");
+  }
+
+  return query.order("updated_at", { ascending: false }).limit(limit);
 }
 
 const PARK_PIN_SELECT_VARIANTS = [
@@ -64,27 +68,50 @@ const PARK_PIN_SELECT_VARIANTS = [
   PARK_PIN_SELECT_LEGACY,
 ] as const;
 
-export async function fetchParkPinRows(
+async function selectParkPinRowsWithVariants(
   supabase: SupabaseClient,
-  countryCode: string,
-  limit = 200
+  code: string,
+  limit: number,
+  options?: FetchParkPinRowsOptions
 ): Promise<ParkPinQueryRow[]> {
-  const code = countryCode.toUpperCase();
   let lastError: string | null = null;
 
   for (const select of PARK_PIN_SELECT_VARIANTS) {
-    const result = await runParkPinSelect(supabase, code, select, limit);
+    const result = await runParkPinSelect(supabase, code, select, limit, options);
     if (!result.error) {
       return (result.data as unknown as ParkPinQueryRow[] | null) ?? [];
     }
     lastError = result.error.message;
-    if (!isMissingColumnError(result.error.message)) {
+    if (isFetchTimeoutError(result.error.message)) {
+      break;
+    }
+    if (!isMissingColumnSchemaError(result.error.message)) {
       break;
     }
   }
 
-  if (lastError) {
+  if (
+    options?.mediaOnly &&
+    lastError &&
+    isMissingColumnSchemaError(lastError) &&
+    !isFetchTimeoutError(lastError)
+  ) {
+    return selectParkPinRowsWithVariants(supabase, code, limit, { mediaOnly: false });
+  }
+
+  if (lastError && !isFetchTimeoutError(lastError)) {
     console.error("fetchParkPinRows:", lastError);
   }
+
   return [];
+}
+
+export async function fetchParkPinRows(
+  supabase: SupabaseClient,
+  countryCode: string,
+  limit = 40,
+  options?: FetchParkPinRowsOptions
+): Promise<ParkPinQueryRow[]> {
+  const code = countryCode.toUpperCase();
+  return selectParkPinRowsWithVariants(supabase, code, limit, options);
 }
