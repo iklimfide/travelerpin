@@ -59,11 +59,12 @@ function toBareHref(href: IntlLinkProps["href"]): IntlLinkProps["href"] {
  * already ran `getPathname`, strip the prefix so IntlLink does not emit
  * `/tr/tr/...`.
  */
-export function Link({ href, locale, ...rest }: IntlLinkProps) {
+/** Default prefetch off — avoids background RSC/API storms on footer and hub links. */
+export function Link({ href, locale, prefetch = false, ...rest }: IntlLinkProps) {
   const bareHref = toBareHref(href);
   const path = hrefPathname(bareHref);
   if (path && isPublicProfilePath(path)) {
-    return <NextLink href={bareHref} {...rest} />;
+    return <NextLink href={bareHref} prefetch={prefetch} {...rest} />;
   }
-  return <IntlLink href={bareHref} locale={locale} {...rest} />;
+  return <IntlLink href={bareHref} locale={locale} prefetch={prefetch} {...rest} />;
 }

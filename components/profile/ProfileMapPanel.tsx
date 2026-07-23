@@ -162,6 +162,7 @@ export function ProfileMapPanel({
           href={allHref}
           className="profile-map-panel profile-map-panel--link"
           aria-label={allAriaLabel}
+          prefetch={false}
         >
           {panel}
         </Link>

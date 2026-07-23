@@ -213,6 +213,12 @@ export function ProfileNextRouteSection({
       ...(initialTransport !== undefined ? { transport: initialTransport } : {}),
     };
     const next = mergeIncomingRoute(routeRef.current, incoming);
+    if (next === routeRef.current) {
+      if (initialStops.length > 0) {
+        setLoadingOwnRoute(false);
+      }
+      return;
+    }
     routeRef.current = next;
     setRoute(next);
     if (initialStops.length > 0) {

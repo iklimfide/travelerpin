@@ -45,12 +45,20 @@ export function CountryPageActions({
   const [optimisticWishlist, setOptimisticWishlist] = useState<boolean | null>(null);
   const visitedAddToken = useRef(0);
   const wishlistAddToken = useRef(0);
+  const visitorStateKey = [
+    initialState.isLoggedIn,
+    initialState.visitedId,
+    initialState.wishlistId,
+    initialState.isOnMap,
+    initialState.visitedViaPlacesOnly,
+  ].join("|");
 
   useEffect(() => {
     setState(initialState);
     setOptimisticOnMap(null);
     setOptimisticWishlist(null);
-  }, [initialState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initialState aligned with visitorStateKey
+  }, [visitorStateKey]);
 
   const onMap = state.visitedViaPlacesOnly
     ? true

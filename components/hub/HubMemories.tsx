@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Link } from "@/lib/i18n/navigation";
 import { InstagramMemoryThumb } from "@/components/city/InstagramMemoryThumb";
+import { HubExternalPhoto } from "@/components/hub/HubExternalPhoto";
 import { HubMemoryLightbox } from "@/components/hub/HubMemoryLightbox";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { hubPinPhotoSrc } from "@/lib/storage/hub-photo-url";
 import { formatVisitDatesList } from "@/lib/utils/visit-date";
 import { getIntlLocale } from "@/lib/i18n/config";
 import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
@@ -41,23 +42,30 @@ export function HubMemories({ hubName, pins, labels }: HubMemoriesProps) {
                 : null;
             const hasMedia = Boolean(pin.mediaUrl);
             const canExpand = hasMedia || Boolean(pin.note?.trim());
+            const photoSrc =
+              pin.mediaType === "photo"
+                ? hubPinPhotoSrc({
+                    mediaDisplayUrl: pin.mediaDisplayUrl,
+                    photoUrl: pin.photoUrl,
+                    mediaUrl: pin.mediaUrl,
+                  })
+                : null;
 
             return (
               <li key={pin.id} className="city-page__memory">
-                {hasMedia && pin.mediaType === "photo" && pin.mediaUrl ? (
+                {hasMedia && pin.mediaType === "photo" && photoSrc ? (
                   <Link
                     href={pin.profilePath}
                     className="city-page__memory-thumb-btn"
                     aria-label={`${pin.displayName} — ${labels.viewMap}`}
                     prefetch={false}
                   >
-                    <Image
-                      src={pin.mediaUrl}
+                    <HubExternalPhoto
+                      src={photoSrc}
                       alt=""
                       width={112}
                       height={112}
                       className="city-page__memory-thumb-image"
-                      sizes="112px"
                     />
                   </Link>
                 ) : hasMedia ? (

@@ -47,12 +47,20 @@ export function CityPageActions({
   const [optimisticWishlist, setOptimisticWishlist] = useState<boolean | null>(null);
   const cityAddToken = useRef(0);
   const wishlistAddToken = useRef(0);
+  const visitorStateKey = [
+    initialState.isLoggedIn,
+    initialState.cityId,
+    initialState.countryWishlistId,
+    initialState.countryVisited,
+  ].join("|");
 
   useEffect(() => {
     setState(initialState);
     setOptimisticCityOnMap(null);
     setOptimisticWishlist(null);
-  }, [initialState]);
+    // visitorStateKey tracks meaningful server prop changes only (avoids object-ref churn).
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initialState aligned with visitorStateKey
+  }, [visitorStateKey]);
 
   const cityOnMap =
     optimisticCityOnMap !== null ? optimisticCityOnMap : Boolean(state.cityId);

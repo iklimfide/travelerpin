@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import { useLocale } from "next-intl";
 import { deleteCitiesBatch } from "@/lib/client/city-actions";
 import { removeVisitedCountry, removeWishlistCountry } from "@/lib/client/country-actions";
-import { fetchHeroImageMaps } from "@/lib/client/hero-images-cache";
+import { fetchHeroImageMaps, readCachedCityHeroImages, readCachedParkHeroImages } from "@/lib/client/hero-images-cache";
 import { deleteParksBatch } from "@/lib/client/park-actions";
 import { useProfileStaleReload } from "@/lib/client/use-profile-stale-reload";
 import { ProfileAllDestinationsListModal } from "@/components/profile/ProfileAllDestinationsListModal";
@@ -136,7 +136,12 @@ export function ProfileAllDestinationsView({
       const viewData = previewAsPublic ? applyPublicPreviewToProfileData(data) : data;
       const { wishlistCountries: visibleWishlist, wishlistCodes: visibleWishlistCodes } =
         filterWishlistForProfileView(viewData, isOwnProfile);
-      const { cityHeroImages, parkHeroImages } = await fetchHeroImageMaps();
+      const cachedCity = readCachedCityHeroImages();
+      const cachedPark = readCachedParkHeroImages();
+      const { cityHeroImages, parkHeroImages } =
+        cachedCity && cachedPark
+          ? { cityHeroImages: cachedCity, parkHeroImages: cachedPark }
+          : await fetchHeroImageMaps();
 
       setViewVisitedCountries(viewData.visitedCountries);
       setViewVisitedCities(viewData.visitedCities);

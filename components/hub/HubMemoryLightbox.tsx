@@ -79,7 +79,7 @@ export function HubMemoryLightbox({
     >
       <div className="city-page__memory-lightbox-panel" onClick={(e) => e.stopPropagation()}>
         <div className="city-page__memory-lightbox-header">
-          <Link href={pin.profilePath} className="city-page__traveler-link">
+          <Link href={pin.profilePath} className="city-page__traveler-link" prefetch={false}>
             <ProfileAvatar
               avatarUrl={pin.avatarUrl}
               displayName={pin.displayName}
@@ -109,6 +109,7 @@ export function HubMemoryLightbox({
               <Link
                 href={pin.placePath}
                 className="city-page__memory-place-link"
+                prefetch={false}
                 onClick={(event) => event.stopPropagation()}
               >
                 {pin.placeLabel}
@@ -150,7 +151,7 @@ export function HubMemoryLightbox({
         ) : null}
 
         <div className="city-page__memory-lightbox-footer">
-          <Link href={pin.profilePath} className="city-page__memory-map-link">
+          <Link href={pin.profilePath} className="city-page__memory-map-link" prefetch={false}>
             {labels.viewMap}
           </Link>
         </div>
