@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { ProfileCountryLink, ProfileParkLink } from "@/components/profile/ProfilePlaceLink";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
@@ -19,11 +18,11 @@ export function ProfileParkDestinationCard({
   return (
     <article className={`profile-trip${layout === "grid" ? " profile-trip--grid" : ""}`}>
       <div className="profile-trip-image profile-trip-image--park">
-        <Image
+        {/* Plain img — /api/hub-photo proxy URLs break under next/image on production. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={park.imageUrl}
           alt=""
-          fill
-          sizes="245px"
           className="profile-trip-image__photo object-cover"
         />
         <span className="profile-trip-badge">{parkTypeLabel(park.parkType)}</span>

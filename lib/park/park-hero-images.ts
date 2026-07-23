@@ -162,7 +162,12 @@ export async function getParkHeroImageUrl(
 export function serializeParkHeroImageMap(
   heroMap: ReadonlyMap<string, string>
 ): Record<string, string> {
-  return Object.fromEntries([...heroMap.entries()]);
+  return Object.fromEntries(
+    [...heroMap.entries()].map(([key, url]) => {
+      const parkType = key.split(":")[1] as ParkType;
+      return [key, toParkHeroDisplayUrl(url, parkType)];
+    })
+  );
 }
 
 export function canonicalCatalogParkName(parkName: string): string {

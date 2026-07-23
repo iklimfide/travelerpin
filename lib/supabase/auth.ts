@@ -12,9 +12,12 @@ export const getAuthUser = cache(async (): Promise<User | null> => {
   if (!supabase) return null;
 
   try {
+    // Cookie session only — middleware refreshes tokens; avoid getUser()'s auth-server
+    // round trip (4s fetch timeout) on every RSC/metadata render.
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
     if (!user) return null;
 
     // Ban check is best-effort: timeouts / missing columns must not drop valid sessions
