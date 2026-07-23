@@ -1,5 +1,6 @@
 import { DEMO_CITIES } from "@/lib/data/demo-cities";
 import { DEMO_VISITED_COUNTRIES } from "@/lib/data/demo-countries";
+import { DEMO_NEXT_ROUTE_STOPS, DEMO_NEXT_ROUTE_TOTAL_DAYS, DEMO_NEXT_ROUTE_TRANSPORT } from "@/lib/data/demo-next-route";
 import { DEMO_PARKS } from "@/lib/data/demo-parks";
 import { DEMO_PERSONA, getDemoTravelStats } from "@/lib/data/demo-persona";
 import { DEMO_WISHLIST_COUNTRIES } from "@/lib/data/demo-wishlist";
@@ -29,7 +30,9 @@ export const DEMO_PROFILE: PublicProfile = {
   marital_status: null,
   wishlist_public: true,
   locale: "en",
-  next_route: [],
+  next_route: DEMO_NEXT_ROUTE_STOPS,
+  next_route_total_days: DEMO_NEXT_ROUTE_TOTAL_DAYS,
+  next_route_transport: DEMO_NEXT_ROUTE_TRANSPORT,
 };
 
 const JENNIFER_HOME_CITY: VisitedCity = {

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { HomeBestDestinations } from "@/components/home/HomeBestDestinations";
 import { HomeBelowFoldSections } from "@/components/home/HomeBelowFoldSections";
 import { HomeLandingSection } from "@/components/home/HomeLandingSection";
 import { DEMO_PERSONA, getDemoTravelStats } from "@/lib/data/demo-persona";
@@ -50,10 +49,6 @@ export default async function HomePage() {
     <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 py-[46px] pb-[72px] max-sm:px-3.5 max-sm:py-8 max-sm:pb-[54px] lg:max-w-[1400px] lg:px-10 xl:max-w-[1520px] xl:px-12">
       <div className="flex flex-col gap-7 sm:gap-9">
         <HomeLandingSection />
-
-        <div className="hidden lg:block">
-          <HomeBestDestinations desktop />
-        </div>
 
         <div className="flex flex-col gap-7 sm:gap-9 lg:hidden">
           <HomeBelowFoldSections

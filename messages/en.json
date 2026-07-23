@@ -458,6 +458,7 @@
     "latestAddedPrefix": "Latest added: ",
     "myTrips": "My trips",
     "nextRouteTitle": "Next Route",
+    "visitorNextRouteTitle": "{name}'s Next Route",
     "nextRouteEmptyOnProfile": "No stops yet. Add countries and cities to build your upcoming route.",
     "sortRoute": "Sort",
     "visitorTrips": "{name}'s trips",

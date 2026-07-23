@@ -21,7 +21,8 @@ import {
   persistNextRouteStops,
 } from "@/lib/client/next-route-state";
 import { useModal } from "@/components/ui/ModalProvider";
-import { useAppMessages } from "@/lib/i18n/client-messages";
+import { useAppMessages, formatMessage } from "@/lib/i18n/client-messages";
+import { turkishGenitiveName } from "@/lib/i18n/turkish-genitive";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { canonicalCityKey } from "@/lib/utils/city-aliases";
 import {
@@ -52,6 +53,7 @@ type ProfileNextRouteSectionProps = {
   avatarUrl?: string | null;
   visitedCountries?: VisitedCountry[];
   visitedCities?: VisitedCity[];
+  sectionId?: string;
 };
 
 function isRouteStopVisited(
@@ -131,6 +133,7 @@ export function ProfileNextRouteSection({
   avatarUrl = null,
   visitedCountries = [],
   visitedCities = [],
+  sectionId = "profile-next-route",
 }: ProfileNextRouteSectionProps) {
   const { profile: profileMessages, nextRoute: nextRouteMessages } = useAppMessages();
   const modal = useModal();
@@ -149,6 +152,13 @@ export function ProfileNextRouteSection({
   );
   const [locallyVisitedKeys, setLocallyVisitedKeys] = useState<Set<string>>(() => new Set());
   const [downloadingRouteCard, setDownloadingRouteCard] = useState(false);
+
+  const routeTitle = useMemo(() => {
+    if (isOwnProfile) return profileMessages.nextRouteTitle;
+    if (!displayName) return profileMessages.nextRouteTitle;
+    const name = locale === "tr" ? turkishGenitiveName(displayName) : displayName;
+    return formatMessage(profileMessages.visitorNextRouteTitle, { name });
+  }, [displayName, isOwnProfile, locale, profileMessages.nextRouteTitle, profileMessages.visitorNextRouteTitle]);
 
   const applyRoute = useCallback(
     (incoming: NextRoutePayload, options?: { replace?: boolean }) => {
@@ -322,9 +332,11 @@ export function ProfileNextRouteSection({
   );
 
   useEffect(() => {
+    const hash = `#${sectionId}`;
+
     function scrollToSection() {
-      if (window.location.hash !== "#profile-next-route") return;
-      document.getElementById("profile-next-route")?.scrollIntoView({
+      if (window.location.hash !== hash) return;
+      document.getElementById(sectionId)?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
@@ -336,7 +348,7 @@ export function ProfileNextRouteSection({
       window.clearTimeout(timer);
       window.removeEventListener("hashchange", scrollToSection);
     };
-  }, []);
+  }, [sectionId]);
 
   const totalDayOptions = useMemo(
     () => Array.from({ length: NEXT_ROUTE_MAX_TOTAL_DAYS + 1 }, (_, index) => index),
@@ -417,14 +429,12 @@ export function ProfileNextRouteSection({
     return <ProfileNextRouteSectionSkeleton rows={4} />;
   }
 
-  const showTripMeta =
-    stops.length > 0 &&
-    (isOwnProfile || totalDays !== undefined || transport !== undefined);
+  const showTripMeta = stops.length > 0 && isOwnProfile;
 
   return (
-    <section id="profile-next-route" className="profile-section profile-next-route">
+    <section id={sectionId} className="profile-section profile-next-route">
       <div
-        id="profile-next-route-capture"
+        id={`${sectionId}-capture`}
         className="profile-next-route-box"
         {...(stops.length > 0 ? { "data-route-capture-ready": true } : {})}
       >
@@ -458,7 +468,7 @@ export function ProfileNextRouteSection({
             ) : null}
             <div className="profile-next-route-box__intro">
               <h3 className="profile-next-route-box__title profile-card-hero__title">
-                {profileMessages.nextRouteTitle}
+                {routeTitle}
               </h3>
               {routeSummaryLabel ? (
                 <p className="profile-next-route-box__count profile-card-hero__count">{routeSummaryLabel}</p>
@@ -491,57 +501,42 @@ export function ProfileNextRouteSection({
           <>
             {showTripMeta ? (
               <div className="profile-next-route-box__trip-meta" data-route-capture-exclude>
-                {isOwnProfile ? (
-                  <>
-                    <select
-                      className="profile-next-route-select"
-                      value={transport ?? ""}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        handleRouteMetaChange({
-                          transport: value ? (value as NextRouteTransportMode) : null,
-                        });
-                      }}
-                      aria-label={nextRouteMessages.transportLabel}
-                    >
-                      <option value="">{nextRouteMessages.transportLabel}</option>
-                      {NEXT_ROUTE_TRANSPORT_MODES.map((mode) => (
-                        <option key={mode} value={mode}>
-                          {transportLabels[mode]}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      className="profile-next-route-select"
-                      value={totalDays ?? ""}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        handleRouteMetaChange({
-                          totalDays: value === "" ? null : Number(value),
-                        });
-                      }}
-                      aria-label={nextRouteMessages.totalDaysLabel}
-                    >
-                      <option value="">{nextRouteMessages.totalDaysLabel}</option>
-                      {totalDayOptions.map((day) => (
-                        <option key={day} value={day}>
-                          {nextRouteMessages.totalDaysOption.replace("{count}", String(day))}
-                        </option>
-                      ))}
-                    </select>
-                  </>
-                ) : (
-                  <>
-                    {transport ? (
-                      <span className="profile-next-route-meta-chip">{transportLabels[transport]}</span>
-                    ) : null}
-                    {totalDays !== undefined ? (
-                      <span className="profile-next-route-meta-chip">
-                        {nextRouteMessages.totalDaysOption.replace("{count}", String(totalDays))}
-                      </span>
-                    ) : null}
-                  </>
-                )}
+                <select
+                  className="profile-next-route-select"
+                  value={transport ?? ""}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    handleRouteMetaChange({
+                      transport: value ? (value as NextRouteTransportMode) : null,
+                    });
+                  }}
+                  aria-label={nextRouteMessages.transportLabel}
+                >
+                  <option value="">{nextRouteMessages.transportLabel}</option>
+                  {NEXT_ROUTE_TRANSPORT_MODES.map((mode) => (
+                    <option key={mode} value={mode}>
+                      {transportLabels[mode]}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="profile-next-route-select"
+                  value={totalDays ?? ""}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    handleRouteMetaChange({
+                      totalDays: value === "" ? null : Number(value),
+                    });
+                  }}
+                  aria-label={nextRouteMessages.totalDaysLabel}
+                >
+                  <option value="">{nextRouteMessages.totalDaysLabel}</option>
+                  {totalDayOptions.map((day) => (
+                    <option key={day} value={day}>
+                      {nextRouteMessages.totalDaysOption.replace("{count}", String(day))}
+                    </option>
+                  ))}
+                </select>
               </div>
             ) : null}
             <div className="profile-next-route-box__body">

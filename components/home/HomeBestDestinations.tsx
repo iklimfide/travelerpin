@@ -64,12 +64,42 @@ function TopTenCard({
 export function HomeBestDestinations({
   compact = false,
   desktop = false,
+  stacked = false,
 }: {
   compact?: boolean;
   desktop?: boolean;
+  /** Left homepage column: header + three lists in a single column. */
+  stacked?: boolean;
 }) {
   const { home: homeMessages } = useAppMessages();
   const t = homeMessages.bestDestinations;
+
+  if (stacked) {
+    return (
+      <section
+        className="w-full rounded-[26px] bg-gradient-to-b from-[#eff6ff] to-[#dbeafe] px-6 py-7 text-left xl:px-7 xl:py-8"
+        aria-labelledby="home-best-destinations-title"
+      >
+        <p className="mb-2 text-xs font-extrabold text-[#2563eb]">
+          <span aria-hidden>✨ </span>
+          {t.eyebrow}
+        </p>
+        <h2
+          id="home-best-destinations-title"
+          className="mb-2 text-[clamp(22px,2.2vw,28px)] font-extrabold tracking-tight text-[#071126]"
+        >
+          {t.title}
+        </h2>
+        <p className="m-0 text-[14px] leading-relaxed text-[#64748b]">{t.subtitle}</p>
+
+        <div className="mt-6 flex flex-col gap-4">
+          <TopTenCard compact title={t.topCountries} items={HOME_BEST_COUNTRIES_LINKED} />
+          <TopTenCard compact title={t.topCities} items={HOME_BEST_CITIES_LINKED} />
+          <TopTenCard compact title={t.topPlaces} items={HOME_BEST_PLACES_LINKED} />
+        </div>
+      </section>
+    );
+  }
 
   if (desktop) {
     return (

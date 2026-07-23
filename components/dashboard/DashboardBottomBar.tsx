@@ -12,6 +12,7 @@ import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShell
 import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
 import { PublicGuestAuthLinks } from "@/components/nav/PublicGuestAuthLinks";
 import { NotificationsNavLink } from "@/components/notifications/NotificationsNavLink";
+import { BRAND } from "@/lib/constants";
 import { useIsDesktopDashboardNav } from "@/lib/hooks/useIsDesktopDashboardNav";
 import { useVisualViewportFixed } from "@/lib/hooks/useVisualViewportFixed";
 import { useAppMessages } from "@/lib/i18n/client-messages";
@@ -196,7 +197,7 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
       <div className="dashboard-bottom-bar__inner">
         {showTopChrome ? (
           <>
-            <Link href={brandHref} className="dashboard-top-bar__brand">
+            <Link href={brandHref} className="dashboard-top-bar__brand" aria-label={BRAND.name}>
               <img
                 src="/apple-touch-icon.png"
                 alt=""
@@ -204,7 +205,12 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
                 height={32}
                 className="dashboard-top-bar__brand-logo"
               />
-              <span className="dashboard-top-bar__brand-label">TravelerPin.com</span>
+              <span className="dashboard-top-bar__brand-label dashboard-top-bar__brand-label--full">
+                {BRAND.name}.com
+              </span>
+              <span className="dashboard-top-bar__brand-label dashboard-top-bar__brand-label--compact">
+                {BRAND.name}
+              </span>
             </Link>
             <div className="dashboard-top-bar__actions">
               {localeSwitcher}

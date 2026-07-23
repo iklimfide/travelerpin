@@ -1392,7 +1392,7 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
 
 /* Guests: top bar chrome on all breakpoints (no bottom bar). */
 .dashboard-shell--guest {
-  --dashboard-top-bar-height: 45px;
+  --dashboard-top-bar-height: 48px;
   padding-bottom: 0;
 }
 
@@ -1459,7 +1459,7 @@ html[data-tp-mobile-preview-embed] body {
 .dashboard-bottom-bar--top {
   top: 0;
   bottom: auto;
-  --dashboard-top-bar-height: 45px;
+  --dashboard-top-bar-height: 48px;
   height: var(--dashboard-top-bar-height);
   max-height: var(--dashboard-top-bar-height);
   padding-bottom: 0;
@@ -1510,8 +1510,14 @@ html[data-tp-mobile-preview-embed] body {
   letter-spacing: -0.02em;
   line-height: 1;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.dashboard-top-bar__brand-label--compact {
+  display: none;
+}
+
+.dashboard-top-bar__brand-label--full {
+  display: inline;
 }
 
 .dashboard-top-bar__actions {
@@ -1658,6 +1664,69 @@ html[data-tp-mobile-preview-embed] body {
   border-color: #eff6ff;
   background: #eff6ff;
   color: #1d4ed8;
+}
+
+@media (max-width: 1023px) {
+  .dashboard-bottom-bar--top .dashboard-bottom-bar__inner {
+    gap: 8px;
+    padding: 0 10px;
+  }
+
+  .dashboard-top-bar__brand {
+    gap: 6px;
+    padding: 4px;
+    min-width: 0;
+  }
+
+  .dashboard-top-bar__brand-label--full {
+    display: none;
+  }
+
+  .dashboard-top-bar__brand-label--compact {
+    display: inline;
+  }
+
+  .dashboard-top-bar__brand-label {
+    font-size: 0.8125rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dashboard-top-bar__actions {
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .dashboard-top-bar__auth-links {
+    gap: 6px;
+  }
+
+  .dashboard-top-bar__auth-link {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .dashboard-locale-switcher__trigger {
+    min-width: 36px;
+    min-height: 34px;
+    padding: 5px 6px;
+    font-size: 0.6875rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .dashboard-top-bar__brand-label--compact {
+    display: none;
+  }
+
+  .dashboard-top-bar__auth-link {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .dashboard-top-bar__auth-links {
+    gap: 4px;
+  }
 }
 
 .dashboard-top-bar__actions .dashboard-bottom-bar__item {
@@ -2526,6 +2595,14 @@ a.save-destination-modal__name-link:hover {
 
   .dashboard-top-bar__brand-label {
     font-size: 1.05rem;
+  }
+
+  .dashboard-top-bar__brand-label--full {
+    display: inline;
+  }
+
+  .dashboard-top-bar__brand-label--compact {
+    display: none;
   }
 
   .dashboard-top-bar__auth-link {

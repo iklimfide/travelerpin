@@ -458,6 +458,7 @@
     "latestAddedPrefix": "Son eklenen: ",
     "myTrips": "Seyahatlerim",
     "nextRouteTitle": "Sonraki Rota",
+    "visitorNextRouteTitle": "{name} Sonraki Rotası",
     "nextRouteEmptyOnProfile": "Henüz durak yok. Yaklaşan rotanı oluşturmak için ülkeler ve şehirler ekle.",
     "sortRoute": "Sırala",
     "visitorTrips": "{name} seyahatleri",

@@ -49,6 +49,10 @@ type PublicProfileViewProps = {
   previewAsPublic?: boolean;
   /** Animate stat counters from zero (homepage embedded demo). */
   animateStats?: boolean;
+  /** Homepage left column renders next route separately. */
+  omitNextRoute?: boolean;
+  /** Show only photos, only Instagram, or both (default). */
+  mediaSections?: "both" | "photos" | "instagram";
 };
 
 export async function PublicProfileView({
@@ -61,6 +65,8 @@ export async function PublicProfileView({
   profilePageHref,
   previewAsPublic = false,
   animateStats = false,
+  omitNextRoute = false,
+  mediaSections = "both",
 }: PublicProfileViewProps) {
   const [t, tHome, tCommon, tBadge, locale] = await Promise.all([
     getTranslations("profile"),
@@ -115,6 +121,8 @@ export async function PublicProfileView({
   );
   const mediaPins = buildProfileMediaPins(visitedCities, visitedParks, profile);
   const isDemoProfile = isDemoProfileUsername(profile.username);
+  const showEmbeddedDemoSections = embedded && isDemoProfile;
+  const showProfileBelowFold = !embedded || showEmbeddedDemoSections;
   const showTravelUpdateCard =
     (isOwnProfile || isDemoProfile) && (!embedded || isDemoProfile);
   const demoTravelDelta = computeTravelUpdateDelta(
@@ -133,7 +141,11 @@ export async function PublicProfileView({
   const badgeShellClassName = badgeTier ? BADGE_TIER_THEMES[badgeTier].shell : "";
 
   const profileBody = (
-    <div className={`profile-page${embedded ? " profile-page--embedded" : ""}`}>
+    <div
+      className={`profile-page${embedded ? " profile-page--embedded" : ""}${
+        showEmbeddedDemoSections ? " profile-page--embedded-demo" : ""
+      }`}
+    >
       {previewAsPublic ? <ProfilePublicPreviewBanner username={profile.username} /> : null}
       <div className="profile-shell">
         <div
@@ -250,7 +262,7 @@ export async function PublicProfileView({
             )
           ) : null}
 
-          {!embedded ? (
+          {showProfileBelowFold ? (
             <>
               <ProfileTripsRow
                 destinations={destinations}
@@ -274,6 +286,7 @@ export async function PublicProfileView({
                 visitedCountries={visitedCountries}
                 visitedCities={visitedCities}
                 visitedParks={visitedParks}
+                sections={mediaSections}
                 labels={{
                   photosHeading: isOwnProfile
                     ? t("myPhotos")
@@ -301,25 +314,27 @@ export async function PublicProfileView({
                 }}
               />
 
-              <ProfileNextRouteSection
-                initialStops={parseNextRoute(profile.next_route)}
-                initialTotalDays={profile.next_route_total_days}
-                initialTransport={profile.next_route_transport}
-                isOwnProfile={isOwnProfile}
-                displayName={displayName}
-                username={profile.username}
-                avatarUrl={profile.avatar_url}
-                visitedCountries={visitedCountries}
-                visitedCities={visitedCities}
-              />
+              {!omitNextRoute ? (
+                <ProfileNextRouteSection
+                  initialStops={parseNextRoute(profile.next_route)}
+                  initialTotalDays={profile.next_route_total_days}
+                  initialTransport={profile.next_route_transport}
+                  isOwnProfile={isOwnProfile}
+                  displayName={displayName}
+                  username={profile.username}
+                  avatarUrl={profile.avatar_url}
+                  visitedCountries={visitedCountries}
+                  visitedCities={visitedCities}
+                />
+              ) : null}
 
-              {!isOwnProfile && isGuest && hasMapContent ? (
+              {!embedded && !isOwnProfile && isGuest && hasMapContent ? (
                 <section className="profile-section">
                   <HomeFeatures />
                 </section>
               ) : null}
 
-              {!isOwnProfile && isGuest ? (
+              {!embedded && !isOwnProfile && isGuest ? (
                 <section className="profile-cta">
                   <div>
                     <p className="profile-cta-title">{tHome("ctaTitle")}</p>

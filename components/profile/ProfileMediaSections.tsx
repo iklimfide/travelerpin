@@ -19,6 +19,8 @@ type ProfileMediaSectionsProps = {
   visitedCountries: VisitedCountry[];
   visitedCities: VisitedCity[];
   visitedParks: VisitedPark[];
+  /** Default: both galleries. Homepage splits photos (left) and Instagram (right). */
+  sections?: "both" | "photos" | "instagram";
   labels: {
     photosHeading: string;
     instagramHeading: string;
@@ -45,8 +47,11 @@ export function ProfileMediaSections({
   visitedCountries,
   visitedCities,
   visitedParks,
+  sections = "both",
   labels,
 }: ProfileMediaSectionsProps) {
+  const showPhotos = sections === "both" || sections === "photos";
+  const showInstagram = sections === "both" || sections === "instagram";
   const { photos, instagram } = splitProfileMediaItems(memoryPins);
   const previewPhotos = photos.slice(0, PROFILE_MEDIA_PREVIEW_LIMIT);
   const previewInstagram = instagram.slice(0, PROFILE_MEDIA_PREVIEW_LIMIT);
@@ -84,39 +89,43 @@ export function ProfileMediaSections({
   return (
     <>
       <div className="profile-media-sections">
-        <ProfileMediaGallery
-          hubName={displayName}
-          variant="photos"
-          headingId="profile-photos-heading"
-          alwaysShow
-          emptyLabel={labels.noPhotosYet}
-          items={previewPhotos}
-          onViewAll={() => setOpenModalTab("photos")}
-          showViewAll={photos.length > 0}
-          showAddButton
-          isOwnProfile={isOwnProfile}
-          visitedCountries={visitedCountries}
-          visitedCities={visitedCities}
-          visitedParks={visitedParks}
-          labels={labels}
-        />
+        {showPhotos ? (
+          <ProfileMediaGallery
+            hubName={displayName}
+            variant="photos"
+            headingId="profile-photos-heading"
+            alwaysShow
+            emptyLabel={labels.noPhotosYet}
+            items={previewPhotos}
+            onViewAll={() => setOpenModalTab("photos")}
+            showViewAll={photos.length > 0}
+            showAddButton
+            isOwnProfile={isOwnProfile}
+            visitedCountries={visitedCountries}
+            visitedCities={visitedCities}
+            visitedParks={visitedParks}
+            labels={labels}
+          />
+        ) : null}
 
-        <ProfileMediaGallery
-          hubName={displayName}
-          variant="instagram"
-          headingId="profile-instagram-heading"
-          alwaysShow
-          emptyLabel={labels.noInstagramYet}
-          items={previewInstagram}
-          onViewAll={() => setOpenModalTab("instagram")}
-          showViewAll={instagram.length > 0}
-          showAddButton
-          isOwnProfile={isOwnProfile}
-          visitedCountries={visitedCountries}
-          visitedCities={visitedCities}
-          visitedParks={visitedParks}
-          labels={labels}
-        />
+        {showInstagram ? (
+          <ProfileMediaGallery
+            hubName={displayName}
+            variant="instagram"
+            headingId="profile-instagram-heading"
+            alwaysShow
+            emptyLabel={labels.noInstagramYet}
+            items={previewInstagram}
+            onViewAll={() => setOpenModalTab("instagram")}
+            showViewAll={instagram.length > 0}
+            showAddButton
+            isOwnProfile={isOwnProfile}
+            visitedCountries={visitedCountries}
+            visitedCities={visitedCities}
+            visitedParks={visitedParks}
+            labels={labels}
+          />
+        ) : null}
       </div>
 
       <ProfileMediaListModal
