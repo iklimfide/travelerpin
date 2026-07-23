@@ -1,4 +1,4 @@
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const CITY_KEY = `tp:v${CACHE_VERSION}:city-hero-images`;
 const PARK_KEY = `tp:v${CACHE_VERSION}:park-hero-images`;
@@ -57,16 +57,16 @@ export function writeCachedParkHeroImages(images: Map<string, string>): void {
   writeCached(PARK_KEY, images);
 }
 
+export function invalidateCachedHeroImages(): void {
+  if (typeof window === "undefined") return;
+  sessionStorage.removeItem(CITY_KEY);
+  sessionStorage.removeItem(PARK_KEY);
+}
+
 export async function fetchHeroImageMaps(): Promise<{
   cityHeroImages: Map<string, string>;
   parkHeroImages: Map<string, string>;
 }> {
-  const cachedCity = readCachedCityHeroImages();
-  const cachedPark = readCachedParkHeroImages();
-  if (cachedCity && cachedPark) {
-    return { cityHeroImages: cachedCity, parkHeroImages: cachedPark };
-  }
-
   const [cityResponse, parkResponse] = await Promise.all([
     fetch("/api/city-hero-images"),
     fetch("/api/park-hero-images"),
@@ -82,8 +82,8 @@ export async function fetchHeroImageMaps(): Promise<{
     Object.entries((parkPayload?.images as Record<string, string> | undefined) ?? {})
   );
 
-  if (cityHeroImages.size > 0) writeCachedCityHeroImages(cityHeroImages);
-  if (parkHeroImages.size > 0) writeCachedParkHeroImages(parkHeroImages);
+  writeCachedCityHeroImages(cityHeroImages);
+  writeCachedParkHeroImages(parkHeroImages);
 
   return { cityHeroImages, parkHeroImages };
 }

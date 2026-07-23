@@ -72,7 +72,7 @@ export function YpImageUrlImportModal({
           />
         </div>
         <p className="yp-muted" style={{ marginTop: "0.55rem", fontSize: "0.82rem" }}>
-          Doğrudan görsel dosyası linki kullanın (.jpg, .png, .webp). Google Photos
+          Doğrudan görsel dosyası linki kullanın (.jpg, .png, .webp, .avif). Google Photos
           (photos.google.com, /pw/ linkleri) oturum ister — indirip «Foto yükle» kullanın.
         </p>
         <div className="yp-form-actions" style={{ padding: "0.9rem 0 0" }}>

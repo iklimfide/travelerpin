@@ -30,6 +30,27 @@ export function profilePublicPreviewHref(username: string): string {
   return `${profilePath(username)}?${PROFILE_PUBLIC_PREVIEW_PARAM}=${PROFILE_PUBLIC_PREVIEW_VALUE}`;
 }
 
+export function profilePublicPreviewToggleHref(
+  pathname: string,
+  currentlyPreviewing: boolean,
+  existingSearch?: URLSearchParams | { toString(): string }
+): string {
+  const path = pathname.split("?")[0] || pathname;
+  const params =
+    existingSearch && typeof existingSearch === "object" && "get" in existingSearch
+      ? new URLSearchParams(existingSearch.toString())
+      : new URLSearchParams();
+
+  if (currentlyPreviewing) {
+    params.delete(PROFILE_PUBLIC_PREVIEW_PARAM);
+  } else {
+    params.set(PROFILE_PUBLIC_PREVIEW_PARAM, PROFILE_PUBLIC_PREVIEW_VALUE);
+  }
+
+  const query = params.toString();
+  return query ? `${path}?${query}` : path;
+}
+
 export function withProfilePublicPreview(href: string, previewAsPublic: boolean): string {
   if (!previewAsPublic) return href;
   if (href.includes(`${PROFILE_PUBLIC_PREVIEW_PARAM}=${PROFILE_PUBLIC_PREVIEW_VALUE}`)) {

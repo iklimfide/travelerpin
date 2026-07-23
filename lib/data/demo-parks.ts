@@ -77,7 +77,7 @@ export const DEMO_PARKS: VisitedPark[] = [
   {
     id: "demo-banff",
     user_id: "demo",
-    park_name: "Banff National Park",
+    park_name: "Banff",
     park_type: "national_park",
     country_code: "CA",
     country_name: "Canada",

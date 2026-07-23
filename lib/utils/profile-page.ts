@@ -76,12 +76,15 @@ function parkTripImage(
   return getDefaultParkHeroImage(park.park_type);
 }
 
-function tripBadge(city: VisitedCity, isRecent: boolean): ProfileTrip["badge"] {
-  const visits = cityVisitCount(city);
-  if (isRecent) return "recent";
-  if (visits > 3) return "favorite";
-  if (visits === 1) return "dayTrip";
-  return null;
+function cityTripImage(
+  city: VisitedCity,
+  cityHeroImages?: ReadonlyMap<string, string>
+): string {
+  const canonical = canonicalCityName(city.country_code, city.city_name);
+  if (cityHeroImages && cityHeroImages.size > 0) {
+    return resolveCityHeroImageUrl(city.country_code, canonical, cityHeroImages);
+  }
+  return DEFAULT_CITY_HERO_IMAGE;
 }
 
 function sortTripsByDateDesc(a: ProfileTrip, b: ProfileTrip): number {
@@ -227,7 +230,6 @@ export function buildProfileTrips(
   const sortedCities = [...cities].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
-  const recentThreshold = sortedCities[0]?.created_at;
 
   const cityTrips: ProfileTrip[] = sortedCities.map((city) => {
     const canonical = canonicalCityName(city.country_code, city.city_name);
@@ -242,12 +244,10 @@ export function buildProfileTrips(
       countryCode: city.country_code,
       countryName: getCountryName(city.country_code, locale),
       countrySlug: countryHubSlug(city.country_code),
-      imageUrl: cityHeroImages
-        ? resolveCityHeroImageUrl(city.country_code, canonical, cityHeroImages)
-        : DEFAULT_CITY_HERO_IMAGE,
+      imageUrl: cityTripImage(city, cityHeroImages),
       note: city.note,
       createdAt: city.created_at,
-      badge: tripBadge(city, city.created_at === recentThreshold),
+      badge: null,
     };
   });
 

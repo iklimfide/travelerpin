@@ -121,8 +121,26 @@ function shouldSkipI18n(pathname: string): boolean {
   );
 }
 
+function fixDoubleLocalePrefix(pathname: string): string | null {
+  for (const locale of routing.locales) {
+    const doubled = `/${locale}/${locale}`;
+    if (pathname === doubled) return `/${locale}`;
+    if (pathname.startsWith(`${doubled}/`)) {
+      return `/${locale}${pathname.slice(doubled.length)}`;
+    }
+  }
+  return null;
+}
+
 export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const doubleLocalePath = fixDoubleLocalePrefix(pathname);
+  if (doubleLocalePath) {
+    const url = request.nextUrl.clone();
+    url.pathname = doubleLocalePath;
+    return NextResponse.redirect(url, 301);
+  }
+
   const barePath = stripLocalePrefix(pathname);
   const profilePath = getLocalePrefixedPath(pathname);
   const code = request.nextUrl.searchParams.get("code");

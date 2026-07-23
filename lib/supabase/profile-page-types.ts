@@ -1,4 +1,5 @@
 import type { PublicProfile } from "@/lib/supabase/public-profile";
+import { getWishlistCountryCodes } from "@/lib/utils/stats";
 import type {
   ProfileFollowState,
   TravelStats,
@@ -80,6 +81,7 @@ export function mergeTravelStateIntoProfilePageData(
     visitedCities: travel.visitedCities,
     visitedParks: travel.visitedParks,
     wishlistCountries: travel.wishlistCountries,
+    wishlistCodes: getWishlistCountryCodes(travel.wishlistCountries),
     visitedCodes: travel.visitedCodes,
     stats: travel.stats,
   };

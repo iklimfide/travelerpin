@@ -59,7 +59,7 @@ function extensionForContentType(contentType: string): OptimizedImage["extension
 }
 
 function isUnsupportedBrowserImageType(contentType: string): boolean {
-  return /heif|heic|heics|avif/i.test(contentType);
+  return /heif|heic|heics/i.test(contentType);
 }
 
 function sniffImageContentType(buffer: Buffer): string | null {

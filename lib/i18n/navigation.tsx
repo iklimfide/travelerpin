@@ -31,7 +31,7 @@ function hrefPathname(href: IntlLinkProps["href"]): string | null {
   return null;
 }
 
-function toUnprefixedProfileHref(href: IntlLinkProps["href"]): IntlLinkProps["href"] {
+function toBareHref(href: IntlLinkProps["href"]): IntlLinkProps["href"] {
   if (typeof href === "string") {
     const [path, query] = href.split("?");
     const bare = stripLocalePrefix(path || href);
@@ -54,11 +54,16 @@ function toUnprefixedProfileHref(href: IntlLinkProps["href"]): IntlLinkProps["hr
 /**
  * Locale-aware Link that keeps public profile URLs unprefixed
  * (`/arif`, never `/tr/arif`).
+ *
+ * Non-profile hrefs must be locale-unprefixed (`/park/foo`). If a caller
+ * already ran `getPathname`, strip the prefix so IntlLink does not emit
+ * `/tr/tr/...`.
  */
 export function Link({ href, locale, ...rest }: IntlLinkProps) {
-  const path = hrefPathname(href);
+  const bareHref = toBareHref(href);
+  const path = hrefPathname(bareHref);
   if (path && isPublicProfilePath(path)) {
-    return <NextLink href={toUnprefixedProfileHref(href)} {...rest} />;
+    return <NextLink href={bareHref} {...rest} />;
   }
-  return <IntlLink href={href} locale={locale} {...rest} />;
+  return <IntlLink href={bareHref} locale={locale} {...rest} />;
 }

@@ -12,7 +12,7 @@ import { ProfileSquareCaptureHeader } from "@/components/profile/ProfileSquareCa
 import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections";
 import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
 import { usePublicProfileProgressiveLoad } from "@/lib/client/use-public-profile-progressive-load";
-import { fetchHeroImageMaps } from "@/lib/client/hero-images-cache";
+import { fetchHeroImageMaps, readCachedCityHeroImages, readCachedParkHeroImages } from "@/lib/client/hero-images-cache";
 import { useProgressiveStatCount } from "@/lib/hooks/useProgressiveStatCount";
 import { useProfileStatsAnimationEnabled } from "@/lib/hooks/useProfileStatsAnimationEnabled";
 import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
@@ -151,8 +151,12 @@ export function PublicProfileViewClient({
     visibleWishlistCodes.length > 0;
   const showEmptyMapState = !pinsLoading && !hasMapContent;
 
-  const [cityHeroImages, setCityHeroImages] = useState<Map<string, string>>(() => new Map());
-  const [parkHeroImages, setParkHeroImages] = useState<Map<string, string>>(() => new Map());
+  const [cityHeroImages, setCityHeroImages] = useState<Map<string, string>>(
+    () => readCachedCityHeroImages() ?? new Map()
+  );
+  const [parkHeroImages, setParkHeroImages] = useState<Map<string, string>>(
+    () => readCachedParkHeroImages() ?? new Map()
+  );
 
   useEffect(() => {
     if (progressive && !fullData) return;
@@ -161,8 +165,8 @@ export function PublicProfileViewClient({
     void fetchHeroImageMaps()
       .then(({ cityHeroImages: cityMap, parkHeroImages: parkMap }) => {
         if (cancelled) return;
-        if (cityMap.size > 0) setCityHeroImages(cityMap);
-        if (parkMap.size > 0) setParkHeroImages(parkMap);
+        setCityHeroImages(cityMap);
+        setParkHeroImages(parkMap);
       })
       .catch(() => {});
     return () => {

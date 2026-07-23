@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "@/lib/i18n/navigation";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/lib/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
 import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
@@ -11,9 +11,10 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 import { isKamikazeMasterProfile } from "@/lib/kamikaze/master";
 import { profilePath } from "@/lib/seo/site";
+import { stripLocalePrefix } from "@/lib/i18n/pathname";
 import {
   isProfilePublicPreview,
-  profilePublicPreviewHref,
+  profilePublicPreviewToggleHref,
 } from "@/lib/profile/public-preview";
 import { clearAllSessionPageCaches } from "@/lib/client/session-page-cache";
 
@@ -181,15 +182,30 @@ export function BottomBarProfileNav({
 }: BottomBarProfileNavProps) {
   const { common: commonMessages, wishlist: wishlistMessages, share: shareMessages, dashboardNav: dashboardNavMessages, settings: settingsMessages } = useAppMessages();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const menuId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null);
-  const [publicPreviewActive, setPublicPreviewActive] = useState(false);
 
   const username = ownProfile?.username ?? null;
   const profileHref = username ? profilePath(username) : loginHref;
+  const barePathname = stripLocalePrefix(pathname);
+  const onOwnProfilePath = Boolean(
+    username &&
+      (barePathname === profileHref || barePathname.startsWith(`${profileHref}/`))
+  );
+  const publicPreviewActive = onOwnProfilePath && isProfilePublicPreview(searchParams);
+  const publicPreviewToggleHref = useMemo(
+    () =>
+      profilePublicPreviewToggleHref(
+        onOwnProfilePath ? barePathname : profileHref,
+        publicPreviewActive,
+        searchParams
+      ),
+    [barePathname, onOwnProfilePath, profileHref, publicPreviewActive, searchParams]
+  );
   const profileDisplayName = ownProfile?.displayName?.trim() || username || "";
   const active = Boolean(username) && pathname === profileHref;
   const profileSharesMapHref = showBarDestinationsInMenu && mapHref === profileHref;
@@ -209,14 +225,6 @@ export function BottomBarProfileNav({
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setPublicPreviewActive(
-      isProfilePublicPreview(params) &&
-        (pathname === profileHref || pathname.startsWith(`${profileHref}/`))
-    );
-  }, [pathname, profileHref]);
 
   useEffect(() => {
     if (!open) return;
@@ -293,7 +301,7 @@ export function BottomBarProfileNav({
 
   const publicPreviewMenuItem = (
     <Link
-      href={publicPreviewActive ? profileHref : profilePublicPreviewHref(username)}
+      href={publicPreviewToggleHref}
       role="menuitem"
       className={`dashboard-profile-menu__item${
         publicPreviewActive ? " dashboard-profile-menu__item--active" : ""

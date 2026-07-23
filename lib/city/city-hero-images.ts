@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
-import { findCityHubSlug } from "@/lib/data/city-hubs";
+import { findCityHubSlug, getCityHubBySlug } from "@/lib/data/city-hubs";
 import { resolvePublicMediaImageUrl } from "@/lib/storage/hub-photo-url";
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
@@ -103,6 +103,17 @@ export function resolveCityHeroImageUrl(
     cityHeroLookupKey(code, canonicalCityName(code, cityName)),
     cityHeroLookupKey(code, formatCityDisplayName(cityName)),
   ]);
+
+  const slug = findCityHubSlug(code, cityName);
+  if (slug) {
+    const hub = getCityHubBySlug(slug);
+    if (hub) {
+      lookupKeys.add(cityHeroLookupKey(code, hub.name));
+      if (hub.touristCityName) {
+        lookupKeys.add(cityHeroLookupKey(code, hub.touristCityName));
+      }
+    }
+  }
 
   for (const key of lookupKeys) {
     const stored = heroMap.get(key);

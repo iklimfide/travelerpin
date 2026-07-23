@@ -9,6 +9,7 @@ import type {
   WishlistCountry,
 } from "@/types/database";
 import { parseNextRoutePayload } from "@/lib/utils/next-route";
+import { getWishlistCountryCodes } from "@/lib/utils/stats";
 
 export type TravelStateData = {
   visitedCountries: VisitedCountry[];
@@ -263,6 +264,7 @@ export function syncOwnProfileCacheFromTravelState(data: TravelStateData): void 
     visitedCities: data.visitedCities,
     visitedParks: data.visitedParks,
     wishlistCountries: data.wishlistCountries,
+    wishlistCodes: getWishlistCountryCodes(data.wishlistCountries),
     visitedCodes: data.visitedCodes,
     stats: data.stats,
   });

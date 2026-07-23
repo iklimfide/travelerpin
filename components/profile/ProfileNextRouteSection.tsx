@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useLocale } from "next-intl";
-import { Link, getPathname } from "@/lib/i18n/navigation";
+import { Link } from "@/lib/i18n/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
@@ -572,7 +572,7 @@ export function ProfileNextRouteSection({
                           <span className="profile-next-route-text">
                             {stop.href ? (
                               <Link
-                                href={getPathname({ href: stop.href, locale })}
+                                href={stop.href}
                                 className="profile-next-route-name profile-next-route-link"
                                 prefetch={false}
                               >

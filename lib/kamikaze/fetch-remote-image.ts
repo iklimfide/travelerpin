@@ -91,6 +91,12 @@ function detectImageContentType(buffer: Buffer): string | null {
     const riff = buffer.subarray(0, 4).toString("ascii");
     const webp = buffer.subarray(8, 12).toString("ascii");
     if (riff === "RIFF" && webp === "WEBP") return "image/webp";
+
+    const boxType = buffer.subarray(4, 8).toString("ascii");
+    if (boxType === "ftyp") {
+      const brand = buffer.subarray(8, 12).toString("ascii").toLowerCase();
+      if (brand.startsWith("avif") || brand === "avis") return "image/avif";
+    }
   }
   if (buffer.length >= 2 && buffer[0] === 0xff && buffer[1] === 0xd8) return "image/jpeg";
   if (buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
@@ -103,13 +109,27 @@ function detectImageContentType(buffer: Buffer): string | null {
   return null;
 }
 
+function contentTypeFromUrlPath(pathname: string): string | null {
+  const lower = pathname.toLowerCase();
+  if (lower.endsWith(".avif")) return "image/avif";
+  if (lower.endsWith(".webp")) return "image/webp";
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+  if (lower.endsWith(".png")) return "image/png";
+  if (lower.endsWith(".gif")) return "image/gif";
+  return null;
+}
+
 function assertImageSize(byteLength: number): void {
   if (byteLength > LIMITS.avatarMaxBytes) {
     throw new Error("Görsel en fazla 5 MB olabilir");
   }
 }
 
-function normalizeImageContentType(buffer: Buffer, contentType: string): string {
+function normalizeImageContentType(
+  buffer: Buffer,
+  contentType: string,
+  urlPathname = ""
+): string {
   const normalized = contentType.split(";")[0].trim().toLowerCase();
   if (normalized.startsWith("text/html") || normalized.includes("html")) {
     assertNotAuthHtmlPage(buffer);
@@ -119,8 +139,11 @@ function normalizeImageContentType(buffer: Buffer, contentType: string): string 
   const detected = detectImageContentType(buffer);
   if (detected) return detected;
 
+  const fromPath = contentTypeFromUrlPath(urlPathname);
+  if (fromPath) return fromPath;
+
   assertNotAuthHtmlPage(buffer);
-  throw new Error("Link bir görsele işaret etmiyor (doğrudan .jpg/.png/.webp URL kullanın)");
+  throw new Error("Link bir görsele işaret etmiyor (doğrudan .jpg/.png/.webp/.avif URL kullanın)");
 }
 
 async function readR2ImageBuffer(key: string): Promise<{ buffer: Buffer; contentType: string }> {
@@ -133,7 +156,7 @@ async function readR2ImageBuffer(key: string): Promise<{ buffer: Buffer; content
   const buffer = Buffer.from(object.body);
   return {
     buffer,
-    contentType: normalizeImageContentType(buffer, object.contentType),
+    contentType: normalizeImageContentType(buffer, object.contentType, key),
   };
 }
 
@@ -171,7 +194,7 @@ async function readHttpImageBuffer(parsed: URL): Promise<{ buffer: Buffer; conte
 
     return {
       buffer,
-      contentType: normalizeImageContentType(buffer, headerType),
+      contentType: normalizeImageContentType(buffer, headerType, parsed.pathname),
     };
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {

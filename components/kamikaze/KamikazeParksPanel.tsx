@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useModal } from "@/components/ui/ModalProvider";
 import { YpCountrySelect } from "@/components/kamikaze/YpCountrySelect";
 import { YpImageUrlImportModal } from "@/components/kamikaze/YpImageUrlImportModal";
+import { invalidateCachedHeroImages } from "@/lib/client/hero-images-cache";
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
 import { YP_CACHE_KEYS, ypCacheGet, ypCacheInvalidate, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
 import {
@@ -323,6 +324,7 @@ export function KamikazeParksPanel() {
       const data = (await res.json()) as { image?: CustomHeroRow; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Görsel yüklenemedi");
       if (data.image) {
+        invalidateCachedHeroImages();
         const storedUrl = data.image.imageUrl;
         const lookup = parkHeroLookupKey(
           data.image.countryCode,
@@ -370,6 +372,7 @@ export function KamikazeParksPanel() {
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? "Görsel kaldırılamadı");
+      invalidateCachedHeroImages();
       setCustomImages((prev) => {
         const next = new Map(prev);
         for (const mapKey of prev.keys()) {

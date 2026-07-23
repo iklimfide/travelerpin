@@ -1,8 +1,7 @@
 "use client";
 
-import { Link, getPathname } from "@/lib/i18n/navigation";
+import { Link } from "@/lib/i18n/navigation";
 import { useLocale } from "next-intl";
-import type { Locale } from "@/lib/i18n/config";
 import { useMemo } from "react";
 import { getCountryHubByCode } from "@/lib/data/country-hubs";
 import { buildVisitedCountryList } from "@/lib/map/travel-lists";
@@ -22,10 +21,10 @@ type VisitedCountryFlagsProps = {
   className?: string;
 };
 
-function countryHubHref(code: string, locale: Locale): string | null {
+function countryHubHref(code: string): string | null {
   const slug = getCountryHubByCode(code)?.slug;
   if (!slug) return null;
-  return getPathname({ href: countryPath(slug), locale });
+  return countryPath(slug);
 }
 
 function FlagTile({
@@ -147,7 +146,7 @@ export function VisitedCountryFlags({
             key={country.code}
             country={country}
             linkHref={
-              disableCountryLinks ? null : onCountryClick ? null : countryHubHref(country.code, locale)
+              disableCountryLinks ? null : onCountryClick ? null : countryHubHref(country.code)
             }
             onClick={onCountryClick ? () => onCountryClick(country) : undefined}
             variant={variant}

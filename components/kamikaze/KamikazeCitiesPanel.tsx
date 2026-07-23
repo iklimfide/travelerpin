@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useModal } from "@/components/ui/ModalProvider";
 import { YpCountrySelect } from "@/components/kamikaze/YpCountrySelect";
 import { YpImageUrlImportModal } from "@/components/kamikaze/YpImageUrlImportModal";
+import { invalidateCachedHeroImages } from "@/lib/client/hero-images-cache";
 import { cityHeroLookupKey, toCityHeroDisplayUrl } from "@/lib/city/city-hero-images";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { YP_CACHE_KEYS, ypCacheGet, ypCacheInvalidate, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
@@ -304,6 +305,7 @@ export function KamikazeCitiesPanel() {
       const data = (await res.json()) as { image?: CustomHeroRow; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Görsel yüklenemedi");
       if (data.image) {
+        invalidateCachedHeroImages();
         const storedUrl = data.image.imageUrl;
         const lookup = cityHeroLookupKey(data.image.countryCode, data.image.cityName);
         const rowLookup = heroKey(row);
@@ -343,6 +345,7 @@ export function KamikazeCitiesPanel() {
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? "Görsel kaldırılamadı");
+      invalidateCachedHeroImages();
       setCustomImages((prev) => {
         const next = new Map(prev);
         for (const mapKey of prev.keys()) {
