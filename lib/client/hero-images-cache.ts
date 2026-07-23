@@ -1,5 +1,6 @@
 const CACHE_VERSION = 2;
-const CACHE_TTL_MS = 5 * 60 * 1000;
+/** YP hero images change rarely — avoid hammering API on every profile visit. */
+const CACHE_TTL_MS = 30 * 60 * 1000;
 const CITY_KEY = `tp:v${CACHE_VERSION}:city-hero-images`;
 const PARK_KEY = `tp:v${CACHE_VERSION}:park-hero-images`;
 
@@ -61,9 +62,25 @@ export function invalidateCachedHeroImages(): void {
   if (typeof window === "undefined") return;
   sessionStorage.removeItem(CITY_KEY);
   sessionStorage.removeItem(PARK_KEY);
+  inFlightFetch = null;
 }
 
-export async function fetchHeroImageMaps(): Promise<{
+function readCachedHeroImageMaps(): {
+  cityHeroImages: Map<string, string>;
+  parkHeroImages: Map<string, string>;
+} | null {
+  const cityHeroImages = readCachedCityHeroImages();
+  const parkHeroImages = readCachedParkHeroImages();
+  if (!cityHeroImages || !parkHeroImages) return null;
+  return { cityHeroImages, parkHeroImages };
+}
+
+let inFlightFetch: Promise<{
+  cityHeroImages: Map<string, string>;
+  parkHeroImages: Map<string, string>;
+}> | null = null;
+
+async function fetchHeroImageMapsFromNetwork(): Promise<{
   cityHeroImages: Map<string, string>;
   parkHeroImages: Map<string, string>;
 }> {
@@ -86,4 +103,23 @@ export async function fetchHeroImageMaps(): Promise<{
   writeCachedParkHeroImages(parkHeroImages);
 
   return { cityHeroImages, parkHeroImages };
+}
+
+/** Session-cached hero maps; one network round-trip per tab per TTL window. */
+export async function fetchHeroImageMaps(options?: { force?: boolean }): Promise<{
+  cityHeroImages: Map<string, string>;
+  parkHeroImages: Map<string, string>;
+}> {
+  if (!options?.force) {
+    const cached = readCachedHeroImageMaps();
+    if (cached) return cached;
+  }
+
+  if (!inFlightFetch) {
+    inFlightFetch = fetchHeroImageMapsFromNetwork().finally(() => {
+      inFlightFetch = null;
+    });
+  }
+
+  return inFlightFetch;
 }

@@ -146,9 +146,7 @@ export function usePublicProfileProgressiveLoad(
 
     const cached = readProfileCache(normalized);
     if (cached) {
-      // Always refresh in the background — own-profile cache must not stay stale
-      // after pin photo / wishlist edits (previously skipped for the owner).
-      void load(true);
+      // Cache is kept fresh via PROFILE_DATA_STALE_EVENT / travel-state sync.
       return;
     }
 

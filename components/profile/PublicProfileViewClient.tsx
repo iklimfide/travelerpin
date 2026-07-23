@@ -2,7 +2,7 @@
 
 import { Link } from "@/lib/i18n/navigation";
 import { useLocale } from "next-intl";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ProfileOwnerTools } from "@/components/dashboard/ProfileOwnerTools";
 import { HomeFeaturesClient } from "@/components/home/HomeFeaturesClient";
 import { ProfileHeroCover } from "@/components/profile/ProfileHeroCover";
@@ -157,9 +157,12 @@ export function PublicProfileViewClient({
   const [parkHeroImages, setParkHeroImages] = useState<Map<string, string>>(
     () => readCachedParkHeroImages() ?? new Map()
   );
+  const heroesEnsuredRef = useRef(false);
 
   useEffect(() => {
     if (progressive && !fullData) return;
+    if (heroesEnsuredRef.current) return;
+    heroesEnsuredRef.current = true;
 
     let cancelled = false;
     void fetchHeroImageMaps()
