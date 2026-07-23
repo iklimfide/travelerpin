@@ -35,7 +35,7 @@ export function HubRecentTravelers({
         <ul className={travelersClassName}>
           {travelers.map((traveler) => (
             <li key={traveler.username}>
-              <Link href={traveler.profilePath} className="city-page__traveler-link">
+              <Link href={traveler.profilePath} className="city-page__traveler-link" prefetch={false}>
                 <ProfileAvatar
                   avatarUrl={traveler.avatarUrl}
                   displayName={traveler.displayName}

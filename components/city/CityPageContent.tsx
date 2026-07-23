@@ -111,7 +111,7 @@ export async function CityPageContent({
             const parkHub = ensureParkHubFromTouristPark(park);
             return (
               <li key={`${park.parkType}:${park.name}`} className="py-1 first:pt-0 last:pb-0">
-                <Link href={parkPath(parkHub.slug)} className="city-page__link">
+                <Link href={parkPath(parkHub.slug)} className="city-page__link" prefetch={false}>
                   {park.name}
                 </Link>
                 <span className="city-page__subtext">{parkTypeLabel(park.parkType)}</span>

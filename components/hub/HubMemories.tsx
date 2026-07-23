@@ -49,6 +49,7 @@ export function HubMemories({ hubName, pins, labels }: HubMemoriesProps) {
                     href={pin.profilePath}
                     className="city-page__memory-thumb-btn"
                     aria-label={`${pin.displayName} — ${labels.viewMap}`}
+                    prefetch={false}
                   >
                     <Image
                       src={pin.mediaUrl}
@@ -85,7 +86,7 @@ export function HubMemories({ hubName, pins, labels }: HubMemoriesProps) {
                 )}
 
                 <div className="city-page__memory-body">
-                  <Link href={pin.profilePath} className="city-page__memory-author">
+                  <Link href={pin.profilePath} className="city-page__memory-author" prefetch={false}>
                     <ProfileAvatar
                       avatarUrl={pin.avatarUrl}
                       displayName={pin.displayName}

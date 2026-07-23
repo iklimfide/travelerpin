@@ -28,7 +28,7 @@ export function HubSectionCta(props: HubSectionCtaProps) {
 
   if ("href" in props && props.href) {
     return (
-      <Link href={props.href} className={className}>
+      <Link href={props.href} className={className} prefetch={false}>
         {props.label}
       </Link>
     );

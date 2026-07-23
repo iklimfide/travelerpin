@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useLocale } from "next-intl";
-import { Link } from "@/lib/i18n/navigation";
+import { Link, getPathname } from "@/lib/i18n/navigation";
 import {
   POPULAR_DESTINATIONS,
   type PopularDestination,
@@ -1357,6 +1357,9 @@ export function SaveDestinationModal({
                   ? findVisitedParkForRow(row, visitedParks)
                   : undefined;
               const pageHref = destinationRowHref(row);
+              const localizedPageHref = pageHref
+                ? getPathname({ href: pageHref, locale })
+                : null;
 
               return (
                 <li key={row.id} className="save-destination-modal__item">
@@ -1371,12 +1374,13 @@ export function SaveDestinationModal({
                       />
                     </span>
                     <span className="save-destination-modal__text">
-                      {pageHref ? (
+                      {localizedPageHref ? (
                         <Link
-                          href={pageHref}
+                          href={localizedPageHref}
                           className="save-destination-modal__name save-destination-modal__name-link"
                           onClick={onClose}
                           title={row.title}
+                          prefetch={false}
                         >
                           {row.title}
                         </Link>

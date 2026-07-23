@@ -189,6 +189,7 @@ export function ProfileFollowListModal({
                   href={member.profilePath}
                   className="profile-followers-list__item"
                   onClick={onClose}
+                  prefetch={false}
                 >
                   <ProfileAvatar
                     avatarUrl={member.avatarUrl}

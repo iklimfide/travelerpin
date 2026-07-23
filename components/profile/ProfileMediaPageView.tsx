@@ -135,15 +135,21 @@ export function ProfileMediaPageView({
             ) : (
               <section className="city-page__section profile-media-gallery-section">
                 <div className="city-page__hub-photo-gallery profile-media-box">
-                  <div className="profile-media-box__head">
-                    <h2
-                      id="profile-media-page-photos-heading"
-                      className="profile-media-box__title"
-                    >
-                      {labels.photosHeading}
-                    </h2>
+                  <div className="profile-media-box__head profile-card-hero">
+                    <div className="profile-media-box__header">
+                      <div className="profile-media-box__intro">
+                        <h2
+                          id="profile-media-page-photos-heading"
+                          className="profile-media-box__title profile-card-hero__title"
+                        >
+                          {labels.photosHeading}
+                        </h2>
+                      </div>
+                    </div>
                   </div>
-                  <p className="city-page__empty">{labels.mediaPageEmpty}</p>
+                  <div className="profile-media-box__body">
+                    <p className="city-page__empty">{labels.mediaPageEmpty}</p>
+                  </div>
                 </div>
               </section>
             )}

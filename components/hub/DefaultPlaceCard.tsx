@@ -55,6 +55,7 @@ export function DefaultPlaceCard({
                 href={countryPath(countrySlug)}
                 className="hub-place-card__country-name"
                 title={countryName}
+                prefetch={false}
               >
                 {countryName}
               </Link>

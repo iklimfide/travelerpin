@@ -117,7 +117,7 @@ function MediaPlaceCaption({ pin }: { pin: HubTravelerPin }) {
 
   if (pin.placePath) {
     return (
-      <Link href={pin.placePath} className="profile-media-item__place">
+      <Link href={pin.placePath} className="profile-media-item__place" prefetch={false}>
         {label}
       </Link>
     );
@@ -359,7 +359,7 @@ export function ProfileMediaGallery({
     headingCta = (
       <button
         type="button"
-        className="profile-media-box__all"
+        className="profile-media-box__all profile-owner-section__btn"
         onClick={onViewAll}
         aria-expanded={viewAllExpanded}
       >
@@ -371,7 +371,7 @@ export function ProfileMediaGallery({
       <HubSectionCta
         label={labels.viewAll}
         href={viewAllHref}
-        className="profile-media-box__all"
+        className="profile-media-box__all profile-owner-section__btn"
       />
     );
   }
@@ -385,42 +385,54 @@ export function ProfileMediaGallery({
       <section className="city-page__section profile-media-gallery-section" aria-labelledby={headingId}>
         <div className="city-page__hub-photo-gallery profile-media-box">
           {hideHeading ? null : (
-            <div className="profile-media-box__head">
-              {showAddButton && isOwnProfile ? (
-                <button
-                  type="button"
-                  className="profile-media-box__add"
-                  onClick={openAddPicker}
-                >
-                  {profileMessages.ownerAdd}
-                </button>
-              ) : null}
-              <h2 id={headingId} className="profile-media-box__title">
-                {heading}
-              </h2>
-              {headingCta}
+            <div className="profile-media-box__head profile-card-hero">
+              <div className="profile-media-box__header">
+                {showAddButton && isOwnProfile ? (
+                  <div className="profile-media-box__header-action profile-media-box__header-action--start">
+                    <button
+                      type="button"
+                      className="profile-owner-section__btn profile-owner-section__btn--add"
+                      onClick={openAddPicker}
+                    >
+                      {profileMessages.ownerAdd}
+                    </button>
+                  </div>
+                ) : null}
+                <div className="profile-media-box__intro">
+                  <h2 id={headingId} className="profile-media-box__title profile-card-hero__title">
+                    {heading}
+                  </h2>
+                </div>
+                {headingCta ? (
+                  <div className="profile-media-box__header-action profile-media-box__header-action--end">
+                    {headingCta}
+                  </div>
+                ) : null}
+              </div>
             </div>
           )}
-          {items.length > 0 ? (
-            <ul className="city-page__traveler-pictures-grid">
-              {items.map((item) => (
-                <li key={item.id}>
-                  <GalleryTile
-                    item={item}
-                    hubName={hubName}
-                    labels={labels}
-                    isOwnProfile={isOwnProfile}
-                    onSelect={setExpandedItem}
-                    onEdit={() => openEditForItem(item)}
-                    onRemove={() => handleRemoveItem(item)}
-                    photoAnchorPrefix={photoAnchorPrefix}
-                  />
-                </li>
-              ))}
-            </ul>
-          ) : emptyLabel ? (
-            <p className="city-page__empty">{emptyLabel}</p>
-          ) : null}
+          <div className="profile-media-box__body">
+            {items.length > 0 ? (
+              <ul className="city-page__traveler-pictures-grid">
+                {items.map((item) => (
+                  <li key={item.id}>
+                    <GalleryTile
+                      item={item}
+                      hubName={hubName}
+                      labels={labels}
+                      isOwnProfile={isOwnProfile}
+                      onSelect={setExpandedItem}
+                      onEdit={() => openEditForItem(item)}
+                      onRemove={() => handleRemoveItem(item)}
+                      photoAnchorPrefix={photoAnchorPrefix}
+                    />
+                  </li>
+                ))}
+              </ul>
+            ) : emptyLabel ? (
+              <p className="city-page__empty">{emptyLabel}</p>
+            ) : null}
+          </div>
         </div>
       </section>
 

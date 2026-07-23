@@ -1,4 +1,9 @@
-import { Link } from "@/lib/i18n/navigation";
+"use client";
+
+import { useLocale } from "next-intl";
+import { Link, getPathname } from "@/lib/i18n/navigation";
+import { isPublicProfilePath } from "@/lib/i18n/pathname";
+import type { Locale } from "@/lib/i18n/config";
 import { cityPath, countryPath, parkPath } from "@/lib/seo/site";
 
 type ProfilePlaceLinkProps = {
@@ -8,7 +13,14 @@ type ProfilePlaceLinkProps = {
   title?: string;
 };
 
+function resolvePlaceHref(href: string, locale: Locale): string {
+  if (isPublicProfilePath(href)) return href;
+  return getPathname({ href, locale });
+}
+
 function ProfilePlaceLink({ href, children, className = "", title }: ProfilePlaceLinkProps) {
+  const locale: Locale = useLocale() === "tr" ? "tr" : "en";
+
   if (!href) {
     return (
       <span className={className} title={title}>
@@ -18,7 +30,12 @@ function ProfilePlaceLink({ href, children, className = "", title }: ProfilePlac
   }
 
   return (
-    <Link href={href} className={`profile-place-link ${className}`.trim()} title={title}>
+    <Link
+      href={resolvePlaceHref(href, locale)}
+      className={`profile-place-link ${className}`.trim()}
+      title={title}
+      prefetch={false}
+    >
       {children}
     </Link>
   );
