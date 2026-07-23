@@ -13,6 +13,7 @@ import {
   isProfileNextRouteCaptureReady,
   PROFILE_NEXT_ROUTE_CAPTURE_ID,
 } from "@/lib/client/capture-profile-next-route-card";
+import { useModal } from "@/components/ui/ModalProvider";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 import type { TravelUpdateDelta } from "@/lib/utils/travel-update";
 
@@ -37,6 +38,7 @@ export function ShareTravelUpdateModal({
 }: ShareTravelUpdateModalProps) {
   const { share: shareMessages, profile: profileMessages, nextRoute: nextRouteMessages } =
     useAppMessages();
+  const modal = useModal();
   const [downloading, setDownloading] = useState<ShareDownloadFormat | null>(null);
   const [hasNextRouteCard, setHasNextRouteCard] = useState(false);
   const hasUpdate = delta.hasChanges;
@@ -75,7 +77,7 @@ export function ShareTravelUpdateModal({
   async function downloadImage(format: ShareDownloadFormat) {
     if (format === "route") {
       if (!isProfileNextRouteCaptureReady()) {
-        window.alert(nextRouteMessages.downloadShareCardFailed);
+        await modal.alert(nextRouteMessages.downloadShareCardFailed, { variant: "error" });
         return;
       }
     } else {
@@ -83,7 +85,7 @@ export function ShareTravelUpdateModal({
         format === "story" ? profileStoryCaptureId(username) : profileSquareCaptureId(username);
 
       if (!document.getElementById(captureId)) {
-        window.alert(profileMessages.storyCaptureMissing);
+        await modal.alert(profileMessages.storyCaptureMissing, { variant: "error" });
         return;
       }
     }
@@ -118,7 +120,7 @@ export function ShareTravelUpdateModal({
           : format === "route"
             ? nextRouteMessages.downloadShareCardFailed
             : profileMessages.storyCaptureFailed;
-      window.alert(message);
+      await modal.alert(message, { variant: "error" });
     } finally {
       setDownloading(null);
     }

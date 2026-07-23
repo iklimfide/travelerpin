@@ -903,6 +903,7 @@
     "back": "Geri",
     "close": "Kapat",
     "loading": "Yükleniyor...",
+    "syncing": "Haritana kaydediliyor…",
     "saveHint": "Seçimler yalnızca Kaydet'e dokunduğunda haritana kaydedilir.",
     "parkSaveHint": "Bir ülke aç, parkları işaretle, sonra pinlemek için Kaydet'e dokun.",
     "saveFailed": "Seçimlerin kaydedilemedi. Lütfen tekrar deneyin.",

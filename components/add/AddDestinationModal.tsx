@@ -37,6 +37,8 @@ import { isNaturaParkType, isThemeParkType } from "@/lib/utils/park-type";
 import { isCountryOnlyPinRemovable } from "@/lib/utils/country-remove";
 import { filterPersistedPinIds } from "@/lib/utils/pin-id";
 import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
+import { AddDestinationCountryPickerSkeleton } from "@/components/skeletons/AddDestinationModalSkeleton";
+import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
 import "./add-destination.css";
 
@@ -188,6 +190,7 @@ function applyOptimisticParksSave(params: {
 
 export function AddDestinationModal({ onClose, mode = "places" }: AddDestinationModalProps) {
   const { common: commonMessages, addDestination: addDestinationMessages } = useAppMessages();
+  const modal = useModal();
   const toast = useToast();
   const isParksMode = mode === "parks";
   const [step, setStep] = useState<Step>({ kind: "countries" });
@@ -221,7 +224,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
   );
   const [returnExpandedRegion, setReturnExpandedRegion] = useState<AddRegionId | null>(null);
   const [travelStateReady, setTravelStateReady] = useState(() => Boolean(readTravelStateCache()));
-  const [saving, setSaving] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const hasTravelStateRef = useRef(Boolean(readTravelStateCache()));
@@ -262,6 +265,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
     setPendingRemoveParkKeys(new Set());
     setReturnExpandedRegion(null);
     setSaveError(null);
+    setSyncing(false);
 
     const cached = readTravelStateCache();
     if (cached) {
@@ -308,12 +312,12 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape" && !saving) onClose();
+      if (event.key === "Escape" && !syncing) onClose();
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose, saving]);
+  }, [onClose, syncing]);
 
   const parkCountryCodes = useMemo(() => {
     const codes = new Set<string>();
@@ -585,10 +589,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
   }
 
   function handleSave() {
-    if (pendingSelectionCount === 0 || saving) return;
-
-    setSaving(true);
-    setSaveError(null);
+    if (pendingSelectionCount === 0 || syncing || !travelStateReady) return;
 
     if (isParksMode) {
       const pendingParksSnapshot = new Map(pendingParks);
@@ -627,9 +628,9 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
 
       setPendingParks(new Map());
       setPendingRemoveParkKeys(new Set());
-      setSaving(false);
 
       void (async () => {
+        setSyncing(true);
         try {
           const result = await savePendingParks({
             pendingParks: pendingParksSnapshot.values(),
@@ -638,19 +639,23 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
           });
 
           if (!result.ok) {
-            toast.show(
+            await modal.alert(
               result.error.toLowerCase().includes("unauthorized")
                 ? addDestinationMessages.loginRequired
-                : result.error
+                : result.error,
+              { variant: "error" }
             );
             refreshTravelStateAfterSave();
             return;
           }
 
+          toast.show(commonMessages.save);
           refreshTravelStateAfterSave();
         } catch {
-          toast.show(addDestinationMessages.saveFailed);
+          await modal.alert(addDestinationMessages.saveFailed, { variant: "error" });
           refreshTravelStateAfterSave();
+        } finally {
+          setSyncing(false);
         }
       })();
       return;
@@ -696,9 +701,9 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
     setPendingRemoveCountryCodes(new Set());
     setPendingCities(new Map());
     setPendingRemoveCityKeys(new Set());
-    setSaving(false);
 
     void (async () => {
+      setSyncing(true);
       try {
         const result = await savePendingDestinations({
           pendingCountryCodes: pendingCountrySnapshot,
@@ -710,19 +715,23 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
         });
 
         if (!result.ok) {
-          toast.show(
+          await modal.alert(
             result.error.toLowerCase().includes("unauthorized")
               ? addDestinationMessages.loginRequired
-              : result.error
+              : result.error,
+            { variant: "error" }
           );
           refreshTravelStateAfterSave();
           return;
         }
 
+        toast.show(commonMessages.save);
         refreshTravelStateAfterSave();
       } catch {
-        toast.show(addDestinationMessages.saveFailed);
+        await modal.alert(addDestinationMessages.saveFailed, { variant: "error" });
         refreshTravelStateAfterSave();
+      } finally {
+        setSyncing(false);
       }
     })();
   }
@@ -738,13 +747,14 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
         className="add-destination-modal__backdrop"
         aria-label={addDestinationMessages.close}
         onClick={onClose}
-        disabled={saving}
+        disabled={syncing}
       />
       <div
         className="add-destination-modal__sheet"
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-destination-title"
+        aria-busy={!travelStateReady || syncing}
       >
         <div
           className={`add-destination-modal__header${
@@ -779,14 +789,16 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
             className="add-destination-modal__close"
             aria-label={addDestinationMessages.close}
             onClick={onClose}
-            disabled={saving}
+            disabled={syncing}
           >
             ✕
           </button>
         </div>
 
         <div className="add-destination-modal__body">
-          {step.kind === "countries" ? (
+          {!travelStateReady ? (
+            <AddDestinationCountryPickerSkeleton />
+          ) : step.kind === "countries" ? (
             <CountryPickerStep
               visitedCodes={isParksMode ? new Set() : visitedCodes}
               countedCodes={isParksMode ? parkCountryCodes : undefined}
@@ -837,22 +849,24 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
 
         <div
           className={`add-destination-modal__footer${
-            saveError ? "" : " add-destination-modal__footer--action-only"
+            saveError || syncing ? "" : " add-destination-modal__footer--action-only"
           }`}
         >
           {saveError ? (
             <p className="add-destination-modal__footer-hint add-destination-modal__footer-hint--error">
               {saveError}
             </p>
+          ) : syncing ? (
+            <p className="add-destination-modal__footer-hint">{addDestinationMessages.syncing}</p>
           ) : null}
           <button
             type="button"
             className="add-destination-save"
-            disabled={pendingSelectionCount === 0 || saving || !travelStateReady}
+            disabled={pendingSelectionCount === 0 || !travelStateReady || syncing}
             onClick={() => void handleSave()}
           >
-            {saving ? commonMessages.loading : commonMessages.save}
-            {!saving && pendingSelectionCount > 0 ? ` (${pendingSelectionCount})` : ""}
+            {syncing ? addDestinationMessages.syncing : commonMessages.save}
+            {!syncing && pendingSelectionCount > 0 ? ` (${pendingSelectionCount})` : ""}
           </button>
         </div>
       </div>

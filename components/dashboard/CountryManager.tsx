@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -37,6 +37,13 @@ type CountryRow = {
   isWishlist: boolean;
 };
 
+type RowOverride = {
+  isVisited?: boolean;
+  isWishlist?: boolean;
+  visitedId?: string | null;
+  wishlistId?: string | null;
+};
+
 export function CountryManager({
   visitedCountries,
   wishlistCountries,
@@ -51,11 +58,17 @@ export function CountryManager({
   const toast = useToast();
   const locale = useLocale() === "tr" ? "tr" : "en";
   const [query, setQuery] = useState("");
-  const [busyCode, setBusyCode] = useState<string | null>(null);
+  const [rowOverrides, setRowOverrides] = useState<Record<string, RowOverride>>({});
   const [cityPickerTarget, setCityPickerTarget] = useState<{
     code: string;
     name: string;
   } | null>(null);
+  const visitedAddTokens = useRef<Record<string, number>>({});
+  const wishlistAddTokens = useRef<Record<string, number>>({});
+
+  useEffect(() => {
+    setRowOverrides({});
+  }, [visitedCountries, wishlistCountries, visitedCountryCodes]);
 
   const visitedByCode = useMemo(() => {
     const map = new Map<string, VisitedCountry>();
@@ -86,7 +99,7 @@ export function CountryManager({
       .map((city) => city.city_name);
   }, [cityPickerTarget, visitedCities]);
 
-  const rows = useMemo((): CountryRow[] => {
+  const baseRows = useMemo((): CountryRow[] => {
     const q = query.trim().toLowerCase();
     const countryList = getCountryList(locale);
 
@@ -114,13 +127,40 @@ export function CountryManager({
     });
   }, [query, visitedByCode, wishlistByCode, visitedCodeSet, locale]);
 
-  async function addVisited(code: string) {
-    const result = await addVisitedCountry(code);
-    if (!result.ok) {
-      await modal.alert(result.error, { variant: "error" });
-      return false;
-    }
-    return true;
+  const rows = useMemo((): CountryRow[] => {
+    return baseRows.map((row) => {
+      const override = rowOverrides[row.code];
+      if (!override) return row;
+
+      const isVisited = override.isVisited ?? row.isVisited;
+      const isWishlist = override.isWishlist ?? row.isWishlist;
+
+      return {
+        ...row,
+        isVisited,
+        isWishlist: isWishlist && !isVisited,
+        visitedId:
+          override.visitedId !== undefined ? (override.visitedId ?? undefined) : row.visitedId,
+        wishlistId:
+          override.wishlistId !== undefined ? (override.wishlistId ?? undefined) : row.wishlistId,
+      };
+    });
+  }, [baseRows, rowOverrides]);
+
+  function patchRow(code: string, patch: RowOverride) {
+    setRowOverrides((current) => ({
+      ...current,
+      [code]: { ...current[code], ...patch },
+    }));
+  }
+
+  function clearRowOverride(code: string) {
+    setRowOverrides((current) => {
+      if (!(code in current)) return current;
+      const next = { ...current };
+      delete next[code];
+      return next;
+    });
   }
 
   function showRemovePlacesFirst(row: CountryRow) {
@@ -137,73 +177,107 @@ export function CountryManager({
     toast.show(countryMessages.removePlacesFirst);
   }
 
-  async function removeVisited(row: CountryRow) {
+  function handleVisitedToggle(row: CountryRow, checked: boolean) {
+    if (checked) {
+      const token = (visitedAddTokens.current[row.code] ?? 0) + 1;
+      visitedAddTokens.current[row.code] = token;
+
+      patchRow(row.code, {
+        isVisited: true,
+        isWishlist: false,
+        wishlistId: null,
+      });
+      setCityPickerTarget({ code: row.code, name: row.name });
+
+      void addVisitedCountry(row.code).then(async (result) => {
+        if (token !== visitedAddTokens.current[row.code]) {
+          if (result.ok) void removeVisitedCountry(result.id);
+          return;
+        }
+
+        if (!result.ok) {
+          clearRowOverride(row.code);
+          await modal.alert(result.error, { variant: "error" });
+          return;
+        }
+
+        patchRow(row.code, { visitedId: result.id });
+      });
+      return;
+    }
+
     if (
       row.visitedViaPlacesOnly ||
       countryHasMappedPlaces(row.code, visitedCities, visitedParks)
     ) {
       showRemovePlacesFirst(row);
-      return false;
+      return;
     }
-    if (!row.visitedId) return false;
 
-    const result = await removeVisitedCountry(row.visitedId);
-    if (!result.ok) {
-      if (isCountryRemoveBlockedByPlacesError(result.error)) {
-        showRemovePlacesFirst(row);
-        return false;
-      }
-      await modal.alert(result.error, { variant: "error" });
-      return false;
+    if (!row.visitedId) {
+      visitedAddTokens.current[row.code] = (visitedAddTokens.current[row.code] ?? 0) + 1;
+      patchRow(row.code, { isVisited: false, visitedId: null });
+      return;
     }
-    return true;
-  }
 
-  async function addWishlist(code: string) {
-    const result = await addWishlistCountry(code);
-    if (!result.ok) {
-      await modal.alert(result.error, { variant: "error" });
-      return false;
-    }
-    return true;
-  }
+    const prevId = row.visitedId;
+    patchRow(row.code, { isVisited: false, visitedId: null });
 
-  async function removeWishlist(row: CountryRow) {
-    if (!row.wishlistId) return false;
-
-    const result = await removeWishlistCountry(row.wishlistId);
-    if (!result.ok) {
-      await modal.alert(result.error, { variant: "error" });
-      return false;
-    }
-    return true;
-  }
-
-  async function handleVisitedToggle(row: CountryRow, checked: boolean) {
-    if (busyCode) return;
-    setBusyCode(row.code);
-
-    try {
-      const ok = checked ? await addVisited(row.code) : await removeVisited(row);
-      if (ok) {
-        if (checked) {
-          setCityPickerTarget({ code: row.code, name: row.name });
+    void removeVisitedCountry(prevId).then(async (result) => {
+      if (!result.ok) {
+        clearRowOverride(row.code);
+        if (isCountryRemoveBlockedByPlacesError(result.error)) {
+          showRemovePlacesFirst(row);
+          return;
         }
+        await modal.alert(result.error, { variant: "error" });
+        return;
       }
-    } finally {
-      setBusyCode(null);
-    }
+    });
   }
 
-  async function handleWishlistToggle(row: CountryRow, checked: boolean) {
-    if (busyCode || row.isVisited) return;
-    setBusyCode(row.code);
+  function handleWishlistToggle(row: CountryRow, checked: boolean) {
+    if (row.isVisited) return;
 
-    try {
-      await (checked ? addWishlist(row.code) : removeWishlist(row));
-    } finally {
-      setBusyCode(null);
+    if (checked) {
+      const token = (wishlistAddTokens.current[row.code] ?? 0) + 1;
+      wishlistAddTokens.current[row.code] = token;
+
+      patchRow(row.code, { isWishlist: true });
+
+      void addWishlistCountry(row.code).then(async (result) => {
+        if (token !== wishlistAddTokens.current[row.code]) {
+          if (result.ok) void removeWishlistCountry(result.id);
+          return;
+        }
+
+        if (!result.ok) {
+          clearRowOverride(row.code);
+          await modal.alert(result.error, { variant: "error" });
+          return;
+        }
+
+        patchRow(row.code, { wishlistId: result.id });
+      });
+      return;
     }
+
+    if (!row.wishlistId) {
+      wishlistAddTokens.current[row.code] = (wishlistAddTokens.current[row.code] ?? 0) + 1;
+      patchRow(row.code, { isWishlist: false, wishlistId: null });
+      return;
+    }
+
+    const prevId = row.wishlistId;
+    patchRow(row.code, { isWishlist: false, wishlistId: null });
+
+    void removeWishlistCountry(prevId).then(async (result) => {
+      if (!result.ok) {
+        clearRowOverride(row.code);
+        await modal.alert(result.error, { variant: "error" });
+        return;
+      }
+    });
   }
 
   const showIdle = query.trim().length === 0 && rows.length === 0;
@@ -259,54 +333,50 @@ export function CountryManager({
               {countryMessages.noResults}
             </li>
           ) : (
-            rows.map((row) => {
-              const loading = busyCode === row.code;
-
-              return (
-                <li
-                  key={row.code}
-                  className={`grid grid-cols-[minmax(0,1fr)_3.25rem_3.25rem] items-center gap-2 border-b px-2 py-2.5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_5rem_5rem] sm:px-3${embedded ? " border-[#eef2f7]" : " border-slate-800/80"}`}
-                >
-                  <div className="min-w-0">
-                    <p
-                      className={`truncate text-sm${embedded ? " text-[var(--profile-text)]" : " text-slate-200"}`}
+            rows.map((row) => (
+              <li
+                key={row.code}
+                className={`grid grid-cols-[minmax(0,1fr)_3.25rem_3.25rem] items-center gap-2 border-b px-2 py-2.5 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_5rem_5rem] sm:px-3${embedded ? " border-[#eef2f7]" : " border-slate-800/80"}`}
+              >
+                <div className="min-w-0">
+                  <p
+                    className={`truncate text-sm${embedded ? " text-[var(--profile-text)]" : " text-slate-200"}`}
+                    title={row.name}
+                  >
+                    <ProfileCountryLink
+                      slug={resolveCountryHubSlug(row.code, row.name)}
+                      name={row.name}
+                      className={embedded ? "profile-owner-hub-link" : "profile-owner-hub-link text-slate-200"}
                       title={row.name}
-                    >
-                      <ProfileCountryLink
-                        slug={resolveCountryHubSlug(row.code, row.name)}
-                        name={row.name}
-                        className={embedded ? "profile-owner-hub-link" : "profile-owner-hub-link text-slate-200"}
-                        title={row.name}
-                      />
-                    </p>
-                    <p className={`text-xs${embedded ? " text-[#94a3b8]" : " text-slate-600"}`}>{row.code}</p>
-                  </div>
-
-                  <div className="flex justify-center">
-                    <input
-                      type="checkbox"
-                      checked={row.isVisited}
-                      disabled={loading || (row.isVisited && row.visitedViaPlacesOnly)}
-                      title={row.visitedViaPlacesOnly ? countryMessages.lockedViaPlaces : undefined}
-                      onChange={(e) => handleVisitedToggle(row, e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-blue-500 focus:ring-blue-500/40 disabled:opacity-60"
-                      aria-label={`${countryMessages.columnVisited}: ${row.name}`}
                     />
-                  </div>
+                  </p>
+                  <p className={`text-xs${embedded ? " text-[#94a3b8]" : " text-slate-600"}`}>{row.code}</p>
+                </div>
 
-                  <div className="flex justify-center">
-                    <input
-                      type="checkbox"
-                      checked={row.isWishlist && !row.isVisited}
-                      disabled={loading || row.isVisited}
-                      onChange={(e) => handleWishlistToggle(row, e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-amber-500 focus:ring-amber-500/40 disabled:opacity-40"
-                      aria-label={`${wishlistMessages.columnWant}: ${row.name}`}
-                    />
-                  </div>
-                </li>
-              );
-            })
+                <div className="flex justify-center">
+                  <input
+                    type="checkbox"
+                    checked={row.isVisited}
+                    disabled={row.isVisited && row.visitedViaPlacesOnly}
+                    title={row.visitedViaPlacesOnly ? countryMessages.lockedViaPlaces : undefined}
+                    onChange={(e) => handleVisitedToggle(row, e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-blue-500 focus:ring-blue-500/40 disabled:opacity-60"
+                    aria-label={`${countryMessages.columnVisited}: ${row.name}`}
+                  />
+                </div>
+
+                <div className="flex justify-center">
+                  <input
+                    type="checkbox"
+                    checked={row.isWishlist && !row.isVisited}
+                    disabled={row.isVisited}
+                    onChange={(e) => handleWishlistToggle(row, e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-amber-500 focus:ring-amber-500/40 disabled:opacity-40"
+                    aria-label={`${wishlistMessages.columnWant}: ${row.name}`}
+                  />
+                </div>
+              </li>
+            ))
           )}
         </ul>
       </div>

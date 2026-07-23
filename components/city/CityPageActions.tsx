@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { addCity, deleteCitiesBatch } from "@/lib/client/city-actions";
 import { addWishlistCountry, removeWishlistCountry } from "@/lib/client/country-actions";
 import { useModal } from "@/components/ui/ModalProvider";
@@ -42,94 +42,156 @@ export function CityPageActions({
   const modal = useModal();
   const toast = useToast();
   const authGate = useAuthGate();
-  const [busy, setBusy] = useState(false);
   const [state, setState] = useState(initialState);
+  const [optimisticCityOnMap, setOptimisticCityOnMap] = useState<boolean | null>(null);
+  const [optimisticWishlist, setOptimisticWishlist] = useState<boolean | null>(null);
+  const cityAddToken = useRef(0);
+  const wishlistAddToken = useRef(0);
 
   useEffect(() => {
     setState(initialState);
+    setOptimisticCityOnMap(null);
+    setOptimisticWishlist(null);
   }, [initialState]);
 
-  const cityOnMap = Boolean(state.cityId);
-  const onWishlist = Boolean(state.countryWishlistId);
+  const cityOnMap =
+    optimisticCityOnMap !== null ? optimisticCityOnMap : Boolean(state.cityId);
+  const onWishlist =
+    optimisticWishlist !== null ? optimisticWishlist : Boolean(state.countryWishlistId);
   const wishlistDisabled = state.countryVisited || cityOnMap;
 
-  async function handleBeenHere() {
+  function handleBeenHere() {
     if (!state.isLoggedIn) {
       authGate.requireLogin();
       return;
     }
-    if (busy) return;
 
-    setBusy(true);
-    try {
-      if (cityOnMap && state.cityId) {
-        const result = await deleteCitiesBatch({ ids: [state.cityId] });
+    if (cityOnMap) {
+      if (!state.cityId) {
+        cityAddToken.current += 1;
+        setOptimisticCityOnMap(false);
+        setState((current) => ({ ...current, cityId: null }));
+        toast.show(labels.cityRemoved);
+        return;
+      }
+
+      const prevId = state.cityId;
+      setOptimisticCityOnMap(false);
+      setState((current) => ({ ...current, cityId: null }));
+      toast.show(labels.cityRemoved);
+
+      void deleteCitiesBatch({ ids: [prevId] }).then(async (result) => {
         if (!result.ok) {
+          setOptimisticCityOnMap(null);
+          setState((current) => ({ ...current, cityId: prevId }));
           await modal.alert(result.error ?? "Failed to remove city", { variant: "error" });
           return;
         }
-        setState((current) => ({ ...current, cityId: null }));
-        toast.show(labels.cityRemoved);
-      } else {
-        const result = await addCity({
-          city_name: cityName,
-          country_code: countryCode,
-          country_name: countryName,
-          ...(latitude != null && longitude != null
-            ? { latitude, longitude }
-            : {}),
-        });
+        setOptimisticCityOnMap(null);
+      });
+      return;
+    }
 
-        if (!result.ok) {
-          if (result.error.toLowerCase().includes("already")) {
-            await modal.alert(labels.alreadyOnMap, { variant: "info" });
-          } else {
-            await modal.alert(result.error, { variant: "error" });
-          }
-          return;
+    const token = ++cityAddToken.current;
+    setOptimisticCityOnMap(true);
+    setOptimisticWishlist(false);
+    setState((current) => ({
+      ...current,
+      cityId: "pending",
+      countryVisited: true,
+      countryWishlistId: null,
+    }));
+    toast.show(labels.cityAdded);
+
+    void addCity({
+      city_name: cityName,
+      country_code: countryCode,
+      country_name: countryName,
+      ...(latitude != null && longitude != null ? { latitude, longitude } : {}),
+    }).then(async (result) => {
+      if (token !== cityAddToken.current) {
+        if (result.ok) {
+          const city = result.city as { id?: string };
+          if (city.id) void deleteCitiesBatch({ ids: [city.id] });
         }
+        return;
+      }
 
-        const city = result.city as { id?: string };
+      if (!result.ok) {
+        setOptimisticCityOnMap(null);
         setState((current) => ({
           ...current,
-          cityId: city.id ?? current.cityId,
-          countryVisited: true,
-          countryWishlistId: null,
+          cityId: null,
+          countryVisited: initialState.countryVisited,
         }));
-        toast.show(labels.cityAdded);
+        if (result.error.toLowerCase().includes("already")) {
+          await modal.alert(labels.alreadyOnMap, { variant: "info" });
+        } else {
+          await modal.alert(result.error, { variant: "error" });
+        }
+        return;
       }
-    } finally {
-      setBusy(false);
-    }
+
+      const city = result.city as { id?: string };
+      setOptimisticCityOnMap(null);
+      setState((current) => ({
+        ...current,
+        cityId: city.id ?? current.cityId,
+        countryVisited: true,
+        countryWishlistId: null,
+      }));
+    });
   }
 
-  async function handleWantToVisit() {
+  function handleWantToVisit() {
     if (!state.isLoggedIn) {
       authGate.requireLogin();
       return;
     }
-    if (busy || wishlistDisabled) return;
+    if (wishlistDisabled) return;
 
-    setBusy(true);
-    try {
-      if (onWishlist && state.countryWishlistId) {
-        const result = await removeWishlistCountry(state.countryWishlistId);
-        if (!result.ok) {
-          await modal.alert(result.error, { variant: "error" });
-          return;
-        }
+    if (onWishlist) {
+      if (!state.countryWishlistId) {
+        wishlistAddToken.current += 1;
+        setOptimisticWishlist(false);
         toast.show(labels.wishlistRemoved);
-      } else {
-        const result = await addWishlistCountry(countryCode);
-        if (!result.ok) {
-          await modal.alert(result.error, { variant: "error" });
-          return;
-        }
-        toast.show(labels.wishlistAdded);
+        return;
       }
-    } finally {
-      setBusy(false);
+
+      const prevId = state.countryWishlistId;
+      setOptimisticWishlist(false);
+      setState((current) => ({ ...current, countryWishlistId: null }));
+      toast.show(labels.wishlistRemoved);
+
+      void removeWishlistCountry(prevId).then(async (result) => {
+        if (!result.ok) {
+          setOptimisticWishlist(null);
+          setState((current) => ({ ...current, countryWishlistId: prevId }));
+          await modal.alert(result.error, { variant: "error" });
+        }
+      });
+      return;
     }
+
+    const token = ++wishlistAddToken.current;
+    setOptimisticWishlist(true);
+    toast.show(labels.wishlistAdded);
+
+    void addWishlistCountry(countryCode).then(async (result) => {
+      if (token !== wishlistAddToken.current) {
+        if (result.ok) void removeWishlistCountry(result.id);
+        return;
+      }
+
+      if (!result.ok) {
+        setOptimisticWishlist(null);
+        await modal.alert(result.error, { variant: "error" });
+        return;
+      }
+
+      setOptimisticWishlist(null);
+      setState((current) => ({ ...current, countryWishlistId: result.id }));
+    });
   }
 
   return (
@@ -141,8 +203,7 @@ export function CityPageActions({
           type="checkbox"
           className="city-page__btn-check"
           checked={cityOnMap}
-          disabled={busy}
-          onChange={() => void handleBeenHere()}
+          onChange={handleBeenHere}
           aria-label={labels.visited}
         />
         <span>{labels.visited}</span>
@@ -155,8 +216,8 @@ export function CityPageActions({
             type="checkbox"
             className="city-page__btn-check city-page__btn-check--wish"
             checked={onWishlist}
-            disabled={busy || wishlistDisabled}
-            onChange={() => void handleWantToVisit()}
+            disabled={wishlistDisabled}
+            onChange={handleWantToVisit}
             aria-label={labels.wantToVisit}
           />
           <span>{labels.wantToVisit}</span>
@@ -165,7 +226,6 @@ export function CityPageActions({
           label={labels.like}
           loginHref={loginHref}
           isLoggedIn={state.isLoggedIn}
-          disabled={busy}
         />
       </div>
     </div>

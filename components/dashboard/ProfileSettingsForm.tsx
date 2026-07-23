@@ -11,6 +11,7 @@ import {
 import { ShareProfile } from "@/components/share/ShareProfile";
 import { InstagramBrandIcon } from "@/components/share/InstagramBrandIcon";
 import { useModal } from "@/components/ui/ModalProvider";
+import { useToast } from "@/components/ui/ToastProvider";
 import { LIMITS } from "@/lib/constants";
 import { useTranslateCommon, useTranslateSettings, useTranslateWishlist } from "@/lib/i18n/client-messages";
 import { clearSharePromptThrottle } from "@/lib/client/share-pin-prompt";
@@ -64,6 +65,7 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
   const tCommon = useTranslateCommon();
   const tWishlist = useTranslateWishlist();
   const modal = useModal();
+  const toast = useToast();
 
   const username = profile.username;
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
@@ -126,10 +128,10 @@ export function ProfileSettingsForm({ profile, stats }: ProfileSettingsFormProps
         clearSharePromptThrottle();
       }
 
-      await modal.alert(t("saveSuccess"), { variant: "success" });
       setOwnDisplayName(displayName.trim() || null);
       invalidateSettingsCache();
       invalidateOwnProfileCache();
+      toast.show(t("saveSuccess"));
     } finally {
       setLoading(false);
     }

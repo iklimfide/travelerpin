@@ -44,7 +44,8 @@ export function CountryCityPicker({
 
   const [allCities, setAllCities] = useState<TouristCity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [batchPending, setBatchPending] = useState(false);
+  const [optimisticNames, setOptimisticNames] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const lastPromptKeyRef = useRef<string | null>(null);
@@ -55,12 +56,15 @@ export function CountryCityPicker({
   );
 
   function isExistingCity(cityName: string): boolean {
+    const key = canonicalCityKey(countryCode, cityName);
+    if (optimisticNames.has(key)) return true;
     return existingNames.some((name) => citiesAreSame(countryCode, name, cityName));
   }
 
   useEffect(() => {
     setSelectedIds(new Set());
     setFilter("");
+    setOptimisticNames(new Set());
     setLoading(true);
     lastPromptKeyRef.current = null;
 
@@ -113,31 +117,33 @@ export function CountryCityPicker({
     return !exactInList;
   }, [allCities, displayCities.length, existingNames, trimmedFilter]);
 
-  const handleAddCustomCity = useCallback(async () => {
+  const handleAddCustomCity = useCallback(() => {
     if (trimmedFilter.length < MIN_FILTER_LENGTH) return;
     if (isExistingCity(trimmedFilter)) return;
 
-    setSaving(true);
+    const cityName = trimmedFilter;
+    const key = canonicalCityKey(countryCode, cityName);
 
-    try {
-      const result = await addCity({
-        city_name: trimmedFilter,
-        country_code: countryCode,
-        country_name: countryName,
-      });
+    setOptimisticNames((prev) => new Set(prev).add(key));
+    toast.show(mapMessages.cityAdded);
+    lastPromptKeyRef.current = null;
+    setFilter("");
+    onAdded();
 
+    void addCity({
+      city_name: cityName,
+      country_code: countryCode,
+      country_name: countryName,
+    }).then(async (result) => {
       if (!result.ok) {
+        setOptimisticNames((prev) => {
+          const next = new Set(prev);
+          next.delete(key);
+          return next;
+        });
         await modal.alert(result.error, { variant: "error" });
-        throw new Error(result.error);
       }
-
-      toast.show(mapMessages.cityAdded);
-      lastPromptKeyRef.current = null;
-      setFilter("");
-      onAdded();
-    } finally {
-      setSaving(false);
-    }
+    });
   }, [
     countryCode,
     countryName,
@@ -146,10 +152,12 @@ export function CountryCityPicker({
     onAdded,
     toast,
     trimmedFilter,
+    mapMessages.cityAdded,
+    optimisticNames,
   ]);
 
   useEffect(() => {
-    if (loading || saving || !canAddCustomCity || selectedCount > 0) {
+    if (loading || !canAddCustomCity || selectedCount > 0) {
       return;
     }
 
@@ -177,7 +185,6 @@ export function CountryCityPicker({
     countryName,
     handleAddCustomCity,
     loading,
-    saving,
     selectedCount,
     toast,
     trimmedFilter,
@@ -208,37 +215,40 @@ export function CountryCityPicker({
     setSelectedIds(new Set(selectableCities.map(cityId)));
   }
 
-  async function handleAddSelected() {
+  function handleAddSelected() {
     const picked = selectableCities.filter((city) => selectedIds.has(cityId(city)));
-    if (picked.length === 0) return;
+    if (picked.length === 0 || batchPending) return;
 
-    setSaving(true);
+    const pickedKeys = picked.map((city) => canonicalCityKey(countryCode, city.name));
+    setOptimisticNames((prev) => {
+      const next = new Set(prev);
+      for (const key of pickedKeys) next.add(key);
+      return next;
+    });
+    setSelectedIds(new Set());
+    toast.show(formatMessage(mapMessages.citiesAdded, { count: picked.length }));
+    onAdded();
+    setBatchPending(true);
 
-    try {
-      const result = await addCitiesBatch({
-        country_code: countryCode,
-        country_name: countryName,
-        cities: picked.map((city) => ({
-          city_name: city.name,
-          latitude: city.latitude,
-          longitude: city.longitude,
-        })),
-      });
-
+    void addCitiesBatch({
+      country_code: countryCode,
+      country_name: countryName,
+      cities: picked.map((city) => ({
+        city_name: city.name,
+        latitude: city.latitude,
+        longitude: city.longitude,
+      })),
+    }).then(async (result) => {
+      setBatchPending(false);
       if (!result.ok) {
+        setOptimisticNames((prev) => {
+          const next = new Set(prev);
+          for (const key of pickedKeys) next.delete(key);
+          return next;
+        });
         await modal.alert(result.error, { variant: "error" });
-        throw new Error(result.error);
       }
-
-      if (result.added > 0) {
-        toast.show(formatMessage(mapMessages.citiesAdded, { count: result.added }));
-      }
-
-      setSelectedIds(new Set());
-      onAdded();
-    } finally {
-      setSaving(false);
-    }
+    });
   }
 
   return (
@@ -305,7 +315,7 @@ export function CountryCityPicker({
                   <input
                     type="checkbox"
                     checked={checked}
-                    disabled={onMap || saving}
+                    disabled={onMap}
                     onChange={() => toggleCity(city)}
                     className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-600 bg-slate-900 text-blue-500 focus:ring-blue-500/40 disabled:opacity-60"
                   />
@@ -329,7 +339,7 @@ export function CountryCityPicker({
       <button
         type="button"
         onClick={handleAddSelected}
-        disabled={saving || selectedCount === 0}
+        disabled={batchPending || selectedCount === 0}
         className="mt-3 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {selectedCount > 0

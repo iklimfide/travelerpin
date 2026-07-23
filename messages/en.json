@@ -904,6 +904,7 @@
     "back": "Back",
     "close": "Close",
     "loading": "Loading...",
+    "syncing": "Saving to your map…",
     "saveHint": "Selections are saved to your map only when you tap Save.",
     "parkSaveHint": "Open a country, tick parks, then tap Save to pin them.",
     "saveFailed": "Could not save your selections. Please try again.",

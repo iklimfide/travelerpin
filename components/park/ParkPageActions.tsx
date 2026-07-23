@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { addPark, deleteParksBatch } from "@/lib/client/park-actions";
 import { addWishlistCountry, removeWishlistCountry } from "@/lib/client/country-actions";
 import { useModal } from "@/components/ui/ModalProvider";
@@ -44,89 +44,153 @@ export function ParkPageActions({
   const modal = useModal();
   const toast = useToast();
   const authGate = useAuthGate();
-  const [busy, setBusy] = useState(false);
   const [state, setState] = useState(initialState);
+  const [optimisticParkOnMap, setOptimisticParkOnMap] = useState<boolean | null>(null);
+  const [optimisticWishlist, setOptimisticWishlist] = useState<boolean | null>(null);
+  const parkAddToken = useRef(0);
+  const wishlistAddToken = useRef(0);
 
   useEffect(() => {
     setState(initialState);
+    setOptimisticParkOnMap(null);
+    setOptimisticWishlist(null);
   }, [initialState]);
 
-  const parkOnMap = Boolean(state.parkId);
-  const onWishlist = Boolean(state.countryWishlistId);
+  const parkOnMap =
+    optimisticParkOnMap !== null ? optimisticParkOnMap : Boolean(state.parkId);
+  const onWishlist =
+    optimisticWishlist !== null ? optimisticWishlist : Boolean(state.countryWishlistId);
   const wishlistDisabled = state.countryVisited || parkOnMap;
 
-  async function handleBeenHere() {
+  function handleBeenHere() {
     if (!state.isLoggedIn) {
       authGate.requireLogin();
       return;
     }
-    if (busy) return;
 
-    setBusy(true);
-    try {
-      if (parkOnMap && state.parkId) {
-        const result = await deleteParksBatch({ ids: [state.parkId] });
+    if (parkOnMap) {
+      if (!state.parkId) {
+        parkAddToken.current += 1;
+        setOptimisticParkOnMap(false);
+        setState((current) => ({ ...current, parkId: null }));
+        toast.show(labels.parkRemoved);
+        return;
+      }
+
+      const prevId = state.parkId;
+      setOptimisticParkOnMap(false);
+      setState((current) => ({ ...current, parkId: null }));
+      toast.show(labels.parkRemoved);
+
+      void deleteParksBatch({ ids: [prevId] }).then(async (result) => {
         if (!result.ok) {
+          setOptimisticParkOnMap(null);
+          setState((current) => ({ ...current, parkId: prevId }));
           await modal.alert(result.error ?? "Failed to remove park", { variant: "error" });
           return;
         }
-        setState((current) => ({ ...current, parkId: null }));
-        toast.show(labels.parkRemoved);
-      } else {
-        const result = await addPark({
-          park_name: parkName,
-          park_type: parkType,
-          country_code: countryCode,
-          country_name: countryName,
-          ...(latitude != null && longitude != null ? { latitude, longitude } : {}),
-        });
+        setOptimisticParkOnMap(null);
+      });
+      return;
+    }
 
-        if (!result.ok) {
-          await modal.alert(result.error, { variant: "error" });
-          return;
+    const token = ++parkAddToken.current;
+    setOptimisticParkOnMap(true);
+    setOptimisticWishlist(false);
+    setState((current) => ({
+      ...current,
+      parkId: "pending",
+      countryVisited: true,
+      countryWishlistId: null,
+    }));
+    toast.show(labels.parkAdded);
+
+    void addPark({
+      park_name: parkName,
+      park_type: parkType,
+      country_code: countryCode,
+      country_name: countryName,
+      ...(latitude != null && longitude != null ? { latitude, longitude } : {}),
+    }).then(async (result) => {
+      if (token !== parkAddToken.current) {
+        if (result.ok) {
+          const park = result.park as { id?: string };
+          if (park.id) void deleteParksBatch({ ids: [park.id] });
         }
+        return;
+      }
 
-        const park = result.park as { id?: string };
+      if (!result.ok) {
+        setOptimisticParkOnMap(null);
         setState((current) => ({
           ...current,
-          parkId: park.id ?? current.parkId,
-          countryVisited: true,
-          countryWishlistId: null,
+          parkId: null,
+          countryVisited: initialState.countryVisited,
         }));
-        toast.show(labels.parkAdded);
+        await modal.alert(result.error, { variant: "error" });
+        return;
       }
-    } finally {
-      setBusy(false);
-    }
+
+      const park = result.park as { id?: string };
+      setOptimisticParkOnMap(null);
+      setState((current) => ({
+        ...current,
+        parkId: park.id ?? current.parkId,
+        countryVisited: true,
+        countryWishlistId: null,
+      }));
+    });
   }
 
-  async function handleWantToVisit() {
+  function handleWantToVisit() {
     if (!state.isLoggedIn) {
       authGate.requireLogin();
       return;
     }
-    if (busy || wishlistDisabled) return;
+    if (wishlistDisabled) return;
 
-    setBusy(true);
-    try {
-      if (onWishlist && state.countryWishlistId) {
-        const result = await removeWishlistCountry(state.countryWishlistId);
-        if (!result.ok) {
-          await modal.alert(result.error, { variant: "error" });
-          return;
-        }
+    if (onWishlist) {
+      if (!state.countryWishlistId) {
+        wishlistAddToken.current += 1;
+        setOptimisticWishlist(false);
         toast.show(labels.wishlistRemoved);
-      } else {
-        const result = await addWishlistCountry(countryCode);
-        if (!result.ok) {
-          await modal.alert(result.error, { variant: "error" });
-          return;
-        }
-        toast.show(labels.wishlistAdded);
+        return;
       }
-    } finally {
-      setBusy(false);
+
+      const prevId = state.countryWishlistId;
+      setOptimisticWishlist(false);
+      setState((current) => ({ ...current, countryWishlistId: null }));
+      toast.show(labels.wishlistRemoved);
+
+      void removeWishlistCountry(prevId).then(async (result) => {
+        if (!result.ok) {
+          setOptimisticWishlist(null);
+          setState((current) => ({ ...current, countryWishlistId: prevId }));
+          await modal.alert(result.error, { variant: "error" });
+        }
+      });
+      return;
     }
+
+    const token = ++wishlistAddToken.current;
+    setOptimisticWishlist(true);
+    toast.show(labels.wishlistAdded);
+
+    void addWishlistCountry(countryCode).then(async (result) => {
+      if (token !== wishlistAddToken.current) {
+        if (result.ok) void removeWishlistCountry(result.id);
+        return;
+      }
+
+      if (!result.ok) {
+        setOptimisticWishlist(null);
+        await modal.alert(result.error, { variant: "error" });
+        return;
+      }
+
+      setOptimisticWishlist(null);
+      setState((current) => ({ ...current, countryWishlistId: result.id }));
+    });
   }
 
   return (
@@ -138,8 +202,7 @@ export function ParkPageActions({
           type="checkbox"
           className="city-page__btn-check"
           checked={parkOnMap}
-          disabled={busy}
-          onChange={() => void handleBeenHere()}
+          onChange={handleBeenHere}
           aria-label={labels.visited}
         />
         <span>{labels.visited}</span>
@@ -152,8 +215,8 @@ export function ParkPageActions({
             type="checkbox"
             className="city-page__btn-check city-page__btn-check--wish"
             checked={onWishlist}
-            disabled={busy || wishlistDisabled}
-            onChange={() => void handleWantToVisit()}
+            disabled={wishlistDisabled}
+            onChange={handleWantToVisit}
             aria-label={labels.wantToVisit}
           />
           <span>{labels.wantToVisit}</span>
@@ -162,7 +225,6 @@ export function ParkPageActions({
           label={labels.like}
           loginHref={loginHref}
           isLoggedIn={state.isLoggedIn}
-          disabled={busy}
         />
       </div>
     </div>

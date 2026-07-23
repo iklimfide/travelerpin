@@ -52,7 +52,8 @@ export function CountryParkPicker({
 
   const [allParks, setAllParks] = useState<TouristPark[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [batchPending, setBatchPending] = useState(false);
+  const [optimisticKeys, setOptimisticKeys] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>(ALL_TYPES);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -68,6 +69,7 @@ export function CountryParkPicker({
     setSelectedIds(new Set());
     setFilter("");
     setTypeFilter(ALL_TYPES);
+    setOptimisticKeys(new Set());
     setLoading(true);
     lastPromptKeyRef.current = null;
 
@@ -110,8 +112,11 @@ export function CountryParkPicker({
   }, [allParks, countryCode, filter, locale, typeFilter]);
 
   const selectableParks = useMemo(() => {
-    return displayParks.filter((park) => !existingKeys.has(parkKey(park).toLowerCase()));
-  }, [displayParks, existingKeys]);
+    return displayParks.filter((park) => {
+      const key = parkKey(park).toLowerCase();
+      return !existingKeys.has(key) && !optimisticKeys.has(key);
+    });
+  }, [displayParks, existingKeys, optimisticKeys]);
 
   const selectedCount = useMemo(() => {
     return selectableParks.filter((park) => selectedIds.has(parkListId(park))).length;
@@ -123,7 +128,7 @@ export function CountryParkPicker({
     if (trimmedFilter.length < MIN_FILTER_LENGTH) return false;
 
     const key = `${customParkType}:${trimmedFilter.toLowerCase()}`;
-    if (existingKeys.has(key)) return false;
+    if (existingKeys.has(key) || optimisticKeys.has(key)) return false;
     if (displayParks.length > 0) return false;
 
     const normalized = trimmedFilter.toLocaleLowerCase("tr");
@@ -136,37 +141,50 @@ export function CountryParkPicker({
     );
 
     return !exactInList;
-  }, [allParks, countryCode, customParkType, displayParks.length, existingKeys, locale, trimmedFilter]);
+  }, [allParks, countryCode, customParkType, displayParks.length, existingKeys, locale, optimisticKeys, trimmedFilter]);
 
-  const handleAddCustomPark = useCallback(async () => {
+  const handleAddCustomPark = useCallback(() => {
     if (trimmedFilter.length < MIN_FILTER_LENGTH) return;
 
-    setSaving(true);
+    const key = `${customParkType}:${trimmedFilter.toLowerCase()}`;
+    if (existingKeys.has(key) || optimisticKeys.has(key)) return;
 
-    try {
-      const result = await addPark({
-        park_name: trimmedFilter,
-        park_type: customParkType,
-        country_code: countryCode,
-        country_name: countryName,
-      });
+    setOptimisticKeys((prev) => new Set(prev).add(key));
+    toast.show(mapMessages.parkAdded);
+    lastPromptKeyRef.current = null;
+    setFilter("");
+    onAdded();
 
+    void addPark({
+      park_name: trimmedFilter,
+      park_type: customParkType,
+      country_code: countryCode,
+      country_name: countryName,
+    }).then(async (result) => {
       if (!result.ok) {
+        setOptimisticKeys((prev) => {
+          const next = new Set(prev);
+          next.delete(key);
+          return next;
+        });
         await modal.alert(result.error, { variant: "error" });
-        throw new Error(result.error);
       }
-
-      toast.show(mapMessages.parkAdded);
-      lastPromptKeyRef.current = null;
-      setFilter("");
-      onAdded();
-    } finally {
-      setSaving(false);
-    }
-  }, [countryCode, countryName, customParkType, modal, onAdded, toast, trimmedFilter]);
+    });
+  }, [
+    countryCode,
+    countryName,
+    customParkType,
+    existingKeys,
+    modal,
+    onAdded,
+    optimisticKeys,
+    toast,
+    trimmedFilter,
+    mapMessages.parkAdded,
+  ]);
 
   useEffect(() => {
-    if (loading || saving || !canAddCustomPark || selectedCount > 0) {
+    if (loading || !canAddCustomPark || selectedCount > 0) {
       return;
     }
 
@@ -195,7 +213,6 @@ export function CountryParkPicker({
     customParkType,
     handleAddCustomPark,
     loading,
-    saving,
     selectedCount,
     toast,
     trimmedFilter,
@@ -226,38 +243,41 @@ export function CountryParkPicker({
     setSelectedIds(new Set(selectableParks.map(parkListId)));
   }
 
-  async function handleAddSelected() {
+  function handleAddSelected() {
     const picked = selectableParks.filter((park) => selectedIds.has(parkListId(park)));
-    if (picked.length === 0) return;
+    if (picked.length === 0 || batchPending) return;
 
-    setSaving(true);
+    const pickedKeys = picked.map((park) => parkKey(park).toLowerCase());
+    setOptimisticKeys((prev) => {
+      const next = new Set(prev);
+      for (const key of pickedKeys) next.add(key);
+      return next;
+    });
+    setSelectedIds(new Set());
+    toast.show(formatMessage(mapMessages.parksAdded, { count: picked.length }));
+    onAdded();
+    setBatchPending(true);
 
-    try {
-      const result = await addParksBatch({
-        country_code: countryCode,
-        country_name: countryName,
-        parks: picked.map((park) => ({
-          park_name: park.name,
-          park_type: park.parkType,
-          latitude: park.latitude,
-          longitude: park.longitude,
-        })),
-      });
-
+    void addParksBatch({
+      country_code: countryCode,
+      country_name: countryName,
+      parks: picked.map((park) => ({
+        park_name: park.name,
+        park_type: park.parkType,
+        latitude: park.latitude,
+        longitude: park.longitude,
+      })),
+    }).then(async (result) => {
+      setBatchPending(false);
       if (!result.ok) {
+        setOptimisticKeys((prev) => {
+          const next = new Set(prev);
+          for (const key of pickedKeys) next.delete(key);
+          return next;
+        });
         await modal.alert(result.error, { variant: "error" });
-        throw new Error(result.error);
       }
-
-      if (result.added > 0) {
-        toast.show(formatMessage(mapMessages.parksAdded, { count: result.added }));
-      }
-
-      setSelectedIds(new Set());
-      onAdded();
-    } finally {
-      setSaving(false);
-    }
+    });
   }
 
   return (
@@ -346,7 +366,9 @@ export function CountryParkPicker({
         ) : (
           displayParks.map((park) => {
             const id = parkListId(park);
-            const onMap = existingKeys.has(parkKey(park).toLowerCase());
+            const onMap =
+              existingKeys.has(parkKey(park).toLowerCase()) ||
+              optimisticKeys.has(parkKey(park).toLowerCase());
             const checked = onMap || selectedIds.has(id);
             const typeLabel = parkTypeLabel(park.parkType);
             const fullName = getLocalizedParkName(countryCode, park.name, locale);
@@ -362,7 +384,7 @@ export function CountryParkPicker({
                   <input
                     type="checkbox"
                     checked={checked}
-                    disabled={onMap || saving}
+                    disabled={onMap}
                     onChange={() => togglePark(park)}
                     className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-500/40 disabled:opacity-60"
                   />
@@ -387,7 +409,7 @@ export function CountryParkPicker({
       <button
         type="button"
         onClick={handleAddSelected}
-        disabled={saving || selectedCount === 0}
+        disabled={batchPending || selectedCount === 0}
         className="mt-3 w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {selectedCount > 0

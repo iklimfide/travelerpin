@@ -20,6 +20,7 @@ import {
   persistNextRoute,
   persistNextRouteStops,
 } from "@/lib/client/next-route-state";
+import { useModal } from "@/components/ui/ModalProvider";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { canonicalCityKey } from "@/lib/utils/city-aliases";
@@ -132,6 +133,7 @@ export function ProfileNextRouteSection({
   visitedCities = [],
 }: ProfileNextRouteSectionProps) {
   const { profile: profileMessages, nextRoute: nextRouteMessages } = useAppMessages();
+  const modal = useModal();
   const toast = useToast();
   const locale = useLocale() === "tr" ? "tr" : "en";
   const initialResolved = useMemo(
@@ -368,11 +370,11 @@ export function ProfileNextRouteSection({
     try {
       await downloadProfileNextRouteCardPng(username);
     } catch {
-      window.alert(nextRouteMessages.downloadShareCardFailed);
+      await modal.alert(nextRouteMessages.downloadShareCardFailed, { variant: "error" });
     } finally {
       setDownloadingRouteCard(false);
     }
-  }, [downloadingRouteCard, nextRouteMessages.downloadShareCardFailed, username]);
+  }, [downloadingRouteCard, modal, nextRouteMessages.downloadShareCardFailed, username]);
 
   const routeSummaryLabel = useMemo(() => {
     if (stops.length === 0) return null;

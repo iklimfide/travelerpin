@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLocale } from "next-intl";
+import { useModal } from "@/components/ui/ModalProvider";
 import { ShareSheetModal } from "@/components/share/ShareSheetModal";
 import { buildShareText, buildShareUrlOnly } from "@/lib/seo/profile";
 import { profileShareUrl } from "@/lib/seo/site";
@@ -29,6 +30,7 @@ export function useShareProfile({
   onShareComplete,
 }: ShareProfileCoreProps) {
   const [open, setOpen] = useState(false);
+  const modal = useModal();
   const { share: shareCopy } = useAppMessages();
   const localeRaw = useLocale();
   const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
@@ -64,9 +66,7 @@ export function useShareProfile({
       await navigator.clipboard.writeText(shareUrlOnly);
       await onShareComplete?.();
     } catch {
-      if (typeof window !== "undefined") {
-        window.alert(shareMessages.copyFailed);
-      }
+      await modal.alert(shareMessages.copyFailed, { variant: "error" });
     }
   }
 
