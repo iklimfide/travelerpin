@@ -16,6 +16,7 @@ import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
 import { resolvePublicMediaImageUrl } from "@/lib/storage/hub-photo-url";
 import { profileAllPath } from "@/lib/seo/site";
 import { useAnimatedCount } from "@/lib/hooks/useAnimatedCount";
+import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 import { withProfilePublicPreview } from "@/lib/profile/public-preview";
 import type { TravelStats } from "@/types/database";
 
@@ -74,11 +75,13 @@ export function ProfileIdentityCard({
   animateStats = false,
 }: ProfileIdentityCardProps) {
   const t = useTranslateProfile();
-  const animatedCountries = useAnimatedCount(stats.countries, animateStats);
-  const animatedCities = useAnimatedCount(stats.cities, animateStats);
-  const animatedNationalParks = useAnimatedCount(stats.nationalParks, animateStats);
-  const animatedThemeParks = useAnimatedCount(stats.themeParks, animateStats);
-  const displayStats: TravelStats = animateStats
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const animateStatsEnabled = animateStats && !prefersReducedMotion;
+  const animatedCountries = useAnimatedCount(stats.countries, animateStatsEnabled);
+  const animatedCities = useAnimatedCount(stats.cities, animateStatsEnabled);
+  const animatedNationalParks = useAnimatedCount(stats.nationalParks, animateStatsEnabled);
+  const animatedThemeParks = useAnimatedCount(stats.themeParks, animateStatsEnabled);
+  const displayStats: TravelStats = animateStatsEnabled
     ? {
         countries: animatedCountries,
         cities: animatedCities,
@@ -86,7 +89,7 @@ export function ProfileIdentityCard({
         themeParks: animatedThemeParks,
       }
     : stats;
-  const displayCountryCount = animateStats ? animatedCountries : countryCount;
+  const displayCountryCount = animateStatsEnabled ? animatedCountries : countryCount;
   const localeRaw = useLocale();
   const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
   const allHref = withProfilePublicPreview(profileAllPath(username), previewAsPublic);

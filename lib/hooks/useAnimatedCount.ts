@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
-/** Count-up animation for profile stats while travel data loads in the background. */
+const DURATION_MS = 900;
+
+/** Count-up animation for profile stats (homepage demo, etc.). */
 export function useAnimatedCount(target: number, enabled = true): number {
   const [display, setDisplay] = useState(() => (enabled ? 0 : target));
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!enabled) {
       setDisplay(target);
       return;
@@ -18,12 +20,11 @@ export function useAnimatedCount(target: number, enabled = true): number {
     }
 
     setDisplay(0);
-    const durationMs = 650;
     const start = performance.now();
     let frameId = 0;
 
     function tick(now: number) {
-      const progress = Math.min(1, (now - start) / durationMs);
+      const progress = Math.min(1, (now - start) / DURATION_MS);
       const eased = 1 - (1 - progress) ** 2;
       setDisplay(Math.round(target * eased));
       if (progress < 1) {

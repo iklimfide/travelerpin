@@ -15,6 +15,14 @@ export const EMPTY_TRAVEL_STATS: TravelStats = {
   themeParks: 0,
 };
 
+/** Shown while profile stats load on first paint — replaced when real data arrives. */
+export const PROFILE_STATS_LOADING_PLACEHOLDER: TravelStats = {
+  countries: 28,
+  cities: 84,
+  nationalParks: 9,
+  themeParks: 11,
+};
+
 export type PublicProfileShellData = {
   profile: PublicProfile;
   isLoggedIn: boolean;

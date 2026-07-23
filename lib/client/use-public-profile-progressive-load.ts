@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLayoutEffect, useCallback, useEffect, useMemo, useState } from "react";
 import {
   PROFILE_DATA_STALE_EVENT,
   TRAVEL_STATE_UPDATED_EVENT,
@@ -70,6 +70,24 @@ export function usePublicProfileProgressiveLoad(
   const [loading, setLoading] = useState(enabled);
   const shellFallbackData = useMemo(() => createEmptyProfilePageData(shell), [shell]);
 
+  useLayoutEffect(() => {
+    if (!enabled) return;
+
+    const cached = readProfileCache(normalized);
+    if (!cached) return;
+
+    setFullData(cached);
+    setLoading(false);
+    if (cached.followState) {
+      writeFollowStateCache(normalized, cached.followState);
+      prefetchProfileFollowLists(
+        normalized,
+        cached.followState.followerCount,
+        cached.followState.followingCount
+      );
+    }
+  }, [enabled, normalized]);
+
   const load = useCallback(
     async (forceNetwork = false) => {
       if (!enabled) return;
@@ -128,16 +146,6 @@ export function usePublicProfileProgressiveLoad(
 
     const cached = readProfileCache(normalized);
     if (cached) {
-      setFullData(cached);
-      setLoading(false);
-      if (cached.followState) {
-        writeFollowStateCache(normalized, cached.followState);
-        prefetchProfileFollowLists(
-          normalized,
-          cached.followState.followerCount,
-          cached.followState.followingCount
-        );
-      }
       if (getOwnUsername() !== normalized) {
         void load(true);
       }

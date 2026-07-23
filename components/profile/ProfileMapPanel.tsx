@@ -11,6 +11,7 @@ import {
   SHARE_MAP_SHOWCASE_START_EVENT,
 } from "@/lib/client/share-map-showcase";
 import { useAnimatedCount } from "@/lib/hooks/useAnimatedCount";
+import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 import { worldCoveragePercent } from "@/lib/utils/profile-page";
 import type { VisitedCity, VisitedCountry, VisitedPark, WishlistCountry } from "@/types/database";
 
@@ -68,7 +69,9 @@ export function ProfileMapPanel({
   allAriaLabel,
   animateCountryCount = false,
 }: ProfileMapPanelProps) {
-  const displayCountryCount = useAnimatedCount(countryCount, animateCountryCount);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const animateCountryCountEnabled = animateCountryCount && !prefersReducedMotion;
+  const displayCountryCount = useAnimatedCount(countryCount, animateCountryCountEnabled);
   const coverage = worldCoveragePercent(displayCountryCount);
   const showHead = Boolean(title || detailLabel);
   const [shareShowcaseMap, setShareShowcaseMap] = useState(false);

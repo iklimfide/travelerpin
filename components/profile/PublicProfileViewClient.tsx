@@ -13,8 +13,8 @@ import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections"
 import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
 import { usePublicProfileProgressiveLoad } from "@/lib/client/use-public-profile-progressive-load";
 import { fetchHeroImageMaps } from "@/lib/client/hero-images-cache";
-import { useAnimatedCount } from "@/lib/hooks/useAnimatedCount";
-import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
+import { useProgressiveStatCount } from "@/lib/hooks/useProgressiveStatCount";
+import { useProfileStatsAnimationEnabled } from "@/lib/hooks/useProfileStatsAnimationEnabled";
 import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
 import { ProfileTravelUpdateCard } from "@/components/profile/ProfileTravelUpdateCard";
 import { ProfileNextRouteSection } from "@/components/profile/ProfileNextRouteSection";
@@ -33,7 +33,7 @@ import {
   withProfilePublicPreview,
 } from "@/lib/profile/public-preview";
 import {
-  EMPTY_TRAVEL_STATS,
+  PROFILE_STATS_LOADING_PLACEHOLDER,
   type PublicProfilePageData,
   type PublicProfileShellData,
 } from "@/lib/supabase/profile-page-types";
@@ -65,7 +65,6 @@ export function PublicProfileViewClient({
   const tHome = useTranslateHome();
   const tCommon = useTranslateCommon();
   const locale = useLocale() === "tr" ? "tr" : "en";
-  const prefersReducedMotion = usePrefersReducedMotion();
 
   const progressive = progressiveLoad && Boolean(shell);
   const loadShell =
@@ -86,12 +85,28 @@ export function PublicProfileViewClient({
     return applyPublicPreviewToProfileData(fullData);
   }, [fullData, previewAsPublic, rawData]);
 
-  const statTargets = fullData?.stats ?? EMPTY_TRAVEL_STATS;
-  const animateStats = progressive && !prefersReducedMotion;
-  const animatedCountries = useAnimatedCount(statTargets.countries, animateStats);
-  const animatedCities = useAnimatedCount(statTargets.cities, animateStats);
-  const animatedNationalParks = useAnimatedCount(statTargets.nationalParks, animateStats);
-  const animatedThemeParks = useAnimatedCount(statTargets.themeParks, animateStats);
+  const resolvedStats = fullData?.stats ?? null;
+  const animateStats = useProfileStatsAnimationEnabled(progressive);
+  const animatedCountries = useProgressiveStatCount(
+    resolvedStats?.countries ?? null,
+    PROFILE_STATS_LOADING_PLACEHOLDER.countries,
+    animateStats
+  );
+  const animatedCities = useProgressiveStatCount(
+    resolvedStats?.cities ?? null,
+    PROFILE_STATS_LOADING_PLACEHOLDER.cities,
+    animateStats
+  );
+  const animatedNationalParks = useProgressiveStatCount(
+    resolvedStats?.nationalParks ?? null,
+    PROFILE_STATS_LOADING_PLACEHOLDER.nationalParks,
+    animateStats
+  );
+  const animatedThemeParks = useProgressiveStatCount(
+    resolvedStats?.themeParks ?? null,
+    PROFILE_STATS_LOADING_PLACEHOLDER.themeParks,
+    animateStats
+  );
   const displayStats = animateStats
     ? {
         countries: animatedCountries,
