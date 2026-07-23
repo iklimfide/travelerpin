@@ -1,16 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { ProfileMediaGallery } from "@/components/profile/ProfileMediaGallery";
+import { ProfileMediaListModal } from "@/components/profile/ProfileMediaListModal";
 import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
-import { profileMediaPath } from "@/lib/seo/site";
 import {
   PROFILE_MEDIA_PREVIEW_LIMIT,
   splitProfileMediaItems,
 } from "@/lib/utils/profile-media";
 import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
 
+type ProfileMediaTab = "photos" | "instagram";
+
 type ProfileMediaSectionsProps = {
-  username: string;
   displayName: string;
   memoryPins: HubTravelerPin[];
   isOwnProfile: boolean;
@@ -37,7 +39,6 @@ type ProfileMediaSectionsProps = {
 };
 
 export function ProfileMediaSections({
-  username,
   displayName,
   memoryPins,
   isOwnProfile,
@@ -49,44 +50,82 @@ export function ProfileMediaSections({
   const { photos, instagram } = splitProfileMediaItems(memoryPins);
   const previewPhotos = photos.slice(0, PROFILE_MEDIA_PREVIEW_LIMIT);
   const previewInstagram = instagram.slice(0, PROFILE_MEDIA_PREVIEW_LIMIT);
+  const [openModalTab, setOpenModalTab] = useState<ProfileMediaTab | null>(null);
+
+  const modalTitles: Record<ProfileMediaTab, string> = {
+    photos: labels.photosHeading,
+    instagram: labels.instagramHeading,
+  };
+
+  function renderModalGallery(tab: ProfileMediaTab) {
+    const isPhotos = tab === "photos";
+    const items = isPhotos ? photos : instagram;
+
+    return (
+      <div className="profile-media-sections profile-media-list-modal__content">
+        <ProfileMediaGallery
+          hubName={displayName}
+          variant={tab}
+          headingId={isPhotos ? "profile-media-modal-photos-heading" : "profile-media-modal-instagram-heading"}
+          hideHeading
+          items={items}
+          alwaysShow
+          emptyLabel={isPhotos ? labels.noPhotosYet : labels.noInstagramYet}
+          isOwnProfile={isOwnProfile}
+          visitedCountries={visitedCountries}
+          visitedCities={visitedCities}
+          visitedParks={visitedParks}
+          labels={labels}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="profile-media-sections">
-      <ProfileMediaGallery
-        hubName={displayName}
-        variant="photos"
-        headingId="profile-photos-heading"
-        alwaysShow
-        emptyLabel={labels.noPhotosYet}
-        items={previewPhotos}
-        viewAllHref={
-          previewPhotos.length > 0 ? profileMediaPath(username, "photos") : undefined
-        }
-        showAddButton
-        isOwnProfile={isOwnProfile}
-        visitedCountries={visitedCountries}
-        visitedCities={visitedCities}
-        visitedParks={visitedParks}
-        labels={labels}
-      />
+    <>
+      <div className="profile-media-sections">
+        <ProfileMediaGallery
+          hubName={displayName}
+          variant="photos"
+          headingId="profile-photos-heading"
+          alwaysShow
+          emptyLabel={labels.noPhotosYet}
+          items={previewPhotos}
+          onViewAll={() => setOpenModalTab("photos")}
+          showViewAll={photos.length > 0}
+          showAddButton
+          isOwnProfile={isOwnProfile}
+          visitedCountries={visitedCountries}
+          visitedCities={visitedCities}
+          visitedParks={visitedParks}
+          labels={labels}
+        />
 
-      <ProfileMediaGallery
-        hubName={displayName}
-        variant="instagram"
-        headingId="profile-instagram-heading"
-        alwaysShow
-        emptyLabel={labels.noInstagramYet}
-        items={previewInstagram}
-        viewAllHref={
-          previewInstagram.length > 0 ? profileMediaPath(username, "instagram") : undefined
-        }
-        showAddButton
-        isOwnProfile={isOwnProfile}
-        visitedCountries={visitedCountries}
-        visitedCities={visitedCities}
-        visitedParks={visitedParks}
-        labels={labels}
-      />
-    </div>
+        <ProfileMediaGallery
+          hubName={displayName}
+          variant="instagram"
+          headingId="profile-instagram-heading"
+          alwaysShow
+          emptyLabel={labels.noInstagramYet}
+          items={previewInstagram}
+          onViewAll={() => setOpenModalTab("instagram")}
+          showViewAll={instagram.length > 0}
+          showAddButton
+          isOwnProfile={isOwnProfile}
+          visitedCountries={visitedCountries}
+          visitedCities={visitedCities}
+          visitedParks={visitedParks}
+          labels={labels}
+        />
+      </div>
+
+      <ProfileMediaListModal
+        open={openModalTab !== null}
+        title={openModalTab ? modalTitles[openModalTab] : ""}
+        onClose={() => setOpenModalTab(null)}
+      >
+        {openModalTab ? renderModalGallery(openModalTab) : null}
+      </ProfileMediaListModal>
+    </>
   );
 }

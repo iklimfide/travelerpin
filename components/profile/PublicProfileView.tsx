@@ -18,11 +18,12 @@ import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
 import { ProfileTravelUpdateCard } from "@/components/profile/ProfileTravelUpdateCard";
 import { ProfileTravelUpdateSection } from "@/components/profile/ProfileTravelUpdateSection";
 import { ProfileNextRouteSection } from "@/components/profile/ProfileNextRouteSection";
-import { ProfileVisitorDestinations } from "@/components/profile/ProfileVisitorDestinations";
 import { ProfileTripsRow } from "@/components/profile/ProfileTripsRow";
 import { ProfilePublicPreviewBanner } from "@/components/profile/ProfilePublicPreviewBanner";
 import {
-  buildProfileTrips,
+  buildProfileAllDestinations,
+} from "@/lib/utils/profile-all-destinations";
+import {
   WORLD_COUNTRY_TOTAL,
 } from "@/lib/utils/profile-page";
 import { buildProfileMediaPins } from "@/lib/utils/profile-media";
@@ -101,13 +102,14 @@ export async function PublicProfileView({
     getCachedCityHeroImageMap(),
     getCachedParkHeroImageMap(),
   ]);
-  const trips = buildProfileTrips(
+  const destinations = buildProfileAllDestinations(
     visitedCountries,
     visitedCities,
     visitedParks,
-    profile.residence,
+    visibleWishlistCountries,
     visitedCodes,
-    locale === "tr" ? "tr" : "en",
+    profile.residence,
+    localeCode,
     cityHeroImages,
     parkHeroImages
   );
@@ -251,15 +253,9 @@ export async function PublicProfileView({
           {!embedded ? (
             <>
               <ProfileTripsRow
-                trips={trips}
-                title={isOwnProfile ? t("myTrips") : t("visitorTrips", { name: displayName })}
-                allLabel={t("tripsAll")}
-                allHref={
-                  hasMapContent
-                    ? withProfilePublicPreview(profileAllPath(profile.username), previewAsPublic)
-                    : undefined
-                }
-                clampToPrimaryColumn={!isOwnProfile}
+                destinations={destinations}
+                displayName={displayName}
+                isOwnProfile={isOwnProfile}
                 badgeLabels={{
                   recent: t("tripBadgeRecent"),
                   favorite: t("tripBadgeFavorite"),
@@ -267,45 +263,11 @@ export async function PublicProfileView({
                 }}
               />
 
-              {(isOwnProfile && ownerTools) ||
-              (!isOwnProfile &&
-                (visitedCodes.length > 0 ||
-                  visitedCities.length > 0 ||
-                  visitedParks.length > 0)) ? (
-                <div className="profile-dashboard-tools">
-                  {isOwnProfile ? (
-                    ownerTools
-                  ) : (
-                    <ProfileVisitorDestinations
-                      username={profile.username}
-                      residence={profile.residence}
-                      visitedCountries={visitedCountries}
-                      visitedCities={visitedCities}
-                      visitedParks={visitedParks}
-                      visitedCodes={visitedCodes}
-                      labels={{
-                        countriesTitle: t("visitorVisitedCountries", { name: displayName }),
-                        citiesTitle: t("visitorVisitedCities", { name: displayName }),
-                        parksTitle: t("visitorVisitedParks", { name: displayName }),
-                        countriesCount: t("visitorCountCountries", {
-                          count: visitedCodes.length,
-                        }),
-                        citiesCount: t("visitorCountCities", {
-                          count: visitedCities.length,
-                        }),
-                        parksCount: t("visitorCountParks", {
-                          count: visitedParks.length,
-                        }),
-                        show: t("ownerShow"),
-                        viewAll: t("allDestinationsAll"),
-                      }}
-                    />
-                  )}
-                </div>
+              {isOwnProfile && ownerTools ? (
+                <div className="profile-dashboard-tools">{ownerTools}</div>
               ) : null}
 
               <ProfileMediaSections
-                username={profile.username}
                 displayName={displayName}
                 memoryPins={mediaPins}
                 isOwnProfile={isOwnProfile}

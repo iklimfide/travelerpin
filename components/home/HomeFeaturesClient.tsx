@@ -77,13 +77,13 @@ export function HomeFeaturesClient({
       <div
         className={
           compact
-            ? "flex flex-wrap justify-center gap-2.5 text-[12px] font-bold text-[#64748b]"
-            : "mb-[52px] flex flex-wrap justify-center gap-3.5 text-sm font-bold text-[#64748b]"
+            ? "flex flex-col items-center gap-2.5 text-[12px] font-bold text-[#64748b]"
+            : "mb-[52px] flex flex-col items-center gap-3.5 text-sm font-bold text-[#64748b]"
         }
         aria-label="How it works"
       >
         {steps.map((label, index) => (
-          <div key={label} className="inline-flex items-center gap-2">
+          <div key={label} className="flex items-center gap-2">
             <span
               className={`grid h-[25px] w-[25px] place-items-center rounded-full text-[13px] ${STEP_STYLES[index]}`}
             >

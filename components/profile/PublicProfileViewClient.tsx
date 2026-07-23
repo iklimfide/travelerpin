@@ -15,14 +15,12 @@ import { usePublicProfileProgressiveLoad } from "@/lib/client/use-public-profile
 import { fetchHeroImageMaps } from "@/lib/client/hero-images-cache";
 import { useAnimatedCount } from "@/lib/hooks/useAnimatedCount";
 import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
-import { useProgressiveReveal } from "@/lib/hooks/useProgressiveReveal";
 import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
 import { ProfileTravelUpdateCard } from "@/components/profile/ProfileTravelUpdateCard";
 import { ProfileNextRouteSection } from "@/components/profile/ProfileNextRouteSection";
-import { ProfileVisitorDestinations } from "@/components/profile/ProfileVisitorDestinations";
 import { ProfileTripsRow } from "@/components/profile/ProfileTripsRow";
 import { ProfilePublicPreviewBanner } from "@/components/profile/ProfilePublicPreviewBanner";
-import { buildProfileTrips } from "@/lib/utils/profile-page";
+import { buildProfileAllDestinations } from "@/lib/utils/profile-all-destinations";
 import { buildProfileMediaPins } from "@/lib/utils/profile-media";
 import { resolveResidenceCityHref } from "@/lib/utils/residence-city";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
@@ -39,8 +37,6 @@ import {
   type PublicProfilePageData,
   type PublicProfileShellData,
 } from "@/lib/supabase/profile-page-types";
-
-const INITIAL_TRIPS = 3;
 
 type PublicProfileViewClientProps = {
   shell?: PublicProfileShellData;
@@ -126,8 +122,7 @@ export function PublicProfileViewClient({
   const visibleWishlistCodes =
     isOwnProfile || wishlistPublic ? wishlistCodes : [];
 
-  const revealPins = progressive && Boolean(fullData) && !prefersReducedMotion;
-  // Map SVG repaints are expensive in Firefox — show all country fills at once.
+
   const mapPinsReady = Boolean(fullData);
   const mapVisitedCountries = mapPinsReady ? visitedCountries : [];
   const mapVisitedCodes = mapPinsReady ? visitedCodes : [];
@@ -160,14 +155,15 @@ export function PublicProfileViewClient({
     };
   }, [fullData, progressive]);
 
-  const trips = useMemo(
+  const destinations = useMemo(
     () =>
-      buildProfileTrips(
+      buildProfileAllDestinations(
         visitedCountries,
         visitedCities,
         visitedParks,
-        profile.residence,
+        visibleWishlistCountries,
         visitedCodes,
+        profile.residence,
         locale,
         cityHeroImages,
         parkHeroImages
@@ -176,19 +172,20 @@ export function PublicProfileViewClient({
       visitedCountries,
       visitedCities,
       visitedParks,
-      profile.residence,
+      visibleWishlistCountries,
       visitedCodes,
+      profile.residence,
       locale,
       cityHeroImages,
       parkHeroImages,
     ]
   );
-  const visibleTrips = useProgressiveReveal(trips, {
-    enabled: revealPins,
-    initial: INITIAL_TRIPS,
-    step: 3,
-  });
-  const displayTrips = revealPins ? visibleTrips : trips;
+
+  const destinationCount =
+    destinations.countries.length +
+    destinations.cities.length +
+    destinations.parks.length +
+    destinations.wishlist.length;
 
   const mediaPins = buildProfileMediaPins(visitedCities, visitedParks, profile);
   const isDemoProfile = isDemoProfileUsername(profile.username);
@@ -325,17 +322,11 @@ export function PublicProfileViewClient({
 
           {!embedded ? (
             <>
-              {(!progressive || fullData) && displayTrips.length > 0 ? (
+              {(!progressive || fullData) && destinationCount > 0 ? (
                 <ProfileTripsRow
-                  trips={displayTrips}
-                  title={isOwnProfile ? t("myTrips") : t("visitorTrips", { name: displayName })}
-                  allLabel={t("tripsAll")}
-                  allHref={
-                    hasMapContent && !showEmptyMapState
-                      ? withProfilePublicPreview(profileAllPath(profile.username), previewAsPublic)
-                      : undefined
-                  }
-                  clampToPrimaryColumn={!isOwnProfile}
+                  destinations={destinations}
+                  displayName={displayName}
+                  isOwnProfile={isOwnProfile}
                   badgeLabels={{
                     recent: t("tripBadgeRecent"),
                     favorite: t("tripBadgeFavorite"),
@@ -344,47 +335,12 @@ export function PublicProfileViewClient({
                 />
               ) : null}
 
-              {(!progressive || fullData) &&
-              ((isOwnProfile && resolvedOwnerTools) ||
-                (!isOwnProfile &&
-                  (visitedCodes.length > 0 ||
-                    visitedCities.length > 0 ||
-                    visitedParks.length > 0))) ? (
-                <div className="profile-dashboard-tools">
-                  {isOwnProfile ? (
-                    resolvedOwnerTools
-                  ) : (
-                    <ProfileVisitorDestinations
-                      username={profile.username}
-                      residence={profile.residence}
-                      visitedCountries={visitedCountries}
-                      visitedCities={visitedCities}
-                      visitedParks={visitedParks}
-                      visitedCodes={visitedCodes}
-                      labels={{
-                        countriesTitle: t("visitorVisitedCountries", { name: displayName }),
-                        citiesTitle: t("visitorVisitedCities", { name: displayName }),
-                        parksTitle: t("visitorVisitedParks", { name: displayName }),
-                        countriesCount: t("visitorCountCountries", {
-                          count: visitedCodes.length,
-                        }),
-                        citiesCount: t("visitorCountCities", {
-                          count: visitedCities.length,
-                        }),
-                        parksCount: t("visitorCountParks", {
-                          count: visitedParks.length,
-                        }),
-                        show: t("ownerShow"),
-                        viewAll: t("allDestinationsAll"),
-                      }}
-                    />
-                  )}
-                </div>
+              {(!progressive || fullData) && isOwnProfile && resolvedOwnerTools ? (
+                <div className="profile-dashboard-tools">{resolvedOwnerTools}</div>
               ) : null}
 
               {(!progressive || fullData) ? (
                 <ProfileMediaSections
-                  username={profile.username}
                   displayName={displayName}
                   memoryPins={mediaPins}
                   isOwnProfile={isOwnProfile}

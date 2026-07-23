@@ -2,6 +2,7 @@ import "server-only";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { LIMITS } from "@/lib/constants";
+import { UNSUPPORTED_IMAGE_FORMAT_ERROR } from "@/lib/utils/image-errors";
 
 type SharpInstance = import("sharp").Sharp;
 type SharpModule = (input: Buffer) => SharpInstance;
@@ -57,8 +58,32 @@ function extensionForContentType(contentType: string): OptimizedImage["extension
   return "jpg";
 }
 
+function isUnsupportedBrowserImageType(contentType: string): boolean {
+  return /heif|heic|heics|avif/i.test(contentType);
+}
+
+function sniffImageContentType(buffer: Buffer): string | null {
+  if (buffer.length >= 12 && buffer.toString("ascii", 4, 8) === "ftyp") {
+    const brand = buffer.toString("ascii", 8, 12).toLowerCase();
+    if (["heic", "heix", "hevc", "hevx", "mif1", "msf1"].includes(brand)) {
+      return "image/heif";
+    }
+    if (brand.startsWith("avif")) return "image/avif";
+  }
+  return null;
+}
+
+function assertBrowserSafeImageBuffer(buffer: Buffer, declaredType: string): void {
+  const sniffed = sniffImageContentType(buffer);
+  const effective = sniffed ?? declaredType;
+  if (isUnsupportedBrowserImageType(effective)) {
+    throw new Error(UNSUPPORTED_IMAGE_FORMAT_ERROR);
+  }
+}
+
 function fallbackImage(buffer: Buffer, contentType: string): OptimizedImage {
   const type = contentType.startsWith("image/") ? contentType : "image/jpeg";
+  assertBrowserSafeImageBuffer(buffer, type);
   return {
     buffer,
     contentType: type,
@@ -99,6 +124,14 @@ export async function optimizeImageToWebp(
   try {
     return await encodeWebp(buffer);
   } catch (error) {
+    if (error instanceof Error && error.message === UNSUPPORTED_IMAGE_FORMAT_ERROR) {
+      throw error;
+    }
+    try {
+      assertBrowserSafeImageBuffer(buffer, fallbackContentType);
+    } catch (assertError) {
+      if (assertError instanceof Error) throw assertError;
+    }
     console.error("optimizeImageToWebp: sharp failed", error);
     const detail = error instanceof Error ? error.message : String(error);
     throw new Error(`Image could not be converted to WebP: ${detail}`);
@@ -121,8 +154,14 @@ export async function optimizeAvatar(
       .toBuffer();
     return { buffer: out, contentType: "image/webp", extension: "webp" };
   } catch (error) {
-    console.error("optimizeAvatar: sharp failed, using original file", error);
-    return fallbackImage(buffer, fallbackContentType);
+    try {
+      assertBrowserSafeImageBuffer(buffer, fallbackContentType);
+    } catch (assertError) {
+      if (assertError instanceof Error) throw assertError;
+    }
+    console.error("optimizeAvatar: sharp failed", error);
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`Image could not be converted to WebP: ${detail}`);
   }
 }
 

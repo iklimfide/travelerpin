@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isR2Configured, uploadPhotoToR2 } from "@/lib/storage/r2";
-import { optimizeImage, getWebpFileName } from "@/lib/utils/image";
+import { getWebpFileName, optimizeImageToWebp } from "@/lib/utils/image";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 
 export async function POST(request: Request) {
@@ -38,11 +38,8 @@ export async function POST(request: Request) {
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
-    const optimized = await optimizeImage(buffer, file.type);
-    const fileName =
-      optimized.extension === "webp"
-        ? `${user.id}/${getWebpFileName(file.name)}`
-        : `${user.id}/${getWebpFileName(file.name).replace(/\.webp$/i, `.${optimized.extension}`)}`;
+    const optimized = await optimizeImageToWebp(buffer, file.type);
+    const fileName = `${user.id}/${getWebpFileName(file.name)}`;
     const publicUrl = await uploadPhotoToR2(
       fileName,
       optimized.buffer,

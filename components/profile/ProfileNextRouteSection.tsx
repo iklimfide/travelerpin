@@ -274,41 +274,36 @@ export function ProfileNextRouteSection({
     <section id="profile-next-route" className="profile-section profile-next-route">
       <div className="profile-owner-section profile-next-route-box">
         <div className="profile-owner-section__header profile-next-route-box__header">
-          <div className="profile-next-route-box__header-side">
-            {isOwnProfile ? (
-              <span className="profile-next-route-box__header-spacer" aria-hidden />
-            ) : null}
-          </div>
+          {isOwnProfile && stops.length > 0 ? (
+            <div className="profile-next-route-box__header-action profile-next-route-box__header-action--start">
+              <button
+                type="button"
+                className="profile-owner-section__btn profile-owner-section__btn--sort"
+                onClick={() => openNextRouteModal("route")}
+              >
+                {profileMessages.sortRoute}
+              </button>
+            </div>
+          ) : null}
           <div className="profile-owner-section__intro profile-next-route-box__intro">
             <h3 className="profile-owner-section__title">{profileMessages.nextRouteTitle}</h3>
             {stopCountLabel ? (
               <p className="profile-owner-section__count">{stopCountLabel}</p>
             ) : null}
           </div>
-          <div className="profile-next-route-box__header-side profile-next-route-box__header-side--end">
-            {isOwnProfile ? (
-              <div className="profile-next-route-box__header-actions">
-                {stops.length > 0 ? (
-                  <button
-                    type="button"
-                    className="profile-owner-section__btn profile-owner-section__btn--sort"
-                    onClick={() => openNextRouteModal("route")}
-                  >
-                    {profileMessages.sortRoute}
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  className="profile-owner-section__btn profile-owner-section__btn--add"
-                  onClick={() => {
-                    openNextRouteDestination();
-                  }}
-                >
-                  {profileMessages.ownerAdd}
-                </button>
-              </div>
-            ) : null}
-          </div>
+          {isOwnProfile ? (
+            <div className="profile-next-route-box__header-action profile-next-route-box__header-action--end">
+              <button
+                type="button"
+                className="profile-owner-section__btn profile-owner-section__btn--add"
+                onClick={() => {
+                  openNextRouteDestination();
+                }}
+              >
+                {profileMessages.ownerAdd}
+              </button>
+            </div>
+          ) : null}
         </div>
 
         {stops.length === 0 ? (

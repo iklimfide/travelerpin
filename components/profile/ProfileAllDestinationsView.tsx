@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/lib/i18n/navigation";
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useState } from "react";
 import { useLocale } from "next-intl";
 import { deleteCitiesBatch } from "@/lib/client/city-actions";
 import { removeVisitedCountry, removeWishlistCountry } from "@/lib/client/country-actions";
@@ -17,6 +17,13 @@ import { ProfileNextRouteSection } from "@/components/profile/ProfileNextRouteSe
 import { ProfileParkDestinationCard } from "@/components/profile/ProfileParkDestinationCard";
 import { ProfileTripCard } from "@/components/profile/ProfileTripCard";
 import { ProfileWishlistDestinationCard } from "@/components/profile/ProfileWishlistDestinationCard";
+import {
+  DestinationSection,
+  PREVIEW_LIMIT,
+  ProfileVisitedDestinationsNav,
+  sectionId,
+  type ProfileVisitedTab,
+} from "@/components/profile/ProfileVisitedDestinationsSections";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
 import { commonMessages, countryMessages, formatMessage, modalMessages, profileDestinationCityCountLabel, profileDestinationParkCountLabel, profileMessages, saveDestinationMessages, useAppMessages } from "@/lib/i18n/client-messages";
@@ -49,9 +56,6 @@ import type {
   WishlistCountry,
 } from "@/types/database";
 
-/** Preview grid: 2 columns × 3 rows. */
-const PREVIEW_LIMIT = 6;
-
 type ProfileAllDestinationsViewProps = {
   username: string;
   displayName: string;
@@ -69,14 +73,7 @@ type ProfileAllDestinationsViewProps = {
   initialNextRouteStops: NextRouteStop[];
 };
 
-type ProfileAllTab = "countries" | "cities" | "parks" | "wishlist";
-
-const PROFILE_ALL_TABS: { id: ProfileAllTab; label: string; icon: string }[] = [
-  { id: "countries", label: saveDestinationMessages.tabCountries, icon: "🌍" },
-  { id: "cities", label: saveDestinationMessages.tabCities, icon: "📍" },
-  { id: "parks", label: saveDestinationMessages.tabParks, icon: "🏞️" },
-  { id: "wishlist", label: saveDestinationMessages.tabWishlist, icon: "⭐" },
-];
+type ProfileAllTab = ProfileVisitedTab;
 
 const MODAL_TITLES: Record<ProfileAllTab, string> = {
   countries: profileMessages.allDestinationsCountries,
@@ -85,90 +82,10 @@ const MODAL_TITLES: Record<ProfileAllTab, string> = {
   wishlist: profileMessages.wishlistCountries,
 };
 
-function sectionId(tab: ProfileAllTab): string {
-  return `profile-all-${tab}`;
-}
-
 type OwnerActions = {
   editLabel: string;
   removeLabel: string;
 } | null;
-
-function DestinationSection({
-  id,
-  title,
-  count,
-  onOpenAll,
-  children,
-}: {
-  id: string;
-  title: string;
-  count: number;
-  onOpenAll: () => void;
-  children: ReactNode;
-}) {
-  const showAllButton = count > PREVIEW_LIMIT;
-
-  return (
-    <section id={id} className="profile-all-section profile-all-box">
-      <div className="profile-all-box__head">
-        <div className="profile-all-box__title-row">
-          <h2 className="profile-all-box__title">{title}</h2>
-          <span className="profile-all-section__count">{count}</span>
-        </div>
-        {showAllButton ? (
-          <button type="button" className="profile-all-box__all" onClick={onOpenAll}>
-            {profileMessages.allDestinationsAll}
-          </button>
-        ) : null}
-      </div>
-      {count === 0 ? (
-        <p className="profile-all-box__empty">{profileMessages.allDestinationsTabEmpty}</p>
-      ) : (
-        <div className="profile-all-grid profile-all-grid--preview" role="list" aria-label={title}>
-          {children}
-        </div>
-      )}
-    </section>
-  );
-}
-
-function ProfileAllDestinationsNav({
-  displayName,
-  isOwnProfile,
-  activeTab,
-  onTabChange,
-}: {
-  displayName: string;
-  isOwnProfile: boolean;
-  activeTab: ProfileAllTab;
-  onTabChange: (tab: ProfileAllTab) => void;
-}) {
-  const visitedLabel = isOwnProfile
-    ? profileMessages.allDestinationsVisitedPrefixOwn
-    : formatMessage(profileMessages.allDestinationsVisitedPrefixVisitor, { name: displayName });
-
-  return (
-    <div className="profile-all-nav">
-      <h2 className="profile-all-nav__title">{visitedLabel}</h2>
-      <div className="profile-all-tabs" role="tablist" aria-label="Destination categories">
-        {PROFILE_ALL_TABS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === item.id}
-            className={`profile-all-tabs__tab${activeTab === item.id ? " profile-all-tabs__tab--active" : ""}`}
-            onClick={() => onTabChange(item.id)}
-          >
-            <span aria-hidden>{item.icon}</span>
-            {item.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export function ProfileAllDestinationsView({
   username,
@@ -507,7 +424,7 @@ export function ProfileAllDestinationsView({
             ) : (
               <main className="profile-all-main">
                 {hasNavContent ? (
-                  <ProfileAllDestinationsNav
+                  <ProfileVisitedDestinationsNav
                     displayName={displayName}
                     isOwnProfile={isOwnProfile}
                     activeTab={activeTab}
