@@ -8,6 +8,8 @@ export type SharePromptMode = "every_pin" | "after_30m" | "never";
 
 export type NextRouteStopKind = "country" | "city";
 
+export type NextRouteTransportMode = "car" | "train" | "bus" | "bicycle" | "walking";
+
 export type NextRouteStop = {
   id: string;
   kind: NextRouteStopKind;
@@ -16,6 +18,12 @@ export type NextRouteStop = {
   countryName?: string;
   slug?: string | null;
   href?: string | null;
+};
+
+export type NextRoutePayload = {
+  stops: NextRouteStop[];
+  totalDays?: number;
+  transport?: NextRouteTransportMode;
 };
 
 export interface Profile {
@@ -34,6 +42,8 @@ export interface Profile {
   /** Owner preferred locale for UI and Open Graph / link-preview copy. */
   locale: "en" | "tr";
   next_route?: NextRouteStop[];
+  next_route_total_days?: number;
+  next_route_transport?: NextRouteTransportMode;
   banned_at?: string | null;
   ban_reason?: string | null;
   created_at: string;

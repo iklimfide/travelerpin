@@ -5,7 +5,12 @@ import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import { countryPath } from "@/lib/seo/site";
 import { canonicalCityKey, canonicalCityName } from "@/lib/utils/city-aliases";
 import { cityPlacePath } from "@/lib/utils/hub-place-path";
-import type { NextRouteStop, NextRouteStopKind } from "@/types/database";
+import type {
+  NextRoutePayload,
+  NextRouteStop,
+  NextRouteStopKind,
+  NextRouteTransportMode,
+} from "@/types/database";
 
 export type NextRouteStopDisplay = {
   title: string;
@@ -14,11 +19,30 @@ export type NextRouteStopDisplay = {
 };
 
 export const NEXT_ROUTE_MAX_STOPS = 24;
+export const NEXT_ROUTE_MAX_TOTAL_DAYS = 30;
+export const NEXT_ROUTE_TRANSPORT_MODES = [
+  "car",
+  "train",
+  "bus",
+  "bicycle",
+  "walking",
+] as const satisfies readonly NextRouteTransportMode[];
 
 const STOP_KINDS = new Set<NextRouteStopKind>(["country", "city"]);
+const TRANSPORT_MODES = new Set<NextRouteTransportMode>(NEXT_ROUTE_TRANSPORT_MODES);
 
 function isStopKind(value: unknown): value is NextRouteStopKind {
   return typeof value === "string" && STOP_KINDS.has(value as NextRouteStopKind);
+}
+
+function isTransportMode(value: unknown): value is NextRouteTransportMode {
+  return typeof value === "string" && TRANSPORT_MODES.has(value as NextRouteTransportMode);
+}
+
+function normalizeTotalDays(value: unknown): number | undefined {
+  if (typeof value !== "number" || !Number.isInteger(value)) return undefined;
+  if (value < 0 || value > NEXT_ROUTE_MAX_TOTAL_DAYS) return undefined;
+  return value;
 }
 
 function normalizeStop(raw: unknown): NextRouteStop | null {
@@ -48,7 +72,7 @@ function normalizeStop(raw: unknown): NextRouteStop | null {
   };
 }
 
-export function parseNextRoute(value: unknown): NextRouteStop[] {
+function parseNextRouteStops(value: unknown): NextRouteStop[] {
   if (!Array.isArray(value)) return [];
 
   const stops: NextRouteStop[] = [];
@@ -83,6 +107,46 @@ export function parseNextRoute(value: unknown): NextRouteStop[] {
   }
 
   return stops;
+}
+
+export function parseNextRoutePayload(value: unknown): NextRoutePayload {
+  if (Array.isArray(value)) {
+    return { stops: parseNextRouteStops(value) };
+  }
+
+  if (!value || typeof value !== "object") {
+    return { stops: [] };
+  }
+
+  const row = value as Record<string, unknown>;
+  const stops = parseNextRouteStops(row.stops);
+  const totalDays = normalizeTotalDays(row.totalDays);
+  const transport = isTransportMode(row.transport) ? row.transport : undefined;
+
+  return {
+    stops,
+    ...(totalDays !== undefined ? { totalDays } : {}),
+    ...(transport !== undefined ? { transport } : {}),
+  };
+}
+
+export function parseNextRoute(value: unknown): NextRouteStop[] {
+  return parseNextRoutePayload(value).stops;
+}
+
+export function serializeNextRoutePayload(payload: NextRoutePayload): Record<string, unknown> {
+  const result: Record<string, unknown> = {
+    stops: payload.stops,
+  };
+
+  if (payload.totalDays !== undefined) {
+    result.totalDays = payload.totalDays;
+  }
+  if (payload.transport !== undefined) {
+    result.transport = payload.transport;
+  }
+
+  return result;
 }
 
 export function createNextRouteStopId(): string {
@@ -148,6 +212,14 @@ export function areNextRouteStopsEqual(a: NextRouteStop[], b: NextRouteStop[]): 
   }
 
   return true;
+}
+
+export function areNextRoutePayloadsEqual(a: NextRoutePayload, b: NextRoutePayload): boolean {
+  return (
+    areNextRouteStopsEqual(a.stops, b.stops) &&
+    (a.totalDays ?? null) === (b.totalDays ?? null) &&
+    (a.transport ?? null) === (b.transport ?? null)
+  );
 }
 
 export function getNextRouteStopDisplay(

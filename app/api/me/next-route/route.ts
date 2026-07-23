@@ -1,6 +1,6 @@
 import { after, NextResponse } from "next/server";
 import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
-import { parseNextRoute } from "@/lib/utils/next-route";
+import { parseNextRoutePayload, serializeNextRoutePayload } from "@/lib/utils/next-route";
 import { nextRouteUpdateSchema } from "@/lib/validations/next-route";
 import { createClient } from "@/lib/supabase/server";
 import { safeGetUser } from "@/lib/supabase/safe-server";
@@ -31,7 +31,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unavailable" }, { status: 503 });
     }
 
-    return NextResponse.json({ stops: parseNextRoute(data?.next_route) });
+    return NextResponse.json(parseNextRoutePayload(data?.next_route));
   } catch (error) {
     console.error("next-route GET failed:", error);
     return NextResponse.json({ error: "Unavailable" }, { status: 503 });
@@ -59,10 +59,10 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const stops = parseNextRoute(parsed.data.stops);
+    const payload = parseNextRoutePayload(parsed.data);
     const { error } = await supabase
       .from("profiles")
-      .update({ next_route: stops })
+      .update({ next_route: serializeNextRoutePayload(payload) })
       .eq("id", user.id);
 
     if (error) {
@@ -78,7 +78,7 @@ export async function PATCH(request: Request) {
 
     after(() => revalidateProfileForPin(supabase, user.id));
 
-    return NextResponse.json({ stops });
+    return NextResponse.json(payload);
   } catch (error) {
     console.error("next-route PATCH failed:", error);
     return NextResponse.json({ error: "Unavailable" }, { status: 503 });

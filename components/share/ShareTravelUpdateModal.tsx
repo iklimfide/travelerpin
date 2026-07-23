@@ -8,8 +8,15 @@ import {
   profileSquareCaptureId,
 } from "@/lib/client/capture-profile-square-card";
 import { profileStoryCaptureId } from "@/lib/client/capture-profile-story-card";
+import {
+  downloadProfileNextRouteCardPng,
+  isProfileNextRouteCaptureReady,
+  PROFILE_NEXT_ROUTE_CAPTURE_ID,
+} from "@/lib/client/capture-profile-next-route-card";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 import type { TravelUpdateDelta } from "@/lib/utils/travel-update";
+
+type ShareDownloadFormat = "square" | "story" | "route";
 
 type ShareTravelUpdateModalProps = {
   open: boolean;
@@ -28,14 +35,24 @@ export function ShareTravelUpdateModal({
   delta,
   persistShareSnapshot = true,
 }: ShareTravelUpdateModalProps) {
-  const { share: shareMessages, profile: profileMessages } = useAppMessages();
-  const [downloading, setDownloading] = useState<"square" | "story" | null>(null);
+  const { share: shareMessages, profile: profileMessages, nextRoute: nextRouteMessages } =
+    useAppMessages();
+  const [downloading, setDownloading] = useState<ShareDownloadFormat | null>(null);
+  const [hasNextRouteCard, setHasNextRouteCard] = useState(false);
   const hasUpdate = delta.hasChanges;
 
   useEffect(() => {
     if (!open) {
       setDownloading(null);
+      setHasNextRouteCard(false);
+      return;
     }
+
+    setHasNextRouteCard(
+      Boolean(
+        document.querySelector(`#${PROFILE_NEXT_ROUTE_CAPTURE_ID}[data-route-capture-ready]`)
+      )
+    );
   }, [open]);
 
   useEffect(() => {
@@ -55,13 +72,20 @@ export function ShareTravelUpdateModal({
     await finalizeTravelShare(username);
   }, [onClose, persistShareSnapshot, username]);
 
-  async function downloadImage(format: "square" | "story") {
-    const captureId =
-      format === "story" ? profileStoryCaptureId(username) : profileSquareCaptureId(username);
+  async function downloadImage(format: ShareDownloadFormat) {
+    if (format === "route") {
+      if (!isProfileNextRouteCaptureReady()) {
+        window.alert(nextRouteMessages.downloadShareCardFailed);
+        return;
+      }
+    } else {
+      const captureId =
+        format === "story" ? profileStoryCaptureId(username) : profileSquareCaptureId(username);
 
-    if (!document.getElementById(captureId)) {
-      window.alert(profileMessages.storyCaptureMissing);
-      return;
+      if (!document.getElementById(captureId)) {
+        window.alert(profileMessages.storyCaptureMissing);
+        return;
+      }
     }
 
     setDownloading(format);
@@ -70,22 +94,30 @@ export function ShareTravelUpdateModal({
 
     let success = false;
     try {
-      const blob =
-        format === "story"
-          ? await captureProfileStoryCard(username)
-          : await captureProfileSquareCard(displayName, username);
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = `travelerpin-${format}-${username}.png`;
-      anchor.click();
-      URL.revokeObjectURL(url);
+      if (format === "route") {
+        await downloadProfileNextRouteCardPng(username);
+      } else {
+        const blob =
+          format === "story"
+            ? await captureProfileStoryCard(username)
+            : await captureProfileSquareCard(displayName, username);
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = `travelerpin-${format}-${username}.png`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+      }
       success = true;
     } catch (error) {
       const message =
         error instanceof Error && error.message === "missing-capture-region"
-          ? profileMessages.storyCaptureMissing
-          : profileMessages.storyCaptureFailed;
+          ? format === "route"
+            ? nextRouteMessages.downloadShareCardFailed
+            : profileMessages.storyCaptureMissing
+          : format === "route"
+            ? nextRouteMessages.downloadShareCardFailed
+            : profileMessages.storyCaptureFailed;
       window.alert(message);
     } finally {
       setDownloading(null);
@@ -158,6 +190,18 @@ export function ShareTravelUpdateModal({
               ? profileMessages.travelUpdateDownloading
               : profileMessages.travelUpdateDownloadStory}
           </button>
+          {hasNextRouteCard ? (
+            <button
+              type="button"
+              disabled={downloading !== null}
+              onClick={() => void downloadImage("route")}
+              className="share-travel-update-btn col-span-2 rounded-2xl px-4 py-3 text-sm font-semibold transition-colors"
+            >
+              {downloading === "route"
+                ? nextRouteMessages.downloadShareCardBusy
+                : nextRouteMessages.downloadShareCard}
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

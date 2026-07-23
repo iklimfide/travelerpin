@@ -9,19 +9,30 @@ import {
   buildCityStop,
   buildCountryStop,
   NEXT_ROUTE_MAX_STOPS,
-  parseNextRoute,
+  parseNextRoutePayload,
   stopDedupeKey,
 } from "@/lib/utils/next-route";
 import { canonicalCityKey, canonicalCityName } from "@/lib/utils/city-aliases";
-import type { NextRouteStop } from "@/types/database";
+import type { NextRoutePayload, NextRouteStop } from "@/types/database";
 
 function citySelectionKey(countryCode: string, cityName: string): string {
   return canonicalCityKey(countryCode, cityName);
 }
 
 type FetchNextRouteResult =
-  | { ok: true; stops: NextRouteStop[]; fromCache: boolean }
+  | { ok: true; route: NextRoutePayload; fromCache: boolean }
   | { ok: false; status: number };
+
+function mergeRouteMeta(base: NextRoutePayload, patch?: Partial<NextRoutePayload>): NextRoutePayload {
+  const cached = readOwnNextRouteCache();
+  const source = patch ?? cached ?? base;
+
+  return {
+    stops: base.stops,
+    ...(source.totalDays !== undefined ? { totalDays: source.totalDays } : {}),
+    ...(source.transport !== undefined ? { transport: source.transport } : {}),
+  };
+}
 
 async function fetchNextRouteFromNetwork(): Promise<FetchNextRouteResult> {
   const res = await fetch("/api/me/next-route");
@@ -29,10 +40,10 @@ async function fetchNextRouteFromNetwork(): Promise<FetchNextRouteResult> {
     return { ok: false, status: res.status };
   }
 
-  const data = (await res.json()) as { stops?: unknown };
-  const stops = parseNextRoute(data.stops);
-  notifyNextRouteChanged(stops);
-  return { ok: true, stops, fromCache: false };
+  const data = (await res.json()) as unknown;
+  const route = parseNextRoutePayload(data);
+  notifyNextRouteChanged(route);
+  return { ok: true, route, fromCache: false };
 }
 
 export async function fetchNextRoute(options?: {
@@ -42,11 +53,10 @@ export async function fetchNextRoute(options?: {
   const preferCache = options?.preferCache ?? true;
   const force = options?.force ?? false;
 
-  // Cache hit (including empty route): no network until a mutation.
   if (preferCache && !force) {
     const cached = readOwnNextRouteCache();
     if (cached !== null) {
-      return { ok: true, stops: cached, fromCache: true };
+      return { ok: true, route: cached, fromCache: true };
     }
   }
 
@@ -127,19 +137,20 @@ export async function savePendingNextRouteStops(params: {
   pendingCountryCodes: Iterable<string>;
   pendingCityKeys: Iterable<string>;
 }): Promise<
-  | { ok: true; savedCount: number; stops: NextRouteStop[] }
+  | { ok: true; savedCount: number; route: NextRoutePayload }
   | { ok: false; error: string }
 > {
   const { stops: next, savedCount } = mergePendingNextRouteStops(params);
+  const route = mergeRouteMeta({ stops: next });
 
   if (savedCount === 0) {
-    return { ok: true, savedCount: 0, stops: next };
+    return { ok: true, savedCount: 0, route };
   }
 
   const res = await fetch("/api/me/next-route", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ stops: next }),
+    body: JSON.stringify(route),
   });
 
   if (!res.ok) {
@@ -150,27 +161,27 @@ export async function savePendingNextRouteStops(params: {
     };
   }
 
-  const data = (await res.json()) as { stops?: unknown };
-  const savedStops = parseNextRoute(data.stops);
-  notifyNextRouteChanged(savedStops);
-  return { ok: true, savedCount, stops: savedStops };
+  const data = (await res.json()) as unknown;
+  const savedRoute = parseNextRoutePayload(data);
+  notifyNextRouteChanged(savedRoute);
+  return { ok: true, savedCount, route: savedRoute };
 }
 
 type PersistNextRouteOptions = {
-  previousStops?: NextRouteStop[];
+  previousRoute?: NextRoutePayload;
   onError?: (message: string) => void;
 };
 
-async function patchNextRouteStops(
-  stops: NextRouteStop[]
+async function patchNextRoute(
+  route: NextRoutePayload
 ): Promise<
-  | { ok: true; stops: NextRouteStop[] }
+  | { ok: true; route: NextRoutePayload }
   | { ok: false; error: string }
 > {
   const res = await fetch("/api/me/next-route", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ stops }),
+    body: JSON.stringify(route),
   });
 
   if (!res.ok) {
@@ -181,41 +192,50 @@ async function patchNextRouteStops(
     };
   }
 
-  const data = (await res.json()) as { stops?: unknown };
-  return { ok: true, stops: parseNextRoute(data.stops) };
+  const data = (await res.json()) as unknown;
+  return { ok: true, route: parseNextRoutePayload(data) };
 }
 
-/** Optimistic save: updates cache immediately, persists in the background. */
-export function persistNextRouteStops(
-  stops: NextRouteStop[],
-  options?: PersistNextRouteOptions
-): void {
-  notifyNextRouteChanged(stops);
+export function persistNextRoute(route: NextRoutePayload, options?: PersistNextRouteOptions): void {
+  notifyNextRouteChanged(route);
 
   void (async () => {
-    const result = await patchNextRouteStops(stops);
+    const result = await patchNextRoute(route);
     if (result.ok) {
-      notifyNextRouteChanged(result.stops);
+      notifyNextRouteChanged(result.route);
       return;
     }
 
-    if (options?.previousStops) {
-      notifyNextRouteChanged(options.previousStops);
+    if (options?.previousRoute) {
+      notifyNextRouteChanged(options.previousRoute);
     }
     options?.onError?.(result.error);
   })();
 }
 
+export function persistNextRouteStops(
+  stops: NextRouteStop[],
+  options?: PersistNextRouteOptions
+): void {
+  const previousRoute = options?.previousRoute ?? readOwnNextRouteCache() ?? { stops };
+  const route = mergeRouteMeta({ stops }, previousRoute);
+  persistNextRoute(route, {
+    previousRoute: { ...previousRoute, stops: options?.previousRoute?.stops ?? previousRoute.stops },
+    onError: options?.onError,
+  });
+}
+
 export async function saveNextRouteStops(
   stops: NextRouteStop[]
 ): Promise<
-  | { ok: true; stops: NextRouteStop[] }
+  | { ok: true; route: NextRoutePayload }
   | { ok: false; error: string }
 > {
-  const result = await patchNextRouteStops(stops);
+  const route = mergeRouteMeta({ stops });
+  const result = await patchNextRoute(route);
   if (!result.ok) return result;
 
-  notifyNextRouteChanged(result.stops);
+  notifyNextRouteChanged(result.route);
   return result;
 }
 
@@ -224,7 +244,7 @@ export async function markNextRouteStopVisited(params: {
   currentStops: NextRouteStop[];
   alreadyVisited?: boolean;
 }): Promise<
-  | { ok: true; stops: NextRouteStop[]; added: boolean; alreadyHad: boolean }
+  | { ok: true; route: NextRoutePayload; added: boolean; alreadyHad: boolean }
   | { ok: false; error: string }
 > {
   const { stop, currentStops, alreadyVisited = false } = params;
@@ -268,7 +288,7 @@ export async function markNextRouteStopVisited(params: {
     return { ok: false, error: saveResult.error };
   }
 
-  return { ok: true, stops: saveResult.stops, added, alreadyHad };
+  return { ok: true, route: saveResult.route, added, alreadyHad };
 }
 
 export function persistMarkNextRouteStopVisited(params: {
@@ -279,11 +299,12 @@ export function persistMarkNextRouteStopVisited(params: {
   onAdded?: () => void;
 }): void {
   const { stop, currentStops, alreadyVisited = false } = params;
+  const previousRoute = readOwnNextRouteCache() ?? { stops: currentStops };
   const previousStops = currentStops;
   const nextStops = currentStops.filter((entry) => entry.id !== stop.id);
 
   persistNextRouteStops(nextStops, {
-    previousStops,
+    previousRoute: { ...previousRoute, stops: previousStops },
     onError: params.onError,
   });
 
@@ -292,7 +313,10 @@ export function persistMarkNextRouteStopVisited(params: {
   const code = stop.countryCode?.toUpperCase();
   if (!code) {
     params.onError?.("Missing country code");
-    persistNextRouteStops(previousStops, { onError: params.onError });
+    persistNextRouteStops(previousStops, {
+      previousRoute: { ...previousRoute, stops: previousStops },
+      onError: params.onError,
+    });
     return;
   }
 
@@ -305,7 +329,10 @@ export function persistMarkNextRouteStopVisited(params: {
       }
       if (result.error === "Country already added") return;
 
-      persistNextRouteStops(previousStops, { onError: params.onError });
+      persistNextRouteStops(previousStops, {
+        previousRoute: { ...previousRoute, stops: previousStops },
+        onError: params.onError,
+      });
       params.onError?.(result.error);
       return;
     }
@@ -319,7 +346,10 @@ export function persistMarkNextRouteStopVisited(params: {
     });
 
     if (!result.ok) {
-      persistNextRouteStops(previousStops, { onError: params.onError });
+      persistNextRouteStops(previousStops, {
+        previousRoute: { ...previousRoute, stops: previousStops },
+        onError: params.onError,
+      });
       params.onError?.(result.error);
       return;
     }

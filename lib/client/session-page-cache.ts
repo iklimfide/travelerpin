@@ -1,14 +1,14 @@
 import type { ProfileSettingsRow } from "@/lib/supabase/profile-settings";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-types";
 import type {
-  NextRouteStop,
+  NextRoutePayload,
   TravelStats,
   VisitedCity,
   VisitedCountry,
   VisitedPark,
   WishlistCountry,
 } from "@/types/database";
-import { parseNextRoute } from "@/lib/utils/next-route";
+import { parseNextRoutePayload } from "@/lib/utils/next-route";
 
 export type TravelStateData = {
   visitedCountries: VisitedCountry[];
@@ -268,21 +268,21 @@ export function syncOwnProfileCacheFromTravelState(data: TravelStateData): void 
   });
 }
 
-export function readOwnNextRouteCache(): NextRouteStop[] | null {
+export function readOwnNextRouteCache(): NextRoutePayload | null {
   const userId = getOwnUserId();
   if (!userId) return null;
-  const payload = readJson<{ stops: unknown }>(nextRouteCacheKey(userId));
+  const payload = readJson<unknown>(nextRouteCacheKey(userId));
   if (!payload) return null;
-  return parseNextRoute(payload.stops);
+  return parseNextRoutePayload(payload);
 }
 
-export function writeOwnNextRouteCache(stops: NextRouteStop[]): void {
+export function writeOwnNextRouteCache(route: NextRoutePayload): void {
   const userId = getOwnUserId();
   if (!userId) return;
-  writeJson(nextRouteCacheKey(userId), { stops });
+  writeJson(nextRouteCacheKey(userId), route);
 }
 
-export function patchOwnProfileNextRoute(stops: NextRouteStop[]): void {
+export function patchOwnProfileNextRoute(route: NextRoutePayload): void {
   const username = getOwnUsername();
   if (!username) return;
 
@@ -293,19 +293,21 @@ export function patchOwnProfileNextRoute(stops: NextRouteStop[]): void {
     ...cached,
     profile: {
       ...cached.profile,
-      next_route: stops,
+      next_route: route.stops,
+      next_route_total_days: route.totalDays,
+      next_route_transport: route.transport,
     },
   });
 }
 
-export function notifyNextRouteChanged(stops: NextRouteStop[]): void {
-  writeOwnNextRouteCache(stops);
-  patchOwnProfileNextRoute(stops);
+export function notifyNextRouteChanged(route: NextRoutePayload): void {
+  writeOwnNextRouteCache(route);
+  patchOwnProfileNextRoute(route);
 
   if (typeof window === "undefined") return;
   window.dispatchEvent(
     new CustomEvent(NEXT_ROUTE_CHANGED_EVENT, {
-      detail: { stops },
+      detail: route,
     })
   );
 }

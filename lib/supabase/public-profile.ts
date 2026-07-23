@@ -1,8 +1,8 @@
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { WishlistCountry, NextRouteStop } from "@/types/database";
+import type { WishlistCountry, NextRouteStop, NextRouteTransportMode } from "@/types/database";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
-import { parseNextRoute } from "@/lib/utils/next-route";
+import { parseNextRoutePayload } from "@/lib/utils/next-route";
 import { normalizeUsernameInput } from "@/lib/utils/username";
 
 export type PublicProfile = {
@@ -20,6 +20,8 @@ export type PublicProfile = {
   /** Owner preferred locale for OG / link-preview copy. */
   locale: "en" | "tr";
   next_route: NextRouteStop[];
+  next_route_total_days?: number;
+  next_route_transport?: NextRouteTransportMode;
 };
 
 const EXTENDED_SELECT =
@@ -39,6 +41,18 @@ function parseProfileLocale(value: unknown): "en" | "tr" {
   return value === "tr" ? "tr" : "en";
 }
 
+function mapNextRouteFields(value: unknown): Pick<
+  PublicProfile,
+  "next_route" | "next_route_total_days" | "next_route_transport"
+> {
+  const payload = parseNextRoutePayload(value);
+  return {
+    next_route: payload.stops,
+    next_route_total_days: payload.totalDays,
+    next_route_transport: payload.transport,
+  };
+}
+
 function mapExtendedRow(row: Record<string, unknown>): PublicProfile {
   return {
     id: String(row.id ?? ""),
@@ -53,7 +67,7 @@ function mapExtendedRow(row: Record<string, unknown>): PublicProfile {
     marital_status: (row.marital_status as string | null) ?? null,
     wishlist_public: row.wishlist_public === true,
     locale: parseProfileLocale(row.locale),
-    next_route: parseNextRoute(row.next_route),
+    ...mapNextRouteFields(row.next_route),
   };
 }
 
@@ -82,7 +96,7 @@ async function fetchFreshProfilePresentationQuery(
         marital_status: (row.marital_status as string | null) ?? null,
         wishlist_public: row.wishlist_public === true,
         locale: parseProfileLocale(row.locale),
-        next_route: parseNextRoute(row.next_route),
+        ...mapNextRouteFields(row.next_route),
       };
     }
   }

@@ -303,7 +303,12 @@ export async function PublicProfileView({
 
               <ProfileNextRouteSection
                 initialStops={parseNextRoute(profile.next_route)}
+                initialTotalDays={profile.next_route_total_days}
+                initialTransport={profile.next_route_transport}
                 isOwnProfile={isOwnProfile}
+                displayName={displayName}
+                username={profile.username}
+                avatarUrl={profile.avatar_url}
                 visitedCountries={visitedCountries}
                 visitedCities={visitedCities}
               />

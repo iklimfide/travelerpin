@@ -93,6 +93,7 @@ export default async function ProfileAllDestinationsPage({ params, searchParams 
       <ProfileAllDestinationsView
         username={profile.username}
         displayName={displayName}
+        avatarUrl={profile.avatar_url}
         isOwnProfile={isOwnProfile}
         previewAsPublic={previewAsPublic}
         destinations={destinations}
@@ -105,6 +106,8 @@ export default async function ProfileAllDestinationsPage({ params, searchParams 
         isLoggedIn={viewData.isLoggedIn}
         stats={viewData.stats}
         initialNextRouteStops={parseNextRoute(profile.next_route)}
+        initialNextRouteTotalDays={profile.next_route_total_days}
+        initialNextRouteTransport={profile.next_route_transport}
       />
     </>
   );

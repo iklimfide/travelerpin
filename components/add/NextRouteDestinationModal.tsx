@@ -40,23 +40,23 @@ type Step =
 
 export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModalProps) {
   const { common: commonMessages, nextRouteDestination: nextRouteDestinationMessages, addDestination: addDestinationMessages } = useAppMessages();
-  const cachedStops = readOwnNextRouteCache();
+  const cachedRoute = readOwnNextRouteCache();
   const [step, setStep] = useState<Step>({ kind: "countries" });
-  const [routeStops, setRouteStops] = useState<NextRouteStop[]>(() => cachedStops ?? []);
+  const [routeStops, setRouteStops] = useState<NextRouteStop[]>(() => cachedRoute?.stops ?? []);
   const [routeCountryCodeSet, setRouteCountryCodeSet] = useState<Set<string>>(
-    () => (cachedStops ? routeCountryCodes(cachedStops) : new Set())
+    () => (cachedRoute ? routeCountryCodes(cachedRoute.stops) : new Set())
   );
   const [routeCityKeySet, setRouteCityKeySet] = useState<Set<string>>(
-    () => (cachedStops ? routeCityKeys(cachedStops) : new Set())
+    () => (cachedRoute ? routeCityKeys(cachedRoute.stops) : new Set())
   );
   const [pendingCountryCodes, setPendingCountryCodes] = useState<Set<string>>(new Set());
   const [pendingCityKeys, setPendingCityKeys] = useState<Set<string>>(new Set());
   const [returnExpandedRegion, setReturnExpandedRegion] = useState<AddRegionId | null>(null);
-  const [loadingState, setLoadingState] = useState(() => cachedStops === null);
+  const [loadingState, setLoadingState] = useState(() => cachedRoute === null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const toast = useToast();
-  const hasRouteStateRef = useRef(cachedStops !== null);
+  const hasRouteStateRef = useRef(cachedRoute !== null);
 
   useEffect(() => {
     setMounted(true);
@@ -80,7 +80,7 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
     });
 
     if (result.ok) {
-      applyRouteStops(result.stops);
+      applyRouteStops(result.route.stops);
       hasRouteStateRef.current = true;
     }
 
@@ -99,7 +99,7 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
 
     const cached = readOwnNextRouteCache();
     if (cached !== null) {
-      applyRouteStops(cached);
+      applyRouteStops(cached.stops);
       setLoadingState(false);
       return;
     }
@@ -113,7 +113,7 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
     }
 
     function onRouteChanged(event: Event) {
-      const detail = (event as CustomEvent<{ stops: NextRouteStop[] }>).detail;
+      const detail = (event as CustomEvent<{ stops?: NextRouteStop[] }>).detail;
       if (!detail?.stops) return;
       applyRouteStops(detail.stops);
       hasRouteStateRef.current = true;
@@ -219,7 +219,8 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
       return;
     }
 
-    const previousStops = routeStops;
+    const cached = readOwnNextRouteCache();
+    const previousRoute = cached ?? { stops: routeStops };
     applyRouteStops(nextStops);
     setPendingCountryCodes(new Set());
     setPendingCityKeys(new Set());
@@ -227,7 +228,7 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
     onClose();
 
     persistNextRouteStops(nextStops, {
-      previousStops,
+      previousRoute: { ...previousRoute, stops: routeStops },
       onError: (message) => {
         toast.show(
           message.toLowerCase().includes("unauthorized")

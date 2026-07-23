@@ -40,7 +40,6 @@ import {
   type ProfileAllDestinations,
 } from "@/lib/utils/profile-all-destinations";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-types";
-import { parseNextRoute } from "@/lib/utils/next-route";
 import {
   countryHasMappedPlaces,
   isCountryRemoveBlockedByPlacesError,
@@ -49,6 +48,7 @@ import { findCountryBackingCity } from "@/lib/utils/country-pin";
 import type { ProfileTrip } from "@/lib/utils/profile-page";
 import type {
   NextRouteStop,
+  NextRouteTransportMode,
   TravelStats,
   VisitedCity,
   VisitedCountry,
@@ -59,6 +59,7 @@ import type {
 type ProfileAllDestinationsViewProps = {
   username: string;
   displayName: string;
+  avatarUrl?: string | null;
   isOwnProfile: boolean;
   previewAsPublic?: boolean;
   destinations: ProfileAllDestinations;
@@ -71,6 +72,8 @@ type ProfileAllDestinationsViewProps = {
   isLoggedIn: boolean;
   stats: TravelStats;
   initialNextRouteStops: NextRouteStop[];
+  initialNextRouteTotalDays?: number;
+  initialNextRouteTransport?: NextRouteTransportMode;
 };
 
 type ProfileAllTab = ProfileVisitedTab;
@@ -90,6 +93,7 @@ type OwnerActions = {
 export function ProfileAllDestinationsView({
   username,
   displayName,
+  avatarUrl = null,
   isOwnProfile,
   previewAsPublic = false,
   destinations,
@@ -102,6 +106,8 @@ export function ProfileAllDestinationsView({
   isLoggedIn,
   stats,
   initialNextRouteStops,
+  initialNextRouteTotalDays,
+  initialNextRouteTransport,
 }: ProfileAllDestinationsViewProps) {
   const { common: commonMessages, country: countryMessages, profile: profileMessages, modal: modalMessages, saveDestination: saveDestinationMessages } = useAppMessages();
   const localeRaw = useLocale();
@@ -117,6 +123,8 @@ export function ProfileAllDestinationsView({
   const [viewWishlistCountries, setViewWishlistCountries] = useState(wishlistCountries);
   const [viewStats, setViewStats] = useState(stats);
   const [viewNextRouteStops, setViewNextRouteStops] = useState(initialNextRouteStops);
+  const [viewNextRouteTotalDays, setViewNextRouteTotalDays] = useState(initialNextRouteTotalDays);
+  const [viewNextRouteTransport, setViewNextRouteTransport] = useState(initialNextRouteTransport);
   const [editingCityId, setEditingCityId] = useState<string | null>(null);
   const [editingParkId, setEditingParkId] = useState<string | null>(null);
   const [editingCountryCode, setEditingCountryCode] = useState<string | null>(null);
@@ -137,7 +145,9 @@ export function ProfileAllDestinationsView({
       setViewWishlistCodes(visibleWishlistCodes);
       setViewWishlistCountries(visibleWishlist);
       setViewStats(viewData.stats);
-      setViewNextRouteStops(parseNextRoute(viewData.profile.next_route));
+      setViewNextRouteStops(viewData.profile.next_route ?? []);
+      setViewNextRouteTotalDays(viewData.profile.next_route_total_days);
+      setViewNextRouteTransport(viewData.profile.next_route_transport);
       setViewDestinations(
         buildProfileAllDestinations(
           viewData.visitedCountries,
@@ -478,7 +488,12 @@ export function ProfileAllDestinationsView({
 
         <ProfileNextRouteSection
           initialStops={viewNextRouteStops}
+          initialTotalDays={viewNextRouteTotalDays}
+          initialTransport={viewNextRouteTransport}
           isOwnProfile={isOwnProfile}
+          displayName={displayName}
+          username={username}
+          avatarUrl={avatarUrl}
           visitedCountries={viewVisitedCountries}
           visitedCities={viewVisitedCities}
         />

@@ -17,8 +17,13 @@ function waitForImage(img: HTMLImageElement): Promise<void> {
 }
 
 /** Give images, fonts, and the map a moment to settle before html-to-image runs. */
-export async function prepareHtmlCapture(root: HTMLElement): Promise<void> {
-  root.scrollIntoView({ block: "start", behavior: "auto" });
+export async function prepareHtmlCapture(
+  root: HTMLElement,
+  options?: { scroll?: boolean }
+): Promise<void> {
+  if (options?.scroll !== false) {
+    root.scrollIntoView({ block: "start", behavior: "auto" });
+  }
 
   const images = Array.from(root.querySelectorAll("img"));
   for (const img of images) {
@@ -39,13 +44,14 @@ export async function prepareHtmlCapture(root: HTMLElement): Promise<void> {
 type CaptureToPngOptions = {
   backgroundColor: string;
   filter?: (node: HTMLElement) => boolean;
+  skipScroll?: boolean;
 };
 
 export async function captureElementToPng(
   element: HTMLElement,
   options: CaptureToPngOptions
 ): Promise<string> {
-  await prepareHtmlCapture(element);
+  await prepareHtmlCapture(element, { scroll: options.skipScroll !== false });
 
   const { toPng } = await import("html-to-image");
   const baseOptions = {

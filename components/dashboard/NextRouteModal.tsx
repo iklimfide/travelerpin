@@ -171,18 +171,18 @@ function buildStopFromResult(result: SearchResult): NextRouteStop {
 export function NextRouteModal({ open, onClose, initialTab = "countries" }: NextRouteModalProps) {
   const { common: commonMessages, saveDestination: saveDestinationMessages, nextRoute: nextRouteMessages } = useAppMessages();
   const locale = useLocale() === "tr" ? "tr" : "en";
-  const cachedStops = readOwnNextRouteCache();
-  const [stops, setStops] = useState<NextRouteStop[]>(() => cachedStops ?? []);
+  const cachedRoute = readOwnNextRouteCache();
+  const [stops, setStops] = useState<NextRouteStop[]>(() => cachedRoute?.stops ?? []);
   const [tab, setTab] = useState<NextRouteTab>("countries");
   const [query, setQuery] = useState("");
-  const [loadingRoute, setLoadingRoute] = useState(() => cachedStops === null);
+  const [loadingRoute, setLoadingRoute] = useState(() => cachedRoute === null);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [savedStops, setSavedStops] = useState<NextRouteStop[]>(() => cachedStops ?? []);
+  const [savedStops, setSavedStops] = useState<NextRouteStop[]>(() => cachedRoute?.stops ?? []);
   const [saveError, setSaveError] = useState<string | null>(null);
   const toast = useToast();
-  const hasRouteRef = useRef(cachedStops !== null);
+  const hasRouteRef = useRef(cachedRoute !== null);
 
   const trimmedQuery = query.trim();
   const isSearching = trimmedQuery.length >= 2;
@@ -207,8 +207,8 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
 
     const cached = readOwnNextRouteCache();
     if (cached !== null) {
-      setStops(cached);
-      setSavedStops(cached);
+      setStops(cached.stops);
+      setSavedStops(cached.stops);
       hasRouteRef.current = true;
       setLoadingRoute(false);
       return;
@@ -226,8 +226,8 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
           setSavedStops([]);
           return;
         }
-        setStops(result.stops);
-        setSavedStops(result.stops);
+        setStops(result.route.stops);
+        setSavedStops(result.route.stops);
       })
       .finally(() => {
         hasRouteRef.current = true;
@@ -313,7 +313,8 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
   const handleSave = useCallback(() => {
     if (!hasUnsavedChanges) return;
 
-    const previousStops = savedStops;
+    const cached = readOwnNextRouteCache();
+    const previousRoute = cached ?? { stops: savedStops };
     const pendingStops = stops;
 
     setSavedStops(pendingStops);
@@ -321,7 +322,7 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
     onClose();
 
     persistNextRouteStops(pendingStops, {
-      previousStops,
+      previousRoute: { ...previousRoute, stops: savedStops },
       onError: (message) => {
         toast.show(message || nextRouteMessages.saveFailed, 2500);
       },
