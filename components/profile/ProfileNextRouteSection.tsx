@@ -13,7 +13,7 @@ import {
   readOwnNextRouteCache,
   writeOwnNextRouteCache,
 } from "@/lib/client/session-page-cache";
-import { fetchNextRoute, persistMarkNextRouteStopVisited } from "@/lib/client/next-route-state";
+import { fetchNextRoute, persistMarkNextRouteStopVisited, persistNextRouteStops } from "@/lib/client/next-route-state";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { canonicalCityKey } from "@/lib/utils/city-aliases";
@@ -204,6 +204,22 @@ export function ProfileNextRouteSection({
     };
   }, [applyStops, isOwnProfile, loadOwnRoute]);
 
+  const handleRemoveFromRoute = useCallback(
+    (stop: NextRouteStop) => {
+      const previousStops = stopsRef.current;
+      const nextStops = previousStops.filter((entry) => entry.id !== stop.id);
+
+      applyStops(nextStops, { replace: true });
+      persistNextRouteStops(nextStops, {
+        previousStops,
+        onError: (message) => {
+          toast.show(message || nextRouteMessages.saveFailed, 2500);
+        },
+      });
+    },
+    [applyStops, nextRouteMessages.saveFailed, toast]
+  );
+
   const handleMarkVisited = useCallback(
     (stop: NextRouteStop) => {
       const visited = isRouteStopVisited(
@@ -262,7 +278,7 @@ export function ProfileNextRouteSection({
   if (stops.length === 0 && !isOwnProfile) return null;
 
   if (isOwnProfile && loadingOwnRoute && stops.length === 0) {
-    return <ProfileNextRouteSectionSkeleton rows={3} />;
+    return <ProfileNextRouteSectionSkeleton rows={4} />;
   }
 
   const stopCountLabel =
@@ -327,17 +343,17 @@ export function ProfileNextRouteSection({
 
                 return (
                   <li key={stop.id} className="profile-next-route-timeline-item">
-                    <span className="profile-next-route-node" aria-hidden>
-                      {index + 1}
-                    </span>
                     <div className="profile-next-route-card">
+                      <span className="profile-next-route-node" aria-hidden>
+                        {index + 1}
+                      </span>
                       {flagUrl ? (
                         <span className="profile-next-route-flag">
                           <Image
                             src={flagUrl}
                             alt=""
-                            width={36}
-                            height={36}
+                            width={32}
+                            height={32}
                             className="rounded-full object-cover"
                           />
                         </span>
@@ -360,30 +376,39 @@ export function ProfileNextRouteSection({
                           </span>
                         ) : null}
                       </span>
+                      {isOwnProfile ? (
+                        <div className="profile-next-route-actions">
+                          <button
+                            type="button"
+                            className="profile-next-route-action-btn profile-next-route-action-btn--remove"
+                            onClick={() => handleRemoveFromRoute(stop)}
+                            aria-label={nextRouteMessages.removeStop}
+                            title={nextRouteMessages.removeStop}
+                          >
+                            −
+                          </button>
+                          <button
+                            type="button"
+                            className={`profile-next-route-action-btn profile-next-route-action-btn--ok${
+                              visited ? " profile-next-route-action-btn--ok-on" : ""
+                            }`}
+                            onClick={() => handleMarkVisited(stop)}
+                            aria-label={
+                              visited
+                                ? nextRouteMessages.markVisitedDone
+                                : nextRouteMessages.markVisited
+                            }
+                            title={
+                              visited
+                                ? nextRouteMessages.markVisitedDone
+                                : nextRouteMessages.markVisited
+                            }
+                          >
+                            ✓
+                          </button>
+                        </div>
+                      ) : null}
                     </div>
-                    {isOwnProfile ? (
-                      <div className="profile-next-route-actions">
-                        <button
-                          type="button"
-                          className={`save-destination-modal__check${
-                            visited ? " save-destination-modal__check--on" : ""
-                          }`}
-                          onClick={() => handleMarkVisited(stop)}
-                          aria-label={
-                            visited
-                              ? nextRouteMessages.markVisitedDone
-                              : nextRouteMessages.markVisited
-                          }
-                          title={
-                            visited
-                              ? nextRouteMessages.markVisitedDone
-                              : nextRouteMessages.markVisited
-                          }
-                        >
-                          ✓
-                        </button>
-                      </div>
-                    ) : null}
                   </li>
                 );
               })}

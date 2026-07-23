@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/Skeleton";
 
-export function ProfileNextRouteSectionSkeleton({ rows = 3 }: { rows?: number }) {
+export function ProfileNextRouteSectionSkeleton({ rows = 4 }: { rows?: number }) {
   return (
     <section
       className="profile-section profile-next-route"
@@ -29,8 +29,8 @@ export function ProfileNextRouteSectionSkeleton({ rows = 3 }: { rows?: number })
           <ol className="profile-next-route-timeline profile-next-route-timeline--skeleton">
             {Array.from({ length: rows }).map((_, index) => (
               <li key={index} className="profile-next-route-timeline-item profile-next-route-timeline-item--skeleton">
-                <Skeleton className="profile-next-route-skeleton-node" />
                 <div className="profile-next-route-card profile-next-route-card--skeleton">
+                  <Skeleton className="profile-next-route-skeleton-node" />
                   <Skeleton className="profile-next-route-skeleton-flag" />
                   <div className="profile-next-route-text">
                     <Skeleton className="profile-next-route-skeleton-line profile-next-route-skeleton-line--title" />
