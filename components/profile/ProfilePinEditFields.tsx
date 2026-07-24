@@ -11,11 +11,11 @@ type ProfilePinEditFieldsProps = {
   onVisitDatesChange: (dates: string[]) => void;
   note: string;
   onNoteChange: (note: string) => void;
-  savedPhotoUrl: string | null;
-  photoFile: File | null;
-  onPhotoFileChange: (file: File | null) => void;
-  removePhoto: boolean;
-  onRemovePhotoChange: (remove: boolean) => void;
+  savedPhotoUrls: string[];
+  removedSavedPhotoUrls: string[];
+  onRemovedSavedPhotoUrlsChange: (urls: string[]) => void;
+  newPhotoFiles: File[];
+  onNewPhotoFilesChange: (files: File[]) => void;
   instagramUrls: string[];
   onInstagramUrlsChange: (urls: string[]) => void;
   mediaFocus?: "photo" | "instagram";
@@ -29,11 +29,11 @@ export function ProfilePinEditFields({
   onVisitDatesChange,
   note,
   onNoteChange,
-  savedPhotoUrl,
-  photoFile,
-  onPhotoFileChange,
-  removePhoto,
-  onRemovePhotoChange,
+  savedPhotoUrls,
+  removedSavedPhotoUrls,
+  onRemovedSavedPhotoUrlsChange,
+  newPhotoFiles,
+  onNewPhotoFilesChange,
   instagramUrls,
   onInstagramUrlsChange,
   mediaFocus,
@@ -59,11 +59,11 @@ export function ProfilePinEditFields({
           removeInstagram: t("removeInstagram"),
           removePhoto: t("removePhoto"),
         }}
-        savedPhotoUrl={savedPhotoUrl}
-        photoFile={photoFile}
-        onPhotoFileChange={onPhotoFileChange}
-        removePhoto={removePhoto}
-        onRemovePhotoChange={onRemovePhotoChange}
+        savedPhotoUrls={savedPhotoUrls}
+        removedSavedPhotoUrls={removedSavedPhotoUrls}
+        onRemovedSavedPhotoUrlsChange={onRemovedSavedPhotoUrlsChange}
+        newPhotoFiles={newPhotoFiles}
+        onNewPhotoFilesChange={onNewPhotoFilesChange}
         instagramUrls={instagramUrls}
         onInstagramUrlsChange={onInstagramUrlsChange}
         autoFocusInstagram={mediaFocus === "instagram"}

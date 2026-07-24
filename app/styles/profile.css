@@ -2569,6 +2569,39 @@
   color: #fff;
 }
 
+.profile-all-destinations-modal__filter {
+  flex-shrink: 0;
+  padding: 0 16px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.profile-all-destinations-modal__filter-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.profile-all-destinations-modal__filter-select {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.35);
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  outline: none;
+}
+
+.profile-all-destinations-modal__filter-select:focus {
+  border-color: rgba(96, 165, 250, 0.85);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
+}
+
 .profile-media-list-modal {
   padding: 12px;
   align-items: stretch;
@@ -2628,6 +2661,40 @@
 
 .profile-media-list-modal__content .city-page__section {
   margin-top: 0;
+}
+
+@media (min-width: 768px) {
+  .profile-media-list-modal {
+    padding: 24px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .profile-media-list-modal .profile-followers-modal__sheet,
+  .profile-media-list-modal__sheet {
+    width: min(640px, calc(100vw - 48px));
+    max-width: 640px;
+    height: auto;
+    max-height: min(92vh, 880px);
+    border-radius: 20px;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.18);
+  }
+
+  .profile-media-list-modal__content.profile-media-sections {
+    --profile-inset: 0;
+    padding-inline: 0;
+  }
+
+  .profile-media-list-modal__content .city-page__traveler-pictures-grid {
+    padding: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .profile-media-list-modal__content.profile-media-sections .city-page__traveler-pictures-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
 }
 
 .profile-destination-edit-modal__body {

@@ -1,4 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { LIMITS } from "@/lib/constants";
+import { activePinPhotoCount } from "@/lib/utils/pin-media";
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
 
 type PinMediaFieldsProps = {
@@ -12,30 +14,45 @@ type PinMediaFieldsProps = {
     removeInstagram: string;
     removePhoto: string;
   };
-  savedPhotoUrl: string | null;
-  photoFile: File | null;
-  onPhotoFileChange: (file: File | null) => void;
-  removePhoto: boolean;
-  onRemovePhotoChange: (remove: boolean) => void;
+  savedPhotoUrls: string[];
+  removedSavedPhotoUrls: string[];
+  onRemovedSavedPhotoUrlsChange: (urls: string[]) => void;
+  newPhotoFiles: File[];
+  onNewPhotoFilesChange: (files: File[]) => void;
   instagramUrls: string[];
   onInstagramUrlsChange: (urls: string[]) => void;
-  /** Opens with an empty Instagram field focused (e.g. from “Add your Instagram link”). */
   autoFocusInstagram?: boolean;
   hideInstagramHint?: boolean;
-  /** Keeps at least one empty Instagram field visible (profile edit modals). */
   defaultInstagramField?: boolean;
-  /** Center action buttons in two equal columns (profile edit modals). */
   equalActionButtons?: boolean;
   hideMediaHint?: boolean;
 };
 
+async function uploadPinPhotoFile(
+  file: File,
+  formatPhotoUploadError: (message: string) => string
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const uploadRes = await fetch("/api/upload", {
+    method: "POST",
+    body: formData,
+  });
+  if (!uploadRes.ok) {
+    const data = await uploadRes.json();
+    return { ok: false, error: formatPhotoUploadError(data.error) };
+  }
+  const { url } = await uploadRes.json();
+  return { ok: true, url: url as string };
+}
+
 export function PinMediaFields({
   labels,
-  savedPhotoUrl,
-  photoFile,
-  onPhotoFileChange,
-  removePhoto,
-  onRemovePhotoChange,
+  savedPhotoUrls,
+  removedSavedPhotoUrls,
+  onRemovedSavedPhotoUrlsChange,
+  newPhotoFiles,
+  onNewPhotoFilesChange,
   instagramUrls,
   onInstagramUrlsChange,
   autoFocusInstagram = false,
@@ -44,7 +61,16 @@ export function PinMediaFields({
   equalActionButtons = false,
   hideMediaHint = false,
 }: PinMediaFieldsProps) {
-  const showSavedPhoto = Boolean(savedPhotoUrl) && !removePhoto && !photoFile;
+  const removedSet = useMemo(() => new Set(removedSavedPhotoUrls), [removedSavedPhotoUrls]);
+  const visibleSavedUrls = savedPhotoUrls.filter((url) => !removedSet.has(url));
+  const photoCount = activePinPhotoCount({
+    savedPhotoUrls,
+    removedSavedPhotoUrls,
+    newPhotoFiles,
+  });
+  const canAddPhotos = photoCount < LIMITS.maxPinPhotos;
+  const remainingSlots = LIMITS.maxPinPhotos - photoCount;
+
   const instagramDraftRef = useRef<HTMLInputElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
@@ -78,8 +104,29 @@ export function PinMediaFields({
     onInstagramUrlsChange(next);
   }
 
+  function removeSavedPhoto(url: string) {
+    if (removedSet.has(url)) return;
+    onRemovedSavedPhotoUrlsChange([...removedSavedPhotoUrls, url]);
+  }
+
+  function removeNewPhoto(index: number) {
+    onNewPhotoFilesChange(newPhotoFiles.filter((_, i) => i !== index));
+  }
+
+  function handlePhotoInputChange(fileList: FileList | null) {
+    if (!fileList?.length) return;
+    const incoming = Array.from(fileList).slice(0, remainingSlots);
+    if (incoming.length === 0) return;
+    onNewPhotoFilesChange([...newPhotoFiles, ...incoming]);
+    if (photoInputRef.current) {
+      photoInputRef.current.value = "";
+    }
+  }
+
   const visibleInstagramUrls =
     defaultInstagramField && instagramUrls.length === 0 ? [""] : instagramUrls;
+
+  const hasPhotoTiles = visibleSavedUrls.length > 0 || newPhotoFiles.length > 0;
 
   return (
     <div className="space-y-4">
@@ -92,20 +139,19 @@ export function PinMediaFields({
           ref={photoInputRef}
           type="file"
           accept="image/*"
+          multiple
           className="hidden"
-          onChange={(e) => {
-            onRemovePhotoChange(false);
-            onPhotoFileChange(e.target.files?.[0] ?? null);
-          }}
+          onChange={(e) => handlePhotoInputChange(e.target.files)}
         />
         <div className={equalActionButtons ? "pin-form-actions" : "flex flex-wrap gap-2"}>
           <button
             type="button"
+            disabled={!canAddPhotos}
             onClick={() => photoInputRef.current?.click()}
             className={
               equalActionButtons
                 ? "pin-form-actions__btn pin-form-actions__btn--primary"
-                : "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
+                : "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
             }
           >
             {labels.photo}
@@ -122,19 +168,43 @@ export function PinMediaFields({
             {labels.addInstagram}
           </button>
         </div>
-        {photoFile ? (
-          <p className="text-xs text-emerald-400">{photoFile.name}</p>
-        ) : showSavedPhoto ? (
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="text-xs text-slate-500">{labels.photoSaved}</p>
-            <button
-              type="button"
-              onClick={() => onRemovePhotoChange(true)}
-              className="text-xs text-red-400 hover:text-red-300"
-            >
-              {labels.removePhoto}
-            </button>
-          </div>
+
+        {hasPhotoTiles ? (
+          <ul className="pin-media-photo-grid">
+            {visibleSavedUrls.map((url) => (
+              <li key={url} className="pin-media-photo-grid__item">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt="" className="pin-media-photo-grid__image" />
+                <button
+                  type="button"
+                  className="pin-media-photo-grid__remove"
+                  onClick={() => removeSavedPhoto(url)}
+                  aria-label={labels.removePhoto}
+                >
+                  ✕
+                </button>
+                <span className="pin-media-photo-grid__badge">{labels.photoSaved}</span>
+              </li>
+            ))}
+            {newPhotoFiles.map((file, index) => (
+              <li key={`${file.name}-${index}`} className="pin-media-photo-grid__item">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt=""
+                  className="pin-media-photo-grid__image"
+                />
+                <button
+                  type="button"
+                  className="pin-media-photo-grid__remove"
+                  onClick={() => removeNewPhoto(index)}
+                  aria-label={labels.removePhoto}
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
         ) : null}
       </div>
 
@@ -178,32 +248,27 @@ export function PinMediaFields({
 }
 
 export async function buildPinMediaPayload(options: {
-  photoFile: File | null;
-  savedPhotoUrl: string | null;
-  removePhoto: boolean;
+  savedPhotoUrls: string[];
+  removedSavedPhotoUrls: string[];
+  newPhotoFiles: File[];
   instagramUrls: string[];
   isValidInstagramUrl: (url: string) => boolean;
   formatPhotoUploadError: (message: string) => string;
 }): Promise<
-  | { ok: true; photo_url: string | null; instagram_urls: string[] }
+  | { ok: true; photo_url: string | null; photo_urls: string[]; instagram_urls: string[] }
   | { ok: false; error: string }
 > {
-  let photoUrl: string | null = options.removePhoto ? null : options.savedPhotoUrl;
+  const removed = new Set(options.removedSavedPhotoUrls);
+  const photoUrls = options.savedPhotoUrls.filter((url) => !removed.has(url));
 
-  if (options.photoFile) {
-    const formData = new FormData();
-    formData.append("file", options.photoFile);
-    const uploadRes = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-    if (!uploadRes.ok) {
-      const data = await uploadRes.json();
-      return { ok: false, error: options.formatPhotoUploadError(data.error) };
-    }
-    const { url } = await uploadRes.json();
-    photoUrl = url;
+  for (const file of options.newPhotoFiles) {
+    if (photoUrls.length >= LIMITS.maxPinPhotos) break;
+    const uploaded = await uploadPinPhotoFile(file, options.formatPhotoUploadError);
+    if (!uploaded.ok) return uploaded;
+    photoUrls.push(uploaded.url);
   }
+
+  const capped = photoUrls.slice(0, LIMITS.maxPinPhotos);
 
   const instagramUrls: string[] = [];
   const seen = new Set<string>();
@@ -224,7 +289,8 @@ export async function buildPinMediaPayload(options: {
 
   return {
     ok: true,
-    photo_url: photoUrl,
+    photo_url: capped[0] ?? null,
+    photo_urls: capped,
     instagram_urls: instagramUrls,
   };
 }

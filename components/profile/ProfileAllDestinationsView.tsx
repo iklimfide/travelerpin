@@ -9,6 +9,11 @@ import { fetchHeroImageMaps } from "@/lib/client/hero-images-cache";
 import { deleteParksBatch } from "@/lib/client/park-actions";
 import { useProfileStaleReload } from "@/lib/client/use-profile-stale-reload";
 import { ProfileAllDestinationsListModal } from "@/components/profile/ProfileAllDestinationsListModal";
+import {
+  PROFILE_MODAL_ALL_COUNTRIES,
+  ProfileDestinationsModalCountryFilter,
+  useProfileCityModalCountryFilter,
+} from "@/components/profile/ProfileDestinationsModalCountryFilter";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
 import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
 import { ProfileCountryDestinationCard } from "@/components/profile/ProfileCountryDestinationCard";
@@ -130,6 +135,10 @@ export function ProfileAllDestinationsView({
   const [editingCountryCode, setEditingCountryCode] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ProfileAllTab>("countries");
   const [openModalTab, setOpenModalTab] = useState<ProfileAllTab | null>(null);
+  const [citiesModalCountryFilter, setCitiesModalCountryFilter] = useState(
+    PROFILE_MODAL_ALL_COUNTRIES
+  );
+  const { filterCities } = useProfileCityModalCountryFilter(viewDestinations.cities);
 
   const applyPageData = useCallback(
     async (data: PublicProfilePageData) => {
@@ -385,7 +394,7 @@ export function ProfileAllDestinationsView({
       case "countries":
         return renderCountryCards(viewDestinations.countries);
       case "cities":
-        return renderCityCards(viewDestinations.cities);
+        return renderCityCards(filterCities(citiesModalCountryFilter, viewDestinations.cities));
       case "parks":
         return renderParkCards(viewDestinations.parks);
       case "wishlist":
@@ -502,8 +511,20 @@ export function ProfileAllDestinationsView({
       <ProfileAllDestinationsListModal
         open={openModalTab !== null}
         title={openModalTab ? MODAL_TITLES[openModalTab] : ""}
-        onClose={() => setOpenModalTab(null)}
+        onClose={() => {
+          setOpenModalTab(null);
+          setCitiesModalCountryFilter(PROFILE_MODAL_ALL_COUNTRIES);
+        }}
         closeOnEscape={!isEditingDestination}
+        toolbar={
+          openModalTab === "cities" ? (
+            <ProfileDestinationsModalCountryFilter
+              cities={viewDestinations.cities}
+              value={citiesModalCountryFilter}
+              onChange={setCitiesModalCountryFilter}
+            />
+          ) : null
+        }
       >
         {openModalTab ? renderModalItems(openModalTab) : null}
       </ProfileAllDestinationsListModal>

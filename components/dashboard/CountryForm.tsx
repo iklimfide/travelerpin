@@ -11,7 +11,8 @@ import { getCountryName } from "@/lib/data/countries";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { isValidInstagramUrl } from "@/lib/utils/instagram";
 import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
-import { readInstagramUrls, readPhotoUrl, pinPhotoMediaChanged, withInstagramDraftField } from "@/lib/utils/pin-media";
+import { readInstagramUrls, readPhotoUrls, pinPhotoMediaChanged, withInstagramDraftField } from "@/lib/utils/pin-media";
+import { createPinPhotoFormState } from "@/lib/client/pin-photo-form-state";
 import type { VisitedCity, VisitedCountry } from "@/types/database";
 
 type CountryFormProps = {
@@ -38,12 +39,14 @@ export function CountryForm({
 
   const [note, setNote] = useState(backingCity?.note ?? "");
   const [visitDates, setVisitDates] = useState<string[]>(backingCity?.visit_dates ?? []);
-  const [savedPhotoUrl, setSavedPhotoUrl] = useState(() => readPhotoUrl(backingCity));
-  const [removePhoto, setRemovePhoto] = useState(false);
+  const [savedPhotoUrls, setSavedPhotoUrls] = useState(
+    () => createPinPhotoFormState(backingCity).savedPhotoUrls
+  );
+  const [removedSavedPhotoUrls, setRemovedSavedPhotoUrls] = useState<string[]>([]);
+  const [newPhotoFiles, setNewPhotoFiles] = useState<File[]>([]);
   const [instagramUrls, setInstagramUrls] = useState(() =>
     withInstagramDraftField(readInstagramUrls(backingCity))
   );
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -64,9 +67,9 @@ export function CountryForm({
       }
 
       const mediaResult = await buildPinMediaPayload({
-        photoFile,
-        savedPhotoUrl,
-        removePhoto,
+        savedPhotoUrls,
+        removedSavedPhotoUrls,
+        newPhotoFiles,
         instagramUrls,
         isValidInstagramUrl,
         formatPhotoUploadError,
@@ -83,6 +86,7 @@ export function CountryForm({
         country_name: countryName,
         note: note || null,
         photo_url: mediaResult.photo_url,
+        photo_urls: mediaResult.photo_urls,
         instagram_urls: mediaResult.instagram_urls,
         visit_dates: visitDates,
       };
@@ -105,10 +109,11 @@ export function CountryForm({
       notifyProfileDataChanged();
       if (
         pinPhotoMediaChanged({
-          photoFile,
-          removePhoto,
-          previousPhotoUrl: savedPhotoUrl,
-          nextPhotoUrl: mediaResult.photo_url,
+          savedPhotoUrls,
+          removedSavedPhotoUrls,
+          newPhotoFiles,
+          previousPhotoUrls: readPhotoUrls(backingCity),
+          nextPhotoUrls: mediaResult.photo_urls,
         })
       ) {
         router.refresh();
@@ -126,14 +131,11 @@ export function CountryForm({
         onVisitDatesChange={setVisitDates}
         note={note}
         onNoteChange={setNote}
-        savedPhotoUrl={savedPhotoUrl}
-        photoFile={photoFile}
-        onPhotoFileChange={(file) => {
-          setPhotoFile(file);
-          if (file) setRemovePhoto(false);
-        }}
-        removePhoto={removePhoto}
-        onRemovePhotoChange={setRemovePhoto}
+        savedPhotoUrls={savedPhotoUrls}
+        removedSavedPhotoUrls={removedSavedPhotoUrls}
+        onRemovedSavedPhotoUrlsChange={setRemovedSavedPhotoUrls}
+        newPhotoFiles={newPhotoFiles}
+        onNewPhotoFilesChange={setNewPhotoFiles}
         instagramUrls={instagramUrls}
         onInstagramUrlsChange={setInstagramUrls}
         mediaFocus={mediaFocus}

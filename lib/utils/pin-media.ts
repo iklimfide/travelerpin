@@ -1,8 +1,10 @@
 import type { MediaType } from "@/types/database";
+import { LIMITS } from "@/lib/constants";
 import { isValidInstagramUrl, normalizeInstagramPostUrl } from "@/lib/utils/instagram";
 
 export type PinMediaRow = {
   photo_url?: string | null;
+  photo_urls?: string[] | null;
   instagram_urls?: string[] | null;
   media_type?: MediaType | null;
   media_url?: string | null;
@@ -10,13 +12,30 @@ export type PinMediaRow = {
 
 export type PinMediaInput = PinMediaRow & {
   instagram_urls?: string[] | null;
+  photo_urls?: string[] | null;
 };
 
+export function readPhotoUrls(row: PinMediaRow | null | undefined): string[] {
+  if (!row) return [];
+
+  const fromArray = (row.photo_urls ?? []).map((url) => url?.trim()).filter(Boolean) as string[];
+  if (fromArray.length > 0) {
+    return fromArray.slice(0, LIMITS.maxPinPhotos);
+  }
+
+  if (row.photo_url?.trim()) {
+    return [row.photo_url.trim()];
+  }
+
+  if (row.media_type === "photo" && row.media_url?.trim()) {
+    return [row.media_url.trim()];
+  }
+
+  return [];
+}
+
 export function readPhotoUrl(row: PinMediaRow | null | undefined): string | null {
-  if (!row) return null;
-  if (row.photo_url) return row.photo_url;
-  if (row.media_type === "photo" && row.media_url) return row.media_url;
-  return null;
+  return readPhotoUrls(row)[0] ?? null;
 }
 
 export function readInstagramUrls(row: PinMediaRow | null | undefined): string[] {
@@ -37,19 +56,33 @@ export function withInstagramDraftField(urls: string[]): string[] {
 }
 
 export function pinHasMedia(row: PinMediaRow | null | undefined): boolean {
-  return Boolean(readPhotoUrl(row)) || readInstagramUrls(row).length > 0;
+  return readPhotoUrls(row).length > 0 || readInstagramUrls(row).length > 0;
 }
 
-/** True when a save changed the pin's uploaded photo (upload, replace, or remove). */
+export function activePinPhotoCount(options: {
+  savedPhotoUrls: string[];
+  removedSavedPhotoUrls: string[];
+  newPhotoFiles: File[];
+}): number {
+  const removed = new Set(options.removedSavedPhotoUrls);
+  const keptSaved = options.savedPhotoUrls.filter((url) => !removed.has(url)).length;
+  return keptSaved + options.newPhotoFiles.length;
+}
+
+/** True when a save changed the pin's uploaded photos (upload, replace, or remove). */
 export function pinPhotoMediaChanged(input: {
-  photoFile: File | null;
-  removePhoto: boolean;
-  previousPhotoUrl: string | null;
-  nextPhotoUrl: string | null;
+  savedPhotoUrls: string[];
+  removedSavedPhotoUrls: string[];
+  newPhotoFiles: File[];
+  previousPhotoUrls: string[];
+  nextPhotoUrls: string[];
 }): boolean {
-  if (input.photoFile) return true;
-  if (input.removePhoto && input.previousPhotoUrl) return true;
-  return input.nextPhotoUrl !== input.previousPhotoUrl;
+  if (input.newPhotoFiles.length > 0) return true;
+  if (input.removedSavedPhotoUrls.length > 0) return true;
+
+  const prev = input.previousPhotoUrls.join("\0");
+  const next = input.nextPhotoUrls.join("\0");
+  return prev !== next;
 }
 
 export function normalizeInstagramUrlList(urls: string[] | null | undefined): string[] {
@@ -73,32 +106,33 @@ export function normalizeInstagramUrlList(urls: string[] | null | undefined): st
 
 export async function resolvePinMediaFields(data: PinMediaInput): Promise<{
   photo_url: string | null;
+  photo_urls: string[];
   instagram_urls: string[];
   media_type: MediaType | null;
   media_url: string | null;
   media_preview_url: string | null;
 }> {
-  let photoUrl = data.photo_url?.trim() || null;
+  let photoUrls = (data.photo_urls ?? [])
+    .map((url) => url.trim())
+    .filter(Boolean)
+    .slice(0, LIMITS.maxPinPhotos);
+
+  if (photoUrls.length === 0) {
+    const legacy = data.photo_url?.trim();
+    if (legacy) photoUrls = [legacy];
+  }
+
   let instagramUrls = normalizeInstagramUrlList(data.instagram_urls);
 
   if (instagramUrls.length === 0 && data.media_type === "instagram" && data.media_url?.trim()) {
     instagramUrls = normalizeInstagramUrlList([data.media_url]);
   }
 
-  if (!photoUrl && data.media_type === "photo" && data.media_url?.trim()) {
-    photoUrl = data.media_url.trim();
-  }
-
-  if (photoUrl) {
-    try {
-      new URL(photoUrl);
-    } catch {
-      photoUrl = null;
-    }
-  }
+  const photoUrl = photoUrls[0] ?? null;
 
   return {
     photo_url: photoUrl,
+    photo_urls: photoUrls,
     instagram_urls: instagramUrls,
     media_type: photoUrl ? "photo" : instagramUrls.length > 0 ? "instagram" : null,
     media_url: photoUrl ?? instagramUrls[0] ?? null,

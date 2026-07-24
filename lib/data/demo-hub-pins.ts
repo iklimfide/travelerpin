@@ -14,6 +14,7 @@ import {
 } from "@/lib/supabase/hub-traveler-pin";
 import { visitedParkToHubPin } from "@/lib/supabase/park-travelers";
 import { profilePath } from "@/lib/seo/site";
+import { cityPlacePath, parkPlacePath } from "@/lib/utils/hub-place-path";
 import { normalizeCityKey } from "@/lib/utils/city-name";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 
@@ -47,6 +48,7 @@ export function getDemoPinsForCountry(countryCode: string): HubTravelerPin[] {
       createHubTravelerPin({
         id: `city:${city.id}`,
         placeLabel: city.city_name,
+        placePath: cityPlacePath(city.country_code, city.city_name),
         note: city.note,
         mediaRow: city,
         mediaPreviewUrl: city.media_preview_url,
@@ -66,6 +68,7 @@ export function getDemoPinsForCountry(countryCode: string): HubTravelerPin[] {
       createHubTravelerPin({
         id: `park:${park.id}`,
         placeLabel: park.park_name,
+        placePath: parkPlacePath(park.park_name, park.country_code),
         note: park.note,
         mediaRow: park,
         visitDates: park.visit_dates ?? [],

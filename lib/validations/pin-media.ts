@@ -63,10 +63,12 @@ export function refinePinMediaInput(data: {
     .map((url) => url.trim())
     .filter(Boolean);
 
-  if (photoUrls.length > LIMITS.maxPinPhotos) return false;
-  if (photoUrls.some((url) => !isValidPhotoUrl(url))) return false;
-
   const legacyPhotoUrl = data.photo_url?.trim();
+  const photoCount =
+    photoUrls.length > 0 ? photoUrls.length : legacyPhotoUrl ? 1 : 0;
+
+  if (photoCount > LIMITS.maxPinPhotos) return false;
+  if (photoUrls.some((url) => !isValidPhotoUrl(url))) return false;
   if (legacyPhotoUrl && !isValidPhotoUrl(legacyPhotoUrl)) return false;
 
   const instagramUrls = (data.instagram_urls ?? []).map((url) => url.trim()).filter(Boolean);

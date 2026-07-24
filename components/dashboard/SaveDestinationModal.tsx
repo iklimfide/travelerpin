@@ -11,6 +11,7 @@ import {
 import { POPULAR_PARKS, type PopularPark } from "@/lib/data/popular-parks";
 import { getCountryList, getCountryName, searchCountries } from "@/lib/data/countries";
 import { getPopularCountries } from "@/lib/data/popular-countries";
+import { fetchModalBrowseCities } from "@/lib/client/modal-cities-browse";
 import {
   quickAddDestination,
   quickRemoveDestination,
@@ -151,6 +152,23 @@ function destinationRowHref(row: DestinationRow): string | null {
     return cityPlacePath(row.countryCode, row.cityName);
   }
   return parkPlacePath(row.parkName, row.countryCode);
+}
+
+function modalBrowseCityToRow(
+  city: { countryCode: string; name: string },
+  locale: Locale
+): DestinationRow {
+  return {
+    id: destinationId("city", city.countryCode, city.name),
+    kind: "city",
+    title: getLocalizedCityName(city.countryCode, city.name, locale),
+    subtitle: getCountryName(city.countryCode, locale),
+    countryCode: city.countryCode,
+    countryName: getCountryName(city.countryCode, locale),
+    cityName: city.name,
+    latitude: 0,
+    longitude: 0,
+  };
 }
 
 function popularToRow(destination: PopularDestination, locale: Locale): DestinationRow {
@@ -391,6 +409,7 @@ export function SaveDestinationModal({
   );
   const [searchCities, setSearchCities] = useState<SearchCityResult[]>([]);
   const [searchParks, setSearchParks] = useState<SearchParkResult[]>([]);
+  const [browseCities, setBrowseCities] = useState<{ countryCode: string; name: string }[]>([]);
   const [recentlyAdded, setRecentlyAdded] = useState<Set<string>>(new Set());
   const [recentlyRemoved, setRecentlyRemoved] = useState<Set<string>>(new Set());
   const [recentlyWishlistAdded, setRecentlyWishlistAdded] = useState<Set<string>>(new Set());
@@ -456,6 +475,17 @@ export function SaveDestinationModal({
 
     void loadTravelState({ background: false });
   }, [open, initialTab, loadTravelState, applyTravelData]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    void fetchModalBrowseCities(40).then((cities) => {
+      if (!cancelled) setBrowseCities(cities);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -658,9 +688,7 @@ export function SaveDestinationModal({
     }
 
     if (tab === "cities") {
-      return POPULAR_DESTINATIONS.filter((destination) => destination.kind === "city")
-        .slice(0, 40)
-        .map((destination) => popularToRow(destination, locale));
+      return browseCities.map((city) => modalBrowseCityToRow(city, locale));
     }
 
     if (tab === "parks") {
@@ -670,7 +698,7 @@ export function SaveDestinationModal({
     return POPULAR_DESTINATIONS.slice(0, 40).map((destination) =>
       popularToRow(destination, locale)
     );
-  }, [isWantMode, needle, searchCities, searchParks, tab, trimmedQuery.length, visitedCountryCodes, visitedCities, visitedParks, locale]);
+  }, [isWantMode, needle, searchCities, searchParks, tab, trimmedQuery.length, visitedCountryCodes, visitedCities, visitedParks, locale, browseCities]);
 
   const editingCity = useMemo(
     () => visitedCities.find((city) => city.id === editingCityId) ?? null,

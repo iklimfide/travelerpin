@@ -75,6 +75,7 @@ export interface VisitedCity {
   longitude: number | null;
   note: string | null;
   photo_url: string | null;
+  photo_urls?: string[];
   instagram_urls: string[];
   media_type: MediaType | null;
   media_url: string | null;
@@ -95,6 +96,7 @@ export interface VisitedPark {
   longitude: number | null;
   note: string | null;
   photo_url: string | null;
+  photo_urls?: string[];
   instagram_urls: string[];
   media_type: MediaType | null;
   media_url: string | null;

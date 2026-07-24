@@ -26,6 +26,7 @@ export type CityPinQueryRow = {
   city_name?: string;
   note: string | null;
   photo_url?: string | null;
+  photo_urls?: string[] | null;
   instagram_urls?: string[] | null;
   media_type: MediaType | null;
   media_url: string | null;

@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { CountryPageContent } from "@/components/country/CountryPageContent";
 import { getCountryHubBySlug, listCountryHubSlugs } from "@/lib/data/country-hubs";
+import { buildCountryModalCities } from "@/lib/data/country-page-cities";
+import { getTouristParksByCountry } from "@/lib/data/tourist-park-search";
+import { ensureParkHubFromTouristPark } from "@/lib/data/park-hubs";
 import {
   getDemoPinsForCountry,
   mergeDemoCountryTravelers,
   mergeDemoHubPins,
 } from "@/lib/data/demo-hub-pins";
+import { getCatalogOverlay, cityNameTrOverrideMap, parkNameTrOverrideMap } from "@/lib/kamikaze/catalog-overlay";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { getLocalizedCityName } from "@/lib/i18n/place-names";
+import { getLocalizedParkName } from "@/lib/i18n/park-place-names";
 import { getCachedRecentCountryTravelers } from "@/lib/supabase/country-travelers-cache";
 import { getCachedRecentCountryPins } from "@/lib/supabase/country-memory-pins-cache";
 import {
@@ -21,10 +28,15 @@ import {
   fetchRecentCountryWishlisters,
 } from "@/lib/supabase/country-pin-count";
 import { loadCountryPageUserState } from "@/lib/supabase/country-visitor-state";
-import { loadPublishedCityKeys, publicCityHubSlug } from "@/lib/supabase/city-hub-access";
+import {
+  loadPublishedCityKeys,
+  publicCityHubSlug,
+} from "@/lib/supabase/city-hub-access";
+import { loadPublishedParkKeys, touristParkIsPubliclyLinked } from "@/lib/supabase/park-hub-access";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
-import { countryPath, countryUrl, buildCountryPageTitle, DEFAULT_DESCRIPTION } from "@/lib/seo/site";
+import { countryPath, countryUrl, buildCountryPageTitle, DEFAULT_DESCRIPTION, cityPath, parkPath } from "@/lib/seo/site";
+import { parkTypeLabel } from "@/lib/utils/park-type";
 import {
   PIN_MAP_OG_DESCRIPTION,
   PIN_MAP_OG_TITLE,
@@ -84,20 +96,55 @@ export default async function CountryHubPage({ params }: PageProps) {
   const returnPath = countryPath(slug);
   const loginHref = `/login?next=${encodeURIComponent(returnPath)}`;
 
-  const [t, tCommon, cachedTravelers, cachedCountryPins, user, supabase] = await Promise.all([
+  const [t, tCommon, cachedTravelers, cachedCountryPins, user, supabase, localeRaw, overlay] =
+    await Promise.all([
     getTranslations("countryHub"),
     getTranslations("common"),
     getCachedRecentCountryTravelers(hub.code),
     getCachedRecentCountryPins(hub.code),
     getAuthUser(),
     createClient(),
+    getLocale(),
+    getCatalogOverlay(),
   ]);
+  const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
+  const collatorLocale = locale === "tr" ? "tr" : "en";
 
   const { visitorState, editOwnerCity, editOwnerPark, ownerHubPin, visitedCountries } =
     await loadCountryPageUserState(supabase, user?.id, hub);
 
-  const publishedCityKeys = await loadPublishedCityKeys(supabase);
+  const [publishedCityKeys, publishedParkKeys] = await Promise.all([
+    loadPublishedCityKeys(supabase),
+    loadPublishedParkKeys(supabase),
+  ]);
   const capitalCitySlug = publicCityHubSlug(hub.code, hub.capital, publishedCityKeys);
+  const cityTr = cityNameTrOverrideMap(overlay);
+  const parkTr = parkNameTrOverrideMap(overlay);
+
+  const cityLinks = buildCountryModalCities(hub.code, overlay, "")
+    .map((city) => {
+      const slug = publicCityHubSlug(hub.code, city.name, publishedCityKeys);
+      return {
+        label: getLocalizedCityName(hub.code, city.name, locale, cityTr),
+        href: slug ? cityPath(slug) : undefined,
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label, collatorLocale, { sensitivity: "base" }));
+
+  const parkLinks = getTouristParksByCountry(hub.code)
+    .filter((park) => touristParkIsPubliclyLinked(park, publishedParkKeys))
+    .map((park) => {
+      const parkHub = ensureParkHubFromTouristPark(park);
+      return {
+        href: parkPath(parkHub.slug),
+        label: getLocalizedParkName(hub.code, park.name, locale, {
+          nameTrOverrides: parkTr,
+          parkType: park.parkType,
+        }),
+        meta: parkTypeLabel(park.parkType),
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label, collatorLocale, { sensitivity: "base" }));
 
   // Trust unstable_cache pins; mergeOwnerHubPin overlays a fresh owner pin when needed.
   const countryPins = cachedCountryPins;
@@ -164,6 +211,7 @@ export default async function CountryHubPage({ params }: PageProps) {
     visa: t("visa"),
     language: t("language"),
     viewTravelMap: t("viewTravelMap"),
+    viewProfile: t("viewProfile"),
     viewPin: t("viewPin"),
     close: t("closePin"),
     instagramPost: t("instagramPost"),
@@ -204,6 +252,12 @@ export default async function CountryHubPage({ params }: PageProps) {
           visitedCountries={visitedCountries}
           loginHref={loginHref}
           pinCountItems={pinCountItems}
+          cityLinks={cityLinks}
+          parkLinks={parkLinks}
+          placeListHeadings={{
+            cities: t("citiesInCountry", { country: hub.name }),
+            parks: t("parksInCountry", { country: hub.name }),
+          }}
           labels={labels}
         />
       </main>

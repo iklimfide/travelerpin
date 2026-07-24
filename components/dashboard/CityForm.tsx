@@ -14,7 +14,8 @@ import { useToast } from "@/components/ui/ToastProvider";
 import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEditor";
 import { buildPinMediaPayload, PinMediaFields } from "@/components/dashboard/PinMediaFields";
 import { ProfilePinEditFields } from "@/components/profile/ProfilePinEditFields";
-import { readInstagramUrls, readPhotoUrl, pinPhotoMediaChanged, withInstagramDraftField } from "@/lib/utils/pin-media";
+import { readInstagramUrls, readPhotoUrls, pinPhotoMediaChanged, withInstagramDraftField } from "@/lib/utils/pin-media";
+import { createPinPhotoFormState } from "@/lib/client/pin-photo-form-state";
 import type { VisitedCity, VisitedCountry } from "@/types/database";
 
 type SearchCity = {
@@ -86,14 +87,14 @@ export function CityForm({
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [note, setNote] = useState(city?.note ?? "");
   const [visitDates, setVisitDates] = useState<string[]>(city?.visit_dates ?? []);
-  const [savedPhotoUrl, setSavedPhotoUrl] = useState(() => readPhotoUrl(city));
-  const [removePhoto, setRemovePhoto] = useState(false);
+  const [savedPhotoUrls, setSavedPhotoUrls] = useState(() => createPinPhotoFormState(city).savedPhotoUrls);
+  const [removedSavedPhotoUrls, setRemovedSavedPhotoUrls] = useState<string[]>([]);
+  const [newPhotoFiles, setNewPhotoFiles] = useState<File[]>([]);
   const [instagramUrls, setInstagramUrls] = useState(() => {
     const urls = readInstagramUrls(city);
     if (hideHeader) return withInstagramDraftField(urls);
     return mediaFocus === "instagram" ? withInstagramDraftField(urls) : urls;
   });
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   const selectedCountry = visitedCountries.find((c) => c.country_code === countryCode);
@@ -409,9 +410,9 @@ export function CityForm({
 
     try {
       const mediaResult = await buildPinMediaPayload({
-        photoFile,
-        savedPhotoUrl,
-        removePhoto,
+        savedPhotoUrls,
+        removedSavedPhotoUrls,
+        newPhotoFiles,
         instagramUrls,
         isValidInstagramUrl,
         formatPhotoUploadError,
@@ -431,6 +432,7 @@ export function CityForm({
           : {}),
         note: note || null,
         photo_url: mediaResult.photo_url,
+        photo_urls: mediaResult.photo_urls,
         instagram_urls: mediaResult.instagram_urls,
         visit_dates: visitDates,
       };
@@ -453,10 +455,11 @@ export function CityForm({
       notifyProfileDataChanged();
       if (
         pinPhotoMediaChanged({
-          photoFile,
-          removePhoto,
-          previousPhotoUrl: savedPhotoUrl,
-          nextPhotoUrl: mediaResult.photo_url,
+          savedPhotoUrls,
+          removedSavedPhotoUrls,
+          newPhotoFiles,
+          previousPhotoUrls: readPhotoUrls(city),
+          nextPhotoUrls: mediaResult.photo_urls,
         })
       ) {
         router.refresh();
@@ -475,14 +478,11 @@ export function CityForm({
           onVisitDatesChange={setVisitDates}
           note={note}
           onNoteChange={setNote}
-          savedPhotoUrl={savedPhotoUrl}
-          photoFile={photoFile}
-          onPhotoFileChange={(file) => {
-            setPhotoFile(file);
-            if (file) setRemovePhoto(false);
-          }}
-          removePhoto={removePhoto}
-          onRemovePhotoChange={setRemovePhoto}
+          savedPhotoUrls={savedPhotoUrls}
+          removedSavedPhotoUrls={removedSavedPhotoUrls}
+          onRemovedSavedPhotoUrlsChange={setRemovedSavedPhotoUrls}
+          newPhotoFiles={newPhotoFiles}
+          onNewPhotoFilesChange={setNewPhotoFiles}
           instagramUrls={instagramUrls}
           onInstagramUrlsChange={setInstagramUrls}
           mediaFocus={mediaFocus}
@@ -686,14 +686,11 @@ export function CityForm({
               removeInstagram: t("removeInstagram"),
               removePhoto: t("removePhoto"),
             }}
-            savedPhotoUrl={savedPhotoUrl}
-            photoFile={photoFile}
-            onPhotoFileChange={(file) => {
-              setPhotoFile(file);
-              if (file) setRemovePhoto(false);
-            }}
-            removePhoto={removePhoto}
-            onRemovePhotoChange={setRemovePhoto}
+            savedPhotoUrls={savedPhotoUrls}
+            removedSavedPhotoUrls={removedSavedPhotoUrls}
+            onRemovedSavedPhotoUrlsChange={setRemovedSavedPhotoUrls}
+            newPhotoFiles={newPhotoFiles}
+            onNewPhotoFilesChange={setNewPhotoFiles}
             instagramUrls={instagramUrls}
             onInstagramUrlsChange={setInstagramUrls}
             autoFocusInstagram={mediaFocus === "instagram"}

@@ -19,7 +19,9 @@ export function isVisitDatesSchemaError(message: string): boolean {
 export function isPinMediaSchemaError(message: string): boolean {
   const lower = message.toLowerCase();
   return (
-    (lower.includes("photo_url") || lower.includes("instagram_urls")) &&
+    (lower.includes("photo_url") ||
+      lower.includes("photo_urls") ||
+      lower.includes("instagram_urls")) &&
     isMissingColumnSchemaError(message)
   );
 }
@@ -40,6 +42,16 @@ export function instagramUrlsInRow(fields: PinMediaRowPayload): string[] {
   return fields.instagram_urls.filter(
     (url): url is string => typeof url === "string" && Boolean(url.trim())
   );
+}
+
+export function photoUrlsInRow(fields: PinMediaRowPayload): string[] {
+  if (Array.isArray(fields.photo_urls)) {
+    return fields.photo_urls.filter(
+      (url): url is string => typeof url === "string" && Boolean(url.trim())
+    );
+  }
+  const single = photoUrlInRow(fields);
+  return single ? [single] : [];
 }
 
 export function photoUrlInRow(fields: PinMediaRowPayload): string | null {
@@ -77,6 +89,6 @@ export function legacyMediaFromPinMediaFields(fields: PinMediaRowPayload): PinMe
     media_url = null;
   }
 
-  const withoutNewColumns = omitRowColumns(fields, ["photo_url", "instagram_urls"]);
+  const withoutNewColumns = omitRowColumns(fields, ["photo_url", "photo_urls", "instagram_urls"]);
   return { ...withoutNewColumns, media_type, media_url };
 }

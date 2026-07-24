@@ -64,6 +64,11 @@ export function listFeaturedCityHubSlugs(): string[] {
   return listCityHubSlugs();
 }
 
+export function listFeaturedCityHubsForCountry(countryCode: string): CityHub[] {
+  const code = countryCode.toUpperCase();
+  return Object.values(catalog.cities).filter((hub) => hub.countryCode.toUpperCase() === code);
+}
+
 export function isFeaturedCityHub(slug: string): boolean {
   return featuredSlugs.has(slug.toLowerCase());
 }

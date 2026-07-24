@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { COUNTRY_LIST, searchCountries, getCountryName } from "@/lib/data/countries";
-import { searchTouristCitiesInCountries, TOURIST_CITIES } from "@/lib/data/tourist-cities";
+import {
+  buildCountryModalCities,
+  searchModalCitiesInCountries,
+} from "@/lib/data/country-page-cities";
 import { searchTouristParksInCountries } from "@/lib/data/tourist-park-search";
 import {
   applyParkOverlay,
   cityNameTrOverrideMap,
-  exclusionSet,
   getCatalogOverlay,
 } from "@/lib/kamikaze/catalog-overlay";
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
@@ -54,15 +56,14 @@ export async function GET(request: Request) {
   }));
 
   const overlay = await getCatalogOverlay();
-  const cityExcluded = exclusionSet(overlay, "city");
   const nameTrOverrides = cityNameTrOverrideMap(overlay);
 
-  const baseCities = searchTouristCitiesInCountries(COUNTRY_CODES, q, 40).filter(
-    (city) =>
-      !cityExcluded.has(
-        `${city.countryCode}:${catalogNameKey(city.name, city.countryCode)}`
-      )
-  );
+  const baseCities = searchModalCitiesInCountries(COUNTRY_CODES, overlay, q, 40).map((city) => ({
+    countryCode: city.countryCode,
+    name: city.name,
+    latitude: city.latitude,
+    longitude: city.longitude,
+  }));
 
   const cityKeys = new Set(
     baseCities.map(
@@ -70,25 +71,28 @@ export async function GET(request: Request) {
     )
   );
 
-  for (const hit of findCanonicalCitiesByLocalizedQuery(q, locale)) {
-    const code = hit.countryCode.toUpperCase();
-    const key = `${code}:${catalogNameKey(hit.cityName, code)}`;
-    if (cityKeys.has(key) || cityExcluded.has(key)) continue;
+  function pushModalCity(code: string, cityName: string) {
+    const upper = code.toUpperCase();
+    const key = `${upper}:${catalogNameKey(cityName, upper)}`;
+    if (cityKeys.has(key)) return false;
 
-    const fromCatalog = TOURIST_CITIES.find(
-      (city) =>
-        city.countryCode.toUpperCase() === code &&
-        canonicalCityName(code, city.name) === hit.cityName
+    const fromModal = buildCountryModalCities(upper, overlay, "").find(
+      (city) => canonicalCityName(upper, city.name) === canonicalCityName(upper, cityName)
     );
-    if (!fromCatalog) continue;
+    if (!fromModal) return false;
 
     baseCities.push({
-      countryCode: code,
-      name: hit.cityName,
-      latitude: fromCatalog.latitude,
-      longitude: fromCatalog.longitude,
+      countryCode: upper,
+      name: canonicalCityName(upper, fromModal.name),
+      latitude: fromModal.latitude,
+      longitude: fromModal.longitude,
     });
     cityKeys.add(key);
+    return true;
+  }
+
+  for (const hit of findCanonicalCitiesByLocalizedQuery(q, locale)) {
+    pushModalCity(hit.countryCode, hit.cityName);
     if (baseCities.length >= 40) break;
   }
 
@@ -96,41 +100,10 @@ export async function GET(request: Request) {
     for (const row of overlay.nameTr) {
       if (!matchesPlaceNameSearch(row.name_tr, q)) continue;
       const code = row.country_code.toUpperCase();
-      const rowKey = catalogNameKey(row.name_key, code);
-      const key = `${code}:${rowKey}`;
-      if (cityKeys.has(key) || cityExcluded.has(key)) continue;
-
-      const fromCatalog = TOURIST_CITIES.find(
-        (city) =>
-          city.countryCode.toUpperCase() === code &&
-          catalogNameKey(city.name, code) === rowKey
-      );
-      if (!fromCatalog) continue;
-
-      baseCities.push({
-        countryCode: code,
-        name: canonicalCityName(code, fromCatalog.name),
-        latitude: fromCatalog.latitude,
-        longitude: fromCatalog.longitude,
-      });
-      cityKeys.add(key);
-      if (baseCities.length >= 40) break;
+      if (pushModalCity(code, row.name_key)) {
+        if (baseCities.length >= 40) break;
+      }
     }
-  }
-
-  for (const row of overlay.cities) {
-    const code = row.country_code.toUpperCase();
-    const key = `${code}:${catalogNameKey(row.name, code)}`;
-    if (cityKeys.has(key) || cityExcluded.has(key)) continue;
-    if (!matchesPlaceNameSearch(row.name, q)) continue;
-    baseCities.push({
-      countryCode: code,
-      name: row.name,
-      latitude: row.latitude ?? 0,
-      longitude: row.longitude ?? 0,
-    });
-    cityKeys.add(key);
-    if (baseCities.length >= 40) break;
   }
 
   const deduped = new Map<string, (typeof baseCities)[number]>();

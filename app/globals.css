@@ -1219,6 +1219,68 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
   background-color: #dbeafe;
 }
 
+.pin-media-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pin-media-photo-grid__item {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #dbe5f0;
+  background: #f8fafc;
+}
+
+.pin-media-photo-grid__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pin-media-photo-grid__remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pin-media-photo-grid__remove:hover {
+  background: rgba(220, 38, 38, 0.92);
+}
+
+.pin-media-photo-grid__badge {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  max-width: calc(100% - 12px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.65);
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
 .visit-years-picker {
   position: relative;
   width: 100%;

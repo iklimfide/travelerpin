@@ -8,6 +8,7 @@ type ProfileAllDestinationsListModalProps = {
   title: string;
   onClose: () => void;
   closeOnEscape?: boolean;
+  toolbar?: ReactNode;
   children: ReactNode;
 };
 
@@ -16,6 +17,7 @@ export function ProfileAllDestinationsListModal({
   title,
   onClose,
   closeOnEscape = true,
+  toolbar = null,
   children,
 }: ProfileAllDestinationsListModalProps) {
   const { share: shareMessages } = useAppMessages();
@@ -63,6 +65,8 @@ export function ProfileAllDestinationsListModal({
             </svg>
           </button>
         </div>
+
+        {toolbar}
 
         <div className="profile-all-destinations-modal__body">
           <div className="profile-all-grid" role="list" aria-label={title}>

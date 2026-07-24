@@ -1,5 +1,5 @@
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
-import { readInstagramUrls, readPhotoUrl } from "@/lib/utils/pin-media";
+import { readInstagramUrls, readPhotoUrls } from "@/lib/utils/pin-media";
 import type { VisitedCity, VisitedPark } from "@/types/database";
 
 function filterInstagramUrl(urls: string[], toRemove: string): string[] {
@@ -11,17 +11,22 @@ function cityMediaPatchPayload(
   city: VisitedCity,
   overrides: {
     photo_url?: string | null;
+    photo_urls?: string[];
     instagram_urls?: string[];
     clearLegacyMedia?: boolean;
   }
 ) {
+  const photoUrls =
+    overrides.photo_urls !== undefined ? overrides.photo_urls : readPhotoUrls(city);
+
   return {
     city_name: city.city_name,
     country_code: city.country_code,
     country_name: city.country_name,
     note: city.note,
     photo_url:
-      overrides.photo_url !== undefined ? overrides.photo_url : readPhotoUrl(city),
+      overrides.photo_url !== undefined ? overrides.photo_url : photoUrls[0] ?? null,
+    photo_urls: photoUrls,
     instagram_urls:
       overrides.instagram_urls !== undefined
         ? overrides.instagram_urls
@@ -35,10 +40,14 @@ function parkMediaPatchPayload(
   park: VisitedPark,
   overrides: {
     photo_url?: string | null;
+    photo_urls?: string[];
     instagram_urls?: string[];
     clearLegacyMedia?: boolean;
   }
 ) {
+  const photoUrls =
+    overrides.photo_urls !== undefined ? overrides.photo_urls : readPhotoUrls(park);
+
   return {
     park_name: park.park_name,
     park_type: park.park_type,
@@ -46,7 +55,8 @@ function parkMediaPatchPayload(
     country_name: park.country_name,
     note: park.note,
     photo_url:
-      overrides.photo_url !== undefined ? overrides.photo_url : readPhotoUrl(park),
+      overrides.photo_url !== undefined ? overrides.photo_url : photoUrls[0] ?? null,
+    photo_urls: photoUrls,
     instagram_urls:
       overrides.instagram_urls !== undefined
         ? overrides.instagram_urls
@@ -56,22 +66,36 @@ function parkMediaPatchPayload(
   };
 }
 
-export async function removeCityPhoto(city: VisitedCity): Promise<Response> {
+export async function removeCityPhoto(city: VisitedCity, photoUrl?: string): Promise<Response> {
+  const current = readPhotoUrls(city);
+  const next = photoUrl ? current.filter((url) => url !== photoUrl) : [];
+
   return fetch(`/api/cities/${city.id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(
-      cityMediaPatchPayload(city, { photo_url: null, clearLegacyMedia: true })
+      cityMediaPatchPayload(city, {
+        photo_urls: next,
+        photo_url: next[0] ?? null,
+        clearLegacyMedia: next.length === 0,
+      })
     ),
   });
 }
 
-export async function removeParkPhoto(park: VisitedPark): Promise<Response> {
+export async function removeParkPhoto(park: VisitedPark, photoUrl?: string): Promise<Response> {
+  const current = readPhotoUrls(park);
+  const next = photoUrl ? current.filter((url) => url !== photoUrl) : [];
+
   return fetch(`/api/parks/${park.id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(
-      parkMediaPatchPayload(park, { photo_url: null, clearLegacyMedia: true })
+      parkMediaPatchPayload(park, {
+        photo_urls: next,
+        photo_url: next[0] ?? null,
+        clearLegacyMedia: next.length === 0,
+      })
     ),
   });
 }

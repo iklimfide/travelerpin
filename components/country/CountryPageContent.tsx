@@ -5,6 +5,10 @@ import { CountryPageNav } from "@/components/country/CountryPageNav";
 import { CountryPagePinStatsBlock } from "@/components/country/CountryPagePinStatsBlock";
 import { HubPageListingSections } from "@/components/hub/HubPageListingSections";
 import { HubPageTopBar } from "@/components/hub/HubPageTopBar";
+import {
+  CountryPageHubPlaceLists,
+  type CountryHubPlaceLink,
+} from "@/components/country/CountryPageHubPlaceLists";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { cityPath } from "@/lib/seo/site";
@@ -26,6 +30,12 @@ type CountryPageContentProps = {
   visitedCountries: VisitedCountry[];
   loginHref: string;
   pinCountItems?: HubPinStatItem[];
+  cityLinks?: CountryHubPlaceLink[];
+  parkLinks?: CountryHubPlaceLink[];
+  placeListHeadings?: {
+    cities: string;
+    parks: string;
+  };
   labels: {
     home: string;
     visited: string;
@@ -42,6 +52,7 @@ type CountryPageContentProps = {
     visa: string;
     language: string;
     viewTravelMap: string;
+    viewProfile: string;
     viewPin: string;
     close: string;
     instagramPost: string;
@@ -76,6 +87,9 @@ export function CountryPageContent({
   visitedCountries,
   loginHref,
   pinCountItems = [],
+  cityLinks = [],
+  parkLinks = [],
+  placeListHeadings,
   labels,
 }: CountryPageContentProps) {
   const flagUrl = countryCodeToFlagUrl(hub.code);
@@ -145,6 +159,8 @@ export function CountryPageContent({
           visitedCountries={visitedCountries}
           ownerCity={editOwnerCity}
           ownerPark={editOwnerPark}
+          showPlaceCaptions
+          lightboxFooterLabel={labels.viewProfile}
           headingIds={{
             travelers: "country-travelers-heading",
             wishlist: "country-wishlist-heading",
@@ -187,6 +203,15 @@ export function CountryPageContent({
             </Link>
             <p className="city-page__featured-pin-note">{featuredPin.note}</p>
           </section>
+        ) : null}
+
+        {placeListHeadings ? (
+          <CountryPageHubPlaceLists
+            citiesHeading={placeListHeadings.cities}
+            parksHeading={placeListHeadings.parks}
+            cities={cityLinks}
+            parks={parkLinks}
+          />
         ) : null}
       </div>
     </div>

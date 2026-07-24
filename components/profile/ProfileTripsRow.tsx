@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { ProfileAllDestinationsListModal } from "@/components/profile/ProfileAllDestinationsListModal";
+import {
+  PROFILE_MODAL_ALL_COUNTRIES,
+  ProfileDestinationsModalCountryFilter,
+  useProfileCityModalCountryFilter,
+} from "@/components/profile/ProfileDestinationsModalCountryFilter";
 import { ProfileCountryDestinationCard } from "@/components/profile/ProfileCountryDestinationCard";
 import { ProfileParkDestinationCard } from "@/components/profile/ProfileParkDestinationCard";
 import { ProfileTripCard } from "@/components/profile/ProfileTripCard";
@@ -41,6 +46,10 @@ export function ProfileTripsRow({
   const { profile: profileMessages } = useAppMessages();
   const [activeTab, setActiveTab] = useState<ProfileVisitedTab>("countries");
   const [openModalTab, setOpenModalTab] = useState<ProfileVisitedTab | null>(null);
+  const [citiesModalCountryFilter, setCitiesModalCountryFilter] = useState(
+    PROFILE_MODAL_ALL_COUNTRIES
+  );
+  const { filterCities } = useProfileCityModalCountryFilter(destinations.cities);
 
   const totalCount =
     destinations.countries.length +
@@ -74,7 +83,7 @@ export function ProfileTripsRow({
           />
         ));
       case "cities":
-        return destinations.cities.map((trip) => (
+        return filterCities(citiesModalCountryFilter, destinations.cities).map((trip) => (
           <ProfileTripCard key={trip.id} trip={trip} badgeLabels={badgeLabels} layout="grid" />
         ));
       case "parks":
@@ -159,7 +168,19 @@ export function ProfileTripsRow({
       <ProfileAllDestinationsListModal
         open={openModalTab !== null}
         title={openModalTab ? modalTitles[openModalTab] : ""}
-        onClose={() => setOpenModalTab(null)}
+        onClose={() => {
+          setOpenModalTab(null);
+          setCitiesModalCountryFilter(PROFILE_MODAL_ALL_COUNTRIES);
+        }}
+        toolbar={
+          openModalTab === "cities" ? (
+            <ProfileDestinationsModalCountryFilter
+              cities={destinations.cities}
+              value={citiesModalCountryFilter}
+              onChange={setCitiesModalCountryFilter}
+            />
+          ) : null
+        }
       >
         {openModalTab ? renderModalItems(openModalTab) : null}
       </ProfileAllDestinationsListModal>

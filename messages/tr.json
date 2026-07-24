@@ -260,7 +260,10 @@
     "viewTravelMap": "Haritayı görüntüle",
     "viewPin": "Pini görüntüle",
     "closePin": "Kapat",
-    "instagramPost": "Instagram"
+    "instagramPost": "Instagram",
+    "citiesInCountry": "{country} şehirleri",
+    "parksInCountry": "{country} parkları",
+    "viewProfile": "Profili görüntüle"
   },
   "cityHub": {
     "home": "Panel",
@@ -626,7 +629,7 @@
     "photo": "Fotoğraf yükle",
     "instagram": "Instagram gönderi bağlantısı",
     "instagramHint": "Standart bir Instagram gönderi URL'si yapıştır — ziyaretçiler bu pini açtığında gömeceğiz",
-    "mediaHint": "Bir fotoğraf ve istediğin kadar Instagram bağlantısı",
+    "mediaHint": "En fazla 3 fotoğraf (tek seferde birden fazla seçebilirsin) ve istediğin kadar Instagram bağlantısı",
     "photoSaved": "Fotoğraf kaydedildi",
     "addInstagram": "Instagram bağlantısı ekle",
     "removeInstagram": "Kaldır",
@@ -731,7 +734,7 @@
     "photo": "Fotoğraf yükle",
     "instagram": "Instagram gönderi bağlantısı",
     "instagramHint": "Standart bir Instagram gönderi URL'si yapıştır — ziyaretçiler bu pini açtığında gömeceğiz",
-    "mediaHint": "Bir fotoğraf ve istediğin kadar Instagram bağlantısı",
+    "mediaHint": "En fazla 3 fotoğraf (tek seferde birden fazla seçebilirsin) ve istediğin kadar Instagram bağlantısı",
     "photoSaved": "Fotoğraf kaydedildi",
     "addInstagram": "Instagram bağlantısı ekle",
     "removeInstagram": "Kaldır",

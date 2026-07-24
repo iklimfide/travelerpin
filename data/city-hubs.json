@@ -242,6 +242,60 @@
       "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
       "heroImageAlt": "Prague"
     },
+    "brno": {
+      "slug": "brno",
+      "name": "Brno",
+      "countryCode": "CZ",
+      "countrySlug": "czech-republic",
+      "countryName": "Czech Republic",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
+      "heroImageAlt": "Brno"
+    },
+    "olomouc": {
+      "slug": "olomouc",
+      "name": "Olomouc",
+      "countryCode": "CZ",
+      "countrySlug": "czech-republic",
+      "countryName": "Czech Republic",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
+      "heroImageAlt": "Olomouc"
+    },
+    "ostrava": {
+      "slug": "ostrava",
+      "name": "Ostrava",
+      "countryCode": "CZ",
+      "countrySlug": "czech-republic",
+      "countryName": "Czech Republic",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
+      "heroImageAlt": "Ostrava"
+    },
+    "pilsen": {
+      "slug": "pilsen",
+      "name": "Pilsen",
+      "countryCode": "CZ",
+      "countrySlug": "czech-republic",
+      "countryName": "Czech Republic",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
+      "heroImageAlt": "Pilsen"
+    },
+    "chesky-krumlov": {
+      "slug": "chesky-krumlov",
+      "name": "Český Krumlov",
+      "countryCode": "CZ",
+      "countrySlug": "czech-republic",
+      "countryName": "Czech Republic",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
+      "heroImageAlt": "Český Krumlov"
+    },
+    "karlovy-vary": {
+      "slug": "karlovy-vary",
+      "name": "Karlovy Vary",
+      "countryCode": "CZ",
+      "countrySlug": "czech-republic",
+      "countryName": "Czech Republic",
+      "heroImage": "https://pub-fb30ec3d35d940109814405afa9ad457.r2.dev/city-hubs/default-city.png",
+      "heroImageAlt": "Karlovy Vary"
+    },
     "brussels": {
       "slug": "brussels",
       "name": "Brussels",

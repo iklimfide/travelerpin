@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { getCityCatalog } from "@/lib/add/city-catalog";
+import { buildCountryModalCities } from "@/lib/data/country-page-cities";
 import {
-  applyCityOverlayToCatalogCities,
   attachCityNameTr,
   buildCityTiers,
   getCatalogOverlayFresh,
@@ -19,12 +18,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Country is required" }, { status: 400 });
   }
 
-  const catalog = getCityCatalog(country, q);
   const overlay = await getCatalogOverlayFresh();
   const allCities = attachCityNameTr(
-    sortCitiesForAddModal(
-      applyCityOverlayToCatalogCities(catalog.allCities, overlay, country, q)
-    ),
+    sortCitiesForAddModal(buildCountryModalCities(country, overlay, q)),
     overlay
   );
 

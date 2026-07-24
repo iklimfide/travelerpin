@@ -6,6 +6,7 @@ import {
 } from "@/lib/data/city-visitor-state";
 import type { HubTravelerPin } from "@/lib/supabase/hub-traveler-pin";
 import { visitedCityToHubPin } from "@/lib/supabase/city-travelers";
+import { cityPinMatchesHub } from "@/lib/utils/city-aliases";
 import type { VisitedCity, VisitedCountry } from "@/types/database";
 
 export type CityPageUserState = {

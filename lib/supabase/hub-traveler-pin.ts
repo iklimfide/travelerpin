@@ -1,7 +1,7 @@
 import type { MediaType } from "@/types/database";
 import type { CountryTraveler } from "@/lib/supabase/country-travelers";
 import { toHubPhotoSrc } from "@/lib/storage/hub-photo-url";
-import { readInstagramUrls, readPhotoUrl, type PinMediaRow } from "@/lib/utils/pin-media";
+import { readInstagramUrls, readPhotoUrl, readPhotoUrls, type PinMediaRow } from "@/lib/utils/pin-media";
 
 export type HubTravelerPin = {
   id: string;
@@ -9,6 +9,7 @@ export type HubTravelerPin = {
   placePath: string | null;
   note: string | null;
   photoUrl: string | null;
+  photoUrls: string[];
   instagramUrls: string[];
   mediaType: MediaType | null;
   mediaUrl: string | null;
@@ -40,8 +41,48 @@ export function hubPhotoDisplayUrl(mediaUrl: string | null): string | null {
   return toHubPhotoSrc(mediaUrl);
 }
 
+/** Cached or legacy pins may omit `photoUrls`; derive from single-photo fields. */
+export function pinPhotoUrls(pin: HubTravelerPin): string[] {
+  if (Array.isArray(pin.photoUrls) && pin.photoUrls.length > 0) {
+    return pin.photoUrls;
+  }
+  if (pin.photoUrl) return [pin.photoUrl];
+  if (pin.mediaType === "photo" && pin.mediaUrl) return [pin.mediaUrl];
+  return [];
+}
+
+export function pinInstagramUrls(pin: HubTravelerPin): string[] {
+  if (Array.isArray(pin.instagramUrls) && pin.instagramUrls.length > 0) {
+    return pin.instagramUrls;
+  }
+  if (pin.mediaType === "instagram" && pin.mediaUrl) return [pin.mediaUrl];
+  return [];
+}
+
+export function normalizeHubTravelerPin(pin: HubTravelerPin): HubTravelerPin {
+  const photoUrls = pinPhotoUrls(pin);
+  const instagramUrls = pinInstagramUrls(pin);
+  const photoUrl = photoUrls[0] ?? pin.photoUrl ?? null;
+
+  if (
+    pin.photoUrls === photoUrls &&
+    pin.instagramUrls === instagramUrls &&
+    pin.photoUrl === photoUrl
+  ) {
+    return pin;
+  }
+
+  return {
+    ...pin,
+    photoUrl,
+    photoUrls,
+    instagramUrls,
+  };
+}
+
 export function buildHubTravelerPinMedia(row: PinMediaRow) {
-  const photoUrl = readPhotoUrl(row);
+  const photoUrls = readPhotoUrls(row);
+  const photoUrl = photoUrls[0] ?? readPhotoUrl(row);
   const instagramUrls = readInstagramUrls(row);
   const mediaUrl = photoUrl ?? instagramUrls[0] ?? row.media_url ?? null;
   const mediaType: MediaType | null = photoUrl
@@ -52,6 +93,7 @@ export function buildHubTravelerPinMedia(row: PinMediaRow) {
 
   return {
     photoUrl,
+    photoUrls,
     instagramUrls,
     mediaUrl,
     mediaType,
@@ -95,16 +137,27 @@ export function createHubTravelerPin(input: HubTravelerPinInput): HubTravelerPin
   const fillFromProfile = input.fillMissingMediaFromProfile === true;
 
   const hasExplicitPhoto =
-    Boolean(media.photoUrl) || (media.mediaType === "photo" && Boolean(media.mediaUrl));
+    media.photoUrls.length > 0 ||
+    Boolean(media.photoUrl) ||
+    (media.mediaType === "photo" && Boolean(media.mediaUrl));
   const hasExplicitInstagram =
     media.instagramUrls.length > 0 ||
     (media.mediaType === "instagram" && Boolean(media.mediaUrl));
 
-  const photoUrl = hasExplicitPhoto
-    ? (media.photoUrl ?? media.mediaUrl)
-    : fillFromProfile
-      ? input.avatarUrl
-      : null;
+  let photoUrls: string[] = [];
+  if (hasExplicitPhoto) {
+    if (media.photoUrls.length > 0) {
+      photoUrls = media.photoUrls;
+    } else if (media.photoUrl) {
+      photoUrls = [media.photoUrl];
+    } else if (media.mediaUrl) {
+      photoUrls = [media.mediaUrl];
+    }
+  } else if (fillFromProfile && input.avatarUrl) {
+    photoUrls = [input.avatarUrl];
+  }
+
+  const photoUrl = photoUrls[0] ?? null;
 
   const instagramUrls = hasExplicitInstagram
     ? media.instagramUrls.length > 0
@@ -129,6 +182,7 @@ export function createHubTravelerPin(input: HubTravelerPinInput): HubTravelerPin
     placePath: input.placePath ?? null,
     note: input.note,
     photoUrl,
+    photoUrls,
     instagramUrls,
     mediaType,
     mediaUrl,
@@ -145,32 +199,39 @@ export function createHubTravelerPin(input: HubTravelerPinInput): HubTravelerPin
 }
 
 export function pinHasGalleryMedia(pin: HubTravelerPin): boolean {
-  return Boolean(pin.photoUrl) || pin.instagramUrls.length > 0 || Boolean(pin.mediaUrl);
+  return (
+    pinPhotoUrls(pin).length > 0 ||
+    pinInstagramUrls(pin).length > 0 ||
+    Boolean(pin.mediaUrl)
+  );
 }
 
 export function pinHasPhotoMedia(pin: HubTravelerPin): boolean {
-  return Boolean(pin.photoUrl) || (pin.mediaType === "photo" && Boolean(pin.mediaUrl));
+  return pinPhotoUrls(pin).length > 0 || (pin.mediaType === "photo" && Boolean(pin.mediaUrl));
 }
 
 export function pinHasInstagramMedia(pin: HubTravelerPin): boolean {
-  return pin.instagramUrls.length > 0 || pin.mediaType === "instagram";
+  return pinInstagramUrls(pin).length > 0 || pin.mediaType === "instagram";
 }
 
 export function expandHubPinGalleryItems(pins: HubTravelerPin[]): HubGalleryItem[] {
   const items: HubGalleryItem[] = [];
 
   for (const pin of pins) {
-    if (pin.photoUrl) {
+    const photoUrls = pinPhotoUrls(pin);
+    const instagramUrls = pinInstagramUrls(pin);
+
+    photoUrls.forEach((url, index) => {
       items.push({
-        id: `${pin.id}:photo`,
+        id: `${pin.id}:photo:${index}`,
         pin,
         mediaType: "photo",
-        mediaUrl: pin.photoUrl,
-        mediaDisplayUrl: hubPhotoDisplayUrl(pin.photoUrl),
+        mediaUrl: url,
+        mediaDisplayUrl: hubPhotoDisplayUrl(url),
       });
-    }
+    });
 
-    pin.instagramUrls.forEach((url, index) => {
+    instagramUrls.forEach((url, index) => {
       items.push({
         id: `${pin.id}:ig:${index}`,
         pin,
@@ -180,7 +241,7 @@ export function expandHubPinGalleryItems(pins: HubTravelerPin[]): HubGalleryItem
       });
     });
 
-    if (!pin.photoUrl && pin.instagramUrls.length === 0 && pin.mediaUrl) {
+    if (photoUrls.length === 0 && instagramUrls.length === 0 && pin.mediaUrl) {
       items.push({
         id: `${pin.id}:legacy`,
         pin,
@@ -220,10 +281,10 @@ export function countHubMediaTravelers(pins: HubTravelerPin[]): HubMediaTraveler
   const instagramUsers = new Set<string>();
 
   for (const pin of pins) {
-    if (pin.photoUrl || (pin.mediaType !== "instagram" && pin.mediaUrl)) {
+    if (pinHasPhotoMedia(pin)) {
       photoUsers.add(pin.username);
     }
-    if (pin.instagramUrls.length > 0 || pin.mediaType === "instagram") {
+    if (pinHasInstagramMedia(pin)) {
       instagramUsers.add(pin.username);
     }
   }
@@ -245,7 +306,7 @@ export function pinsWithContent(pins: HubTravelerPin[]): HubTravelerPin[] {
 }
 
 export function sortHubTravelerPins(pins: HubTravelerPin[]): HubTravelerPin[] {
-  return [...pins].sort((a, b) => {
+  return [...pins].map(normalizeHubTravelerPin).sort((a, b) => {
     const priorityDiff = pinPriority(b) - pinPriority(a);
     if (priorityDiff !== 0) return priorityDiff;
     return b.pinnedAt.localeCompare(a.pinnedAt);

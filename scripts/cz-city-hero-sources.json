@@ -1,0 +1,32 @@
+[
+  {
+    "countryCode": "CZ",
+    "cityName": "Prague",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Prague_Panorama_-_Oct_2010.jpg/1280px-Prague_Panorama_-_Oct_2010.jpg",
+    "credit": "Wikimedia Commons — Prague Panorama (Oct 2010)"
+  },
+  {
+    "countryCode": "CZ",
+    "cityName": "Brno",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Brno_View_44.jpg/1280px-Brno_View_44.jpg",
+    "credit": "Wikimedia Commons — Brno View 44"
+  },
+  {
+    "countryCode": "CZ",
+    "cityName": "Olomouc",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Olomouc_panorama_big.jpg/1280px-Olomouc_panorama_big.jpg",
+    "credit": "Wikimedia Commons — Olomouc panorama"
+  },
+  {
+    "countryCode": "CZ",
+    "cityName": "Ostrava",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Doln%C3%AD_oblast_V%C3%ADtkovic_07-08-2012.JPG/1280px-Doln%C3%AD_oblast_V%C3%ADtkovic_07-08-2012.JPG",
+    "credit": "Wikimedia Commons — Dolní oblast Vítkovice, Ostrava"
+  },
+  {
+    "countryCode": "CZ",
+    "cityName": "Pilsen",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Cathedral_of_St_Bartholomew_Plzen_%E6%AF%94%E7%88%BE%E6%A3%AE_%E8%81%96%E5%B7%B4%E7%88%BE%E5%A4%9A%E7%A5%BF%E8%8C%82%E4%B8%BB%E6%95%99%E5%BA%A7%E5%A0%82_-_panoramio.jpg/1280px-Cathedral_of_St_Bartholomew_Plzen_%E6%AF%94%E7%88%BE%E6%A3%AE_%E8%81%96%E5%B7%B4%E7%88%BE%E5%A4%9A%E7%A5%BF%E8%8C%82%E4%B8%BB%E6%95%99%E5%BA%A7%E5%A0%82_-_panoramio.jpg",
+    "credit": "Wikimedia Commons — St Bartholomew Cathedral, Plzeň"
+  }
+]

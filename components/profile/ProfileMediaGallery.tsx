@@ -328,14 +328,14 @@ export function ProfileMediaGallery({
       if (!city) return;
       response =
         item.mediaType === "photo"
-          ? await removeCityPhoto(city)
+          ? await removeCityPhoto(city, item.mediaUrl)
           : await removeCityInstagramUrl(city, item.mediaUrl);
     } else {
       const park = visitedParks.find((entry) => entry.id === ref.id);
       if (!park) return;
       response =
         item.mediaType === "photo"
-          ? await removeParkPhoto(park)
+          ? await removeParkPhoto(park, item.mediaUrl)
           : await removeParkInstagramUrl(park, item.mediaUrl);
     }
 

@@ -7,7 +7,7 @@ import { createPortal } from "react-dom";
 import { useLocale } from "next-intl";
 import { getCountryName, searchCountries } from "@/lib/data/countries";
 import { getPopularCountries } from "@/lib/data/popular-countries";
-import { POPULAR_DESTINATIONS } from "@/lib/data/popular-destinations";
+import { fetchModalBrowseCities } from "@/lib/client/modal-cities-browse";
 import { useAppMessages } from "@/lib/i18n/client-messages";
 import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import type { Locale } from "@/lib/i18n/config";
@@ -84,18 +84,18 @@ function countryToRow(country: { code: string; name: string }): BrowseRow {
   };
 }
 
-function popularCityToRow(
-  destination: (typeof POPULAR_DESTINATIONS)[number],
+function catalogCityToRow(
+  city: { countryCode: string; name: string },
   locale: Locale
 ): BrowseRow {
   return {
-    id: rowId("city", destination.countryCode, destination.cityName),
+    id: rowId("city", city.countryCode, city.name),
     kind: "city",
-    title: getLocalizedCityName(destination.countryCode, destination.cityName, locale),
-    subtitle: getCountryName(destination.countryCode, locale),
-    countryCode: destination.countryCode,
-    countryName: getCountryName(destination.countryCode, locale),
-    cityName: destination.cityName,
+    title: getLocalizedCityName(city.countryCode, city.name, locale),
+    subtitle: getCountryName(city.countryCode, locale),
+    countryCode: city.countryCode,
+    countryName: getCountryName(city.countryCode, locale),
+    cityName: city.name,
   };
 }
 
@@ -181,6 +181,7 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
   const [busyId, setBusyId] = useState<string | null>(null);
   const [savedStops, setSavedStops] = useState<NextRouteStop[]>(() => cachedRoute?.stops ?? []);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [browseCities, setBrowseCities] = useState<{ countryCode: string; name: string }[]>([]);
   const toast = useToast();
   const hasRouteRef = useRef(cachedRoute !== null);
 
@@ -234,6 +235,17 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
         setLoadingRoute(false);
       });
   }, [open, initialTab]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    void fetchModalBrowseCities(40).then((cities) => {
+      if (!cancelled) setBrowseCities(cities);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open || !isSearching) {
@@ -381,12 +393,10 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
       );
     }
     if (tab === "cities") {
-      return POPULAR_DESTINATIONS.filter((destination) => destination.kind === "city")
-        .slice(0, 40)
-        .map((destination) => popularCityToRow(destination, locale));
+      return browseCities.map((city) => catalogCityToRow(city, locale));
     }
     return [];
-  }, [tab, locale]);
+  }, [tab, locale, browseCities]);
 
   const listRows = useMemo(() => {
     if (isSearching) return searchResults.map((result) => searchToRow(result, locale));

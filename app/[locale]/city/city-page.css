@@ -629,6 +629,71 @@
   text-decoration: none;
 }
 
+.city-page__place-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.city-page__place-list li {
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+}
+
+.city-page__place-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--city-border);
+  background: var(--city-card);
+  box-shadow: var(--city-shadow);
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.city-page__place-chip:hover {
+  border-color: var(--city-blue);
+  background: #f8fafc;
+}
+
+.city-page__place-chip--static {
+  cursor: default;
+}
+
+.city-page__place-chip--static .city-page__place-chip-name {
+  color: var(--city-text, #334155);
+}
+
+.city-page__place-chip--static:hover {
+  border-color: var(--city-border);
+  background: var(--city-card);
+}
+
+.city-page__place-chip-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--city-blue);
+}
+
+.city-page__place-chip-meta {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--city-muted);
+}
+
 .city-page__link:hover {
   text-decoration: underline;
 }
@@ -789,18 +854,23 @@
 }
 
 .city-page__traveler-pictures-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.city-page__traveler-pictures-grid > li {
+  min-width: 0;
+}
+
 .city-page__traveler-picture-btn {
   display: block;
-  width: 160px;
-  height: 160px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
   overflow: hidden;
   border: 1px solid var(--city-border);
   border-radius: 14px;
@@ -817,11 +887,59 @@
   box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
 }
 
+.city-page__traveler-picture-btn .city-page__memory-thumb-instagram {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
 .city-page__traveler-picture-image {
   display: block;
-  width: 160px;
-  height: 160px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+}
+
+.city-page__hub-media-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+
+.city-page__hub-media-item-media {
+  width: 100%;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+.city-page__hub-media-item-media .city-page__traveler-picture-btn {
+  height: 100%;
+}
+
+.city-page__hub-media-place {
+  display: block;
+  margin-top: 6px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--city-blue);
+  text-align: center;
+  text-decoration: none;
+}
+
+.city-page__hub-media-place:hover {
+  text-decoration: underline;
+}
+
+.city-page__hub-media-place--static {
+  color: var(--city-muted);
+  cursor: default;
 }
 
 .city-page__traveler-name {
@@ -895,6 +1013,10 @@ html.dark .city-page__label {
 
 html.dark .city-page__section-title {
   color: #94a3b8;
+}
+
+html.dark .city-page__place-chip:hover {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 html.dark .city-page__traveler-link:hover {
@@ -1424,9 +1546,12 @@ html.dark .city-page__memory-lightbox-note {
   }
 
   .city-page__traveler-pictures-grid {
-    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+  }
+
+  .city-page__hub-media-item-media {
+    height: auto;
   }
 
   .city-page__traveler-picture-btn {
@@ -1756,4 +1881,96 @@ html.dark .city-page__memory-lightbox-note {
 
 .profile-media-list-modal__content .city-page__section {
   margin-top: 0;
+}
+
+@media (min-width: 768px) {
+  .profile-media-list-modal {
+    padding: 24px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .profile-media-list-modal .profile-followers-modal__sheet,
+  .profile-media-list-modal__sheet {
+    width: min(640px, calc(100vw - 48px));
+    max-width: 640px;
+    height: auto;
+    max-height: min(92vh, 880px);
+    border-radius: 20px;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.18);
+  }
+
+  .profile-media-list-modal__content.profile-media-sections {
+    --profile-inset: 0;
+    padding-inline: 0;
+  }
+
+  .profile-media-list-modal__content .city-page__traveler-pictures-grid {
+    padding: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .profile-media-list-modal__content.profile-media-sections .city-page__traveler-pictures-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+
+/* Destination edit modal (add photo / Instagram on hub pages) */
+.profile-destination-edit-modal {
+  z-index: 110;
+  padding: 12px;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.profile-destination-edit-modal .profile-followers-modal__sheet,
+.profile-destination-edit-modal__sheet {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+}
+
+@media (min-width: 768px) {
+  .profile-destination-edit-modal {
+    justify-content: center;
+  }
+
+  .profile-destination-edit-modal .profile-followers-modal__sheet,
+  .profile-destination-edit-modal__sheet {
+    max-width: 480px;
+  }
+}
+
+.profile-destination-edit-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 18px 48px 14px;
+  background: #2563eb;
+  border-bottom: none;
+}
+
+.profile-destination-edit-modal__head .profile-followers-modal__title {
+  color: #fff;
+}
+
+.profile-destination-edit-modal__head .profile-followers-modal__close {
+  color: #fff;
+}
+
+.profile-destination-edit-modal__head .profile-followers-modal__close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.profile-destination-edit-modal__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 16px 20px;
+  background: #f5f7fb;
 }

@@ -11,7 +11,8 @@ import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { buildPinMediaPayload, PinMediaFields } from "@/components/dashboard/PinMediaFields";
 import { ProfilePinEditFields } from "@/components/profile/ProfilePinEditFields";
-import { readInstagramUrls, readPhotoUrl, pinPhotoMediaChanged, withInstagramDraftField } from "@/lib/utils/pin-media";
+import { readInstagramUrls, readPhotoUrls, pinPhotoMediaChanged, withInstagramDraftField } from "@/lib/utils/pin-media";
+import { createPinPhotoFormState } from "@/lib/client/pin-photo-form-state";
 import { isValidInstagramUrl } from "@/lib/utils/instagram";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -82,14 +83,14 @@ export function ParkForm({
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [note, setNote] = useState(park?.note ?? "");
   const [visitDates, setVisitDates] = useState<string[]>(park?.visit_dates ?? []);
-  const [savedPhotoUrl, setSavedPhotoUrl] = useState(() => readPhotoUrl(park));
-  const [removePhoto, setRemovePhoto] = useState(false);
+  const [savedPhotoUrls, setSavedPhotoUrls] = useState(() => createPinPhotoFormState(park).savedPhotoUrls);
+  const [removedSavedPhotoUrls, setRemovedSavedPhotoUrls] = useState<string[]>([]);
+  const [newPhotoFiles, setNewPhotoFiles] = useState<File[]>([]);
   const [instagramUrls, setInstagramUrls] = useState(() => {
     const urls = readInstagramUrls(park);
     if (hideHeader) return withInstagramDraftField(urls);
     return mediaFocus === "instagram" ? withInstagramDraftField(urls) : urls;
   });
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   const selectedCountry =
@@ -378,6 +379,13 @@ export function ParkForm({
     lastPromptKeyRef.current = null;
   }
 
+  function handleNewPhotoFilesChange(files: File[]) {
+    setNewPhotoFiles(files);
+    if (files.length > 0) {
+      toast.show(t("photoSelected"));
+    }
+  }
+
   async function handleSave() {
     if (!selectedCountry || !parkName.trim()) {
       toast.show(t("pickParkFirst"));
@@ -388,9 +396,9 @@ export function ParkForm({
 
     try {
       const mediaResult = await buildPinMediaPayload({
-        photoFile,
-        savedPhotoUrl,
-        removePhoto,
+        savedPhotoUrls,
+        removedSavedPhotoUrls,
+        newPhotoFiles,
         instagramUrls,
         isValidInstagramUrl,
         formatPhotoUploadError,
@@ -409,6 +417,7 @@ export function ParkForm({
         country_name: selectedCountry.country_name,
         note: note || null,
         photo_url: mediaResult.photo_url,
+        photo_urls: mediaResult.photo_urls,
         instagram_urls: mediaResult.instagram_urls,
         visit_dates: visitDates,
       };
@@ -436,10 +445,11 @@ export function ParkForm({
       notifyProfileDataChanged();
       if (
         pinPhotoMediaChanged({
-          photoFile,
-          removePhoto,
-          previousPhotoUrl: savedPhotoUrl,
-          nextPhotoUrl: mediaResult.photo_url,
+          savedPhotoUrls,
+          removedSavedPhotoUrls,
+          newPhotoFiles,
+          previousPhotoUrls: readPhotoUrls(park),
+          nextPhotoUrls: mediaResult.photo_urls,
         })
       ) {
         router.refresh();
@@ -447,14 +457,6 @@ export function ParkForm({
       onSuccess?.();
     } finally {
       setLoading(false);
-    }
-  }
-
-  function handlePhotoFileChange(file: File | null) {
-    setPhotoFile(file);
-    if (file) {
-      setRemovePhoto(false);
-      toast.show(t("photoSelected"));
     }
   }
 
@@ -471,11 +473,11 @@ export function ParkForm({
           removeInstagram: t("removeInstagram"),
           removePhoto: t("removePhoto"),
         }}
-        savedPhotoUrl={savedPhotoUrl}
-        photoFile={photoFile}
-        onPhotoFileChange={handlePhotoFileChange}
-        removePhoto={removePhoto}
-        onRemovePhotoChange={setRemovePhoto}
+        savedPhotoUrls={savedPhotoUrls}
+        removedSavedPhotoUrls={removedSavedPhotoUrls}
+        onRemovedSavedPhotoUrlsChange={setRemovedSavedPhotoUrls}
+        newPhotoFiles={newPhotoFiles}
+        onNewPhotoFilesChange={handleNewPhotoFilesChange}
         instagramUrls={instagramUrls}
         onInstagramUrlsChange={setInstagramUrls}
         autoFocusInstagram={mediaFocus === "instagram"}
@@ -499,11 +501,11 @@ export function ParkForm({
           onVisitDatesChange={setVisitDates}
           note={note}
           onNoteChange={setNote}
-          savedPhotoUrl={savedPhotoUrl}
-          photoFile={photoFile}
-          onPhotoFileChange={handlePhotoFileChange}
-          removePhoto={removePhoto}
-          onRemovePhotoChange={setRemovePhoto}
+          savedPhotoUrls={savedPhotoUrls}
+          removedSavedPhotoUrls={removedSavedPhotoUrls}
+          onRemovedSavedPhotoUrlsChange={setRemovedSavedPhotoUrls}
+          newPhotoFiles={newPhotoFiles}
+          onNewPhotoFilesChange={handleNewPhotoFilesChange}
           instagramUrls={instagramUrls}
           onInstagramUrlsChange={setInstagramUrls}
           mediaFocus={mediaFocus}

@@ -55,6 +55,9 @@ type HubPageListingSectionsProps = {
     photos: string;
     instagram: string;
   };
+  /** Show city/park name under each gallery tile (country hub). */
+  showPlaceCaptions?: boolean;
+  lightboxFooterLabel?: string;
   labels: HubPageListingSectionsLabels;
 };
 
@@ -101,6 +104,8 @@ export function HubPageListingSections({
   ownerPark = null,
   travelersLayout = "row",
   headingIds,
+  showPlaceCaptions = false,
+  lightboxFooterLabel,
   labels,
 }: HubPageListingSectionsProps) {
   const tProfile = useTranslateProfile();
@@ -196,6 +201,8 @@ export function HubPageListingSections({
           () => openEditModal("photo")
         )}
         labels={pictureLabels}
+        showPlaceCaptions={showPlaceCaptions}
+        lightboxFooterLabel={lightboxFooterLabel}
       />
 
       <HubTravelerPictures
@@ -216,6 +223,8 @@ export function HubPageListingSections({
           () => openEditModal("instagram")
         )}
         labels={pictureLabels}
+        showPlaceCaptions={showPlaceCaptions}
+        lightboxFooterLabel={lightboxFooterLabel}
       />
 
       <ProfileMediaListModal
@@ -234,6 +243,8 @@ export function HubPageListingSections({
               alwaysShow
               emptyLabel={labels.noPhotosYet}
               labels={pictureLabels}
+              showPlaceCaptions={showPlaceCaptions}
+              lightboxFooterLabel={lightboxFooterLabel}
             />
           </div>
         ) : null}
@@ -248,6 +259,8 @@ export function HubPageListingSections({
               alwaysShow
               emptyLabel={labels.noInstagramPostsYet}
               labels={pictureLabels}
+              showPlaceCaptions={showPlaceCaptions}
+              lightboxFooterLabel={lightboxFooterLabel}
             />
           </div>
         ) : null}

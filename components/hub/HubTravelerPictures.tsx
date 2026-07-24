@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { InstagramMemoryThumb } from "@/components/city/InstagramMemoryThumb";
 import { HubExternalPhoto } from "@/components/hub/HubExternalPhoto";
+import { HubMediaPlaceCaption } from "@/components/hub/HubMediaPlaceCaption";
 import { HubMemoryLightbox } from "@/components/hub/HubMemoryLightbox";
 import { HubSectionHeading } from "@/components/hub/HubSectionHeading";
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
@@ -18,6 +19,9 @@ type HubTravelerPicturesProps = {
   headingId: string;
   headingCta?: ReactNode;
   hideHeading?: boolean;
+  showPlaceCaptions?: boolean;
+  /** Footer CTA in photo lightbox (defaults to viewMap). */
+  lightboxFooterLabel?: string;
   showViewAll?: boolean;
   viewAllLabel?: string;
   onViewAll?: () => void;
@@ -35,18 +39,20 @@ function GalleryGrid({
   items,
   hubName,
   labels,
+  showPlaceCaptions = false,
   onSelectPhoto,
 }: {
   items: HubGalleryItem[];
   hubName: string;
   labels: HubTravelerPicturesProps["labels"];
+  showPlaceCaptions?: boolean;
   onSelectPhoto: (item: HubGalleryItem) => void;
 }) {
   return (
     <ul className="city-page__traveler-pictures-grid">
-      {items.map((item) => (
-        <li key={item.id}>
-          {item.mediaType === "instagram" ? (
+      {items.map((item) => {
+        const media =
+          item.mediaType === "instagram" ? (
             <a
               href={normalizeInstagramPostUrl(item.mediaUrl)}
               target="_blank"
@@ -76,9 +82,21 @@ function GalleryGrid({
                 </button>
               ) : null;
             })()
-          )}
-        </li>
-      ))}
+          );
+
+        if (!showPlaceCaptions) {
+          return <li key={item.id}>{media}</li>;
+        }
+
+        return (
+          <li key={item.id}>
+            <div className="city-page__hub-media-item">
+              <div className="city-page__hub-media-item-media">{media}</div>
+              <HubMediaPlaceCaption pin={item.pin} />
+            </div>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -92,6 +110,8 @@ export function HubTravelerPictures({
   headingId,
   headingCta,
   hideHeading = false,
+  showPlaceCaptions = false,
+  lightboxFooterLabel,
   showViewAll = false,
   viewAllLabel,
   onViewAll,
@@ -129,6 +149,7 @@ export function HubTravelerPictures({
               items={items}
               hubName={hubName}
               labels={labels}
+              showPlaceCaptions={showPlaceCaptions}
               onSelectPhoto={setExpandedItem}
             />
           </div>
@@ -144,7 +165,10 @@ export function HubTravelerPictures({
           activeMediaUrl={expandedItem.mediaUrl}
           activeMediaDisplayUrl={expandedItem.mediaDisplayUrl}
           hubName={hubName}
-          labels={{ viewMap: labels.viewMap, close: labels.close }}
+          labels={{
+            viewMap: lightboxFooterLabel ?? labels.viewMap,
+            close: labels.close,
+          }}
           onClose={() => setExpandedItem(null)}
         />
       ) : null}

@@ -34,13 +34,22 @@ export function pinnedCityKey(countryCode: string, cityName: string): string {
   return `${countryCode.toUpperCase()}:${cityName.trim().toLowerCase()}`;
 }
 
+function resolveFeaturedCitySlug(countryCode: string, cityName: string): string | null {
+  const catalogSlug = findCityHubSlug(countryCode, cityName);
+  if (catalogSlug && isFeaturedCityHub(catalogSlug)) return catalogSlug;
+
+  const asciiSlug = buildCitySlug(cityName);
+  if (isFeaturedCityHub(asciiSlug)) return asciiSlug;
+
+  return null;
+}
+
 export function cityIsPubliclyLinked(
   countryCode: string,
   cityName: string,
   publishedCityKeys: Set<string>
 ): boolean {
-  const catalogSlug = findCityHubSlug(countryCode, cityName);
-  if (catalogSlug && isFeaturedCityHub(catalogSlug)) return true;
+  if (resolveFeaturedCitySlug(countryCode, cityName)) return true;
   return publishedCityKeys.has(pinnedCityKey(countryCode, cityName));
 }
 
@@ -50,6 +59,10 @@ export function publicCityHubSlug(
   publishedCityKeys: Set<string>
 ): string | null {
   if (!cityIsPubliclyLinked(countryCode, cityName, publishedCityKeys)) return null;
+
+  const featuredSlug = resolveFeaturedCitySlug(countryCode, cityName);
+  if (featuredSlug) return featuredSlug;
+
   return findCityHubSlug(countryCode, cityName) ?? buildCitySlug(cityName);
 }
 
