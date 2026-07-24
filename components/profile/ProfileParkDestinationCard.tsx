@@ -43,8 +43,8 @@ export function ProfileParkDestinationCard({
               src={countryCodeToFlagUrl(park.countryCode)}
               alt=""
               width={16}
-              height={12}
-              className="mr-1 inline-block rounded-sm"
+              height={16}
+              className="profile-chip-flag mr-1 inline-block"
             />
             <ProfileCountryLink
               slug={park.countrySlug}

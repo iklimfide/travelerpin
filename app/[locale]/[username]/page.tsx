@@ -3,6 +3,14 @@ import { getTranslations } from "next-intl/server";
 import { ProfileJsonLd } from "@/components/profile/ProfileJsonLd";
 import { ProfileServerBridge } from "@/components/profile/ProfileServerBridge";
 import { PublicProfileViewClient } from "@/components/profile/PublicProfileViewClient";
+import {
+  getCachedCityHeroImageMap,
+  serializeCityHeroImageMap,
+} from "@/lib/city/city-hero-images";
+import {
+  getCachedParkHeroImageMap,
+  serializeParkHeroImageMap,
+} from "@/lib/park/park-hero-images";
 import { defaultLocale, isLocale, type Locale } from "@/lib/i18n/config";
 import { buildProfileDescription } from "@/lib/seo/profile";
 import { resolveProfileDisplayName } from "@/lib/utils/display-name";
@@ -42,6 +50,11 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
   const isOwnProfile = isAccountOwner && !previewAsPublic;
   const isGuest = !shell.isLoggedIn;
 
+  const [cityHeroImages, parkHeroImages] = await Promise.all([
+    getCachedCityHeroImageMap(),
+    getCachedParkHeroImageMap(),
+  ]);
+
   return (
     <>
       <ProfileJsonLd profile={shell.profile} profileDescription={profileDescription} />
@@ -52,6 +65,8 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
         isOwnProfile={isOwnProfile}
         isGuest={isGuest}
         previewAsPublic={previewAsPublic}
+        initialCityHeroImages={serializeCityHeroImageMap(cityHeroImages)}
+        initialParkHeroImages={serializeParkHeroImageMap(parkHeroImages)}
       />
     </>
   );

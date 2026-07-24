@@ -81,7 +81,7 @@ function cityTripImage(
   cityHeroImages?: ReadonlyMap<string, string>
 ): string {
   const canonical = canonicalCityName(city.country_code, city.city_name);
-  if (cityHeroImages && cityHeroImages.size > 0) {
+  if (cityHeroImages) {
     return resolveCityHeroImageUrl(city.country_code, canonical, cityHeroImages);
   }
   return DEFAULT_CITY_HERO_IMAGE;

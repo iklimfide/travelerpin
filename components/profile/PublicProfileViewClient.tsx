@@ -12,7 +12,13 @@ import { ProfileSquareCaptureHeader } from "@/components/profile/ProfileSquareCa
 import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections";
 import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
 import { usePublicProfileProgressiveLoad } from "@/lib/client/use-public-profile-progressive-load";
-import { fetchHeroImageMaps, readCachedCityHeroImages, readCachedParkHeroImages } from "@/lib/client/hero-images-cache";
+import {
+  fetchHeroImageMaps,
+  readCachedCityHeroImages,
+  readCachedParkHeroImages,
+  writeCachedCityHeroImages,
+  writeCachedParkHeroImages,
+} from "@/lib/client/hero-images-cache";
 import { useProgressiveStatCount } from "@/lib/hooks/useProgressiveStatCount";
 import { useProfileStatsAnimationEnabled } from "@/lib/hooks/useProfileStatsAnimationEnabled";
 import { computeTravelUpdateDelta } from "@/lib/utils/travel-update";
@@ -38,6 +44,10 @@ import {
   type PublicProfileShellData,
 } from "@/lib/supabase/profile-page-types";
 
+function heroRecordToMap(record: Record<string, string> | undefined): Map<string, string> {
+  return new Map(Object.entries(record ?? {}));
+}
+
 type PublicProfileViewClientProps = {
   shell?: PublicProfileShellData;
   data?: PublicProfilePageData;
@@ -48,6 +58,9 @@ type PublicProfileViewClientProps = {
   embedded?: boolean;
   profilePageHref?: string;
   previewAsPublic?: boolean;
+  /** Same source as city hub pages — avoids stale client-only hero cache on trip cards. */
+  initialCityHeroImages?: Record<string, string>;
+  initialParkHeroImages?: Record<string, string>;
 };
 
 export function PublicProfileViewClient({
@@ -60,7 +73,11 @@ export function PublicProfileViewClient({
   embedded = false,
   profilePageHref,
   previewAsPublic = false,
+  initialCityHeroImages,
+  initialParkHeroImages,
 }: PublicProfileViewClientProps) {
+  const serverHeroMapsProvided =
+    initialCityHeroImages !== undefined && initialParkHeroImages !== undefined;
   const t = useTranslateProfile();
   const tHome = useTranslateHome();
   const tCommon = useTranslateCommon();
@@ -151,11 +168,15 @@ export function PublicProfileViewClient({
     visibleWishlistCodes.length > 0;
   const showEmptyMapState = !pinsLoading && !hasMapContent;
 
-  const [cityHeroImages, setCityHeroImages] = useState<Map<string, string>>(
-    () => readCachedCityHeroImages() ?? new Map()
+  const [cityHeroImages, setCityHeroImages] = useState<Map<string, string>>(() =>
+    serverHeroMapsProvided
+      ? heroRecordToMap(initialCityHeroImages)
+      : (readCachedCityHeroImages() ?? new Map())
   );
-  const [parkHeroImages, setParkHeroImages] = useState<Map<string, string>>(
-    () => readCachedParkHeroImages() ?? new Map()
+  const [parkHeroImages, setParkHeroImages] = useState<Map<string, string>>(() =>
+    serverHeroMapsProvided
+      ? heroRecordToMap(initialParkHeroImages)
+      : (readCachedParkHeroImages() ?? new Map())
   );
   const heroesEnsuredRef = useRef(false);
 
@@ -163,6 +184,16 @@ export function PublicProfileViewClient({
     if (progressive && !fullData) return;
     if (heroesEnsuredRef.current) return;
     heroesEnsuredRef.current = true;
+
+    if (serverHeroMapsProvided) {
+      const cityMap = heroRecordToMap(initialCityHeroImages);
+      const parkMap = heroRecordToMap(initialParkHeroImages);
+      setCityHeroImages(cityMap);
+      setParkHeroImages(parkMap);
+      writeCachedCityHeroImages(cityMap);
+      writeCachedParkHeroImages(parkMap);
+      return;
+    }
 
     let cancelled = false;
     void fetchHeroImageMaps()
@@ -175,7 +206,7 @@ export function PublicProfileViewClient({
     return () => {
       cancelled = true;
     };
-  }, [fullData, progressive]);
+  }, [fullData, progressive, serverHeroMapsProvided, initialCityHeroImages, initialParkHeroImages]);
 
   const destinations = useMemo(
     () =>

@@ -92,12 +92,12 @@ export function ProfileTripCard({
             <span className="profile-chip">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={countryCodeToFlagUrl(trip.countryCode)}
-                alt=""
-                width={16}
-                height={12}
-                className="mr-1 inline-block rounded-sm"
-              />
+              src={countryCodeToFlagUrl(trip.countryCode)}
+              alt=""
+              width={16}
+              height={16}
+              className="profile-chip-flag mr-1 inline-block"
+            />
               <ProfileCountryLink
                 slug={trip.countrySlug}
                 name={trip.countryName}
