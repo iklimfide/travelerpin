@@ -5,12 +5,13 @@ import type { ParkHub } from "@/lib/data/park-hubs";
 
 type ParkPageNavProps = {
   hub: ParkHub;
+  displayName: string;
   labels: {
     home: string;
   };
 };
 
-export function ParkPageNav({ hub, labels }: ParkPageNavProps) {
+export function ParkPageNav({ hub, displayName, labels }: ParkPageNavProps) {
   const flagUrl = countryCodeToFlagUrl(hub.countryCode);
 
   return (
@@ -28,7 +29,7 @@ export function ParkPageNav({ hub, labels }: ParkPageNavProps) {
         ) : null}
         {hub.countryName}
       </Link>
-      <span className="city-page__nav-badge city-page__nav-badge--active">{hub.name}</span>
+      <span className="city-page__nav-badge city-page__nav-badge--active">{displayName}</span>
     </nav>
   );
 }

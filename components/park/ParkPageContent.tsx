@@ -18,6 +18,7 @@ import type { VisitedCountry, VisitedPark } from "@/types/database";
 
 type ParkPageContentProps = {
   hub: ParkHub;
+  displayName: string;
   travelers: CountryTraveler[];
   wishlistTravelers?: CountryTraveler[];
   memoryPins: HubTravelerPin[];
@@ -79,6 +80,7 @@ type ParkPageContentProps = {
 
 export async function ParkPageContent({
   hub,
+  displayName,
   travelers,
   wishlistTravelers = [],
   memoryPins,
@@ -111,7 +113,7 @@ export async function ParkPageContent({
   return (
     <div className="city-page">
       <HubPageTopBar>
-        <ParkPageNav hub={hub} labels={{ home: labels.home }} />
+        <ParkPageNav hub={hub} displayName={displayName} labels={{ home: labels.home }} />
       </HubPageTopBar>
 
       <div className="city-page__container">
@@ -127,7 +129,7 @@ export async function ParkPageContent({
           />
 
           <div>
-            <h1 className="city-page__title">{hub.name}</h1>
+            <h1 className="city-page__title">{displayName}</h1>
             <ParkPageActions
               parkName={hub.name}
               parkType={hub.parkType}
@@ -153,7 +155,7 @@ export async function ParkPageContent({
         </section>
 
         <HubPageListingSections
-          hubName={hub.name}
+          hubName={displayName}
           travelers={travelers}
           wishlistTravelers={wishlistTravelers}
           memoryPins={memoryPins}
