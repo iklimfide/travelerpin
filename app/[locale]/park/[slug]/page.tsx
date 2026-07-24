@@ -27,6 +27,7 @@ import { loadPublicParkHubBySlug } from "@/lib/supabase/park-hub-access";
 import { findPublishedHubSlugRedirect } from "@/lib/supabase/published-hubs";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
+import { isKamikazeMasterUser } from "@/lib/kamikaze/master";
 import { buildParkSlug, sanitizeParkSlug } from "@/lib/utils/park-slug";
 import "../../city/city-page.css";
 
@@ -180,6 +181,21 @@ export default async function ParkHubPage({ params }: PageProps) {
     pinItTooCta: t("pinItTooCta"),
     login: tCommon("login"),
     register: tCommon("register"),
+    heroModeration: {
+      uploadPhoto: t("heroUploadPhoto"),
+      importUrl: t("heroImportUrl"),
+      removePhoto: t("heroRemovePhoto"),
+      importTitle: t("heroImportTitle"),
+      importSubtitle: t("heroImportSubtitle"),
+      importFieldLabel: t("heroImportFieldLabel"),
+      importHint: t("heroImportHint"),
+      importUrlRequired: t("heroImportUrlRequired"),
+      cancel: tCommon("cancel"),
+      submit: t("heroImportSubmit"),
+      removeConfirm: t("heroRemoveConfirm"),
+      uploadSuccess: t("heroUploadSuccess"),
+      removeSuccess: t("heroRemoveSuccess"),
+    },
   };
 
   return (
@@ -192,6 +208,7 @@ export default async function ParkHubPage({ params }: PageProps) {
         visitorState={visitorState}
         ownerPark={ownerPark}
         visitedCountries={visitedCountries}
+        canModerateHero={Boolean(user && isKamikazeMasterUser(user))}
         loginHref={loginHref}
         pinCountItems={pinCountItems}
         labels={labels}

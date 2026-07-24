@@ -1,5 +1,6 @@
 import { Link } from "@/lib/i18n/navigation";
 import type { HubPinStatItem } from "@/components/hub/HubPagePinCount";
+import { HubHeroImageMasterModeration } from "@/components/hub/HubHeroImageMasterModeration";
 import { HubPageListingSections } from "@/components/hub/HubPageListingSections";
 import { HubPageTopBar } from "@/components/hub/HubPageTopBar";
 import { ParkPageActions } from "@/components/park/ParkPageActions";
@@ -23,6 +24,7 @@ type ParkPageContentProps = {
   visitorState: ParkVisitorState;
   ownerPark: VisitedPark | null;
   visitedCountries: VisitedCountry[];
+  canModerateHero: boolean;
   loginHref: string;
   pinCountItems?: HubPinStatItem[];
   labels: {
@@ -57,6 +59,21 @@ type ParkPageContentProps = {
     pinItTooCta: string;
     login: string;
     register: string;
+    heroModeration: {
+      uploadPhoto: string;
+      importUrl: string;
+      removePhoto: string;
+      importTitle: string;
+      importSubtitle: string;
+      importFieldLabel: string;
+      importHint: string;
+      importUrlRequired: string;
+      cancel: string;
+      submit: string;
+      removeConfirm: string;
+      uploadSuccess: string;
+      removeSuccess: string;
+    };
   };
 };
 
@@ -68,6 +85,7 @@ export async function ParkPageContent({
   visitorState,
   ownerPark,
   visitedCountries,
+  canModerateHero,
   loginHref,
   pinCountItems = [],
   labels,
@@ -98,10 +116,15 @@ export async function ParkPageContent({
 
       <div className="city-page__container">
         <section className="city-page__hero city-page__hero--park-card">
-          <div className="city-page__park-card-image">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={heroUrl} alt="" width={220} />
-          </div>
+          <HubHeroImageMasterModeration
+            kind="park"
+            countryCode={hub.countryCode}
+            placeName={hub.name}
+            parkType={hub.parkType}
+            initialImageUrl={heroUrl}
+            canModerate={canModerateHero}
+            labels={labels.heroModeration}
+          />
 
           <div>
             <h1 className="city-page__title">{hub.name}</h1>

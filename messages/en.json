@@ -301,7 +301,19 @@
     "photosHeading": "Photos",
     "instagramHeading": "Instagram posts",
     "noInstagramPostsYet": "No Instagram posts added for this city yet.",
-    "noPhotosYet": "No photos added for this city yet."
+    "noPhotosYet": "No photos added for this city yet.",
+    "heroUploadPhoto": "Upload cover",
+    "heroImportUrl": "Import URL",
+    "heroRemovePhoto": "Remove cover",
+    "heroImportTitle": "Import cover from URL",
+    "heroImportSubtitle": "Paste a direct link to an image file.",
+    "heroImportFieldLabel": "Image URL",
+    "heroImportHint": "Use a direct file link (.jpg, .png, .webp, .avif). Session-gated hosts may fail — upload the file instead.",
+    "heroImportUrlRequired": "Image URL is required.",
+    "heroImportSubmit": "Import",
+    "heroRemoveConfirm": "Remove this cover photo? The default illustration will show until you upload a new one.",
+    "heroUploadSuccess": "Cover photo updated.",
+    "heroRemoveSuccess": "Cover photo removed."
   },
   "parkHub": {
     "home": "Dashboard",
@@ -341,7 +353,19 @@
     "photosHeading": "Photos",
     "instagramHeading": "Instagram posts",
     "noInstagramPostsYet": "No Instagram posts added for this park yet.",
-    "noPhotosYet": "No photos added for this park yet."
+    "noPhotosYet": "No photos added for this park yet.",
+    "heroUploadPhoto": "Upload cover",
+    "heroImportUrl": "Import URL",
+    "heroRemovePhoto": "Remove cover",
+    "heroImportTitle": "Import cover from URL",
+    "heroImportSubtitle": "Paste a direct link to an image file.",
+    "heroImportFieldLabel": "Image URL",
+    "heroImportHint": "Use a direct file link (.jpg, .png, .webp, .avif). Session-gated hosts may fail — upload the file instead.",
+    "heroImportUrlRequired": "Image URL is required.",
+    "heroImportSubmit": "Import",
+    "heroRemoveConfirm": "Remove this cover photo? The default illustration will show until you upload a new one.",
+    "heroUploadSuccess": "Cover photo updated.",
+    "heroRemoveSuccess": "Cover photo removed."
   },
   "auth": {
     "email": "Email",

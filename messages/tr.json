@@ -301,7 +301,19 @@
     "photosHeading": "Fotoğraflar",
     "instagramHeading": "Instagram gönderileri",
     "noInstagramPostsYet": "Bu şehir için henüz Instagram gönderisi eklenmedi.",
-    "noPhotosYet": "Bu şehir için henüz fotoğraf eklenmedi."
+    "noPhotosYet": "Bu şehir için henüz fotoğraf eklenmedi.",
+    "heroUploadPhoto": "Kapak yükle",
+    "heroImportUrl": "URL'den al",
+    "heroRemovePhoto": "Kapağı kaldır",
+    "heroImportTitle": "Kapak görselini URL'den içe aktar",
+    "heroImportSubtitle": "Doğrudan görsel dosyası linki yapıştırın.",
+    "heroImportFieldLabel": "Görsel linki",
+    "heroImportHint": "Doğrudan dosya linki kullanın (.jpg, .png, .webp, .avif). Oturum isteyen siteler başarısız olabilir — dosyayı yükleyin.",
+    "heroImportUrlRequired": "Görsel linki gerekli.",
+    "heroImportSubmit": "İçe aktar",
+    "heroRemoveConfirm": "Bu kapak fotoğrafı kaldırılsın mı? Yeni bir görsel yükleyene kadar varsayılan illüstrasyon gösterilir.",
+    "heroUploadSuccess": "Kapak fotoğrafı güncellendi.",
+    "heroRemoveSuccess": "Kapak fotoğrafı kaldırıldı."
   },
   "parkHub": {
     "home": "Panel",
@@ -341,7 +353,19 @@
     "photosHeading": "Fotoğraflar",
     "instagramHeading": "Instagram gönderileri",
     "noInstagramPostsYet": "Bu park için henüz Instagram gönderisi eklenmedi.",
-    "noPhotosYet": "Bu park için henüz fotoğraf eklenmedi."
+    "noPhotosYet": "Bu park için henüz fotoğraf eklenmedi.",
+    "heroUploadPhoto": "Kapak yükle",
+    "heroImportUrl": "URL'den al",
+    "heroRemovePhoto": "Kapağı kaldır",
+    "heroImportTitle": "Kapak görselini URL'den içe aktar",
+    "heroImportSubtitle": "Doğrudan görsel dosyası linki yapıştırın.",
+    "heroImportFieldLabel": "Görsel linki",
+    "heroImportHint": "Doğrudan dosya linki kullanın (.jpg, .png, .webp, .avif). Oturum isteyen siteler başarısız olabilir — dosyayı yükleyin.",
+    "heroImportUrlRequired": "Görsel linki gerekli.",
+    "heroImportSubmit": "İçe aktar",
+    "heroRemoveConfirm": "Bu kapak fotoğrafı kaldırılsın mı? Yeni bir görsel yükleyene kadar varsayılan illüstrasyon gösterilir.",
+    "heroUploadSuccess": "Kapak fotoğrafı güncellendi.",
+    "heroRemoveSuccess": "Kapak fotoğrafı kaldırıldı."
   },
   "auth": {
     "email": "E-posta",

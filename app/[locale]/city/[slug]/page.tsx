@@ -23,6 +23,7 @@ import {
 import { getCachedRecentCityPinsWithPreviews } from "@/lib/supabase/city-travelers-cache";
 import { getAuthUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
+import { isKamikazeMasterUser } from "@/lib/kamikaze/master";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { getLocalizedCityName } from "@/lib/i18n/place-names";
 import { cityPath, cityUrl, buildCityPageTitle, DEFAULT_DESCRIPTION } from "@/lib/seo/site";
@@ -208,6 +209,21 @@ export default async function CityHubPage({ params }: PageProps) {
     pinItTooCta: t("pinItTooCta"),
     login: tCommon("login"),
     register: tCommon("register"),
+    heroModeration: {
+      uploadPhoto: t("heroUploadPhoto"),
+      importUrl: t("heroImportUrl"),
+      removePhoto: t("heroRemovePhoto"),
+      importTitle: t("heroImportTitle"),
+      importSubtitle: t("heroImportSubtitle"),
+      importFieldLabel: t("heroImportFieldLabel"),
+      importHint: t("heroImportHint"),
+      importUrlRequired: t("heroImportUrlRequired"),
+      cancel: tCommon("cancel"),
+      submit: t("heroImportSubmit"),
+      removeConfirm: t("heroRemoveConfirm"),
+      uploadSuccess: t("heroUploadSuccess"),
+      removeSuccess: t("heroRemoveSuccess"),
+    },
   };
 
   return (
@@ -222,6 +238,7 @@ export default async function CityHubPage({ params }: PageProps) {
         visitorState={visitorState}
         ownerCity={ownerCity}
         visitedCountries={visitedCountries}
+        canModerateHero={Boolean(user && isKamikazeMasterUser(user))}
         loginHref={loginHref}
         pinCountItems={pinCountItems}
         labels={labels}
