@@ -316,7 +316,17 @@
     "heroImportSubmit": "Import",
     "heroRemoveConfirm": "Remove this cover photo? The default illustration will show until you upload a new one.",
     "heroUploadSuccess": "Cover photo updated.",
-    "heroRemoveSuccess": "Cover photo removed."
+    "heroRemoveSuccess": "Cover photo removed.",
+    "heroSearchStock": "Search stock",
+    "heroStockTitle": "Search stock photos",
+    "heroStockSubtitle": "Browse Pixabay, Unsplash, and Pexels (whichever APIs are configured).",
+    "heroStockQueryLabel": "Search",
+    "heroStockSearch": "Search",
+    "heroStockSearching": "Searching…",
+    "heroStockEmpty": "No results. Try another query.",
+    "heroStockNoProviders": "Stock photo APIs are not configured on the server.",
+    "heroStockPick": "Use this photo",
+    "heroStockPhotographer": "Photo by"
   },
   "parkHub": {
     "home": "Dashboard",
@@ -368,7 +378,17 @@
     "heroImportSubmit": "Import",
     "heroRemoveConfirm": "Remove this cover photo? The default illustration will show until you upload a new one.",
     "heroUploadSuccess": "Cover photo updated.",
-    "heroRemoveSuccess": "Cover photo removed."
+    "heroRemoveSuccess": "Cover photo removed.",
+    "heroSearchStock": "Search stock",
+    "heroStockTitle": "Search stock photos",
+    "heroStockSubtitle": "Browse Pixabay, Unsplash, and Pexels (whichever APIs are configured).",
+    "heroStockQueryLabel": "Search",
+    "heroStockSearch": "Search",
+    "heroStockSearching": "Searching…",
+    "heroStockEmpty": "No results. Try another query.",
+    "heroStockNoProviders": "Stock photo APIs are not configured on the server.",
+    "heroStockPick": "Use this photo",
+    "heroStockPhotographer": "Photo by"
   },
   "auth": {
     "email": "Email",

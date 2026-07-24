@@ -6,6 +6,7 @@ import { CityPageNav } from "@/components/city/CityPageNav";
 import { CityPageActions } from "@/components/city/CityPageActions";
 import { CityPagePinStatsBlock } from "@/components/city/CityPagePinStatsBlock";
 import { HubHeroImageMasterModeration } from "@/components/hub/HubHeroImageMasterModeration";
+import type { HubHeroImageMasterModerationLabels } from "@/components/hub/HubHeroImageMasterModeration";
 import { HubPageListingSections } from "@/components/hub/HubPageListingSections";
 import { HubPageTopBar } from "@/components/hub/HubPageTopBar";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
@@ -69,21 +70,7 @@ type CityPageContentProps = {
     pinItTooCta: string;
     login: string;
     register: string;
-    heroModeration: {
-      uploadPhoto: string;
-      importUrl: string;
-      removePhoto: string;
-      importTitle: string;
-      importSubtitle: string;
-      importFieldLabel: string;
-      importHint: string;
-      importUrlRequired: string;
-      cancel: string;
-      submit: string;
-      removeConfirm: string;
-      uploadSuccess: string;
-      removeSuccess: string;
-    };
+    heroModeration: HubHeroImageMasterModerationLabels;
   };
 };
 

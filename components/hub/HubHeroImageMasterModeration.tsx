@@ -8,13 +8,17 @@ import { invalidateCachedHeroImages } from "@/lib/client/hero-images-cache";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { toCityHeroDisplayUrl } from "@/lib/city/city-hero-images";
 import { toParkHeroDisplayUrl } from "@/lib/park/park-hero-images";
+import {
+  StockPhotoSearchModal,
+  type StockPhotoSearchModalLabels,
+} from "@/components/kamikaze/StockPhotoSearchModal";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
 import type { ParkType } from "@/types/database";
 
 type HubHeroKind = "city" | "park";
 
-type HubHeroImageMasterModerationLabels = {
+export type HubHeroImageMasterModerationLabels = {
   uploadPhoto: string;
   importUrl: string;
   removePhoto: string;
@@ -28,6 +32,10 @@ type HubHeroImageMasterModerationLabels = {
   removeConfirm: string;
   uploadSuccess: string;
   removeSuccess: string;
+  searchStock: string;
+  stockTitle: string;
+  stockSubtitle: string;
+  stockSearch: StockPhotoSearchModalLabels;
 };
 
 type HubHeroImageMasterModerationProps = {
@@ -82,6 +90,7 @@ export function HubHeroImageMasterModeration({
   );
   const [busy, setBusy] = useState(false);
   const [urlModalOpen, setUrlModalOpen] = useState(false);
+  const [stockModalOpen, setStockModalOpen] = useState(false);
   const [urlValue, setUrlValue] = useState("");
   const [urlError, setUrlError] = useState<string | null>(null);
 
@@ -225,6 +234,14 @@ export function HubHeroImageMasterModeration({
           >
             {labels.importUrl}
           </button>
+          <button
+            type="button"
+            className="city-page__hero-master-btn"
+            disabled={busy}
+            onClick={() => setStockModalOpen(true)}
+          >
+            {labels.searchStock}
+          </button>
           {hasCustomHero ? (
             <button
               type="button"
@@ -245,6 +262,22 @@ export function HubHeroImageMasterModeration({
           onChange={(event) => void onFileChange(event)}
         />
       </div>
+
+      {stockModalOpen ? (
+        <StockPhotoSearchModal
+          skin="hub"
+          title={labels.stockTitle}
+          subtitle={labels.stockSubtitle}
+          defaultQuery={placeName}
+          busy={busy}
+          labels={labels.stockSearch}
+          onClose={() => setStockModalOpen(false)}
+          onSubmit={async (imageUrl) => {
+            await postHero({ imageUrl });
+            setStockModalOpen(false);
+          }}
+        />
+      ) : null}
 
       {urlModalOpen ? (
         <div className="city-page__hero-master-modal" role="presentation">

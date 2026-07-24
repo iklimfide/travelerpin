@@ -4,6 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useModal } from "@/components/ui/ModalProvider";
 import { YpCountrySelect } from "@/components/kamikaze/YpCountrySelect";
 import { YpImageUrlImportModal } from "@/components/kamikaze/YpImageUrlImportModal";
+import {
+  StockPhotoSearchModal,
+  YP_STOCK_PHOTO_LABELS,
+} from "@/components/kamikaze/StockPhotoSearchModal";
 import { invalidateCachedHeroImages } from "@/lib/client/hero-images-cache";
 import { cityHeroLookupKey, toCityHeroDisplayUrl } from "@/lib/city/city-hero-images";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
@@ -61,6 +65,7 @@ export function KamikazeCitiesPanel() {
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set());
   const [renameTarget, setRenameTarget] = useState<CatalogCityRow | null>(null);
   const [urlImportTarget, setUrlImportTarget] = useState<CatalogCityRow | null>(null);
+  const [stockSearchTarget, setStockSearchTarget] = useState<CatalogCityRow | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [renameTrValue, setRenameTrValue] = useState("");
   const fileInputsRef = useRef<Map<string, HTMLInputElement>>(new Map());
@@ -627,6 +632,14 @@ export function KamikazeCitiesPanel() {
         >
           Linkten
         </button>
+        <button
+          type="button"
+          className="yp-btn"
+          disabled={busy}
+          onClick={() => setStockSearchTarget(row)}
+        >
+          Stok ara
+        </button>
         {customUrl ? (
           <button
             type="button"
@@ -1026,6 +1039,23 @@ export function KamikazeCitiesPanel() {
           </>
         )}
       </div>
+
+      {stockSearchTarget ? (
+        <StockPhotoSearchModal
+          key={`stock-${heroKey(stockSearchTarget)}`}
+          skin="yp"
+          title="Stok foto ara"
+          subtitle={`${stockSearchTarget.countryName} · ${stockSearchTarget.name}`}
+          defaultQuery={stockSearchTarget.name}
+          busy={busyKey === heroKey(stockSearchTarget)}
+          labels={YP_STOCK_PHOTO_LABELS}
+          onClose={() => setStockSearchTarget(null)}
+          onSubmit={async (imageUrl) => {
+            await uploadImageFromUrl(stockSearchTarget, imageUrl);
+            setStockSearchTarget(null);
+          }}
+        />
+      ) : null}
 
       {urlImportTarget ? (
         <YpImageUrlImportModal

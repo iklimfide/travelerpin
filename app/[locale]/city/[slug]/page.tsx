@@ -223,6 +223,19 @@ export default async function CityHubPage({ params }: PageProps) {
       removeConfirm: t("heroRemoveConfirm"),
       uploadSuccess: t("heroUploadSuccess"),
       removeSuccess: t("heroRemoveSuccess"),
+      searchStock: t("heroSearchStock"),
+      stockTitle: t("heroStockTitle"),
+      stockSubtitle: t("heroStockSubtitle"),
+      stockSearch: {
+        queryLabel: t("heroStockQueryLabel"),
+        search: t("heroStockSearch"),
+        searching: t("heroStockSearching"),
+        empty: t("heroStockEmpty"),
+        noProviders: t("heroStockNoProviders"),
+        pick: t("heroStockPick"),
+        cancel: tCommon("cancel"),
+        photographer: t("heroStockPhotographer"),
+      },
     },
   };
 

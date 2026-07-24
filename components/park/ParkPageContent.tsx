@@ -1,6 +1,7 @@
 import { Link } from "@/lib/i18n/navigation";
 import type { HubPinStatItem } from "@/components/hub/HubPagePinCount";
 import { HubHeroImageMasterModeration } from "@/components/hub/HubHeroImageMasterModeration";
+import type { HubHeroImageMasterModerationLabels } from "@/components/hub/HubHeroImageMasterModeration";
 import { HubPageListingSections } from "@/components/hub/HubPageListingSections";
 import { HubPageTopBar } from "@/components/hub/HubPageTopBar";
 import { ParkPageActions } from "@/components/park/ParkPageActions";
@@ -60,21 +61,7 @@ type ParkPageContentProps = {
     pinItTooCta: string;
     login: string;
     register: string;
-    heroModeration: {
-      uploadPhoto: string;
-      importUrl: string;
-      removePhoto: string;
-      importTitle: string;
-      importSubtitle: string;
-      importFieldLabel: string;
-      importHint: string;
-      importUrlRequired: string;
-      cancel: string;
-      submit: string;
-      removeConfirm: string;
-      uploadSuccess: string;
-      removeSuccess: string;
-    };
+    heroModeration: HubHeroImageMasterModerationLabels;
   };
 };
 

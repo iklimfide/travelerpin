@@ -316,7 +316,17 @@
     "heroImportSubmit": "İçe aktar",
     "heroRemoveConfirm": "Bu kapak fotoğrafı kaldırılsın mı? Yeni bir görsel yükleyene kadar varsayılan illüstrasyon gösterilir.",
     "heroUploadSuccess": "Kapak fotoğrafı güncellendi.",
-    "heroRemoveSuccess": "Kapak fotoğrafı kaldırıldı."
+    "heroRemoveSuccess": "Kapak fotoğrafı kaldırıldı.",
+    "heroSearchStock": "Stok ara",
+    "heroStockTitle": "Stok foto ara",
+    "heroStockSubtitle": "Pixabay, Unsplash ve Pexels (sunucuda tanımlı olanlar).",
+    "heroStockQueryLabel": "Arama",
+    "heroStockSearch": "Ara",
+    "heroStockSearching": "Aranıyor…",
+    "heroStockEmpty": "Sonuç yok. Farklı bir arama deneyin.",
+    "heroStockNoProviders": "Sunucuda stok foto API anahtarı tanımlı değil.",
+    "heroStockPick": "Bu fotoğrafı kullan",
+    "heroStockPhotographer": "Foto:"
   },
   "parkHub": {
     "home": "Panel",
@@ -368,7 +378,17 @@
     "heroImportSubmit": "İçe aktar",
     "heroRemoveConfirm": "Bu kapak fotoğrafı kaldırılsın mı? Yeni bir görsel yükleyene kadar varsayılan illüstrasyon gösterilir.",
     "heroUploadSuccess": "Kapak fotoğrafı güncellendi.",
-    "heroRemoveSuccess": "Kapak fotoğrafı kaldırıldı."
+    "heroRemoveSuccess": "Kapak fotoğrafı kaldırıldı.",
+    "heroSearchStock": "Stok ara",
+    "heroStockTitle": "Stok foto ara",
+    "heroStockSubtitle": "Pixabay, Unsplash ve Pexels (sunucuda tanımlı olanlar).",
+    "heroStockQueryLabel": "Arama",
+    "heroStockSearch": "Ara",
+    "heroStockSearching": "Aranıyor…",
+    "heroStockEmpty": "Sonuç yok. Farklı bir arama deneyin.",
+    "heroStockNoProviders": "Sunucuda stok foto API anahtarı tanımlı değil.",
+    "heroStockPick": "Bu fotoğrafı kullan",
+    "heroStockPhotographer": "Foto:"
   },
   "auth": {
     "email": "E-posta",
