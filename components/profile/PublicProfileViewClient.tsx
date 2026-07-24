@@ -269,7 +269,9 @@ export function PublicProfileViewClient({
     ) : undefined);
 
   const profileBody = (
-    <div className={`profile-page${embedded ? " profile-page--embedded" : ""}`}>
+    <div
+      className={`profile-page${embedded ? " profile-page--embedded" : " profile-page--route"}`}
+    >
       {previewAsPublic ? <ProfilePublicPreviewBanner username={profile.username} /> : null}
       <div className="profile-shell">
         <div

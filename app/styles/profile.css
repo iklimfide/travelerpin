@@ -1397,11 +1397,11 @@
 }
 
 .profile-media-sections .city-page__traveler-pictures-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin: 0;
-  padding: 16px 16px 16px;
+  padding: 16px;
   list-style: none;
 }
 
@@ -1411,8 +1411,9 @@
 
 .profile-media-sections .city-page__traveler-picture-btn {
   display: block;
-  width: 160px;
-  height: 160px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
   overflow: hidden;
   border: 1px solid var(--city-border);
   border-radius: 14px;
@@ -1433,8 +1434,8 @@
 
 .profile-media-sections .city-page__traveler-picture-image {
   display: block;
-  width: 160px;
-  height: 160px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -1534,31 +1535,17 @@
     opacity: 1;
     pointer-events: auto;
   }
+}
 
-  .profile-media-sections .city-page__traveler-pictures-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    padding: 16px;
-  }
+.profile-media-sections .profile-media-item {
+  width: 100%;
+  height: auto;
+}
 
-  .profile-media-sections .city-page__traveler-picture-btn,
-  .profile-media-sections .profile-media-item__media {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-  }
-
-  .profile-media-sections .profile-media-item {
-    width: 100%;
-    height: auto;
-    aspect-ratio: auto;
-  }
-
-  .profile-media-sections .city-page__traveler-picture-image {
-    width: 100%;
-    height: 100%;
-  }
+.profile-media-sections .profile-media-item__media {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
 }
 
 .profile-media-item {
@@ -3202,6 +3189,55 @@
   text-decoration: underline;
 }
 
+@media (max-width: 719px) {
+  .profile-next-route--own .profile-next-route-card {
+    padding: 6px 7px;
+    gap: 5px;
+  }
+
+  .profile-next-route--own .profile-next-route-card__main {
+    gap: 5px;
+  }
+
+  .profile-next-route--own .profile-next-route-node {
+    width: 20px;
+    height: 20px;
+    border-width: 1.5px;
+    font-size: 9px;
+  }
+
+  .profile-next-route--own .profile-next-route-flag {
+    width: 22px;
+  }
+
+  .profile-next-route--own .profile-next-route-name {
+    font-size: 11px;
+    letter-spacing: -0.2px;
+  }
+
+  .profile-next-route--own .profile-next-route-meta {
+    font-size: 9px;
+  }
+
+  .profile-next-route--own .profile-next-route-text {
+    gap: 1px;
+  }
+
+  .profile-next-route--own .profile-next-route-actions {
+    gap: 3px;
+  }
+
+  .profile-next-route--own .profile-next-route-action-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+
+  .profile-next-route--own .profile-next-route-action-btn--remove {
+    font-size: 14px;
+  }
+}
+
 .profile-section.profile-next-route {
   padding-inline: var(--profile-inset);
   margin-top: var(--profile-stack-gap);
@@ -3846,206 +3882,73 @@
 
 @media (min-width: 1024px) {
   .profile-page--route {
-    --profile-inset: 0;
-    --profile-stack-gap: 20px;
-    --profile-desktop-gap: 24px;
+    --profile-inset: 8px;
+    --profile-stack-gap: 12px;
     box-sizing: border-box;
     width: 100%;
-    max-width: 1200px;
+    max-width: none;
     margin-inline: auto;
-    padding: 28px 32px 40px;
+    padding: 18px 0 40px;
   }
 
   .profile-page--route .profile-guest-auth-bar {
-    max-width: 1200px;
+    max-width: 640px;
     margin-inline: auto;
-    padding-inline: 32px;
+    padding-inline: var(--profile-inset);
     box-sizing: border-box;
   }
 
   .profile-page--route .profile-shell {
-    display: grid;
-    grid-template-columns: 0.9fr 1.1fr;
-    column-gap: 28px;
-    row-gap: var(--profile-stack-gap);
-    width: 100%;
-    max-width: none;
-    min-height: 0;
-    margin: 0;
-    padding: var(--profile-desktop-gap);
-    overflow: visible;
-    border-radius: 28px;
-    background: var(--profile-card);
-    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.1);
+    max-width: 640px;
+    margin-inline: auto;
   }
 
-  .profile-page--route .profile-shell > .profile-main {
-    display: contents;
-  }
-
-  .profile-page--route .profile-story-capture {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .profile-page--route .profile-section:has(.profile-update-card) {
-    grid-column: 2;
-    grid-row: 1;
-    margin-top: 0;
-  }
-
-  .profile-visited-preview .profile-all-nav.profile-card-hero {
-    margin-bottom: 12px;
-  }
-
-  .profile-section.profile-visited-preview {
-    margin-top: 16px;
-    padding: 0;
-  }
-
-  .profile-section:has(.profile-update-card) + .profile-section.profile-visited-preview {
-    margin-top: 18px;
-  }
-
-  .profile-page--route .profile-visited-preview {
-    grid-column: 2;
-    grid-row: 2 / span 3;
-    align-self: start;
-  }
-
-  .profile-page--route .profile-dashboard-tools {
-    grid-column: 1;
-    grid-row: 2;
-  }
-
-  .profile-page--route .profile-section.profile-next-route {
-    grid-column: 1;
-    grid-row: 3;
-  }
-
-  .profile-page--route .profile-media-sections {
-    grid-column: 1 / -1;
-    grid-row: 4;
-  }
-
-  .profile-page--route .profile-shell > .profile-main > .profile-section:not(:has(.profile-update-card)):not(.profile-next-route) {
-    grid-column: 1 / -1;
-  }
-
-  .profile-page--route .profile-cta {
-    grid-column: 1 / -1;
-  }
-
-  .profile-page--route .profile-hero {
-    padding: 0;
-    border-radius: 24px 24px 0 0;
-  }
-
-  .profile-page--route .profile-hero-card {
-    min-height: 188px;
-    padding: 28px 32px 32px;
-    border-radius: 24px;
-    display: flex;
-    align-items: flex-end;
-  }
-
-  .profile-page--route .profile-hero-title {
-    margin-top: 0;
-    max-width: none;
-  }
-
-  .profile-page--route .profile-hero-title h1 {
-    font-size: min(34px, max(14px, calc(100cqw / 22)));
-    margin-bottom: 8px;
-  }
-
-  .profile-page--route .profile-hero-title p {
-    font-size: 15px;
-    line-height: 1.45;
-  }
-
-  .profile-page--route .profile-route-line,
-  .profile-page--route .profile-route-dot {
-    display: none;
-  }
-
-  .profile-page--route .profile-card {
-    margin: -56px 0 0;
-    padding: 72px 22px 24px;
-    border-radius: 24px;
-    box-shadow: 0 16px 36px rgba(16, 32, 60, 0.08);
-  }
-
-  .profile-page--route .profile-square-capture {
-    margin-top: var(--profile-stack-gap);
-  }
-
-  .profile-page--route .profile-map-panel {
-    padding: 20px;
-    border-radius: 24px;
-  }
-
-  .profile-page--route .profile-mini-map #travel-map,
-  .profile-page--route .profile-mini-map #travel-map > div {
-    aspect-ratio: 4 / 3;
-    min-height: 260px;
-  }
-
-  .profile-page--route .profile-section,
-  .profile-page--route .profile-media-sections,
-  .profile-page--route .profile-dashboard-tools,
-  .profile-page--route .profile-cta {
-    padding-inline: 0;
-    margin-top: var(--profile-stack-gap);
-  }
-
-  .profile-page--route .profile-trips-scroll {
-    overflow: visible;
-  }
-
-  .profile-page--route .profile-trips-scroll--clamped {
-    overflow: hidden;
-  }
-
-  .profile-page--route .profile-trips-track {
-    display: grid;
+  .profile-page--route .profile-visited-preview .profile-all-grid--preview {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    width: 100%;
     gap: 12px;
   }
 
-  .profile-page--route .profile-trip {
-    width: auto;
-    min-width: 0;
-    max-width: none;
-    flex-shrink: unset;
-    scroll-snap-align: unset;
+  .profile-page--route .profile-visited-preview .profile-all-grid .profile-trip {
+    border-radius: 20px;
   }
 
-  .profile-page--route .profile-trips-track .profile-trip-image {
-    height: auto;
-    aspect-ratio: 4 / 3;
+  .profile-page--route .profile-visited-preview .profile-all-grid .profile-trip-body {
+    padding: 11px 12px 10px;
   }
 
-  .profile-page--route .profile-trips-track .profile-trip-image__photo {
-    transform: none;
+  .profile-page--route .profile-visited-preview .profile-all-grid .profile-trip-body h3 {
+    font-size: 15px;
+    letter-spacing: -0.2px;
   }
 
-  .profile-page--route .profile-cta {
-    margin-inline: 0;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 14px;
-    padding: 22px 24px;
+  .profile-page--route .profile-visited-preview .profile-all-grid .profile-trip-body p {
+    font-size: 12px;
+    line-height: 1.35;
+    -webkit-line-clamp: 2;
   }
 
-  .profile-page--route .profile-cta-actions {
-    flex-shrink: 0;
-    flex-direction: row;
-    justify-content: center;
-    gap: 12px;
+  .profile-page--route .profile-visited-preview .profile-all-grid .profile-trip-meta {
+    margin-top: 6px;
+    gap: 4px;
+  }
+
+  .profile-page--route .profile-visited-preview .profile-all-grid .profile-chip {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  .profile-page--route .profile-visited-preview .profile-all-grid .profile-trip-badge {
+    top: 8px;
+    padding: 5px 8px;
+    font-size: 10px;
+  }
+
+  .profile-page--route .profile-visited-preview .profile-all-grid .profile-trip-flag {
+    width: clamp(52px, 33%, 80px);
+  }
+
+  .profile-page--route .profile-media-sections .city-page__traveler-pictures-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .profile-all-page {
@@ -4117,7 +4020,7 @@
 
   .profile-all-page .profile-all-grid,
   .profile-all-page .profile-all-grid--preview {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
   }
 
@@ -4196,9 +4099,12 @@
 }
 
 @media (min-width: 1280px) {
-  .profile-page--route {
-    max-width: 1400px;
-    padding-inline: 40px;
+  .profile-page--route .profile-shell {
+    max-width: 680px;
+  }
+
+  .profile-page--route .profile-guest-auth-bar {
+    max-width: 680px;
   }
 
   .profile-all-page {
@@ -4234,20 +4140,6 @@
 
   .profile-all-page .profile-all-grid .profile-trip-flag {
     width: clamp(56px, 33%, 84px);
-  }
-
-  .profile-page--route .profile-guest-auth-bar {
-    max-width: 1400px;
-    padding-inline: 40px;
-  }
-
-  .profile-page--route .profile-shell {
-    gap: 28px;
-    padding: 28px;
-  }
-
-  .profile-page--route .profile-trips-track {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 

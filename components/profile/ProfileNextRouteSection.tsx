@@ -438,7 +438,10 @@ export function ProfileNextRouteSection({
   const showTripMeta = stops.length > 0 && isOwnProfile;
 
   return (
-    <section id={sectionId} className="profile-section profile-next-route">
+    <section
+      id={sectionId}
+      className={`profile-section profile-next-route${isOwnProfile ? " profile-next-route--own" : ""}`}
+    >
       <div
         id={`${sectionId}-capture`}
         className="profile-next-route-box"
