@@ -23,9 +23,9 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function fetchFirstStockImageUrl(cityName: string): Promise<string | null> {
+export async function fetchFirstStockImageUrl(query: string): Promise<string | null> {
   const res = await fetch(
-    `/api/kamikaze/stock-photos?q=${encodeURIComponent(cityName.trim())}&page=1`
+    `/api/kamikaze/stock-photos?q=${encodeURIComponent(query.trim())}&page=1`
   );
   if (!res.ok) return null;
   const data = (await res.json()) as { results?: { imageUrl?: string }[] };

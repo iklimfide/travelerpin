@@ -7,6 +7,12 @@ import {
   assignBulkCityHeroes,
   fetchCityHeroCustomLookupKeys,
 } from "@/lib/kamikaze/client/bulk-city-hero";
+import { parkHeroLookupKey } from "@/lib/park/park-hero-images";
+import {
+  assignBulkParkHeroes,
+  fetchParkHeroCustomLookupKeys,
+} from "@/lib/kamikaze/client/bulk-park-hero";
+import type { ParkType } from "@/types/database";
 import { YP_CACHE_KEYS, ypCacheGet, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
 
 type CountryStat = {
@@ -55,16 +61,27 @@ export function KamikazeStatsPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [customHeroKeys, setCustomHeroKeys] = useState<Set<string>>(() => new Set());
+  const [customParkHeroKeys, setCustomParkHeroKeys] = useState<Set<string>>(() => new Set());
   const [bulkHeroBusy, setBulkHeroBusy] = useState(false);
+  const [bulkParkHeroBusy, setBulkParkHeroBusy] = useState(false);
   const [bulkHeroProgress, setBulkHeroProgress] = useState<{
     current: number;
     total: number;
     cityName: string;
   } | null>(null);
+  const [bulkParkHeroProgress, setBulkParkHeroProgress] = useState<{
+    current: number;
+    total: number;
+    parkName: string;
+  } | null>(null);
 
   const reloadCustomHeroKeys = useCallback(async () => {
-    const keys = await fetchCityHeroCustomLookupKeys();
-    setCustomHeroKeys(keys);
+    const [cityKeys, parkKeys] = await Promise.all([
+      fetchCityHeroCustomLookupKeys(),
+      fetchParkHeroCustomLookupKeys(),
+    ]);
+    setCustomHeroKeys(cityKeys);
+    setCustomParkHeroKeys(parkKeys);
   }, []);
 
   useEffect(() => {
@@ -170,6 +187,54 @@ export function KamikazeStatsPanel() {
     }
   }
 
+  const pinnedParksMissingHero = parks.filter(
+    (row) =>
+      !customParkHeroKeys.has(
+        parkHeroLookupKey(row.countryCode, row.parkName, row.parkType as ParkType)
+      )
+  );
+
+  async function handleBulkHeroForPinnedParks() {
+    if (pinnedParksMissingHero.length === 0) {
+      await modal.alert("Pinlenen parkların hepsinde zaten özel kapak var.", { variant: "info" });
+      return;
+    }
+
+    const ok = await modal.confirm(
+      `Pin istatistiğindeki ${pinnedParksMissingHero.length} parke (özel kapak olmayan) stok aramasından ilk sonuç otomatik yüklenecek. Beğenmediklerini park sayfasından tek tek değiştirebilirsin. Devam edilsin mi?`,
+      {
+        title: "Pinlenen parklara kapak ata",
+        variant: "info",
+        confirmLabel: "Ata",
+        cancelLabel: "Vazgeç",
+      }
+    );
+    if (!ok) return;
+
+    setBulkParkHeroBusy(true);
+    setError(null);
+    try {
+      const { assigned, failed } = await assignBulkParkHeroes(
+        pinnedParksMissingHero.map((row) => ({
+          countryCode: row.countryCode,
+          parkName: row.parkName,
+          parkType: row.parkType as ParkType,
+        })),
+        { onProgress: (progress) => setBulkParkHeroProgress(progress) }
+      );
+      await reloadCustomHeroKeys();
+      await modal.alert(
+        `${assigned} kapak atandı.${failed > 0 ? ` ${failed} parkta sonuç bulunamadı veya yükleme başarısız.` : ""}`,
+        { variant: assigned > 0 ? "success" : "info" }
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Toplu kapak atama başarısız");
+    } finally {
+      setBulkParkHeroProgress(null);
+      setBulkParkHeroBusy(false);
+    }
+  }
+
   const visibleCountries = countries.slice(0, countryVisible);
   const visibleCities = cities.slice(0, cityVisible);
   const visibleParks = parks.slice(0, parkVisible);
@@ -184,8 +249,14 @@ export function KamikazeStatsPanel() {
       {error ? <p className="yp-error">{error}</p> : null}
       {bulkHeroProgress ? (
         <p className="yp-muted">
-          Kapak atanıyor ({bulkHeroProgress.current}/{bulkHeroProgress.total}):{" "}
+          Şehir kapak atanıyor ({bulkHeroProgress.current}/{bulkHeroProgress.total}):{" "}
           {bulkHeroProgress.cityName}
+        </p>
+      ) : null}
+      {bulkParkHeroProgress ? (
+        <p className="yp-muted">
+          Park kapak atanıyor ({bulkParkHeroProgress.current}/{bulkParkHeroProgress.total}):{" "}
+          {bulkParkHeroProgress.parkName}
         </p>
       ) : null}
       {loading ? <p className="yp-muted">Sıralamalar yükleniyor…</p> : null}
@@ -297,11 +368,33 @@ export function KamikazeStatsPanel() {
       </div>
 
       <div className="yp-panel">
-        <div className="yp-panel__title">En çok pinlenen parklar</div>
+        <div className="yp-panel__title">
+          <div className="yp-panel__title-start">
+            <span>En çok pinlenen parklar</span>
+          </div>
+          {parks.length > 0 && !loading ? (
+            <div className="yp-actions">
+              <button
+                type="button"
+                className="yp-btn yp-btn--primary"
+                disabled={bulkParkHeroBusy || pinnedParksMissingHero.length === 0}
+                onClick={() => void handleBulkHeroForPinnedParks()}
+              >
+                {bulkParkHeroBusy
+                  ? "Kapak atanıyor…"
+                  : `Pinlenenlere kapak ata (${pinnedParksMissingHero.length})`}
+              </button>
+            </div>
+          ) : null}
+        </div>
         {parks.length === 0 && !loading ? (
           <div className="yp-empty">Henüz park pin verisi yok.</div>
         ) : parks.length > 0 ? (
           <>
+            <p className="yp-muted" style={{ padding: "0 0.9rem", margin: 0, fontSize: "0.85rem" }}>
+              Kapak atama tüm pinlenen park listesine uygulanır (tabloda görünen sayfa değil). Özel
+              kapak olanlar atlanır.
+            </p>
             <table className="yp-table">
               <thead>
                 <tr>
