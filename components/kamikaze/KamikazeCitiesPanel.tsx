@@ -82,6 +82,8 @@ export function KamikazeCitiesPanel() {
     Boolean(popularFilter);
 
   useEffect(() => {
+    if (!canBrowse) return;
+
     let cancelled = false;
     void fetch("/api/kamikaze/city-images")
       .then((res) => (res.ok ? res.json() : null))
@@ -99,7 +101,7 @@ export function KamikazeCitiesPanel() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [canBrowse]);
 
   const loadList = useCallback(
     async (mode: "replace" | "append" = "replace", options?: { force?: boolean; offset?: number }) => {
@@ -187,11 +189,21 @@ export function KamikazeCitiesPanel() {
   );
 
   useEffect(() => {
+    if (!canBrowse) {
+      setResults([]);
+      setHasMore(false);
+      setNextOffset(0);
+      setTotal(0);
+      setSelectedKeys(new Set());
+      setLoading(false);
+      return;
+    }
+
     const timer = window.setTimeout(() => {
       void loadList("replace");
     }, 280);
     return () => window.clearTimeout(timer);
-  }, [loadList]);
+  }, [canBrowse, loadList]);
 
   useEffect(() => {
     const queryText = formName.trim();

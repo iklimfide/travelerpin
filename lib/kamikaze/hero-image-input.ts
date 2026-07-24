@@ -1,6 +1,7 @@
 import "server-only";
 import { LIMITS } from "@/lib/constants";
 import { fetchRemoteImageBuffer } from "@/lib/kamikaze/fetch-remote-image";
+import { detectImageMimeFromBuffer } from "@/lib/utils/image";
 
 export class HeroImageInputError extends Error {
   constructor(message: string) {
@@ -16,16 +17,17 @@ export async function readKamikazeHeroImageInput(
   const imageUrl = String(formData.get("imageUrl") ?? formData.get("url") ?? "").trim();
 
   if (file instanceof File) {
-    if (!file.type.startsWith("image/")) {
-      throw new HeroImageInputError("Dosya bir görsel olmalı");
-    }
     if (file.size > LIMITS.avatarMaxBytes) {
       throw new HeroImageInputError("Görsel en fazla 5 MB olabilir");
     }
-    return {
-      buffer: Buffer.from(await file.arrayBuffer()),
-      contentType: file.type,
-    };
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const contentType =
+      detectImageMimeFromBuffer(buffer) ??
+      (file.type.startsWith("image/") ? file.type : "");
+    if (!contentType.startsWith("image/")) {
+      throw new HeroImageInputError("Dosya bir görsel olmalı");
+    }
+    return { buffer, contentType };
   }
 
   if (imageUrl) {

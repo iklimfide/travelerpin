@@ -24,8 +24,8 @@ function loadSharp(): SharpModule {
 
   const sharpRoot = join(process.cwd(), "node_modules", "sharp");
   const loaders = [
-    () => createRequire(join(sharpRoot, "package.json"))("./dist/index.cjs") as unknown,
     () => createRequire(join(process.cwd(), "package.json"))("sharp") as unknown,
+    () => createRequire(join(sharpRoot, "package.json"))("./dist/index.cjs") as unknown,
   ];
 
   for (const load of loaders) {
@@ -62,7 +62,31 @@ function isUnsupportedBrowserImageType(contentType: string): boolean {
   return /heif|heic|heics/i.test(contentType);
 }
 
-function sniffImageContentType(buffer: Buffer): string | null {
+/** Magic-byte MIME sniffing — browsers often mislabel uploads (especially on mobile). */
+export function detectImageMimeFromBuffer(buffer: Buffer): string | null {
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return "image/jpeg";
+  }
+  if (
+    buffer.length >= 8 &&
+    buffer[0] === 0x89 &&
+    buffer.toString("ascii", 1, 4) === "PNG"
+  ) {
+    return "image/png";
+  }
+  if (
+    buffer.length >= 12 &&
+    buffer.toString("ascii", 0, 4) === "RIFF" &&
+    buffer.toString("ascii", 8, 12) === "WEBP"
+  ) {
+    return "image/webp";
+  }
+  if (
+    buffer.length >= 6 &&
+    (buffer.toString("ascii", 0, 6) === "GIF87a" || buffer.toString("ascii", 0, 6) === "GIF89a")
+  ) {
+    return "image/gif";
+  }
   if (buffer.length >= 12 && buffer.toString("ascii", 4, 8) === "ftyp") {
     const brand = buffer.toString("ascii", 8, 12).toLowerCase();
     if (["heic", "heix", "hevc", "hevx", "mif1", "msf1"].includes(brand)) {
@@ -73,6 +97,10 @@ function sniffImageContentType(buffer: Buffer): string | null {
   return null;
 }
 
+function sniffImageContentType(buffer: Buffer): string | null {
+  return detectImageMimeFromBuffer(buffer);
+}
+
 function assertBrowserSafeImageBuffer(buffer: Buffer, declaredType: string): void {
   const sniffed = sniffImageContentType(buffer);
   const effective = sniffed ?? declaredType;
@@ -81,8 +109,15 @@ function assertBrowserSafeImageBuffer(buffer: Buffer, declaredType: string): voi
   }
 }
 
+function resolveDeclaredContentType(buffer: Buffer, declaredType: string): string {
+  const detected = detectImageMimeFromBuffer(buffer);
+  if (detected) return detected;
+  if (declaredType.startsWith("image/")) return declaredType;
+  return "image/jpeg";
+}
+
 function fallbackImage(buffer: Buffer, contentType: string): OptimizedImage {
-  const type = contentType.startsWith("image/") ? contentType : "image/jpeg";
+  const type = resolveDeclaredContentType(buffer, contentType);
   assertBrowserSafeImageBuffer(buffer, type);
   return {
     buffer,
@@ -163,6 +198,10 @@ export async function optimizeAvatar(
     const detail = error instanceof Error ? error.message : String(error);
     throw new Error(`Image could not be converted to WebP: ${detail}`);
   }
+}
+
+export function heroStorageExtension(ext: OptimizedImage["extension"]): string {
+  return ext === "jpeg" ? "jpg" : ext;
 }
 
 export function getWebpFileName(originalName: string): string {

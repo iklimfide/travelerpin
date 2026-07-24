@@ -17,7 +17,7 @@ import {
 } from "@/lib/storage/r2";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
-import { optimizeImageToWebp } from "@/lib/utils/image";
+import { heroStorageExtension, optimizeImage } from "@/lib/utils/image";
 import {
   HeroImageInputError,
   readKamikazeHeroImageInput,
@@ -115,11 +115,12 @@ export async function POST(request: Request) {
   try {
     const canonical = canonicalCatalogCityName(countryCode, formatCityDisplayName(cityNameRaw));
     const nameKey = catalogNameKey(canonical, countryCode);
-    const optimized = await optimizeImageToWebp(imageInput.buffer, imageInput.contentType);
+    const optimized = await optimizeImage(imageInput.buffer, imageInput.contentType);
+    const storageExt = heroStorageExtension(optimized.extension);
 
     await deleteR2Objects(cityHeroR2ObjectKeys(countryCode, nameKey));
 
-    const r2Key = cityHeroR2ObjectKey(countryCode, nameKey, "webp");
+    const r2Key = cityHeroR2ObjectKey(countryCode, nameKey, storageExt);
     const publicUrl = await uploadPhotoToR2(r2Key, optimized.buffer, optimized.contentType);
     const imageUrl = `${publicUrl}?v=${Date.now()}`;
 

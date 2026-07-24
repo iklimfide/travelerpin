@@ -29,6 +29,7 @@ export function KamikazeNav() {
             <Link
               key={link.href}
               href={link.href}
+              prefetch={false}
               className={`yp-nav__link${active ? " yp-nav__link--active" : ""}`}
             >
               {link.label}

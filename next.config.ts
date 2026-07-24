@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
     "@img/colour",
     "@img/sharp-wasm32",
     "@img/sharp-win32-x64",
+    "@img/sharp-linux-x64",
+    "@img/sharp-linux-arm64",
+    "@img/sharp-linuxmusl-x64",
     "detect-libc",
   ],
   // Soft-nav revisits (profile/settings/modals) stay instant until pin/settings change.
