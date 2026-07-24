@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useModal } from "@/components/ui/ModalProvider";
+import { cityHeroLookupKey } from "@/lib/city/city-hero-images";
+import {
+  assignBulkCityHeroes,
+  fetchCityHeroCustomLookupKeys,
+} from "@/lib/kamikaze/client/bulk-city-hero";
 import { YP_CACHE_KEYS, ypCacheGet, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
 
 type CountryStat = {
@@ -39,6 +45,7 @@ const PARK_TYPE_LABELS: Record<string, string> = {
 const PAGE_SIZE = 20;
 
 export function KamikazeStatsPanel() {
+  const modal = useModal();
   const [countries, setCountries] = useState<CountryStat[]>([]);
   const [cities, setCities] = useState<CityStat[]>([]);
   const [parks, setParks] = useState<ParkStat[]>([]);
@@ -47,6 +54,22 @@ export function KamikazeStatsPanel() {
   const [parkVisible, setParkVisible] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [customHeroKeys, setCustomHeroKeys] = useState<Set<string>>(() => new Set());
+  const [bulkHeroBusy, setBulkHeroBusy] = useState(false);
+  const [bulkHeroProgress, setBulkHeroProgress] = useState<{
+    current: number;
+    total: number;
+    cityName: string;
+  } | null>(null);
+
+  const reloadCustomHeroKeys = useCallback(async () => {
+    const keys = await fetchCityHeroCustomLookupKeys();
+    setCustomHeroKeys(keys);
+  }, []);
+
+  useEffect(() => {
+    void reloadCustomHeroKeys();
+  }, [reloadCustomHeroKeys]);
 
   useEffect(() => {
     let cancelled = false;
@@ -103,6 +126,50 @@ export function KamikazeStatsPanel() {
     };
   }, []);
 
+  const pinnedCitiesMissingHero = cities.filter(
+    (row) => !customHeroKeys.has(cityHeroLookupKey(row.countryCode, row.cityName))
+  );
+
+  async function handleBulkHeroForPinnedCities() {
+    if (pinnedCitiesMissingHero.length === 0) {
+      await modal.alert("Pinlenen şehirlerin hepsinde zaten özel kapak var.", { variant: "info" });
+      return;
+    }
+
+    const ok = await modal.confirm(
+      `Pin istatistiğindeki ${pinnedCitiesMissingHero.length} şehre (özel kapak olmayan) stok aramasından ilk sonuç otomatik yüklenecek. Beğenmediklerini şehir sayfasından tek tek değiştirebilirsin. Devam edilsin mi?`,
+      {
+        title: "Pinlenen şehirlere kapak ata",
+        variant: "info",
+        confirmLabel: "Ata",
+        cancelLabel: "Vazgeç",
+      }
+    );
+    if (!ok) return;
+
+    setBulkHeroBusy(true);
+    setError(null);
+    try {
+      const { assigned, failed } = await assignBulkCityHeroes(
+        pinnedCitiesMissingHero.map((row) => ({
+          countryCode: row.countryCode,
+          cityName: row.cityName,
+        })),
+        { onProgress: (progress) => setBulkHeroProgress(progress) }
+      );
+      await reloadCustomHeroKeys();
+      await modal.alert(
+        `${assigned} kapak atandı.${failed > 0 ? ` ${failed} şehirde sonuç bulunamadı veya yükleme başarısız.` : ""}`,
+        { variant: assigned > 0 ? "success" : "info" }
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Toplu kapak atama başarısız");
+    } finally {
+      setBulkHeroProgress(null);
+      setBulkHeroBusy(false);
+    }
+  }
+
   const visibleCountries = countries.slice(0, countryVisible);
   const visibleCities = cities.slice(0, cityVisible);
   const visibleParks = parks.slice(0, parkVisible);
@@ -115,6 +182,12 @@ export function KamikazeStatsPanel() {
       </p>
 
       {error ? <p className="yp-error">{error}</p> : null}
+      {bulkHeroProgress ? (
+        <p className="yp-muted">
+          Kapak atanıyor ({bulkHeroProgress.current}/{bulkHeroProgress.total}):{" "}
+          {bulkHeroProgress.cityName}
+        </p>
+      ) : null}
       {loading ? <p className="yp-muted">Sıralamalar yükleniyor…</p> : null}
 
       <div className="yp-panel">
@@ -159,11 +232,33 @@ export function KamikazeStatsPanel() {
       </div>
 
       <div className="yp-panel">
-        <div className="yp-panel__title">En çok pinlenen şehirler</div>
+        <div className="yp-panel__title">
+          <div className="yp-panel__title-start">
+            <span>En çok pinlenen şehirler</span>
+          </div>
+          {cities.length > 0 && !loading ? (
+            <div className="yp-actions">
+              <button
+                type="button"
+                className="yp-btn yp-btn--primary"
+                disabled={bulkHeroBusy || pinnedCitiesMissingHero.length === 0}
+                onClick={() => void handleBulkHeroForPinnedCities()}
+              >
+                {bulkHeroBusy
+                  ? "Kapak atanıyor…"
+                  : `Pinlenenlere kapak ata (${pinnedCitiesMissingHero.length})`}
+              </button>
+            </div>
+          ) : null}
+        </div>
         {cities.length === 0 && !loading ? (
           <div className="yp-empty">Henüz şehir pin verisi yok.</div>
         ) : cities.length > 0 ? (
           <>
+            <p className="yp-muted" style={{ padding: "0 0.9rem", margin: 0, fontSize: "0.85rem" }}>
+              Kapak atama tüm pinlenen şehir listesine uygulanır (tabloda görünen sayfa değil). Özel
+              kapak olanlar atlanır.
+            </p>
             <table className="yp-table">
               <thead>
                 <tr>

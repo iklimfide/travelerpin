@@ -589,6 +589,12 @@
   font-size: 0.85rem;
 }
 
+.stock-photo-search__more-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.65rem;
+}
+
 .yp-i18n-toolbar {
   align-items: end;
 }

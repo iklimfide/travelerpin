@@ -326,7 +326,9 @@
     "heroStockEmpty": "Sonuç yok. Farklı bir arama deneyin.",
     "heroStockNoProviders": "Sunucuda stok foto API anahtarı tanımlı değil.",
     "heroStockPick": "Bu fotoğrafı kullan",
-    "heroStockPhotographer": "Foto:"
+    "heroStockPhotographer": "Foto:",
+    "heroStockLoadMore": "Yenilerini getir",
+    "heroStockNoMore": "Bu arama için başka sonuç kalmadı."
   },
   "parkHub": {
     "home": "Panel",
@@ -388,7 +390,9 @@
     "heroStockEmpty": "Sonuç yok. Farklı bir arama deneyin.",
     "heroStockNoProviders": "Sunucuda stok foto API anahtarı tanımlı değil.",
     "heroStockPick": "Bu fotoğrafı kullan",
-    "heroStockPhotographer": "Foto:"
+    "heroStockPhotographer": "Foto:",
+    "heroStockLoadMore": "Yenilerini getir",
+    "heroStockNoMore": "Bu arama için başka sonuç kalmadı."
   },
   "auth": {
     "email": "E-posta",

@@ -224,6 +224,8 @@ export default async function ParkHubPage({ params }: PageProps) {
         pick: t("heroStockPick"),
         cancel: tCommon("cancel"),
         photographer: t("heroStockPhotographer"),
+        loadMore: t("heroStockLoadMore"),
+        noMore: t("heroStockNoMore"),
       },
     },
   };

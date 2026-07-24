@@ -12,6 +12,9 @@ import { invalidateCachedHeroImages } from "@/lib/client/hero-images-cache";
 import { cityHeroLookupKey, toCityHeroDisplayUrl } from "@/lib/city/city-hero-images";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { YP_CACHE_KEYS, ypCacheGet, ypCacheInvalidate, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
+import {
+  assignBulkCityHeroes,
+} from "@/lib/kamikaze/client/bulk-city-hero";
 import { citiesAreSame } from "@/lib/utils/city-aliases";
 import { cityPlacePath } from "@/lib/utils/hub-place-path";
 
@@ -66,6 +69,11 @@ export function KamikazeCitiesPanel() {
   const [renameTarget, setRenameTarget] = useState<CatalogCityRow | null>(null);
   const [urlImportTarget, setUrlImportTarget] = useState<CatalogCityRow | null>(null);
   const [stockSearchTarget, setStockSearchTarget] = useState<CatalogCityRow | null>(null);
+  const [bulkHeroProgress, setBulkHeroProgress] = useState<{
+    current: number;
+    total: number;
+    cityName: string;
+  } | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [renameTrValue, setRenameTrValue] = useState("");
   const fileInputsRef = useRef<Map<string, HTMLInputElement>>(new Map());
@@ -274,6 +282,10 @@ export function KamikazeCitiesPanel() {
     return cityHeroLookupKey(row.countryCode, row.name);
   }
 
+  function hasCustomHero(row: CatalogCityRow): boolean {
+    return customImages.has(heroKey(row));
+  }
+
   function resolveCustomUrl(row: CatalogCityRow): string | null {
     const stored = customImages.get(heroKey(row));
     return stored ? toCityHeroDisplayUrl(stored) : null;
@@ -307,10 +319,11 @@ export function KamikazeCitiesPanel() {
 
   async function postHeroImage(
     row: CatalogCityRow,
-    payload: { file?: File; imageUrl?: string }
+    payload: { file?: File; imageUrl?: string },
+    options?: { quiet?: boolean }
   ) {
     const key = heroKey(row);
-    setBusyKey(key);
+    if (!options?.quiet) setBusyKey(key);
     setError(null);
     try {
       const formData = new FormData();
@@ -338,7 +351,7 @@ export function KamikazeCitiesPanel() {
       setError(message);
       throw err instanceof Error ? err : new Error(message);
     } finally {
-      setBusyKey(null);
+      if (!options?.quiet) setBusyKey(null);
     }
   }
 
@@ -506,6 +519,129 @@ export function KamikazeCitiesPanel() {
       },
       "bulk-delete"
     );
+  }
+
+  async function fetchCatalogCityPage(offset: number): Promise<{
+    page: CatalogCityRow[];
+    hasMore: boolean;
+    nextOffset: number;
+  }> {
+    const params = new URLSearchParams({
+      kind: "city",
+      offset: String(offset),
+      limit: String(CATALOG_PAGE_SIZE),
+    });
+    if (country) params.set("country", country);
+    if (query.trim()) params.set("q", query.trim());
+    if (popularFilter) params.set("popularFilter", popularFilter);
+    if (listScope === "yp") params.set("ypOnly", "1");
+
+    const res = await fetch(`/api/kamikaze/catalog?${params}`);
+    const data = (await res.json()) as {
+      results?: CatalogCityRow[];
+      hasMore?: boolean;
+      nextOffset?: number;
+      error?: string;
+    };
+    if (!res.ok) throw new Error(data.error ?? "Şehirler yüklenemedi");
+
+    const page = data.results ?? [];
+    return {
+      page,
+      hasMore: Boolean(data.hasMore),
+      nextOffset: data.nextOffset ?? offset + page.length,
+    };
+  }
+
+  async function fetchAllFilteredCatalogRows(): Promise<CatalogCityRow[]> {
+    const all: CatalogCityRow[] = [];
+    let offset = 0;
+    let hasMore = true;
+    while (hasMore) {
+      const chunk = await fetchCatalogCityPage(offset);
+      all.push(...chunk.page);
+      hasMore = chunk.hasMore;
+      offset = chunk.nextOffset;
+    }
+    return all;
+  }
+
+  async function runBulkAutoHero(targets: CatalogCityRow[], scopeLabel: string) {
+    const rows = targets.filter((row) => !hasCustomHero(row));
+    if (rows.length === 0) {
+      await modal.alert("Atanacak şehir yok — seçilenlerin hepsinde zaten özel kapak var.", {
+        variant: "info",
+      });
+      return;
+    }
+
+    const ok = await modal.confirm(
+      `${scopeLabel}: ${rows.length} şehre stok aramasından (Unsplash vb.) ilk sonuç otomatik kapak olarak yüklenecek. Zaten özel kapak olanlar atlanır. Beğenmediklerini şehir sayfasından tek tek değiştirebilirsin. Devam edilsin mi?`,
+      {
+        title: "Otomatik kapak ata",
+        variant: "info",
+        confirmLabel: "Ata",
+        cancelLabel: "Vazgeç",
+      }
+    );
+    if (!ok) return;
+
+    setBusyId("bulk-hero");
+    setError(null);
+
+    try {
+      const { assigned, failed } = await assignBulkCityHeroes(
+        rows.map((row) => ({ countryCode: row.countryCode, cityName: row.name })),
+        {
+          onProgress: (progress) => setBulkHeroProgress(progress),
+        }
+      );
+
+      const heroRes = await fetch("/api/kamikaze/city-images");
+      if (heroRes.ok) {
+        const data = (await heroRes.json()) as { images?: CustomHeroRow[] };
+        const next = new Map<string, string>();
+        for (const row of data.images ?? []) {
+          next.set(cityHeroLookupKey(row.countryCode, row.cityName), row.imageUrl);
+        }
+        setCustomImages(next);
+      }
+
+      ypCacheInvalidate("catalog:");
+      await loadList("replace", { force: true });
+
+      await modal.alert(
+        `${assigned} kapak atandı.${failed > 0 ? ` ${failed} şehirde sonuç bulunamadı veya yükleme başarısız.` : ""} Beğenmediklerini şehir sayfasından «Stok ara» ile değiştirebilirsin.`,
+        { variant: assigned > 0 ? "success" : "info" }
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Toplu kapak atama başarısız");
+    } finally {
+      setBulkHeroProgress(null);
+      setBusyId(null);
+    }
+  }
+
+  async function handleBulkAutoHeroForFilter() {
+    if (!canBrowse) return;
+    setError(null);
+    try {
+      setBusyId("bulk-hero-load");
+      const all = await fetchAllFilteredCatalogRows();
+      setBusyId(null);
+      const scope =
+        country.trim() !== ""
+          ? `Süzgeç (${all.length} şehir)`
+          : `Mevcut süzgeç (${all.length} şehir)`;
+      await runBulkAutoHero(all, scope);
+    } catch (err) {
+      setBusyId(null);
+      setError(err instanceof Error ? err.message : "Liste yüklenemedi");
+    }
+  }
+
+  async function handleBulkAutoHeroForSelection() {
+    await runBulkAutoHero(selectedRows(), `Seçili (${selectedRows().length})`);
   }
 
   async function handleBulkPopular(isPopular: boolean) {
@@ -760,6 +896,12 @@ export function KamikazeCitiesPanel() {
       </p>
 
       {error ? <p className="yp-error">{error}</p> : null}
+      {bulkHeroProgress ? (
+        <p className="yp-muted" style={{ marginTop: bulkHeroProgress ? "0.35rem" : 0 }}>
+          Kapak atanıyor ({bulkHeroProgress.current}/{bulkHeroProgress.total}):{" "}
+          {bulkHeroProgress.cityName}
+        </p>
+      ) : null}
 
       <div className="yp-panel">
         <div className="yp-panel__title">Yeni şehir ekle</div>
@@ -919,10 +1061,22 @@ export function KamikazeCitiesPanel() {
           type="button"
           className="yp-btn"
           onClick={() => void loadList("replace", { force: true })}
-          disabled={loading}
+          disabled={loading || Boolean(busyId?.startsWith("bulk-hero"))}
         >
           {loading ? "Yükleniyor…" : "Yenile"}
         </button>
+        {canBrowse ? (
+          <button
+            type="button"
+            className="yp-btn yp-btn--primary"
+            disabled={Boolean(busyId) || loading}
+            onClick={() => void handleBulkAutoHeroForFilter()}
+          >
+            {busyId === "bulk-hero-load" || busyId === "bulk-hero"
+              ? "Kapak atanıyor…"
+              : "Süzgeçteki eksiklere kapak ata"}
+          </button>
+        ) : null}
       </div>
 
       <div className="yp-panel">
@@ -947,6 +1101,14 @@ export function KamikazeCitiesPanel() {
           </div>
           {selectedKeys.size > 0 ? (
             <div className="yp-actions">
+              <button
+                type="button"
+                className="yp-btn yp-btn--primary"
+                disabled={busyId === "bulk-hero" || busyId === "bulk-hero-load"}
+                onClick={() => void handleBulkAutoHeroForSelection()}
+              >
+                Otomatik kapak ata ({selectedKeys.size})
+              </button>
               <button
                 type="button"
                 className="yp-btn yp-btn--primary"

@@ -326,7 +326,9 @@
     "heroStockEmpty": "No results. Try another query.",
     "heroStockNoProviders": "Stock photo APIs are not configured on the server.",
     "heroStockPick": "Use this photo",
-    "heroStockPhotographer": "Photo by"
+    "heroStockPhotographer": "Photo by",
+    "heroStockLoadMore": "Show more photos",
+    "heroStockNoMore": "No more results for this search."
   },
   "parkHub": {
     "home": "Dashboard",
@@ -388,7 +390,9 @@
     "heroStockEmpty": "No results. Try another query.",
     "heroStockNoProviders": "Stock photo APIs are not configured on the server.",
     "heroStockPick": "Use this photo",
-    "heroStockPhotographer": "Photo by"
+    "heroStockPhotographer": "Photo by",
+    "heroStockLoadMore": "Show more photos",
+    "heroStockNoMore": "No more results for this search."
   },
   "auth": {
     "email": "Email",

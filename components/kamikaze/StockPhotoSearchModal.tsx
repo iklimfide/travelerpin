@@ -12,6 +12,8 @@ export type StockPhotoSearchModalLabels = {
   pick: string;
   cancel: string;
   photographer: string;
+  loadMore: string;
+  noMore: string;
 };
 
 type StockPhotoSearchModalProps = {
@@ -42,51 +44,75 @@ export function StockPhotoSearchModal({
   onSubmit,
 }: StockPhotoSearchModalProps) {
   const [query, setQuery] = useState(defaultQuery);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<StockPhotoHit[]>([]);
   const [providers, setProviders] = useState<StockPhotoProvider[]>([]);
+  const [hasMore, setHasMore] = useState(false);
 
-  const runSearch = useCallback(async (searchQuery: string) => {
-    const q = searchQuery.trim();
-    if (!q) return;
+  const runSearch = useCallback(
+    async (searchQuery: string, nextPage: number) => {
+      const q = searchQuery.trim();
+      if (!q) return;
 
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/kamikaze/stock-photos?q=${encodeURIComponent(q)}`);
-      const data = (await res.json()) as {
-        results?: StockPhotoHit[];
-        providers?: StockPhotoProvider[];
-        error?: string;
-      };
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `/api/kamikaze/stock-photos?q=${encodeURIComponent(q)}&page=${nextPage}`
+        );
+        const data = (await res.json()) as {
+          results?: StockPhotoHit[];
+          providers?: StockPhotoProvider[];
+          hasMore?: boolean;
+          error?: string;
+        };
 
-      if (!res.ok) {
-        if (res.status === 503) {
-          setResults([]);
-          setProviders([]);
-          setError(data.error ?? labels.noProviders);
-          return;
+        if (!res.ok) {
+          if (res.status === 503) {
+            setResults([]);
+            setProviders([]);
+            setHasMore(false);
+            setError(data.error ?? labels.noProviders);
+            return;
+          }
+          throw new Error(data.error ?? "Arama başarısız");
         }
-        throw new Error(data.error ?? "Arama başarısız");
-      }
 
-      setResults(data.results ?? []);
-      setProviders(data.providers ?? []);
-      if ((data.results ?? []).length === 0) {
-        setError(labels.empty);
+        const nextResults = data.results ?? [];
+        setResults(nextResults);
+        setProviders(data.providers ?? []);
+        setPage(nextPage);
+        setHasMore(Boolean(data.hasMore));
+
+        if (nextResults.length === 0) {
+          setError(nextPage > 1 ? labels.noMore : labels.empty);
+        }
+      } catch (err) {
+        setResults([]);
+        setHasMore(false);
+        setError(err instanceof Error ? err.message : "Arama başarısız");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setResults([]);
-      setError(err instanceof Error ? err.message : "Arama başarısız");
-    } finally {
-      setLoading(false);
-    }
-  }, [labels.empty, labels.noProviders]);
+    },
+    [labels.empty, labels.noMore, labels.noProviders]
+  );
 
   useEffect(() => {
-    void runSearch(defaultQuery);
+    setQuery(defaultQuery);
+    void runSearch(defaultQuery, 1);
   }, [defaultQuery, runSearch]);
+
+  function searchFromInput() {
+    void runSearch(query, 1);
+  }
+
+  function loadNextPage() {
+    if (!hasMore || loading) return;
+    void runSearch(query, page + 1);
+  }
 
   async function pickHit(hit: StockPhotoHit) {
     setError(null);
@@ -98,9 +124,43 @@ export function StockPhotoSearchModal({
   }
 
   const providerHint =
-    providers.length > 0
-      ? providers.map((p) => PROVIDER_LABEL[p]).join(" · ")
-      : null;
+    providers.length > 0 ? providers.map((p) => PROVIDER_LABEL[p]).join(" · ") : null;
+
+  const grid = (
+    <>
+      <StockPhotoGrid
+        results={results}
+        loading={loading}
+        busy={busy}
+        pickLabel={labels.pick}
+        photographerLabel={labels.photographer}
+        onPick={(hit) => void pickHit(hit)}
+      />
+      {results.length > 0 && hasMore ? (
+        <div className="stock-photo-search__more-row">
+          {skin === "hub" ? (
+            <button
+              type="button"
+              className="city-page__hero-master-btn"
+              disabled={busy || loading}
+              onClick={loadNextPage}
+            >
+              {loading ? labels.searching : labels.loadMore}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="yp-btn"
+              disabled={busy || loading}
+              onClick={loadNextPage}
+            >
+              {loading ? labels.searching : labels.loadMore}
+            </button>
+          )}
+        </div>
+      ) : null}
+    </>
+  );
 
   if (skin === "hub") {
     return (
@@ -140,7 +200,7 @@ export function StockPhotoSearchModal({
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
-                  void runSearch(query);
+                  searchFromInput();
                 }
               }}
             />
@@ -148,19 +208,12 @@ export function StockPhotoSearchModal({
               type="button"
               className="city-page__hero-master-btn city-page__hero-master-btn--primary"
               disabled={busy || loading}
-              onClick={() => void runSearch(query)}
+              onClick={searchFromInput}
             >
-              {loading ? labels.searching : labels.search}
+              {loading && page === 1 ? labels.searching : labels.search}
             </button>
           </div>
-          <StockPhotoGrid
-            results={results}
-            loading={loading}
-            busy={busy}
-            pickLabel={labels.pick}
-            photographerLabel={labels.photographer}
-            onPick={(hit) => void pickHit(hit)}
-          />
+          {grid}
           <div className="city-page__hero-master-modal-actions">
             <button
               type="button"
@@ -211,7 +264,7 @@ export function StockPhotoSearchModal({
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
-                  void runSearch(query);
+                  searchFromInput();
                 }
               }}
             />
@@ -219,20 +272,13 @@ export function StockPhotoSearchModal({
               type="button"
               className="yp-btn yp-btn--primary"
               disabled={busy || loading}
-              onClick={() => void runSearch(query)}
+              onClick={searchFromInput}
             >
-              {loading ? labels.searching : labels.search}
+              {loading && page === 1 ? labels.searching : labels.search}
             </button>
           </div>
         </div>
-        <StockPhotoGrid
-          results={results}
-          loading={loading}
-          busy={busy}
-          pickLabel={labels.pick}
-          photographerLabel={labels.photographer}
-          onPick={(hit) => void pickHit(hit)}
-        />
+        {grid}
         <div className="yp-form-actions" style={{ padding: "0.9rem 0 0" }}>
           <button type="button" className="yp-btn" disabled={busy || loading} onClick={onClose}>
             {labels.cancel}
@@ -302,4 +348,6 @@ export const YP_STOCK_PHOTO_LABELS: StockPhotoSearchModalLabels = {
   pick: "Bu fotoğrafı kullan",
   cancel: "Vazgeç",
   photographer: "Foto:",
+  loadMore: "Yenilerini getir",
+  noMore: "Başka sonuç kalmadı.",
 };

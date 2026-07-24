@@ -11,6 +11,8 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const q = String(searchParams.get("q") ?? "").trim();
+  const pageRaw = Number.parseInt(String(searchParams.get("page") ?? "1"), 10);
+  const page = Number.isFinite(pageRaw) && pageRaw >= 1 ? pageRaw : 1;
 
   if (!q) {
     return NextResponse.json({ error: "Arama metni gerekli" }, { status: 400 });
@@ -31,7 +33,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const payload = await searchStockPhotos(q);
+    const payload = await searchStockPhotos(q, page);
     return NextResponse.json(payload);
   } catch (err) {
     return NextResponse.json(

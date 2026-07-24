@@ -235,6 +235,8 @@ export default async function CityHubPage({ params }: PageProps) {
         pick: t("heroStockPick"),
         cancel: tCommon("cancel"),
         photographer: t("heroStockPhotographer"),
+        loadMore: t("heroStockLoadMore"),
+        noMore: t("heroStockNoMore"),
       },
     },
   };

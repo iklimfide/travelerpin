@@ -30,13 +30,18 @@ async function fetchWithTimeout(url: string, init: RequestInit): Promise<Respons
   }
 }
 
-async function searchPixabay(query: string, apiKey: string): Promise<StockPhotoHit[]> {
+async function searchPixabay(
+  query: string,
+  apiKey: string,
+  page: number
+): Promise<{ hits: StockPhotoHit[]; hasMore: boolean }> {
   const url = new URL("https://pixabay.com/api/");
   url.searchParams.set("key", apiKey);
   url.searchParams.set("q", query);
   url.searchParams.set("image_type", "photo");
   url.searchParams.set("orientation", "horizontal");
   url.searchParams.set("per_page", String(PER_PAGE));
+  url.searchParams.set("page", String(page));
   url.searchParams.set("safesearch", "true");
 
   const res = await fetchWithTimeout(url.toString(), {
@@ -47,6 +52,7 @@ async function searchPixabay(query: string, apiKey: string): Promise<StockPhotoH
   }
 
   const data = (await res.json()) as {
+    totalHits?: number;
     hits?: Array<{
       id: number;
       pageURL?: string;
@@ -57,7 +63,7 @@ async function searchPixabay(query: string, apiKey: string): Promise<StockPhotoH
     }>;
   };
 
-  return (data.hits ?? [])
+  const hits = (data.hits ?? [])
     .map((hit): StockPhotoHit | null => {
       const imageUrl = hit.largeImageURL?.trim() || hit.webformatURL?.trim();
       const previewUrl = hit.previewURL?.trim() || imageUrl;
@@ -72,12 +78,21 @@ async function searchPixabay(query: string, apiKey: string): Promise<StockPhotoH
       };
     })
     .filter((row): row is StockPhotoHit => row !== null);
+
+  const totalHits = data.totalHits ?? hits.length;
+  const hasMore = page * PER_PAGE < totalHits;
+  return { hits, hasMore };
 }
 
-async function searchUnsplash(query: string, accessKey: string): Promise<StockPhotoHit[]> {
+async function searchUnsplash(
+  query: string,
+  accessKey: string,
+  page: number
+): Promise<{ hits: StockPhotoHit[]; hasMore: boolean }> {
   const url = new URL("https://api.unsplash.com/search/photos");
   url.searchParams.set("query", query);
   url.searchParams.set("per_page", String(PER_PAGE));
+  url.searchParams.set("page", String(page));
   url.searchParams.set("orientation", "landscape");
 
   const res = await fetchWithTimeout(url.toString(), {
@@ -91,6 +106,7 @@ async function searchUnsplash(query: string, accessKey: string): Promise<StockPh
   }
 
   const data = (await res.json()) as {
+    total_pages?: number;
     results?: Array<{
       id: string;
       urls?: { small?: string; regular?: string };
@@ -99,7 +115,7 @@ async function searchUnsplash(query: string, accessKey: string): Promise<StockPh
     }>;
   };
 
-  return (data.results ?? [])
+  const hits = (data.results ?? [])
     .map((photo): StockPhotoHit | null => {
       const imageUrl = photo.urls?.regular?.trim() || photo.urls?.small?.trim();
       const previewUrl = photo.urls?.small?.trim() || imageUrl;
@@ -114,12 +130,20 @@ async function searchUnsplash(query: string, accessKey: string): Promise<StockPh
       };
     })
     .filter((row): row is StockPhotoHit => row !== null);
+
+  const totalPages = data.total_pages ?? page;
+  return { hits, hasMore: page < totalPages };
 }
 
-async function searchPexels(query: string, apiKey: string): Promise<StockPhotoHit[]> {
+async function searchPexels(
+  query: string,
+  apiKey: string,
+  page: number
+): Promise<{ hits: StockPhotoHit[]; hasMore: boolean }> {
   const url = new URL("https://api.pexels.com/v1/search");
   url.searchParams.set("query", query);
   url.searchParams.set("per_page", String(PER_PAGE));
+  url.searchParams.set("page", String(page));
   url.searchParams.set("orientation", "landscape");
 
   const res = await fetchWithTimeout(url.toString(), {
@@ -133,6 +157,9 @@ async function searchPexels(query: string, apiKey: string): Promise<StockPhotoHi
   }
 
   const data = (await res.json()) as {
+    page?: number;
+    per_page?: number;
+    total_results?: number;
     photos?: Array<{
       id: number;
       url?: string;
@@ -141,7 +168,7 @@ async function searchPexels(query: string, apiKey: string): Promise<StockPhotoHi
     }>;
   };
 
-  return (data.photos ?? [])
+  const hits = (data.photos ?? [])
     .map((photo): StockPhotoHit | null => {
       const imageUrl =
         photo.src?.large2x?.trim() ||
@@ -160,6 +187,11 @@ async function searchPexels(query: string, apiKey: string): Promise<StockPhotoHi
       };
     })
     .filter((row): row is StockPhotoHit => row !== null);
+
+  const perPage = data.per_page ?? PER_PAGE;
+  const currentPage = data.page ?? page;
+  const totalResults = data.total_results ?? hits.length;
+  return { hits, hasMore: currentPage * perPage < totalResults };
 }
 
 function interleaveHits(groups: StockPhotoHit[][]): StockPhotoHit[] {
@@ -174,55 +206,62 @@ function interleaveHits(groups: StockPhotoHit[][]): StockPhotoHit[] {
   return merged;
 }
 
-export async function searchStockPhotos(query: string): Promise<StockPhotoSearchResponse> {
+export async function searchStockPhotos(
+  query: string,
+  page = 1
+): Promise<StockPhotoSearchResponse> {
   const q = query.trim();
+  const safePage = Number.isFinite(page) && page >= 1 ? Math.floor(page) : 1;
   const keys = providerKeys();
   const providers: StockPhotoProvider[] = [];
   const providerErrors: Partial<Record<StockPhotoProvider, string>> = {};
 
   if (!q) {
-    return { results: [], providers: [], providerErrors: {} };
+    return { results: [], providers: [], providerErrors: {}, page: safePage, hasMore: false };
   }
 
-  const tasks: Promise<StockPhotoHit[]>[] = [];
+  const tasks: Promise<{ hits: StockPhotoHit[]; hasMore: boolean }>[] = [];
 
   if (keys.pixabay) {
     providers.push("pixabay");
     tasks.push(
-      searchPixabay(q, keys.pixabay).catch((err) => {
+      searchPixabay(q, keys.pixabay, safePage).catch((err) => {
         providerErrors.pixabay = err instanceof Error ? err.message : "Pixabay failed";
-        return [];
+        return { hits: [], hasMore: false };
       })
     );
   }
   if (keys.unsplash) {
     providers.push("unsplash");
     tasks.push(
-      searchUnsplash(q, keys.unsplash).catch((err) => {
+      searchUnsplash(q, keys.unsplash, safePage).catch((err) => {
         providerErrors.unsplash = err instanceof Error ? err.message : "Unsplash failed";
-        return [];
+        return { hits: [], hasMore: false };
       })
     );
   }
   if (keys.pexels) {
     providers.push("pexels");
     tasks.push(
-      searchPexels(q, keys.pexels).catch((err) => {
+      searchPexels(q, keys.pexels, safePage).catch((err) => {
         providerErrors.pexels = err instanceof Error ? err.message : "Pexels failed";
-        return [];
+        return { hits: [], hasMore: false };
       })
     );
   }
 
   if (tasks.length === 0) {
-    return { results: [], providers: [], providerErrors: {} };
+    return { results: [], providers: [], providerErrors: {}, page: safePage, hasMore: false };
   }
 
   const groups = await Promise.all(tasks);
+  const hasMore = groups.some((group) => group.hasMore);
   return {
-    results: interleaveHits(groups),
+    results: interleaveHits(groups.map((g) => g.hits)),
     providers,
     providerErrors,
+    page: safePage,
+    hasMore,
   };
 }
 

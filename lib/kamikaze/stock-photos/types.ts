@@ -13,4 +13,6 @@ export type StockPhotoSearchResponse = {
   results: StockPhotoHit[];
   providers: StockPhotoProvider[];
   providerErrors: Partial<Record<StockPhotoProvider, string>>;
+  page: number;
+  hasMore: boolean;
 };

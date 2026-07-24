@@ -329,6 +329,12 @@
   color: var(--city-muted, #64748b);
 }
 
+.stock-photo-search__more-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
 .city-page__hero-master-modal-title {
   margin: 0 0 6px;
   font-size: 1.05rem;
