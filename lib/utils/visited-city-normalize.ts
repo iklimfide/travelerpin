@@ -7,10 +7,10 @@ function pickPreferredVisitedCity(a: VisitedCity, b: VisitedCity): VisitedCity {
   const bVisits = b.visit_dates?.length ?? 0;
   if (aVisits !== bVisits) return aVisits > bVisits ? a : b;
 
-  const aTime = Date.parse(a.created_at);
-  const bTime = Date.parse(b.created_at);
+  const aTime = Date.parse(a.updated_at || a.created_at);
+  const bTime = Date.parse(b.updated_at || b.created_at);
   if (!Number.isNaN(aTime) && !Number.isNaN(bTime) && aTime !== bTime) {
-    return aTime <= bTime ? a : b;
+    return aTime >= bTime ? a : b;
   }
 
   return a.id.localeCompare(b.id) <= 0 ? a : b;

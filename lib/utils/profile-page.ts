@@ -116,6 +116,11 @@ function parseCreatedAtMs(value: string | null | undefined): number | null {
   return Number.isFinite(ms) ? ms : null;
 }
 
+function cityPinSortTime(city: VisitedCity): number {
+  const ms = parseCreatedAtMs(city.updated_at) ?? parseCreatedAtMs(city.created_at);
+  return ms ?? 0;
+}
+
 /** Latest pin time for a country (country row, city, or park). */
 export function countryLastPinnedAt(
   code: string,
@@ -227,9 +232,7 @@ export function buildProfileTrips(
     };
   });
 
-  const sortedCities = [...cities].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
+  const sortedCities = [...cities].sort((a, b) => cityPinSortTime(b) - cityPinSortTime(a));
 
   const cityTrips: ProfileTrip[] = sortedCities.map((city) => {
     const canonical = canonicalCityName(city.country_code, city.city_name);
@@ -246,7 +249,7 @@ export function buildProfileTrips(
       countrySlug: countryHubSlug(city.country_code),
       imageUrl: cityTripImage(city, cityHeroImages),
       note: city.note,
-      createdAt: city.created_at,
+      createdAt: city.updated_at || city.created_at,
       badge: null,
     };
   });
