@@ -1,5 +1,9 @@
 import { invalidateCachedHeroImages } from "@/lib/client/hero-images-cache";
-import { cityHeroLookupKey } from "@/lib/city/city-hero-images";
+import {
+  fetchKamikazeCityCustomHeroMap,
+  invalidateKamikazeCustomHeroCache,
+} from "@/lib/kamikaze/client/kamikaze-custom-hero-cache";
+import { fetchStockPhotoPage } from "@/lib/kamikaze/client/stock-photo-search-cache";
 
 export const BULK_CITY_HERO_DELAY_MS = 500;
 
@@ -24,11 +28,8 @@ function sleep(ms: number): Promise<void> {
 }
 
 export async function fetchFirstStockImageUrl(query: string): Promise<string | null> {
-  const res = await fetch(
-    `/api/kamikaze/stock-photos?q=${encodeURIComponent(query.trim())}&page=1`
-  );
-  if (!res.ok) return null;
-  const data = (await res.json()) as { results?: { imageUrl?: string }[] };
+  const data = await fetchStockPhotoPage(query, 1);
+  if (data.status !== 200) return null;
   const imageUrl = data.results?.[0]?.imageUrl?.trim();
   return imageUrl || null;
 }
@@ -80,20 +81,13 @@ export async function assignBulkCityHeroes(
 
   if (assigned > 0) {
     invalidateCachedHeroImages();
+    invalidateKamikazeCustomHeroCache("city");
   }
 
   return { assigned, failed };
 }
 
 export async function fetchCityHeroCustomLookupKeys(): Promise<Set<string>> {
-  const res = await fetch("/api/kamikaze/city-images");
-  if (!res.ok) return new Set();
-  const data = (await res.json()) as {
-    images?: { countryCode: string; cityName: string }[];
-  };
-  const keys = new Set<string>();
-  for (const row of data.images ?? []) {
-    keys.add(cityHeroLookupKey(String(row.countryCode), String(row.cityName)));
-  }
-  return keys;
+  const map = await fetchKamikazeCityCustomHeroMap();
+  return new Set(map.keys());
 }

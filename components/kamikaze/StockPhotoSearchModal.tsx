@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { StockPhotoHit, StockPhotoProvider } from "@/lib/kamikaze/stock-photos/types";
+import { fetchStockPhotoPage } from "@/lib/kamikaze/client/stock-photo-search-cache";
 
 export type StockPhotoSearchModalLabels = {
   queryLabel: string;
@@ -50,55 +51,47 @@ export function StockPhotoSearchModal({
   const [results, setResults] = useState<StockPhotoHit[]>([]);
   const [providers, setProviders] = useState<StockPhotoProvider[]>([]);
   const [hasMore, setHasMore] = useState(false);
+  const labelsRef = useRef(labels);
+  labelsRef.current = labels;
 
-  const runSearch = useCallback(
-    async (searchQuery: string, nextPage: number) => {
-      const q = searchQuery.trim();
-      if (!q) return;
+  const runSearch = useCallback(async (searchQuery: string, nextPage: number) => {
+    const q = searchQuery.trim();
+    if (!q) return;
 
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(
-          `/api/kamikaze/stock-photos?q=${encodeURIComponent(q)}&page=${nextPage}`
-        );
-        const data = (await res.json()) as {
-          results?: StockPhotoHit[];
-          providers?: StockPhotoProvider[];
-          hasMore?: boolean;
-          error?: string;
-        };
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetchStockPhotoPage(q, nextPage);
 
-        if (!res.ok) {
-          if (res.status === 503) {
-            setResults([]);
-            setProviders([]);
-            setHasMore(false);
-            setError(data.error ?? labels.noProviders);
-            return;
-          }
-          throw new Error(data.error ?? "Arama başarısız");
-        }
-
-        const nextResults = data.results ?? [];
-        setResults(nextResults);
-        setProviders(data.providers ?? []);
-        setPage(nextPage);
-        setHasMore(Boolean(data.hasMore));
-
-        if (nextResults.length === 0) {
-          setError(nextPage > 1 ? labels.noMore : labels.empty);
-        }
-      } catch (err) {
+      if (data.status === 503) {
         setResults([]);
+        setProviders([]);
         setHasMore(false);
-        setError(err instanceof Error ? err.message : "Arama başarısız");
-      } finally {
-        setLoading(false);
+        setError(data.error ?? labelsRef.current.noProviders);
+        return;
       }
-    },
-    [labels.empty, labels.noMore, labels.noProviders]
-  );
+
+      if (data.status !== 200) {
+        throw new Error(data.error ?? "Arama başarısız");
+      }
+
+      const nextResults = data.results ?? [];
+      setResults(nextResults);
+      setProviders(data.providers ?? []);
+      setPage(nextPage);
+      setHasMore(Boolean(data.hasMore));
+
+      if (nextResults.length === 0) {
+        setError(nextPage > 1 ? labelsRef.current.noMore : labelsRef.current.empty);
+      }
+    } catch (err) {
+      setResults([]);
+      setHasMore(false);
+      setError(err instanceof Error ? err.message : "Arama başarısız");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     setQuery(defaultQuery);

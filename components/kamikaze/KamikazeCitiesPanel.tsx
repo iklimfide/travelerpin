@@ -10,6 +10,10 @@ import {
 } from "@/components/kamikaze/StockPhotoSearchModal";
 import { invalidateCachedHeroImages } from "@/lib/client/hero-images-cache";
 import { cityHeroLookupKey, toCityHeroDisplayUrl } from "@/lib/city/city-hero-images";
+import {
+  fetchKamikazeCityCustomHeroMap,
+  invalidateKamikazeCustomHeroCache,
+} from "@/lib/kamikaze/client/kamikaze-custom-hero-cache";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { YP_CACHE_KEYS, ypCacheGet, ypCacheInvalidate, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
 import {
@@ -95,18 +99,10 @@ export function KamikazeCitiesPanel() {
     Boolean(popularFilter);
 
   useEffect(() => {
-    if (!canBrowse) return;
-
     let cancelled = false;
-    void fetch("/api/kamikaze/city-images")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: { images?: CustomHeroRow[] } | null) => {
-        if (cancelled || !data?.images) return;
-        const next = new Map<string, string>();
-        for (const row of data.images) {
-          next.set(cityHeroLookupKey(row.countryCode, row.cityName), row.imageUrl);
-        }
-        setCustomImages(next);
+    void fetchKamikazeCityCustomHeroMap()
+      .then((map) => {
+        if (!cancelled) setCustomImages(map);
       })
       .catch(() => {
         /* best-effort */
@@ -114,7 +110,7 @@ export function KamikazeCitiesPanel() {
     return () => {
       cancelled = true;
     };
-  }, [canBrowse]);
+  }, []);
 
   const loadList = useCallback(
     async (mode: "replace" | "append" = "replace", options?: { force?: boolean; offset?: number }) => {
@@ -336,6 +332,7 @@ export function KamikazeCitiesPanel() {
       if (!res.ok) throw new Error(data.error ?? "Görsel yüklenemedi");
       if (data.image) {
         invalidateCachedHeroImages();
+        invalidateKamikazeCustomHeroCache("city");
         const storedUrl = data.image.imageUrl;
         const lookup = cityHeroLookupKey(data.image.countryCode, data.image.cityName);
         const rowLookup = heroKey(row);
@@ -376,6 +373,7 @@ export function KamikazeCitiesPanel() {
       const data = (await res.json()) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? "Görsel kaldırılamadı");
       invalidateCachedHeroImages();
+      invalidateKamikazeCustomHeroCache("city");
       setCustomImages((prev) => {
         const next = new Map(prev);
         for (const mapKey of prev.keys()) {
@@ -597,15 +595,8 @@ export function KamikazeCitiesPanel() {
         }
       );
 
-      const heroRes = await fetch("/api/kamikaze/city-images");
-      if (heroRes.ok) {
-        const data = (await heroRes.json()) as { images?: CustomHeroRow[] };
-        const next = new Map<string, string>();
-        for (const row of data.images ?? []) {
-          next.set(cityHeroLookupKey(row.countryCode, row.cityName), row.imageUrl);
-        }
-        setCustomImages(next);
-      }
+      const heroMap = await fetchKamikazeCityCustomHeroMap({ force: true });
+      setCustomImages(heroMap);
 
       ypCacheInvalidate("catalog:");
       await loadList("replace", { force: true });

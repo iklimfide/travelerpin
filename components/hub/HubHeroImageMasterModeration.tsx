@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/ToastProvider";
 import { invalidateCachedHeroImages } from "@/lib/client/hero-images-cache";
+import {
+  invalidateKamikazeCustomHeroCache,
+} from "@/lib/kamikaze/client/kamikaze-custom-hero-cache";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { toCityHeroDisplayUrl } from "@/lib/city/city-hero-images";
 import { toParkHeroDisplayUrl } from "@/lib/park/park-hero-images";
@@ -133,6 +136,7 @@ export function HubHeroImageMasterModeration({
       }
 
       invalidateCachedHeroImages();
+      invalidateKamikazeCustomHeroCache(kind === "city" ? "city" : "park");
       applyStoredHero(data.image?.imageUrl);
       toast.show(labels.uploadSuccess);
       router.refresh();
@@ -165,6 +169,7 @@ export function HubHeroImageMasterModeration({
       }
 
       invalidateCachedHeroImages();
+      invalidateKamikazeCustomHeroCache(kind === "city" ? "city" : "park");
       applyStoredHero(undefined);
       toast.show(labels.removeSuccess);
       router.refresh();

@@ -9,6 +9,10 @@ import {
   YP_STOCK_PHOTO_LABELS,
 } from "@/components/kamikaze/StockPhotoSearchModal";
 import { invalidateCachedHeroImages } from "@/lib/client/hero-images-cache";
+import {
+  fetchKamikazeParkCustomHeroMap,
+  invalidateKamikazeCustomHeroCache,
+} from "@/lib/kamikaze/client/kamikaze-custom-hero-cache";
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
 import { assignBulkParkHeroes, stockQueryForPark } from "@/lib/kamikaze/client/bulk-park-hero";
 import { YP_CACHE_KEYS, ypCacheGet, ypCacheInvalidate, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
@@ -113,18 +117,10 @@ export function KamikazeParksPanel() {
     Boolean(popularFilter);
 
   useEffect(() => {
-    if (!canBrowse) return;
-
     let cancelled = false;
-    void fetch("/api/kamikaze/park-images")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: { images?: CustomHeroRow[] } | null) => {
-        if (cancelled || !data?.images) return;
-        const next = new Map<string, string>();
-        for (const row of data.images) {
-          next.set(parkHeroLookupKey(row.countryCode, row.parkName, row.parkType), row.imageUrl);
-        }
-        setCustomImages(next);
+    void fetchKamikazeParkCustomHeroMap()
+      .then((map) => {
+        if (!cancelled) setCustomImages(map);
       })
       .catch(() => {
         /* best-effort */
@@ -132,7 +128,7 @@ export function KamikazeParksPanel() {
     return () => {
       cancelled = true;
     };
-  }, [canBrowse]);
+  }, []);
 
   const loadList = useCallback(
     async (mode: "replace" | "append" = "replace", options?: { force?: boolean; offset?: number }) => {
@@ -352,6 +348,7 @@ export function KamikazeParksPanel() {
       if (!res.ok) throw new Error(data.error ?? "Görsel yüklenemedi");
       if (data.image) {
         invalidateCachedHeroImages();
+        invalidateKamikazeCustomHeroCache("park");
         const storedUrl = data.image.imageUrl;
         const lookup = parkHeroLookupKey(
           data.image.countryCode,
@@ -400,6 +397,7 @@ export function KamikazeParksPanel() {
       const data = (await res.json()) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? "Görsel kaldırılamadı");
       invalidateCachedHeroImages();
+      invalidateKamikazeCustomHeroCache("park");
       setCustomImages((prev) => {
         const next = new Map(prev);
         for (const mapKey of prev.keys()) {
@@ -599,15 +597,8 @@ export function KamikazeParksPanel() {
         }
       );
 
-      const heroRes = await fetch("/api/kamikaze/park-images");
-      if (heroRes.ok) {
-        const data = (await heroRes.json()) as { images?: CustomHeroRow[] };
-        const next = new Map<string, string>();
-        for (const row of data.images ?? []) {
-          next.set(parkHeroLookupKey(row.countryCode, row.parkName, row.parkType), row.imageUrl);
-        }
-        setCustomImages(next);
-      }
+      const heroMap = await fetchKamikazeParkCustomHeroMap({ force: true });
+      setCustomImages(heroMap);
 
       ypCacheInvalidate("catalog:");
       await loadList("replace", { force: true });

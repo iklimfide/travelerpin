@@ -26,6 +26,7 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    unoptimized: true,
     localPatterns: [
       {
         pathname: "/api/hub-photo",

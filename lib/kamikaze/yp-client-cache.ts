@@ -87,4 +87,6 @@ export const YP_CACHE_KEYS = {
   users: (query: string) => `users:v2:${query.trim().toLowerCase()}`,
   stats: "stats",
   notifications: "notifications",
+  kamikazeCityHeroImages: "hero:kamikaze:city:v1",
+  kamikazeParkHeroImages: "hero:kamikaze:park:v1",
 } as const;

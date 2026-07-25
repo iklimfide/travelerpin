@@ -1,7 +1,10 @@
 import { invalidateCachedHeroImages } from "@/lib/client/hero-images-cache";
-import { parkHeroLookupKey } from "@/lib/park/park-hero-images";
-import type { ParkType } from "@/types/database";
 import { fetchFirstStockImageUrl } from "@/lib/kamikaze/client/bulk-city-hero";
+import {
+  fetchKamikazeParkCustomHeroMap,
+  invalidateKamikazeCustomHeroCache,
+} from "@/lib/kamikaze/client/kamikaze-custom-hero-cache";
+import type { ParkType } from "@/types/database";
 
 export const BULK_PARK_HERO_DELAY_MS = 500;
 
@@ -86,22 +89,13 @@ export async function assignBulkParkHeroes(
 
   if (assigned > 0) {
     invalidateCachedHeroImages();
+    invalidateKamikazeCustomHeroCache("park");
   }
 
   return { assigned, failed };
 }
 
 export async function fetchParkHeroCustomLookupKeys(): Promise<Set<string>> {
-  const res = await fetch("/api/kamikaze/park-images");
-  if (!res.ok) return new Set();
-  const data = (await res.json()) as {
-    images?: { countryCode: string; parkName: string; parkType: ParkType }[];
-  };
-  const keys = new Set<string>();
-  for (const row of data.images ?? []) {
-    keys.add(
-      parkHeroLookupKey(String(row.countryCode), String(row.parkName), row.parkType)
-    );
-  }
-  return keys;
+  const map = await fetchKamikazeParkCustomHeroMap();
+  return new Set(map.keys());
 }
