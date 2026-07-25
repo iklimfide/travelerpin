@@ -26,7 +26,7 @@
     "addLink": "Add link",
     "loading": "Loading...",
     "photoUploadFailed": "Could not upload photo. Please try again.",
-    "photoUploadUnsupportedFormat": "This photo format is not supported. Save it as JPEG or PNG on your device, then try again.",
+    "photoUploadUnsupportedFormat": "Unsupported file format.",
     "photoUploadNotConfigured": "Photo upload is not set up yet. Add Cloudflare R2 credentials to your environment.",
     "photoUploadRlsDenied": "Photo upload was blocked. Sign in again, or ask an admin to enable city-media storage policies.",
     "pinSaveFailed": "Could not save your pin. Please try again."

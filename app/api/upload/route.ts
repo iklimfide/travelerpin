@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isR2Configured, uploadPhotoToR2 } from "@/lib/storage/r2";
-import { getWebpFileName, optimizeImageToWebp } from "@/lib/utils/image";
+import { detectImageMimeFromBuffer, getWebpFileName, optimizeImageToWebp } from "@/lib/utils/image";
+import { UNSUPPORTED_IMAGE_FORMAT_ERROR } from "@/lib/utils/image-errors";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 
 export async function POST(request: Request) {
@@ -32,13 +33,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No file provided" }, { status: 400 });
   }
 
-  if (!file.type.startsWith("image/")) {
-    return NextResponse.json({ error: "File must be an image" }, { status: 400 });
-  }
-
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
-    const optimized = await optimizeImageToWebp(buffer, file.type);
+    const contentType =
+      detectImageMimeFromBuffer(buffer) ??
+      (file.type.startsWith("image/") ? file.type : "");
+
+    if (!contentType.startsWith("image/")) {
+      return NextResponse.json(
+        { error: formatPhotoUploadError(UNSUPPORTED_IMAGE_FORMAT_ERROR) },
+        { status: 400 }
+      );
+    }
+
+    const optimized = await optimizeImageToWebp(buffer, contentType);
     const fileName = `${user.id}/${getWebpFileName(file.name)}`;
     const publicUrl = await uploadPhotoToR2(
       fileName,

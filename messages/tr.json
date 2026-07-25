@@ -26,7 +26,7 @@
     "addLink": "Bağlantı ekle",
     "loading": "Yükleniyor...",
     "photoUploadFailed": "Fotoğraf yüklenemedi. Lütfen tekrar deneyin.",
-    "photoUploadUnsupportedFormat": "Bu fotoğraf formatı desteklenmiyor. Cihazınızda JPEG veya PNG olarak kaydedip tekrar deneyin.",
+    "photoUploadUnsupportedFormat": "Kabul edilemeyen dosya biçimi.",
     "photoUploadNotConfigured": "Fotoğraf yükleme henüz ayarlanmadı. Ortamınıza Cloudflare R2 kimlik bilgilerini ekleyin.",
     "photoUploadRlsDenied": "Fotoğraf yükleme engellendi. Yeniden giriş yapın veya bir yöneticiden city-media depolama politikalarını etkinleştirmesini isteyin.",
     "pinSaveFailed": "Pin kaydedilemedi. Lütfen tekrar deneyin."

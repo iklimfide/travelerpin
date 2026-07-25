@@ -1244,6 +1244,10 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
   object-fit: cover;
 }
 
+.pin-media-photo-grid__image--pending {
+  background: linear-gradient(145deg, #e2e8f0 0%, #cbd5e1 100%);
+}
+
 .pin-media-photo-grid__remove {
   position: absolute;
   top: 6px;

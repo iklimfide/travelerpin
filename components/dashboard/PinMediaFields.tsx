@@ -1,4 +1,11 @@
+"use client";
+
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  canBrowserPreviewPinPhoto,
+  pickPinPhotoFiles,
+  PIN_PHOTO_INPUT_ACCEPT,
+} from "@/lib/client/pin-photo-pick";
 import { LIMITS } from "@/lib/constants";
 import { activePinPhotoCount } from "@/lib/utils/pin-media";
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
@@ -28,6 +35,9 @@ type PinMediaFieldsProps = {
   defaultInstagramField?: boolean;
   equalActionButtons?: boolean;
   hideMediaHint?: boolean;
+  /** Shown when the picker returns a non-image (e.g. Google Photos edge cases). */
+  onPhotoPickError?: (message: string) => void;
+  photoUnsupportedFormatMessage?: string;
 };
 
 async function uploadPinPhotoFile(
@@ -62,6 +72,8 @@ export function PinMediaFields({
   defaultInstagramField = false,
   equalActionButtons = false,
   hideMediaHint = false,
+  onPhotoPickError,
+  photoUnsupportedFormatMessage,
 }: PinMediaFieldsProps) {
   const removedSet = useMemo(() => new Set(removedSavedPhotoUrls), [removedSavedPhotoUrls]);
   const visibleSavedUrls = savedPhotoUrls.filter((url) => !removedSet.has(url));
@@ -77,6 +89,10 @@ export function PinMediaFields({
   const photoLibraryInputRef = useRef<HTMLInputElement>(null);
   const photoCameraInputRef = useRef<HTMLInputElement>(null);
   const [newPhotoPreviewUrls, setNewPhotoPreviewUrls] = useState<string[]>([]);
+  const pickedFileMimeRef = useRef(new WeakMap<File, string | null>());
+  const photoPickBusyRef = useRef(false);
+  const newPhotoFilesRef = useRef(newPhotoFiles);
+  newPhotoFilesRef.current = newPhotoFiles;
 
   useEffect(() => {
     const urls = newPhotoFiles.map((file) => URL.createObjectURL(file));
@@ -126,12 +142,28 @@ export function PinMediaFields({
   }
 
   function handlePhotoInputChange(fileList: FileList | null) {
-    if (!fileList?.length) return;
+    if (!fileList?.length || photoPickBusyRef.current) return;
     const incoming = Array.from(fileList).slice(0, remainingSlots);
     if (incoming.length === 0) return;
-    onNewPhotoFilesChange([...newPhotoFiles, ...incoming]);
-    if (photoLibraryInputRef.current) photoLibraryInputRef.current.value = "";
-    if (photoCameraInputRef.current) photoCameraInputRef.current.value = "";
+
+    photoPickBusyRef.current = true;
+    void pickPinPhotoFiles(incoming)
+      .then(({ accepted, rejectedUnsupported, mimeByFile }) => {
+        for (const [file, mime] of mimeByFile) {
+          pickedFileMimeRef.current.set(file, mime);
+        }
+        if (rejectedUnsupported) {
+          onPhotoPickError?.(photoUnsupportedFormatMessage ?? "Unsupported file format.");
+        }
+        if (accepted.length > 0) {
+          onNewPhotoFilesChange([...newPhotoFilesRef.current, ...accepted]);
+        }
+      })
+      .finally(() => {
+        photoPickBusyRef.current = false;
+        if (photoLibraryInputRef.current) photoLibraryInputRef.current.value = "";
+        if (photoCameraInputRef.current) photoCameraInputRef.current.value = "";
+      });
   }
 
   const showPhotoSourceChoice = Boolean(labels.photoLibrary && labels.photoCamera);
@@ -151,7 +183,7 @@ export function PinMediaFields({
         <input
           ref={photoLibraryInputRef}
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+          accept={PIN_PHOTO_INPUT_ACCEPT}
           multiple
           className="hidden"
           onChange={(e) => handlePhotoInputChange(e.target.files)}
@@ -159,7 +191,7 @@ export function PinMediaFields({
         <input
           ref={photoCameraInputRef}
           type="file"
-          accept="image/*"
+          accept={PIN_PHOTO_INPUT_ACCEPT}
           capture="environment"
           className="hidden"
           onChange={(e) => handlePhotoInputChange(e.target.files)}
@@ -236,14 +268,24 @@ export function PinMediaFields({
                 <span className="pin-media-photo-grid__badge">{labels.photoSaved}</span>
               </li>
             ))}
-            {newPhotoFiles.map((file, index) => (
-              <li key={`${file.name}-${index}`} className="pin-media-photo-grid__item">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={newPhotoPreviewUrls[index] ?? ""}
-                  alt=""
-                  className="pin-media-photo-grid__image"
-                />
+            {newPhotoFiles.map((file, index) => {
+              const sniffed = pickedFileMimeRef.current.get(file) ?? null;
+              const showPreview = canBrowserPreviewPinPhoto(file, sniffed);
+              return (
+              <li key={`${file.name}-${file.size}-${index}`} className="pin-media-photo-grid__item">
+                {showPreview ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={newPhotoPreviewUrls[index] ?? ""}
+                    alt=""
+                    className="pin-media-photo-grid__image"
+                  />
+                ) : (
+                  <div
+                    className="pin-media-photo-grid__image pin-media-photo-grid__image--pending"
+                    aria-label={labels.photo}
+                  />
+                )}
                 <button
                   type="button"
                   className="pin-media-photo-grid__remove"
@@ -253,7 +295,8 @@ export function PinMediaFields({
                   ✕
                 </button>
               </li>
-            ))}
+            );
+            })}
           </ul>
         ) : null}
       </div>

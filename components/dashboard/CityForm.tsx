@@ -731,6 +731,10 @@ export function CityForm({
             instagramUrls={instagramUrls}
             onInstagramUrlsChange={setInstagramUrls}
             autoFocusInstagram={mediaFocus === "instagram"}
+            onPhotoPickError={(message) => {
+              void modal.alert(message, { variant: "error" });
+            }}
+            photoUnsupportedFormatMessage={tCommon("photoUploadUnsupportedFormat")}
           />
 
           <div>

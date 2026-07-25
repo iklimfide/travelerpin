@@ -3,6 +3,9 @@ import { createRequire } from "node:module";
 import { join } from "node:path";
 import { LIMITS } from "@/lib/constants";
 import { UNSUPPORTED_IMAGE_FORMAT_ERROR } from "@/lib/utils/image-errors";
+import { detectImageMimeFromBuffer } from "@/lib/utils/image-mime";
+
+export { detectImageMimeFromBuffer } from "@/lib/utils/image-mime";
 
 type SharpInstance = import("sharp").Sharp;
 type SharpModule = (input: Buffer) => SharpInstance;
@@ -60,41 +63,6 @@ function extensionForContentType(contentType: string): OptimizedImage["extension
 
 function isUnsupportedBrowserImageType(contentType: string): boolean {
   return /heif|heic|heics/i.test(contentType);
-}
-
-/** Magic-byte MIME sniffing — browsers often mislabel uploads (especially on mobile). */
-export function detectImageMimeFromBuffer(buffer: Buffer): string | null {
-  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
-    return "image/jpeg";
-  }
-  if (
-    buffer.length >= 8 &&
-    buffer[0] === 0x89 &&
-    buffer.toString("ascii", 1, 4) === "PNG"
-  ) {
-    return "image/png";
-  }
-  if (
-    buffer.length >= 12 &&
-    buffer.toString("ascii", 0, 4) === "RIFF" &&
-    buffer.toString("ascii", 8, 12) === "WEBP"
-  ) {
-    return "image/webp";
-  }
-  if (
-    buffer.length >= 6 &&
-    (buffer.toString("ascii", 0, 6) === "GIF87a" || buffer.toString("ascii", 0, 6) === "GIF89a")
-  ) {
-    return "image/gif";
-  }
-  if (buffer.length >= 12 && buffer.toString("ascii", 4, 8) === "ftyp") {
-    const brand = buffer.toString("ascii", 8, 12).toLowerCase();
-    if (["heic", "heix", "hevc", "hevx", "mif1", "msf1"].includes(brand)) {
-      return "image/heif";
-    }
-    if (brand.startsWith("avif")) return "image/avif";
-  }
-  return null;
 }
 
 function sniffImageContentType(buffer: Buffer): string | null {

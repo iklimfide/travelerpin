@@ -5,6 +5,7 @@ import { PinMediaFields } from "@/components/dashboard/PinMediaFields";
 import { PinNoteEditor } from "@/components/dashboard/PinNoteEditor";
 import { LIMITS } from "@/lib/constants";
 import { useTranslateCity, useTranslateCommon } from "@/lib/i18n/client-messages";
+import { useModal } from "@/components/ui/ModalProvider";
 
 type ProfilePinEditFieldsProps = {
   visitDates: string[];
@@ -43,6 +44,7 @@ export function ProfilePinEditFields({
 }: ProfilePinEditFieldsProps) {
   const t = useTranslateCity();
   const tCommon = useTranslateCommon();
+  const modal = useModal();
 
   return (
     <div className="profile-pin-edit-fields">
@@ -73,6 +75,10 @@ export function ProfilePinEditFields({
         hideMediaHint
         defaultInstagramField
         equalActionButtons
+        onPhotoPickError={(message) => {
+          void modal.alert(message, { variant: "error" });
+        }}
+        photoUnsupportedFormatMessage={tCommon("photoUploadUnsupportedFormat")}
       />
 
       <div className="dashboard-form-city__footer dashboard-form-city__footer--before-note">

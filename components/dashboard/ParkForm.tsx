@@ -523,6 +523,10 @@ export function ParkForm({
         hideInstagramHint={hideHeader}
         defaultInstagramField={hideHeader}
         equalActionButtons={hideHeader}
+        onPhotoPickError={(message) => {
+          void modal.alert(message, { variant: "error" });
+        }}
+        photoUnsupportedFormatMessage={tCommon("photoUploadUnsupportedFormat")}
       />
     );
   }
