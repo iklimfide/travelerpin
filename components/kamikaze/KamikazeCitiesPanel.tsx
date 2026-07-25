@@ -789,7 +789,7 @@ export function KamikazeCitiesPanel() {
 
     return (
       <tr key={key}>
-        <td>
+        <td className="yp-table__check">
           <input
             type="checkbox"
             aria-label={`${row.name} seç`}
@@ -810,7 +810,7 @@ export function KamikazeCitiesPanel() {
             <img className="yp-city-thumb" src={customUrl ?? DEFAULT_CITY_HERO_IMAGE} alt="" />
           </div>
         </td>
-        <td>
+        <td data-label="Ad (EN)">
           <a
             href={cityPlacePath(row.countryCode, row.name)}
             className="yp-link yp-city-name"
@@ -822,19 +822,21 @@ export function KamikazeCitiesPanel() {
           {row.capital ? <span className="yp-badge">Başkent</span> : null}{" "}
           {row.popular ? <span className="yp-badge">Popüler</span> : null}
         </td>
-        <td className="yp-muted">{row.nameTr ?? "—"}</td>
-        <td className="yp-muted">
+        <td className="yp-muted" data-label="TR">
+          {row.nameTr ?? "—"}
+        </td>
+        <td className="yp-muted" data-label="Ülke">
           {row.countryName} ({row.countryCode})
         </td>
-        <td>{row.source === "yp" ? <span className="yp-badge">YP</span> : "Statik"}</td>
-        <td>
+        <td data-label="Kaynak">{row.source === "yp" ? <span className="yp-badge">YP</span> : "Statik"}</td>
+        <td data-label="Kapak">
           {customUrl ? (
             <span className="yp-badge">Özel foto</span>
           ) : (
             <span className="yp-badge yp-badge--muted">Varsayılan</span>
           )}
         </td>
-        <td>
+        <td data-label="İşlemler">
           <div className="yp-actions">
             {renderPhotoActions(row)}
             {row.popular ? (
@@ -1150,7 +1152,7 @@ export function KamikazeCitiesPanel() {
           </div>
         ) : (
           <>
-            <div className="yp-table-wrap">
+            <div className="yp-table-wrap yp-table-wrap--mobile-cards">
               <table className="yp-table yp-table--city-images">
                 <thead>
                   <tr>

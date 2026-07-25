@@ -847,7 +847,7 @@ export function KamikazeParksPanel() {
             />
           </div>
         </td>
-        <td className="yp-table__name">
+        <td className="yp-table__name" data-label="Ad">
           <a
             href={parkPlacePath(row.name, row.countryCode)}
             className="yp-link yp-city-name"
@@ -858,9 +858,13 @@ export function KamikazeParksPanel() {
           </a>{" "}
           {row.popular ? <span className="yp-badge">Popüler</span> : null}
         </td>
-        <td className="yp-table__tr yp-muted">{row.nameTr ?? "—"}</td>
-        <td className="yp-table__type yp-muted">{parkTypeLabel(row.parkType)}</td>
-        <td className="yp-table__actions">
+        <td className="yp-table__tr yp-muted" data-label="TR">
+          {row.nameTr ?? "—"}
+        </td>
+        <td className="yp-table__type yp-muted" data-label="Tür">
+          {parkTypeLabel(row.parkType)}
+        </td>
+        <td className="yp-table__actions" data-label="İşlemler">
           <div className="yp-actions">
             {renderPhotoActions(row)}
             {row.popular ? (
@@ -1188,7 +1192,7 @@ export function KamikazeParksPanel() {
           </div>
         ) : (
           <>
-            <div className="yp-table-wrap">
+            <div className="yp-table-wrap yp-table-wrap--mobile-cards">
               <table className="yp-table yp-table--city-images yp-table--parks">
                 <colgroup>
                   <col className="yp-col-check" />

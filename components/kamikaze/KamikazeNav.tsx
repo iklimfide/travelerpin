@@ -2,19 +2,28 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 
 const LINKS = [
   { href: "/kamikaze/catalog", label: "Katalog" },
   { href: "/kamikaze/cities", label: "Şehirler" },
   { href: "/kamikaze/parks", label: "Parklar" },
   { href: "/kamikaze/users", label: "Kullanıcılar" },
-  { href: "/kamikaze/stats", label: "İstatistikler" },
-  { href: "/kamikaze/notifications", label: "Bildirim gönder" },
+  { href: "/kamikaze/stats", label: "İstatistik" },
+  { href: "/kamikaze/notifications", label: "Bildirim" },
   { href: "/kamikaze/i18n", label: "EN–TR" },
 ] as const;
 
 export function KamikazeNav() {
   const pathname = usePathname();
+  const linksRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const root = linksRef.current;
+    if (!root) return;
+    const active = root.querySelector<HTMLElement>(".yp-nav__link--active");
+    active?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, [pathname]);
 
   return (
     <aside className="yp-nav">
@@ -22,7 +31,7 @@ export function KamikazeNav() {
         TravelerPin YP
         <span>İç yönetim paneli</span>
       </div>
-      <nav className="yp-nav__links" aria-label="YP bölümleri">
+      <nav ref={linksRef} className="yp-nav__links" aria-label="YP bölümleri">
         {LINKS.map((link) => {
           const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
           return (

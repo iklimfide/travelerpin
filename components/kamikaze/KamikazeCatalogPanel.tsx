@@ -181,7 +181,7 @@ export function KamikazeCatalogPanel() {
       {error ? <p className="yp-error">{error}</p> : null}
 
       <div className="yp-toolbar yp-toolbar--inline">
-        <div className="yp-field yp-field--filter-q" style={{ flex: "1 1 16rem", maxWidth: "18rem" }}>
+        <div className="yp-field yp-field--filter-q yp-field--grow">
           <label htmlFor="yp-cat-q">Ara</label>
           <div className="yp-field__input-wrap">
             <input
@@ -224,6 +224,7 @@ export function KamikazeCatalogPanel() {
           <div className="yp-empty">{loading ? "Yükleniyor…" : "Sonuç yok."}</div>
         ) : (
           <>
+            <div className="yp-table-wrap yp-table-wrap--mobile-cards">
             <table className="yp-table">
               <thead>
                 <tr>
@@ -245,19 +246,21 @@ export function KamikazeCatalogPanel() {
                         : "ISO";
                   return (
                     <tr key={key}>
-                      <td>
+                      <td data-label="Kod">
                         <code>{row.countryCode}</code>
                       </td>
-                      <td>{row.name}</td>
-                      <td className="yp-muted">{row.nameTr ?? "—"}</td>
-                      <td>
+                      <td data-label="Ad (EN)">{row.name}</td>
+                      <td className="yp-muted" data-label="TR">
+                        {row.nameTr ?? "—"}
+                      </td>
+                      <td data-label="Kaynak">
                         {row.trSource === "db" ? (
                           <span className="yp-badge">{trLabel}</span>
                         ) : (
                           trLabel
                         )}
                       </td>
-                      <td>
+                      <td data-label="İşlemler">
                         <div className="yp-actions">
                           <button
                             type="button"
@@ -274,6 +277,7 @@ export function KamikazeCatalogPanel() {
                 })}
               </tbody>
             </table>
+            </div>
             {hasMore ? (
               <div style={{ padding: "0.75rem 0.9rem" }}>
                 <button
