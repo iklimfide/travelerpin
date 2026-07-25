@@ -40,6 +40,16 @@
       "capital": "Ottawa",
       "language": "English, French"
     },
+    "denmark": {
+      "slug": "denmark",
+      "code": "DK",
+      "name": "Denmark",
+      "currency": "Danish krone (DKK)",
+      "plugType": "Type C, E, F, K",
+      "visaNote": "Schengen area — short-stay visa rules depend on your passport. Verify before booking.",
+      "capital": "Copenhagen",
+      "language": "Danish"
+    },
     "egypt": {
       "slug": "egypt",
       "code": "EG",

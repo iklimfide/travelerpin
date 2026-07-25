@@ -6,6 +6,7 @@ import { LIMITS } from "@/lib/constants";
 import { useTranslateCommon, useTranslatePark } from "@/lib/i18n/client-messages";
 import { addPark } from "@/lib/client/park-actions";
 import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
+import { startBackgroundPinSave } from "@/lib/client/background-pin-save";
 import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEditor";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
@@ -389,6 +390,42 @@ export function ParkForm({
   async function handleSave() {
     if (!selectedCountry || !parkName.trim()) {
       toast.show(t("pickParkFirst"));
+      return;
+    }
+
+    if (hideHeader && isEdit && park) {
+      const mediaSnapshot = {
+        savedPhotoUrls: [...savedPhotoUrls],
+        removedSavedPhotoUrls: [...removedSavedPhotoUrls],
+        newPhotoFiles: [...newPhotoFiles],
+        instagramUrls: [...instagramUrls],
+        previousPhotoUrls: readPhotoUrls(park),
+      };
+      const payloadBase = {
+        park_name: parkName,
+        park_type: parkType,
+        country_code: selectedCountry.country_code,
+        country_name: selectedCountry.country_name,
+        note: note || null,
+        visit_dates: visitDates,
+      };
+      const parkId = park.id;
+      onSuccess?.();
+      startBackgroundPinSave({
+        media: mediaSnapshot,
+        genericSaveFailedMessage: tCommon("pinSaveFailed"),
+        saveRecord: (media) =>
+          fetch(`/api/parks/${parkId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...payloadBase, ...media }),
+          }),
+        onError: (message) => {
+          void modal.alert(message, { variant: "error" });
+        },
+        onPhotoChanged: () => router.refresh(),
+        onNotFound: () => notifyProfileDataChanged(),
+      });
       return;
     }
 

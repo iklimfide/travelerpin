@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LIMITS } from "@/lib/constants";
 import { activePinPhotoCount } from "@/lib/utils/pin-media";
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
@@ -73,6 +73,15 @@ export function PinMediaFields({
 
   const instagramDraftRef = useRef<HTMLInputElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const [newPhotoPreviewUrls, setNewPhotoPreviewUrls] = useState<string[]>([]);
+
+  useEffect(() => {
+    const urls = newPhotoFiles.map((file) => URL.createObjectURL(file));
+    setNewPhotoPreviewUrls(urls);
+    return () => {
+      for (const url of urls) URL.revokeObjectURL(url);
+    };
+  }, [newPhotoFiles]);
 
   useEffect(() => {
     if (!autoFocusInstagram) return;
@@ -190,7 +199,7 @@ export function PinMediaFields({
               <li key={`${file.name}-${index}`} className="pin-media-photo-grid__item">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={URL.createObjectURL(file)}
+                  src={newPhotoPreviewUrls[index] ?? ""}
                   alt=""
                   className="pin-media-photo-grid__image"
                 />

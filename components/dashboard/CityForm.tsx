@@ -6,6 +6,7 @@ import { LIMITS } from "@/lib/constants";
 import { useTranslateCity, useTranslateCommon } from "@/lib/i18n/client-messages";
 import { addCity } from "@/lib/client/city-actions";
 import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
+import { startBackgroundPinSave } from "@/lib/client/background-pin-save";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { isValidInstagramUrl } from "@/lib/utils/instagram";
@@ -404,6 +405,40 @@ export function CityForm({
         await modal.alert(t("alreadyOnMap"), { variant: "info" });
         return;
       }
+    }
+
+    if (hideHeader && isEdit && city) {
+      const mediaSnapshot = {
+        savedPhotoUrls: [...savedPhotoUrls],
+        removedSavedPhotoUrls: [...removedSavedPhotoUrls],
+        newPhotoFiles: [...newPhotoFiles],
+        instagramUrls: [...instagramUrls],
+        previousPhotoUrls: readPhotoUrls(city),
+      };
+      const payloadBase = {
+        city_name: resolvedCityName,
+        country_code: resolvedCountryCode,
+        country_name: countryName,
+        note: note || null,
+        visit_dates: visitDates,
+      };
+      const cityId = city.id;
+      onSuccess?.();
+      startBackgroundPinSave({
+        media: mediaSnapshot,
+        genericSaveFailedMessage: tCommon("pinSaveFailed"),
+        saveRecord: (media) =>
+          fetch(`/api/cities/${cityId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...payloadBase, ...media }),
+          }),
+        onError: (message) => {
+          void modal.alert(message, { variant: "error" });
+        },
+        onPhotoChanged: () => router.refresh(),
+      });
+      return;
     }
 
     setLoading(true);
