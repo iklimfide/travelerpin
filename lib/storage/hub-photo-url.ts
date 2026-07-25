@@ -2,31 +2,23 @@ import {
   hubPhotoProxyPath,
   isR2PublicMediaUrl,
   parseR2ObjectKey,
-  publicR2UrlForObjectKey,
   readMediaCacheBuster,
 } from "@/lib/storage/r2";
 import { readPhotoUrl, type PinMediaRow } from "@/lib/utils/pin-media";
 import type { MediaType } from "@/types/database";
 
-/** Serve R2 uploads through our API — bucket public access is not required. */
+/** Serve R2 uploads through our API when the bucket is not browser-public. */
 export function toHubPhotoSrc(mediaUrl: string | null | undefined): string | null {
   if (!mediaUrl) return null;
 
   const trimmed = mediaUrl.trim();
-
-  // Public bucket URLs load from R2/CDN directly — avoids one serverless invoke per image.
-  if (isR2PublicMediaUrl(trimmed)) {
-    return trimmed;
-  }
-
   const key = parseR2ObjectKey(trimmed);
   if (key) {
-    const buster = readMediaCacheBuster(trimmed);
-    const direct = publicR2UrlForObjectKey(key, buster);
-    if (direct && isR2PublicMediaUrl(direct)) {
-      return direct;
-    }
-    return hubPhotoProxyPath(key, buster);
+    return hubPhotoProxyPath(key, readMediaCacheBuster(trimmed));
+  }
+
+  if (isR2PublicMediaUrl(trimmed)) {
+    return trimmed;
   }
 
   return trimmed;
