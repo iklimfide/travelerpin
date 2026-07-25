@@ -237,6 +237,22 @@ export function hubPhotoProxyPath(key: string, cacheBuster?: string | null): str
   return `/api/hub-photo?${params.toString()}`;
 }
 
+/** Build a public bucket URL for an object key (client-safe when NEXT_PUBLIC_R2_PUBLIC_BASE_URL is set). */
+export function publicR2UrlForObjectKey(
+  key: string,
+  cacheBuster?: string | null
+): string | null {
+  const publicBaseUrl = getR2PublicBaseUrl();
+  if (!publicBaseUrl || !isSafeR2ObjectKey(key)) return null;
+
+  const base = publicBaseUrl.replace(/\/$/, "");
+  const url = new URL(`${base}/${key}`);
+  if (cacheBuster?.trim()) {
+    url.searchParams.set("v", cacheBuster.trim());
+  }
+  return url.toString();
+}
+
 /** Read ?v= cache-buster from stored media URLs (hero uploads append this on each replace). */
 export function readMediaCacheBuster(publicUrl: string): string | null {
   try {

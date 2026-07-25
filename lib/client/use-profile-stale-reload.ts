@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { PROFILE_DATA_STALE_EVENT } from "@/lib/client/session-page-cache";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-types";
 
@@ -11,14 +11,16 @@ export function useProfileStaleReload(
   onReload: (data: PublicProfilePageData) => void
 ): void {
   const normalized = username.trim().toLowerCase();
+  const onReloadRef = useRef(onReload);
+  onReloadRef.current = onReload;
 
   const reload = useCallback(async () => {
     const res = await fetch(`/api/profile/${encodeURIComponent(normalized)}/page-data`, {
       cache: "no-store",
     });
     if (!res.ok) return;
-    onReload((await res.json()) as PublicProfilePageData);
-  }, [normalized, onReload]);
+    onReloadRef.current((await res.json()) as PublicProfilePageData);
+  }, [normalized]);
 
   useEffect(() => {
     if (!enabled) return;

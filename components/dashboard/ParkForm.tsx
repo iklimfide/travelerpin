@@ -503,6 +503,8 @@ export function ParkForm({
         labels={{
           mediaHint: t("mediaHint"),
           photo: t("photo"),
+          photoLibrary: t("photoLibrary"),
+          photoCamera: t("photoCamera"),
           photoSaved: t("photoSaved"),
           instagram: t("instagram"),
           instagramHint: t("instagramHint"),

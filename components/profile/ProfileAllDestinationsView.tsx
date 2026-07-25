@@ -145,7 +145,7 @@ export function ProfileAllDestinationsView({
       const viewData = previewAsPublic ? applyPublicPreviewToProfileData(data) : data;
       const { wishlistCountries: visibleWishlist, wishlistCodes: visibleWishlistCodes } =
         filterWishlistForProfileView(viewData, isOwnProfile);
-      const { cityHeroImages, parkHeroImages } = await fetchHeroImageMaps({ force: true });
+      const { cityHeroImages, parkHeroImages } = await fetchHeroImageMaps();
 
       setViewVisitedCountries(viewData.visitedCountries);
       setViewVisitedCities(viewData.visitedCities);

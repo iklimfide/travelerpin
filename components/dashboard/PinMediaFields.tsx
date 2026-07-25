@@ -7,6 +7,8 @@ type PinMediaFieldsProps = {
   labels: {
     mediaHint: string;
     photo: string;
+    photoLibrary?: string;
+    photoCamera?: string;
     photoSaved: string;
     instagram: string;
     instagramHint: string;
@@ -72,7 +74,8 @@ export function PinMediaFields({
   const remainingSlots = LIMITS.maxPinPhotos - photoCount;
 
   const instagramDraftRef = useRef<HTMLInputElement>(null);
-  const photoInputRef = useRef<HTMLInputElement>(null);
+  const photoLibraryInputRef = useRef<HTMLInputElement>(null);
+  const photoCameraInputRef = useRef<HTMLInputElement>(null);
   const [newPhotoPreviewUrls, setNewPhotoPreviewUrls] = useState<string[]>([]);
 
   useEffect(() => {
@@ -127,10 +130,11 @@ export function PinMediaFields({
     const incoming = Array.from(fileList).slice(0, remainingSlots);
     if (incoming.length === 0) return;
     onNewPhotoFilesChange([...newPhotoFiles, ...incoming]);
-    if (photoInputRef.current) {
-      photoInputRef.current.value = "";
-    }
+    if (photoLibraryInputRef.current) photoLibraryInputRef.current.value = "";
+    if (photoCameraInputRef.current) photoCameraInputRef.current.value = "";
   }
+
+  const showPhotoSourceChoice = Boolean(labels.photoLibrary && labels.photoCamera);
 
   const visibleInstagramUrls =
     defaultInstagramField && instagramUrls.length === 0 ? [""] : instagramUrls;
@@ -145,26 +149,63 @@ export function PinMediaFields({
 
       <div className="space-y-2">
         <input
-          ref={photoInputRef}
+          ref={photoLibraryInputRef}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
           multiple
           className="hidden"
           onChange={(e) => handlePhotoInputChange(e.target.files)}
         />
+        <input
+          ref={photoCameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => handlePhotoInputChange(e.target.files)}
+        />
         <div className={equalActionButtons ? "pin-form-actions" : "flex flex-wrap gap-2"}>
-          <button
-            type="button"
-            disabled={!canAddPhotos}
-            onClick={() => photoInputRef.current?.click()}
-            className={
-              equalActionButtons
-                ? "pin-form-actions__btn pin-form-actions__btn--primary"
-                : "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
-            }
-          >
-            {labels.photo}
-          </button>
+          {showPhotoSourceChoice ? (
+            <>
+              <button
+                type="button"
+                disabled={!canAddPhotos}
+                onClick={() => photoLibraryInputRef.current?.click()}
+                className={
+                  equalActionButtons
+                    ? "pin-form-actions__btn pin-form-actions__btn--primary"
+                    : "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                }
+              >
+                {labels.photoLibrary}
+              </button>
+              <button
+                type="button"
+                disabled={!canAddPhotos}
+                onClick={() => photoCameraInputRef.current?.click()}
+                className={
+                  equalActionButtons
+                    ? "pin-form-actions__btn pin-form-actions__btn--secondary"
+                    : "rounded-lg border border-blue-600 bg-transparent px-4 py-2 text-sm font-medium text-blue-400 hover:bg-blue-600/10 disabled:cursor-not-allowed disabled:opacity-50"
+                }
+              >
+                {labels.photoCamera}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              disabled={!canAddPhotos}
+              onClick={() => photoLibraryInputRef.current?.click()}
+              className={
+                equalActionButtons
+                  ? "pin-form-actions__btn pin-form-actions__btn--primary"
+                  : "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+              }
+            >
+              {labels.photo}
+            </button>
+          )}
           <button
             type="button"
             onClick={addInstagramField}
