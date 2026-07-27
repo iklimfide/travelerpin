@@ -17,6 +17,7 @@ import {
   routeCountryCodes,
 } from "@/lib/client/next-route-state";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import {
   getAddRegionForCountryCode,
   type AddRegionId,
@@ -57,6 +58,8 @@ export function NextRouteDestinationModal({ onClose }: NextRouteDestinationModal
   const [mounted, setMounted] = useState(false);
   const toast = useToast();
   const hasRouteStateRef = useRef(cachedRoute !== null);
+
+  useLockBodyScroll(true);
 
   useEffect(() => {
     setMounted(true);

@@ -16,6 +16,7 @@ import {
   readOwnNextRouteCache,
 } from "@/lib/client/session-page-cache";
 import { fetchNextRoute, persistNextRouteStops } from "@/lib/client/next-route-state";
+import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import { useToast } from "@/components/ui/ToastProvider";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import {
@@ -190,6 +191,8 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
   const isSearching = trimmedQuery.length >= 2;
 
   const stopKeys = useMemo(() => new Set(stops.map(stopKey)), [stops]);
+
+  useLockBodyScroll(open);
 
   useEffect(() => {
     if (!open) return;

@@ -1,5 +1,9 @@
 import { detectImageMimeFromBuffer } from "@/lib/utils/image-mime";
-import { ensureReadablePinPhotoFile } from "@/lib/client/pin-photo-force-read";
+import {
+  ensureReadablePinPhotoFile,
+  PIN_PHOTO_FORCE_READ_TIMEOUT_MS,
+  readPinPhotoHeaderBytes,
+} from "@/lib/client/pin-photo-force-read";
 
 /** Wide picker filter — OS may still return octet-stream; we sniff bytes on pick. */
 export const PIN_PHOTO_INPUT_ACCEPT =
@@ -33,26 +37,34 @@ export type PinPhotoPickResult = {
   mimeByFile: Map<File, string | null>;
 };
 
-export async function pickPinPhotoFiles(files: File[]): Promise<PinPhotoPickResult> {
+export async function pickPinPhotoFiles(
+  files: File[],
+  readTimeoutMs = PIN_PHOTO_FORCE_READ_TIMEOUT_MS
+): Promise<PinPhotoPickResult> {
   const accepted: File[] = [];
   const mimeByFile = new Map<File, string | null>();
   let rejectedUnsupported = false;
 
   for (const raw of files) {
-    const materialized = await ensureReadablePinPhotoFile(raw);
-    if (!materialized) {
+    if (raw.size <= 0) {
+      rejectedUnsupported = true;
+      continue;
+    }
+
+    const materialized = await ensureReadablePinPhotoFile(raw, readTimeoutMs);
+    if (!materialized || materialized.size <= 0) {
       rejectedUnsupported = true;
       continue;
     }
     const file = materialized;
 
-    if (file.size <= 0) {
+    const headBuffer = await readPinPhotoHeaderBytes(file, readTimeoutMs);
+    if (!headBuffer) {
       rejectedUnsupported = true;
       continue;
     }
 
-    const head = new Uint8Array(await file.slice(0, 16).arrayBuffer());
-    const sniffed = detectImageMimeFromBuffer(head);
+    const sniffed = detectImageMimeFromBuffer(new Uint8Array(headBuffer));
 
     if (sniffed) {
       accepted.push(file);

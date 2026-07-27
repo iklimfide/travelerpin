@@ -1,7 +1,14 @@
 import { LIMITS } from "@/lib/constants";
 import { detectImageMimeFromBuffer } from "@/lib/utils/image-mime";
 
-export const PIN_PHOTO_FORCE_READ_TIMEOUT_MS = 45_000;
+/** Hard cap — unreadable virtual picker files must fail fast (no UI freeze). */
+export const PIN_PHOTO_FORCE_READ_TIMEOUT_MS = 500;
+
+export type PinPhotoReadFailureCode =
+  | "PIN_PHOTO_READ_TIMEOUT"
+  | "PIN_PHOTO_READ_FAILED"
+  | "PIN_PHOTO_READ_EMPTY"
+  | "PIN_PHOTO_UNSUPPORTED";
 
 const VIRTUAL_PICKER_MIME = new Set([
   "",
@@ -13,13 +20,17 @@ const VIRTUAL_PICKER_MIME = new Set([
 function readBlobWithTimeout(blob: Blob, timeoutMs: number): Promise<ArrayBuffer> {
   return new Promise((resolve, reject) => {
     const timer = window.setTimeout(() => {
-      reject(new Error("PIN_PHOTO_READ_TIMEOUT"));
+      reject(new Error("PIN_PHOTO_READ_TIMEOUT" satisfies PinPhotoReadFailureCode));
     }, timeoutMs);
 
     blob
       .arrayBuffer()
       .then((buffer) => {
         window.clearTimeout(timer);
+        if (buffer.byteLength <= 0) {
+          reject(new Error("PIN_PHOTO_READ_EMPTY" satisfies PinPhotoReadFailureCode));
+          return;
+        }
         resolve(buffer);
       })
       .catch((error: unknown) => {
@@ -69,36 +80,6 @@ export function pinPhotoNeedsForceRead(file: File): boolean {
   return false;
 }
 
-async function readViaObjectUrlFetch(
-  file: File,
-  timeoutMs: number
-): Promise<ArrayBuffer> {
-  const objectUrl = URL.createObjectURL(file);
-  try {
-    const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      const response = await fetch(objectUrl, { signal: controller.signal });
-      if (!response.ok) {
-        throw new Error("PIN_PHOTO_FETCH_FAILED");
-      }
-      return await response.arrayBuffer();
-    } finally {
-      window.clearTimeout(timer);
-    }
-  } finally {
-    URL.revokeObjectURL(objectUrl);
-  }
-}
-
-async function readPinPhotoBytes(file: File, timeoutMs: number): Promise<ArrayBuffer> {
-  try {
-    return await readBlobWithTimeout(file, timeoutMs);
-  } catch {
-    return readViaObjectUrlFetch(file, timeoutMs);
-  }
-}
-
 function bytesToPinPhotoFile(
   file: File,
   buffer: ArrayBuffer,
@@ -114,13 +95,29 @@ function bytesToPinPhotoFile(
   });
 }
 
+/** Read first bytes with the same hard timeout as full materialization. */
+export async function readPinPhotoHeaderBytes(
+  file: File,
+  timeoutMs = PIN_PHOTO_FORCE_READ_TIMEOUT_MS
+): Promise<ArrayBuffer | null> {
+  if (file.size <= 0) return null;
+  try {
+    const slice = file.slice(0, Math.min(16, file.size));
+    return await readBlobWithTimeout(slice, timeoutMs);
+  } catch {
+    return null;
+  }
+}
+
 /** Read virtual picker files (Google Photos / content URI) into a normal in-memory File. */
 export async function materializePinPhotoFile(
   file: File,
   timeoutMs = PIN_PHOTO_FORCE_READ_TIMEOUT_MS
 ): Promise<File | null> {
+  if (file.size <= 0) return null;
+
   try {
-    const buffer = await readPinPhotoBytes(file, timeoutMs);
+    const buffer = await readBlobWithTimeout(file, timeoutMs);
     const mime = resolveImageMime(buffer, file.type);
     if (!mime) return null;
     return bytesToPinPhotoFile(file, buffer, mime);
@@ -131,26 +128,28 @@ export async function materializePinPhotoFile(
 
 /**
  * Ensures the picker file is readable locally before upload/preview.
- * Fast-path keeps the original File when type and header bytes look valid.
+ * Fails fast — no fetch/object-URL fallback, no second read pass.
  */
 export async function ensureReadablePinPhotoFile(
   file: File,
   timeoutMs = PIN_PHOTO_FORCE_READ_TIMEOUT_MS
 ): Promise<File | null> {
+  if (file.size <= 0) return null;
+
   if (pinPhotoNeedsForceRead(file)) {
     return materializePinPhotoFile(file, timeoutMs);
   }
 
   try {
-    const head = await readBlobWithTimeout(file.slice(0, 16), Math.min(timeoutMs, 12_000));
+    const head = await readBlobWithTimeout(file.slice(0, Math.min(16, file.size)), timeoutMs);
     const sniffed = detectImageMimeFromBuffer(new Uint8Array(head));
     const type = file.type.trim().toLowerCase();
     if (sniffed && type.startsWith("image/") && !VIRTUAL_PICKER_MIME.has(type)) {
       return file;
     }
   } catch {
-    return materializePinPhotoFile(file, timeoutMs);
+    return null;
   }
 
-  return materializePinPhotoFile(file, timeoutMs);
+  return null;
 }

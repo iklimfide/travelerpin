@@ -1523,6 +1523,14 @@ html[data-tp-mobile-preview-embed] body {
   right: auto;
 }
 
+@media (max-width: 1023px) {
+  .dashboard-bottom-bar:not(.dashboard-bottom-bar--top) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: #ffffff;
+  }
+}
+
 /* Top chrome: guests (all breakpoints) + signed-in desktop (class set in JS). */
 .dashboard-bottom-bar--top {
   top: 0;

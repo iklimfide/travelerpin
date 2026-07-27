@@ -146,6 +146,21 @@ export function PinMediaFields({
     const incoming = Array.from(fileList).slice(0, remainingSlots);
     if (incoming.length === 0) return;
 
+    const pickErrorMessage =
+      photoUnsupportedFormatMessage ??
+      "Unsupported or unreadable file format.";
+
+    const notifyPickError = () => {
+      onPhotoPickError?.(pickErrorMessage);
+    };
+
+    if (incoming.every((file) => file.size <= 0)) {
+      notifyPickError();
+      if (photoLibraryInputRef.current) photoLibraryInputRef.current.value = "";
+      if (photoCameraInputRef.current) photoCameraInputRef.current.value = "";
+      return;
+    }
+
     photoPickBusyRef.current = true;
     void pickPinPhotoFiles(incoming)
       .then(({ accepted, rejectedUnsupported, mimeByFile }) => {
@@ -153,14 +168,17 @@ export function PinMediaFields({
           pickedFileMimeRef.current.set(file, mime);
         }
         if (rejectedUnsupported) {
-          onPhotoPickError?.(photoUnsupportedFormatMessage ?? "Unsupported file format.");
+          notifyPickError();
+        }
+        if (accepted.length === 0 && !rejectedUnsupported) {
+          notifyPickError();
         }
         if (accepted.length > 0) {
           onNewPhotoFilesChange([...newPhotoFilesRef.current, ...accepted]);
         }
       })
       .catch(() => {
-        onPhotoPickError?.(photoUnsupportedFormatMessage ?? "Unsupported file format.");
+        notifyPickError();
       })
       .finally(() => {
         photoPickBusyRef.current = false;

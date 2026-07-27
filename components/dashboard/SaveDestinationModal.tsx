@@ -26,6 +26,7 @@ import {
   type TravelStateData,
 } from "@/lib/client/session-page-cache";
 import { fetchTravelState } from "@/lib/client/travel-state";
+import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import { addPark } from "@/lib/client/park-actions";
 import { CityForm } from "@/components/dashboard/CityForm";
 import { ParkForm } from "@/components/dashboard/ParkForm";
@@ -384,6 +385,7 @@ export function SaveDestinationModal({
   const locale = useLocale() === "tr" ? "tr" : "en";
   const countryList = useMemo(() => getCountryList(locale), [locale]);
   const toast = useToast();
+  useLockBodyScroll(open);
 
   const [tab, setTab] = useState<SaveDestinationTab>("popular");
   const [query, setQuery] = useState("");

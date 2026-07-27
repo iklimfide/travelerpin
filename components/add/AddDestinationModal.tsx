@@ -24,6 +24,7 @@ import {
   type PendingCitySelection,
   type PendingParkSelection,
 } from "@/lib/client/travel-state";
+import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 import {
   getAddRegionForCountryCode,
   type AddRegionId,
@@ -192,6 +193,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
   const { common: commonMessages, addDestination: addDestinationMessages } = useAppMessages();
   const modal = useModal();
   const toast = useToast();
+  useLockBodyScroll(true);
   const isParksMode = mode === "parks";
   const [step, setStep] = useState<Step>({ kind: "countries" });
   const [visitedCodes, setVisitedCodes] = useState<Set<string>>(

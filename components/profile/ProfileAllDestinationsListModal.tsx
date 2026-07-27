@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useAppMessages } from "@/lib/i18n/client-messages";
+import { useLockBodyScroll } from "@/lib/hooks/useLockBodyScroll";
 
 type ProfileAllDestinationsListModalProps = {
   open: boolean;
@@ -21,6 +23,14 @@ export function ProfileAllDestinationsListModal({
   children,
 }: ProfileAllDestinationsListModalProps) {
   const { share: shareMessages } = useAppMessages();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useLockBodyScroll(open);
+
   useEffect(() => {
     if (!open || !closeOnEscape) return;
 
@@ -32,11 +42,11 @@ export function ProfileAllDestinationsListModal({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, onClose, closeOnEscape]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
   const titleId = "profile-all-destinations-list-title";
 
-  return (
+  return createPortal(
     <div className="profile-followers-modal profile-all-destinations-modal" role="presentation">
       <button
         type="button"
@@ -74,6 +84,7 @@ export function ProfileAllDestinationsListModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
