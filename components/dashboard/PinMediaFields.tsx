@@ -159,6 +159,9 @@ export function PinMediaFields({
           onNewPhotoFilesChange([...newPhotoFilesRef.current, ...accepted]);
         }
       })
+      .catch(() => {
+        onPhotoPickError?.(photoUnsupportedFormatMessage ?? "Unsupported file format.");
+      })
       .finally(() => {
         photoPickBusyRef.current = false;
         if (photoLibraryInputRef.current) photoLibraryInputRef.current.value = "";

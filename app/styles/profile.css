@@ -23,6 +23,8 @@
   color: var(--profile-text);
   flex: 1;
   width: 100%;
+  min-width: 0;
+  overflow-x: clip;
 }
 
 .profile-public-preview-banner {
@@ -938,6 +940,7 @@
   display: block;
   font-size: 25px;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
   color: #142033;
   line-height: 1;
   margin-bottom: 4px;
@@ -1806,6 +1809,7 @@
   max-width: 100%;
   min-width: 0;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   overscroll-x: contain;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
@@ -1833,6 +1837,7 @@
   background: transparent;
   border: none;
   box-shadow: none;
+  overflow-x: clip;
 }
 
 .profile-section:has(.profile-update-card) + .profile-section.profile-visited-preview {
@@ -1857,6 +1862,7 @@
   max-width: 100%;
   min-width: 0;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   overscroll-x: contain;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
@@ -2310,7 +2316,10 @@
   align-items: flex-end;
   justify-content: center;
   gap: 8px;
+  max-width: 100%;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
   margin: 0;
   border-bottom: 1px solid #dbe5f0;
   scrollbar-width: none;
@@ -3660,6 +3669,7 @@
   font-weight: 700;
   color: #526176;
   background: #ffffff;
+  cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 

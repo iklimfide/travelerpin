@@ -29,6 +29,7 @@ function readCached(key: string): Map<string, string> | null {
 
 function writeCached(key: string, images: Map<string, string>): void {
   if (typeof window === "undefined") return;
+  if (images.size === 0) return;
 
   try {
     const payload: CachedHeroPayload = {
@@ -71,7 +72,7 @@ function readCachedHeroImageMaps(): {
 } | null {
   const cityHeroImages = readCachedCityHeroImages();
   const parkHeroImages = readCachedParkHeroImages();
-  if (!cityHeroImages || !parkHeroImages) return null;
+  if (!cityHeroImages?.size || !parkHeroImages?.size) return null;
   return { cityHeroImages, parkHeroImages };
 }
 

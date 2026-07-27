@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { NextRouteSortableStopList } from "@/components/dashboard/NextRouteSortableStopList";
 import { SaveDestinationModalListSkeleton } from "@/components/skeletons/SaveDestinationModalSkeleton";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -369,20 +370,6 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
     [applyStops]
   );
 
-  const moveStop = useCallback(
-    (index: number, direction: -1 | 1) => {
-      const target = index + direction;
-      applyStops((prev) => {
-        if (target < 0 || target >= prev.length) return prev;
-        const next = [...prev];
-        const [item] = next.splice(index, 1);
-        next.splice(target, 0, item!);
-        return next;
-      });
-    },
-    [applyStops]
-  );
-
   const browseRows = useMemo((): BrowseRow[] => {
     if (tab === "countries") {
       return getPopularCountries(40).map((country) =>
@@ -525,63 +512,14 @@ export function NextRouteModal({ open, onClose, initialTab = "countries" }: Next
           {listEmptyMessage ? (
             <li className="save-destination-modal__empty">{listEmptyMessage}</li>
           ) : tab === "route" && !isSearching ? (
-            stops.map((stop, index) => {
-              const row = stopToRow(stop, index, locale);
-              const key = browseRowKey(row);
-              const isBusy = busyId === key;
-              return (
-                <li key={stop.id} className="save-destination-modal__item">
-                  <div className="save-destination-modal__row">
-                    <span className="save-destination-modal__flag">
-                      <Image
-                        src={countryCodeToFlagUrl(row.countryCode)}
-                        alt=""
-                        width={32}
-                        height={32}
-                        className="rounded-full object-cover"
-                      />
-                    </span>
-                    <span className="save-destination-modal__text">
-                      <span className="save-destination-modal__name" title={row.title}>
-                        {row.title}
-                      </span>
-                      <span className="save-destination-modal__meta" title={row.subtitle}>
-                        {row.subtitle}
-                      </span>
-                    </span>
-                    <div className="save-destination-modal__row-actions">
-                      <button
-                        type="button"
-                        className="save-destination-modal__mini-btn"
-                        onClick={() => moveStop(row.index, -1)}
-                        disabled={row.index === 0 || isBusy}
-                        aria-label={nextRouteMessages.moveUp}
-                      >
-                        ↑
-                      </button>
-                      <button
-                        type="button"
-                        className="save-destination-modal__mini-btn"
-                        onClick={() => moveStop(row.index, 1)}
-                        disabled={row.index === stops.length - 1 || isBusy}
-                        aria-label={nextRouteMessages.moveDown}
-                      >
-                        ↓
-                      </button>
-                      <button
-                        type="button"
-                        className="save-destination-modal__check save-destination-modal__check--on"
-                        onClick={() => removeFromRoute(key)}
-                        disabled={isBusy}
-                        aria-label={nextRouteMessages.removeStop}
-                      >
-                        ✓
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              );
-            })
+            <NextRouteSortableStopList
+              stops={stops}
+              locale={locale}
+              busyId={busyId}
+              removeStopLabel={nextRouteMessages.removeStop}
+              onReorder={(nextStops) => applyStops(() => nextStops)}
+              onRemove={removeFromRoute}
+            />
           ) : (
             listRows.map((row) => {
               const key = browseRowKey(row);

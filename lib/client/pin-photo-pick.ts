@@ -1,4 +1,5 @@
 import { detectImageMimeFromBuffer } from "@/lib/utils/image-mime";
+import { ensureReadablePinPhotoFile } from "@/lib/client/pin-photo-force-read";
 
 /** Wide picker filter — OS may still return octet-stream; we sniff bytes on pick. */
 export const PIN_PHOTO_INPUT_ACCEPT =
@@ -37,7 +38,14 @@ export async function pickPinPhotoFiles(files: File[]): Promise<PinPhotoPickResu
   const mimeByFile = new Map<File, string | null>();
   let rejectedUnsupported = false;
 
-  for (const file of files) {
+  for (const raw of files) {
+    const materialized = await ensureReadablePinPhotoFile(raw);
+    if (!materialized) {
+      rejectedUnsupported = true;
+      continue;
+    }
+    const file = materialized;
+
     if (file.size <= 0) {
       rejectedUnsupported = true;
       continue;

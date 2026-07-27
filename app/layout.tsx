@@ -91,7 +91,7 @@ export default async function RootLayout({
       className={`${geistSans.variable} light h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-full min-w-0 flex-col overflow-x-hidden bg-background text-foreground">
+      <body className="flex min-h-full min-w-0 flex-col overflow-x-clip overscroll-x-none bg-background text-foreground">
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
           strategy="afterInteractive"

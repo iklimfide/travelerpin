@@ -1,5 +1,11 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { ProfileCountryLink, ProfileParkLink } from "@/components/profile/ProfilePlaceLink";
+import {
+  profileParkHeroLookupName,
+  useProfileParkHeroImage,
+} from "@/components/profile/profile-place-hero-image";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { parkTypeLabel } from "@/lib/utils/park-type";
 import type { ProfileParkDestination } from "@/lib/utils/profile-all-destinations";
@@ -15,13 +21,20 @@ export function ProfileParkDestinationCard({
   layout = "grid",
   actions,
 }: ProfileParkDestinationCardProps) {
+  const photoUrl = useProfileParkHeroImage(
+    park.countryCode,
+    profileParkHeroLookupName(park.parkSlug, park.parkName),
+    park.parkType,
+    park.imageUrl
+  );
+
   return (
     <article className={`profile-trip${layout === "grid" ? " profile-trip--grid" : ""}`}>
       <div className="profile-trip-image profile-trip-image--park">
         {/* Plain img — /api/hub-photo proxy URLs break under next/image on production. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={park.imageUrl}
+          src={photoUrl}
           alt=""
           className="profile-trip-image__photo object-cover"
         />

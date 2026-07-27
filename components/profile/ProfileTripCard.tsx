@@ -1,5 +1,11 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { ProfileCityLink, ProfileCountryLink, ProfileParkLink } from "@/components/profile/ProfilePlaceLink";
+import {
+  profileCityHeroLookupName,
+  useProfileCityHeroImage,
+} from "@/components/profile/profile-place-hero-image";
 import { profileCardGradient } from "@/components/profile/profile-card-gradient";
 import { countryCodeToFlagUrl } from "@/lib/utils/country-flag";
 import { parkTypeLabel } from "@/lib/utils/park-type";
@@ -18,6 +24,13 @@ export function ProfileTripCard({
   layout = "row",
   actions,
 }: ProfileTripCardProps) {
+  const cityHeroUrl = useProfileCityHeroImage(
+    trip.countryCode,
+    profileCityHeroLookupName(trip.citySlug, trip.placeName),
+    trip.kind === "city" ? trip.imageUrl : null
+  );
+  const photoUrl = trip.kind === "city" ? cityHeroUrl : trip.imageUrl;
+
   return (
     <article
       className={`profile-trip${layout === "grid" ? " profile-trip--grid" : ""}`}
@@ -36,11 +49,11 @@ export function ProfileTripCard({
             : undefined
         }
       >
-        {trip.imageUrl ? (
+        {photoUrl ? (
           // Plain img — proxy URLs use /api/hub-photo?key=… which next/image rejects on production.
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={trip.imageUrl}
+            src={photoUrl}
             alt=""
             className="profile-trip-image__photo object-cover"
           />

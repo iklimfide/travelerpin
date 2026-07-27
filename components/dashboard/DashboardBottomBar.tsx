@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAddDestination } from "@/components/add/AddDestinationProvider";
 import { useNextRouteDestination } from "@/components/add/NextRouteDestinationProvider";
 import { useWishlistDestination } from "@/components/add/WishlistDestinationProvider";
+import { useDashboardAdd } from "@/components/dashboard/DashboardAddProvider";
 import { BottomBarProfileNav } from "@/components/dashboard/BottomBarProfileNav";
 import type { BottomBarOwnProfile } from "@/components/dashboard/OwnProfileShellGate";
 import { LocaleSwitcher } from "@/components/layout/LocaleSwitcher";
@@ -110,6 +111,7 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
   const router = useRouter();
   const { open: openAddDestination } = useAddDestination();
   const { open: openNextRouteDestination } = useNextRouteDestination();
+  const { openNextRouteModal } = useDashboardAdd();
   const { open: openWishlistDestination } = useWishlistDestination();
   const barRef = useRef<HTMLElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -153,7 +155,11 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
       router.push(loginHrefFor(currentPath));
       return;
     }
-    openNextRouteDestination();
+    if (isDesktopNav) {
+      openNextRouteDestination();
+      return;
+    }
+    openNextRouteModal("route");
   }
 
   function handleWishlistClick() {
