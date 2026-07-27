@@ -1,13 +1,31 @@
 import { detectImageMimeFromBuffer } from "@/lib/utils/image-mime";
 import {
   ensureReadablePinPhotoFile,
-  PIN_PHOTO_FORCE_READ_TIMEOUT_MS,
+  PIN_PHOTO_LOCAL_READ_TIMEOUT_MS,
   readPinPhotoHeaderBytes,
 } from "@/lib/client/pin-photo-force-read";
 
-/** Wide picker filter — OS may still return octet-stream; we sniff bytes on pick. */
-export const PIN_PHOTO_INPUT_ACCEPT =
-  "image/*,.jpg,.jpeg,.png,.webp,.gif,.heic,.heif,.avif,.bmp,.tif,.tiff";
+/**
+ * Gallery / file picker — explicit MIME + extensions (no `image/*`) so Android
+ * is less likely to open Google Photos instead of the device gallery.
+ */
+export const PIN_PHOTO_GALLERY_ACCEPT =
+  "image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.gif,.heic,.heif";
+
+/** Camera capture — same explicit types, no wildcard. */
+export const PIN_PHOTO_CAMERA_ACCEPT =
+  "image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp";
+
+/** @deprecated Prefer PIN_PHOTO_GALLERY_ACCEPT / PIN_PHOTO_CAMERA_ACCEPT */
+export const PIN_PHOTO_INPUT_ACCEPT = PIN_PHOTO_GALLERY_ACCEPT;
+
+type PinPhotoPickerWindow = Window & {
+  showOpenFilePicker?: (options: {
+    multiple?: boolean;
+    types?: { description: string; accept: Record<string, string[]> }[];
+    excludeAcceptAllOption?: boolean;
+  }) => Promise<FileSystemFileHandle[]>;
+};
 
 const IMAGE_EXT = /\.(jpe?g|png|webp|gif|heic|heif|avif|bmp|tiff?)$/i;
 
@@ -37,9 +55,51 @@ export type PinPhotoPickResult = {
   mimeByFile: Map<File, string | null>;
 };
 
+/**
+ * Opens the system file picker when supported (often a gallery/files UI on mobile).
+ * Returns `null` when unsupported — use a hidden `<input type="file">` fallback.
+ * Returns `[]` when the user cancels.
+ */
+export async function openPinPhotoGalleryFiles(maxCount: number): Promise<File[] | null> {
+  const showOpenFilePicker = (window as PinPhotoPickerWindow).showOpenFilePicker;
+  if (typeof showOpenFilePicker !== "function") {
+    return null;
+  }
+
+  try {
+    const handles = await showOpenFilePicker({
+      multiple: maxCount > 1,
+      types: [
+        {
+          description: "Images",
+          accept: {
+            "image/jpeg": [".jpg", ".jpeg"],
+            "image/png": [".png"],
+            "image/webp": [".webp"],
+            "image/gif": [".gif"],
+            "image/heic": [".heic"],
+            "image/heif": [".heif"],
+          },
+        },
+      ],
+      excludeAcceptAllOption: false,
+    });
+    const files: File[] = [];
+    for (const handle of handles.slice(0, maxCount)) {
+      files.push(await handle.getFile());
+    }
+    return files;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      return [];
+    }
+    return null;
+  }
+}
+
 export async function pickPinPhotoFiles(
   files: File[],
-  readTimeoutMs = PIN_PHOTO_FORCE_READ_TIMEOUT_MS
+  readTimeoutMs = PIN_PHOTO_LOCAL_READ_TIMEOUT_MS
 ): Promise<PinPhotoPickResult> {
   const accepted: File[] = [];
   const mimeByFile = new Map<File, string | null>();

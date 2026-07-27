@@ -1,8 +1,14 @@
 import { LIMITS } from "@/lib/constants";
 import { detectImageMimeFromBuffer } from "@/lib/utils/image-mime";
 
-/** Hard cap — unreadable virtual picker files must fail fast (no UI freeze). */
-export const PIN_PHOTO_FORCE_READ_TIMEOUT_MS = 500;
+/** Virtual picker files (Google Photos / content URI) — fail fast, no UI freeze. */
+export const PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS = 500;
+
+/** @deprecated Use PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS */
+export const PIN_PHOTO_FORCE_READ_TIMEOUT_MS = PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS;
+
+/** Local gallery / camera files may need longer to read on slow devices. */
+export const PIN_PHOTO_LOCAL_READ_TIMEOUT_MS = 12_000;
 
 export type PinPhotoReadFailureCode =
   | "PIN_PHOTO_READ_TIMEOUT"
@@ -98,7 +104,7 @@ function bytesToPinPhotoFile(
 /** Read first bytes with the same hard timeout as full materialization. */
 export async function readPinPhotoHeaderBytes(
   file: File,
-  timeoutMs = PIN_PHOTO_FORCE_READ_TIMEOUT_MS
+  timeoutMs = PIN_PHOTO_LOCAL_READ_TIMEOUT_MS
 ): Promise<ArrayBuffer | null> {
   if (file.size <= 0) return null;
   try {
@@ -112,7 +118,7 @@ export async function readPinPhotoHeaderBytes(
 /** Read virtual picker files (Google Photos / content URI) into a normal in-memory File. */
 export async function materializePinPhotoFile(
   file: File,
-  timeoutMs = PIN_PHOTO_FORCE_READ_TIMEOUT_MS
+  timeoutMs = PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS
 ): Promise<File | null> {
   if (file.size <= 0) return null;
 
@@ -132,16 +138,19 @@ export async function materializePinPhotoFile(
  */
 export async function ensureReadablePinPhotoFile(
   file: File,
-  timeoutMs = PIN_PHOTO_FORCE_READ_TIMEOUT_MS
+  localReadTimeoutMs = PIN_PHOTO_LOCAL_READ_TIMEOUT_MS
 ): Promise<File | null> {
   if (file.size <= 0) return null;
 
   if (pinPhotoNeedsForceRead(file)) {
-    return materializePinPhotoFile(file, timeoutMs);
+    return materializePinPhotoFile(file, PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS);
   }
 
   try {
-    const head = await readBlobWithTimeout(file.slice(0, Math.min(16, file.size)), timeoutMs);
+    const head = await readBlobWithTimeout(
+      file.slice(0, Math.min(16, file.size)),
+      localReadTimeoutMs
+    );
     const sniffed = detectImageMimeFromBuffer(new Uint8Array(head));
     const type = file.type.trim().toLowerCase();
     if (sniffed && type.startsWith("image/") && !VIRTUAL_PICKER_MIME.has(type)) {

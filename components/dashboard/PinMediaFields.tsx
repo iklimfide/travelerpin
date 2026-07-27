@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   canBrowserPreviewPinPhoto,
+  openPinPhotoGalleryFiles,
   pickPinPhotoFiles,
-  PIN_PHOTO_INPUT_ACCEPT,
+  PIN_PHOTO_CAMERA_ACCEPT,
+  PIN_PHOTO_GALLERY_ACCEPT,
 } from "@/lib/client/pin-photo-pick";
 import { LIMITS } from "@/lib/constants";
 import { activePinPhotoCount } from "@/lib/utils/pin-media";
@@ -141,28 +143,53 @@ export function PinMediaFields({
     onNewPhotoFilesChange(newPhotoFiles.filter((_, i) => i !== index));
   }
 
-  function handlePhotoInputChange(fileList: FileList | null) {
-    if (!fileList?.length || photoPickBusyRef.current) return;
-    const incoming = Array.from(fileList).slice(0, remainingSlots);
-    if (incoming.length === 0) return;
+  function resetPhotoPickerInputs() {
+    if (photoLibraryInputRef.current) photoLibraryInputRef.current.value = "";
+    if (photoCameraInputRef.current) photoCameraInputRef.current.value = "";
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  }
+
+  function scheduleNativePickerDismissGuard() {
+    const onReturn = () => {
+      window.setTimeout(() => {
+        photoPickBusyRef.current = false;
+        resetPhotoPickerInputs();
+      }, 300);
+    };
+    window.addEventListener("focus", onReturn, { once: true });
+    document.addEventListener(
+      "visibilitychange",
+      () => {
+        if (document.visibilityState === "visible") onReturn();
+      },
+      { once: true }
+    );
+  }
+
+  function processPhotoFiles(incoming: File[]) {
+    const files = incoming.slice(0, remainingSlots);
+    if (files.length === 0) return;
 
     const pickErrorMessage =
       photoUnsupportedFormatMessage ??
       "Unsupported or unreadable file format.";
 
     const notifyPickError = () => {
-      onPhotoPickError?.(pickErrorMessage);
+      queueMicrotask(() => {
+        onPhotoPickError?.(pickErrorMessage);
+      });
     };
 
-    if (incoming.every((file) => file.size <= 0)) {
+    if (files.every((file) => file.size <= 0)) {
       notifyPickError();
-      if (photoLibraryInputRef.current) photoLibraryInputRef.current.value = "";
-      if (photoCameraInputRef.current) photoCameraInputRef.current.value = "";
+      resetPhotoPickerInputs();
       return;
     }
 
     photoPickBusyRef.current = true;
-    void pickPinPhotoFiles(incoming)
+    void pickPinPhotoFiles(files)
       .then(({ accepted, rejectedUnsupported, mimeByFile }) => {
         for (const [file, mime] of mimeByFile) {
           pickedFileMimeRef.current.set(file, mime);
@@ -182,9 +209,34 @@ export function PinMediaFields({
       })
       .finally(() => {
         photoPickBusyRef.current = false;
-        if (photoLibraryInputRef.current) photoLibraryInputRef.current.value = "";
-        if (photoCameraInputRef.current) photoCameraInputRef.current.value = "";
+        resetPhotoPickerInputs();
       });
+  }
+
+  function handlePhotoInputChange(fileList: FileList | null) {
+    if (!fileList?.length || photoPickBusyRef.current) return;
+    processPhotoFiles(Array.from(fileList));
+  }
+
+  async function openPhotoLibrary() {
+    if (!canAddPhotos || photoPickBusyRef.current) return;
+
+    const fromPicker = await openPinPhotoGalleryFiles(remainingSlots);
+    if (fromPicker !== null) {
+      if (fromPicker.length > 0) {
+        processPhotoFiles(fromPicker);
+      }
+      return;
+    }
+
+    scheduleNativePickerDismissGuard();
+    photoLibraryInputRef.current?.click();
+  }
+
+  function openPhotoCamera() {
+    if (!canAddPhotos || photoPickBusyRef.current) return;
+    scheduleNativePickerDismissGuard();
+    photoCameraInputRef.current?.click();
   }
 
   const showPhotoSourceChoice = Boolean(labels.photoLibrary && labels.photoCamera);
@@ -204,7 +256,7 @@ export function PinMediaFields({
         <input
           ref={photoLibraryInputRef}
           type="file"
-          accept={PIN_PHOTO_INPUT_ACCEPT}
+          accept={PIN_PHOTO_GALLERY_ACCEPT}
           multiple
           className="hidden"
           onChange={(e) => handlePhotoInputChange(e.target.files)}
@@ -212,7 +264,7 @@ export function PinMediaFields({
         <input
           ref={photoCameraInputRef}
           type="file"
-          accept={PIN_PHOTO_INPUT_ACCEPT}
+          accept={PIN_PHOTO_CAMERA_ACCEPT}
           capture="environment"
           className="hidden"
           onChange={(e) => handlePhotoInputChange(e.target.files)}
@@ -223,7 +275,7 @@ export function PinMediaFields({
               <button
                 type="button"
                 disabled={!canAddPhotos}
-                onClick={() => photoLibraryInputRef.current?.click()}
+                onClick={() => void openPhotoLibrary()}
                 className={
                   equalActionButtons
                     ? "pin-form-actions__btn pin-form-actions__btn--primary"
@@ -235,7 +287,7 @@ export function PinMediaFields({
               <button
                 type="button"
                 disabled={!canAddPhotos}
-                onClick={() => photoCameraInputRef.current?.click()}
+                onClick={openPhotoCamera}
                 className={
                   equalActionButtons
                     ? "pin-form-actions__btn pin-form-actions__btn--secondary"
@@ -249,7 +301,7 @@ export function PinMediaFields({
             <button
               type="button"
               disabled={!canAddPhotos}
-              onClick={() => photoLibraryInputRef.current?.click()}
+              onClick={() => void openPhotoLibrary()}
               className={
                 equalActionButtons
                   ? "pin-form-actions__btn pin-form-actions__btn--primary"
