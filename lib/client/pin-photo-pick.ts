@@ -2,6 +2,7 @@ import { LIMITS } from "@/lib/constants";
 import { mimeFromImageFileName } from "@/lib/utils/image-mime";
 import {
   ensureReadablePinPhotoFileDetailed,
+  pinPhotoNeedsForceRead,
   PIN_PHOTO_LOCAL_READ_TIMEOUT_MS,
 } from "@/lib/client/pin-photo-force-read";
 
@@ -52,14 +53,12 @@ export async function pickPinPhotoFiles(
       continue;
     }
 
-    if (raw.size <= 0) {
-      rejectedUnsupported = true;
-      continue;
-    }
-
-    if (!declaredTypeLooksLikeImage(raw.type) && !hasImageExtension(raw.name)) {
-      rejectedUnsupported = true;
-      continue;
+    const virtualOrEmpty = raw.size <= 0 || pinPhotoNeedsForceRead(raw);
+    if (!virtualOrEmpty) {
+      if (!declaredTypeLooksLikeImage(raw.type) && !hasImageExtension(raw.name)) {
+        rejectedUnsupported = true;
+        continue;
+      }
     }
 
     const readResult = await ensureReadablePinPhotoFileDetailed(raw, readTimeoutMs);

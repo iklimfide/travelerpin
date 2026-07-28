@@ -88,10 +88,9 @@ export function CountryForm({
 
     setLoading(true);
     try {
-      await executeBackgroundPinSave({
+      const saved = await executeBackgroundPinSave({
         media: mediaSnapshot,
         genericSaveFailedMessage: tCommon("pinSaveFailed"),
-        onMediaReady: () => onSuccess?.(),
         saveRecord: (media) =>
           fetch(url, {
             method,
@@ -104,6 +103,7 @@ export function CountryForm({
         onPhotoChanged: () => router.refresh(),
         formatPhotoUploadError: (message) => formatPinPhotoUploadError(tCommon, message),
       });
+      if (saved) onSuccess?.();
     } finally {
       setLoading(false);
     }

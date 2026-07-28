@@ -426,10 +426,9 @@ export function CityForm({
       const cityId = city.id;
       setLoading(true);
       try {
-        await executeBackgroundPinSave({
+        const saved = await executeBackgroundPinSave({
           media: mediaSnapshot,
           genericSaveFailedMessage: tCommon("pinSaveFailed"),
-          onMediaReady: () => onSuccess?.(),
           saveRecord: (media) =>
             fetch(`/api/cities/${cityId}`, {
               method: "PATCH",
@@ -442,6 +441,7 @@ export function CityForm({
           onPhotoChanged: () => router.refresh(),
           formatPhotoUploadError: (message) => formatPinPhotoUploadError(tCommon, message),
         });
+        if (saved) onSuccess?.();
       } finally {
         setLoading(false);
       }

@@ -231,18 +231,48 @@ export function ProfileMediaGallery({
   const locale = useLocale() as Locale;
   const modal = useModal();
   const [expandedItem, setExpandedItem] = useState<HubGalleryItem | null>(null);
-  const [editingCityId, setEditingCityId] = useState<string | null>(null);
-  const [editingParkId, setEditingParkId] = useState<string | null>(null);
+  const [editModalCity, setEditModalCity] = useState<VisitedCity | null>(null);
+  const [editModalPark, setEditModalPark] = useState<VisitedPark | null>(null);
   const [addPickerOpen, setAddPickerOpen] = useState(false);
   const [addPickerQuery, setAddPickerQuery] = useState("");
+  const [addPickerEntries, setAddPickerEntries] = useState<
+    Array<{
+      kind: "city" | "park";
+      id: string;
+      name: string;
+      rawName: string;
+      countryName: string;
+      rawCountryName: string;
+    }>
+  >([]);
   const [editMediaFocus, setEditMediaFocus] = useState<"photo" | "instagram" | undefined>(
     undefined
   );
 
   const heading = variant === "photos" ? labels.photosHeading : labels.instagramHeading;
 
-  const editingCity = visitedCities.find((city) => city.id === editingCityId) ?? null;
-  const editingPark = visitedParks.find((park) => park.id === editingParkId) ?? null;
+  function buildPickerEntries(
+    cities: VisitedCity[],
+    parks: VisitedPark[]
+  ): typeof addPickerEntries {
+    const pickerCityEntries = cities.map((city) => ({
+      kind: "city" as const,
+      id: city.id,
+      name: getLocalizedCityName(city.country_code, city.city_name, locale),
+      rawName: city.city_name,
+      countryName: getCountryName(city.country_code, locale),
+      rawCountryName: city.country_name,
+    }));
+    const pickerParkEntries = parks.map((park) => ({
+      kind: "park" as const,
+      id: park.id,
+      name: park.park_name,
+      rawName: park.park_name,
+      countryName: getCountryName(park.country_code, locale),
+      rawCountryName: park.country_name,
+    }));
+    return [...pickerCityEntries, ...pickerParkEntries];
+  }
 
   function openEditForItem(item: HubGalleryItem) {
     const ref = parseProfilePinId(item.pin.id);
@@ -251,41 +281,25 @@ export function ProfileMediaGallery({
     setEditMediaFocus(undefined);
 
     if (ref.kind === "city") {
-      setEditingParkId(null);
-      setEditingCityId(ref.id);
+      setEditModalPark(null);
+      setEditModalCity(visitedCities.find((city) => city.id === ref.id) ?? null);
       return;
     }
 
-    setEditingCityId(null);
-    setEditingParkId(ref.id);
+    setEditModalCity(null);
+    setEditModalPark(visitedParks.find((park) => park.id === ref.id) ?? null);
   }
 
   const addMediaFocus = variant === "photos" ? "photo" : "instagram";
 
   function openAddPicker() {
     setAddPickerQuery("");
+    setAddPickerEntries(buildPickerEntries(visitedCities, visitedParks));
     setAddPickerOpen(true);
   }
 
-  const pickerCityEntries = visitedCities.map((city) => ({
-    kind: "city" as const,
-    id: city.id,
-    name: getLocalizedCityName(city.country_code, city.city_name, locale),
-    rawName: city.city_name,
-    countryName: getCountryName(city.country_code, locale),
-    rawCountryName: city.country_name,
-  }));
-  const pickerParkEntries = visitedParks.map((park) => ({
-    kind: "park" as const,
-    id: park.id,
-    name: park.park_name,
-    rawName: park.park_name,
-    countryName: getCountryName(park.country_code, locale),
-    rawCountryName: park.country_name,
-  }));
-
   const pickerFilter = addPickerQuery.trim().toLocaleLowerCase(locale);
-  const pickerEntries = [...pickerCityEntries, ...pickerParkEntries].filter((entry) => {
+  const pickerEntries = addPickerEntries.filter((entry) => {
     if (!pickerFilter) return true;
     return [entry.name, entry.rawName, entry.countryName, entry.rawCountryName].some(
       (value) => value.toLocaleLowerCase(locale).includes(pickerFilter)
@@ -296,12 +310,12 @@ export function ProfileMediaGallery({
     setAddPickerOpen(false);
     setEditMediaFocus(addMediaFocus);
     if (kind === "city") {
-      setEditingParkId(null);
-      setEditingCityId(id);
+      setEditModalPark(null);
+      setEditModalCity(visitedCities.find((city) => city.id === id) ?? null);
       return;
     }
-    setEditingCityId(null);
-    setEditingParkId(id);
+    setEditModalCity(null);
+    setEditModalPark(visitedParks.find((park) => park.id === id) ?? null);
   }
 
   async function handleRemoveItem(item: HubGalleryItem) {
@@ -531,13 +545,13 @@ export function ProfileMediaGallery({
 
       {isOwnProfile ? (
         <ProfileDestinationEditModal
-          city={editingCity}
-          park={editingPark}
+          city={editModalCity}
+          park={editModalPark}
           visitedCountries={visitedCountries}
           mediaFocus={editMediaFocus}
           onClose={() => {
-            setEditingCityId(null);
-            setEditingParkId(null);
+            setEditModalCity(null);
+            setEditModalPark(null);
             setEditMediaFocus(undefined);
           }}
         />

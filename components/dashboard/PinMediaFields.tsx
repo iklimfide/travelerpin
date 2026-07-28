@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   canBrowserPreviewPinPhoto,
   pickPinPhotoFiles,
   PIN_PHOTO_GALLERY_ACCEPT,
-  validatePinPhotoBrowserPreview,
 } from "@/lib/client/pin-photo-pick";
+import {
+  pinPhotoPreviewObjectUrl,
+  revokeAllPinPhotoPreviewObjectUrls,
+  revokePinPhotoPreviewObjectUrl,
+} from "@/lib/client/pin-photo-preview-cache";
 import { uploadPinPhotoToR2 } from "@/lib/client/pin-photo-upload";
 import {
   formatPinPhotoUploadError,
@@ -77,8 +81,10 @@ export function PinMediaFields({
   function photoPickUnsupportedFormatMessage(): string {
     return photoUnsupportedFormatMessage ?? tCommon("photoUploadUnsupportedFormat");
   }
-  const removedSet = useMemo(() => new Set(removedSavedPhotoUrls), [removedSavedPhotoUrls]);
-  const visibleSavedUrls = savedPhotoUrls.filter((url) => !removedSet.has(url));
+
+  const removedSetRef = useRef(new Set(removedSavedPhotoUrls));
+  removedSetRef.current = new Set(removedSavedPhotoUrls);
+  const visibleSavedUrls = savedPhotoUrls.filter((url) => !removedSetRef.current.has(url));
   const photoCount = activePinPhotoCount({
     savedPhotoUrls,
     removedSavedPhotoUrls,
@@ -92,20 +98,19 @@ export function PinMediaFields({
   const photoLibraryInputRef = useRef<HTMLInputElement>(null);
   const pickedFileMimeRef = useRef(new WeakMap<File, string | null>());
   const photoPickBusyRef = useRef(false);
+  const [photoPickInProgress, setPhotoPickInProgress] = useState(false);
+  const photoPickGenerationRef = useRef(0);
   const lastPhotoInputAtRef = useRef(0);
+  const lastPickErrorAtRef = useRef(0);
+  const lastPickErrorMessageRef = useRef("");
   const newPhotoFilesRef = useRef(newPhotoFiles);
   newPhotoFilesRef.current = newPhotoFiles;
 
-  const newPhotoPreviewUrls = useMemo(
-    () => newPhotoFiles.map((file) => URL.createObjectURL(file)),
-    [newPhotoFiles]
-  );
-
   useEffect(() => {
     return () => {
-      for (const url of newPhotoPreviewUrls) URL.revokeObjectURL(url);
+      revokeAllPinPhotoPreviewObjectUrls(newPhotoFilesRef.current);
     };
-  }, [newPhotoPreviewUrls]);
+  }, []);
 
   useEffect(() => {
     if (!autoFocusInstagram) return;
@@ -138,19 +143,33 @@ export function PinMediaFields({
   }
 
   function removeSavedPhoto(url: string) {
-    if (removedSet.has(url)) return;
+    if (removedSetRef.current.has(url)) return;
     onRemovedSavedPhotoUrlsChange([...removedSavedPhotoUrls, url]);
   }
 
   function removeNewPhoto(index: number) {
+    const file = newPhotoFiles[index];
+    if (file) revokePinPhotoPreviewObjectUrl(file);
     onNewPhotoFilesChange(newPhotoFiles.filter((_, i) => i !== index));
   }
 
   function resetPhotoPickerInputs() {
     if (photoLibraryInputRef.current) photoLibraryInputRef.current.value = "";
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
+  }
+
+  function notifyPickErrorOnce(message: string) {
+    const now = Date.now();
+    if (
+      message === lastPickErrorMessageRef.current &&
+      now - lastPickErrorAtRef.current < 1500
+    ) {
+      return;
     }
+    lastPickErrorMessageRef.current = message;
+    lastPickErrorAtRef.current = now;
+    queueMicrotask(() => {
+      onPhotoPickError?.(message);
+    });
   }
 
   function openPhotoLibrary() {
@@ -167,49 +186,38 @@ export function PinMediaFields({
     const fileTooLargeMessage = photoPickFileTooLargeMessage();
     const unsupportedFormatMessage = photoPickUnsupportedFormatMessage();
 
-    const notifyPickError = (message: string) => {
-      queueMicrotask(() => {
-        onPhotoPickError?.(message);
-      });
-    };
-
     if (files.some((file) => file.size > LIMITS.maxPinPhotoBytes)) {
-      notifyPickError(fileTooLargeMessage);
+      notifyPickErrorOnce(fileTooLargeMessage);
       resetPhotoPickerInputs();
       return;
     }
 
-    if (files.every((file) => file.size <= 0)) {
-      notifyPickError(unsupportedFormatMessage);
-      resetPhotoPickerInputs();
-      return;
-    }
-
+    const generation = ++photoPickGenerationRef.current;
     photoPickBusyRef.current = true;
+    setPhotoPickInProgress(true);
+
     void pickPinPhotoFiles(files)
-      .then(async ({ accepted, rejectedFileTooLarge, mimeByFile }) => {
+      .then(({ accepted, rejectedFileTooLarge, mimeByFile }) => {
+        if (generation !== photoPickGenerationRef.current) return;
+
         for (const [file, mime] of mimeByFile) {
           pickedFileMimeRef.current.set(file, mime);
         }
 
-        let filesToAdd: File[] = [];
+        let filesToAdd = rejectedFileTooLarge ? [] : [...accepted];
 
-        if (!rejectedFileTooLarge) {
-          for (const file of accepted) {
-            const mime = mimeByFile.get(file) ?? null;
-            if (await validatePinPhotoBrowserPreview(file, mime)) {
-              filesToAdd.push(file);
-            }
-          }
-        }
+        if (generation !== photoPickGenerationRef.current) return;
 
         if (rejectedFileTooLarge) {
-          notifyPickError(fileTooLargeMessage);
+          notifyPickErrorOnce(fileTooLargeMessage);
         } else if (filesToAdd.length === 0) {
-          notifyPickError(unsupportedFormatMessage);
+          notifyPickErrorOnce(unsupportedFormatMessage);
         }
 
         if (filesToAdd.length > 0) {
+          for (const file of filesToAdd) {
+            pinPhotoPreviewObjectUrl(file);
+          }
           if (multiPhoto) {
             onNewPhotoFilesChange([...newPhotoFilesRef.current, ...filesToAdd]);
           } else {
@@ -226,10 +234,13 @@ export function PinMediaFields({
         }
       })
       .catch(() => {
-        notifyPickError(unsupportedFormatMessage);
+        if (generation !== photoPickGenerationRef.current) return;
+        notifyPickErrorOnce(unsupportedFormatMessage);
       })
       .finally(() => {
+        if (generation !== photoPickGenerationRef.current) return;
         photoPickBusyRef.current = false;
+        setPhotoPickInProgress(false);
         resetPhotoPickerInputs();
       });
   }
@@ -242,14 +253,9 @@ export function PinMediaFields({
     processPhotoFiles(Array.from(fileList));
   }
 
-  function handleNewPhotoPreviewError(index: number) {
-    onNewPhotoFilesChange(newPhotoFilesRef.current.filter((_, i) => i !== index));
-    queueMicrotask(() => {
-      onPhotoPickError?.(photoPickUnsupportedFormatMessage());
-    });
-  }
-
-  const photoButtonLabel = labels.photoLibrary ?? labels.photo;
+  const photoButtonLabel = photoPickInProgress
+    ? tCommon("loading")
+    : (labels.photoLibrary ?? labels.photo);
 
   const visibleInstagramUrls =
     defaultInstagramField && instagramUrls.length === 0 ? [""] : instagramUrls;
@@ -274,7 +280,7 @@ export function PinMediaFields({
         <div className={equalActionButtons ? "pin-form-actions" : "flex flex-wrap gap-2"}>
           <button
             type="button"
-            disabled={!canAddPhotos}
+            disabled={!canAddPhotos || photoPickInProgress}
             onClick={openPhotoLibrary}
             className={
               equalActionButtons
@@ -316,18 +322,17 @@ export function PinMediaFields({
             ))}
             {newPhotoFiles.map((file, index) => {
               const sniffed = pickedFileMimeRef.current.get(file) ?? null;
-              const previewUrl = newPhotoPreviewUrls[index];
-              const showPreview =
-                Boolean(previewUrl) && canBrowserPreviewPinPhoto(file, sniffed);
+              const showPreview = canBrowserPreviewPinPhoto(file, sniffed);
+              const previewUrl = showPreview ? pinPhotoPreviewObjectUrl(file) : null;
               return (
-              <li key={`${file.name}-${file.size}-${index}`} className="pin-media-photo-grid__item">
-                {showPreview ? (
+              <li key={`${file.name}-${file.size}-${file.lastModified}`} className="pin-media-photo-grid__item">
+                {previewUrl ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={previewUrl}
                     alt=""
                     className="pin-media-photo-grid__image"
-                    onError={() => handleNewPhotoPreviewError(index)}
+                    decoding="async"
                   />
                 ) : (
                   <div

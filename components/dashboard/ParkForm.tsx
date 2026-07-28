@@ -413,10 +413,9 @@ export function ParkForm({
       const parkId = park.id;
       setLoading(true);
       try {
-        await executeBackgroundPinSave({
+        const saved = await executeBackgroundPinSave({
           media: mediaSnapshot,
           genericSaveFailedMessage: tCommon("pinSaveFailed"),
-          onMediaReady: () => onSuccess?.(),
           saveRecord: (media) =>
             fetch(`/api/parks/${parkId}`, {
               method: "PATCH",
@@ -430,6 +429,7 @@ export function ParkForm({
           onNotFound: () => notifyProfileDataChanged(),
           formatPhotoUploadError: (message) => formatPinPhotoUploadError(tCommon, message),
         });
+        if (saved) onSuccess?.();
       } finally {
         setLoading(false);
       }

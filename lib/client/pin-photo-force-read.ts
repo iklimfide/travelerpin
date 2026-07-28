@@ -134,7 +134,8 @@ async function materializePinPhotoFileOutcome(
   if (file.size > LIMITS.maxPinPhotoBytes) {
     return { ok: false, reason: "too_large" };
   }
-  if (file.size <= 0) {
+
+  if (file.size <= 0 && !pinPhotoNeedsForceRead(file)) {
     return { ok: false, reason: "unsupported" };
   }
 
@@ -184,12 +185,6 @@ export async function ensureReadablePinPhotoFileDetailed(
   const first = await materializePinPhotoFileOutcome(file, localReadTimeoutMs);
   if (first.ok) return { ok: true, file: first.file };
   if (first.reason === "too_large") return first;
-
-  if (pinPhotoNeedsForceRead(file)) {
-    const retry = await materializePinPhotoFileOutcome(file, PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS);
-    if (retry.ok) return { ok: true, file: retry.file };
-    return { ok: false, reason: retry.reason };
-  }
 
   return { ok: false, reason: first.reason };
 }
