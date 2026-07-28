@@ -38,5 +38,5 @@ export const LIMITS = {
   minCityPopulation: 100_000,
   maxCityVisitDates: 24,
   maxPinPhotos: 1,
-  maxPinPhotoBytes: 12 * 1024 * 1024,
+  maxPinPhotoBytes: 5 * 1024 * 1024,
 } as const;

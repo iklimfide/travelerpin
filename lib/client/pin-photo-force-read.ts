@@ -105,6 +105,10 @@ function bytesToPinPhotoFile(
   });
 }
 
+export type PinPhotoEnsureReadableResult =
+  | { ok: true; file: File }
+  | { ok: false; reason: "too_large" | "unsupported" };
+
 /** Read first bytes with a hard timeout. */
 export async function readPinPhotoHeaderBytes(
   file: File,
@@ -119,40 +123,83 @@ export async function readPinPhotoHeaderBytes(
   }
 }
 
+type MaterializeOutcome =
+  | { ok: true; file: File }
+  | { ok: false; reason: "too_large" | "unsupported" };
+
+async function materializePinPhotoFileOutcome(
+  file: File,
+  timeoutMs: number
+): Promise<MaterializeOutcome> {
+  if (file.size > LIMITS.maxPinPhotoBytes) {
+    return { ok: false, reason: "too_large" };
+  }
+  if (file.size <= 0) {
+    return { ok: false, reason: "unsupported" };
+  }
+
+  try {
+    const buffer = await readBlobWithTimeout(file, timeoutMs);
+    if (buffer.byteLength > LIMITS.maxPinPhotoBytes) {
+      return { ok: false, reason: "too_large" };
+    }
+    const mime = resolveImageMime(buffer, file.type, file.name);
+    if (!mime) return { ok: false, reason: "unsupported" };
+    const materialized = bytesToPinPhotoFile(file, buffer, mime);
+    if (!materialized) {
+      return {
+        ok: false,
+        reason: buffer.byteLength > LIMITS.maxPinPhotoBytes ? "too_large" : "unsupported",
+      };
+    }
+    return { ok: true, file: materialized };
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "PIN_PHOTO_READ_EMPTY") {
+      return { ok: false, reason: "unsupported" };
+    }
+    return { ok: false, reason: "unsupported" };
+  }
+}
+
 /** Read picker file into a normal in-memory File (safe for FormData upload). */
 export async function materializePinPhotoFile(
   file: File,
   timeoutMs = PIN_PHOTO_LOCAL_READ_TIMEOUT_MS
 ): Promise<File | null> {
-  if (file.size <= 0 || file.size > LIMITS.maxPinPhotoBytes) return null;
-
-  try {
-    const buffer = await readBlobWithTimeout(file, timeoutMs);
-    const mime = resolveImageMime(buffer, file.type, file.name);
-    if (!mime) return null;
-    return bytesToPinPhotoFile(file, buffer, mime);
-  } catch {
-    return null;
-  }
+  const outcome = await materializePinPhotoFileOutcome(file, timeoutMs);
+  return outcome.ok ? outcome.file : null;
 }
 
 /**
  * Ensures the picker file is readable and upload-safe (always in-memory when possible).
  */
+export async function ensureReadablePinPhotoFileDetailed(
+  file: File,
+  localReadTimeoutMs = PIN_PHOTO_LOCAL_READ_TIMEOUT_MS
+): Promise<PinPhotoEnsureReadableResult> {
+  if (file.size > LIMITS.maxPinPhotoBytes) {
+    return { ok: false, reason: "too_large" };
+  }
+
+  const first = await materializePinPhotoFileOutcome(file, localReadTimeoutMs);
+  if (first.ok) return { ok: true, file: first.file };
+  if (first.reason === "too_large") return first;
+
+  if (pinPhotoNeedsForceRead(file)) {
+    const retry = await materializePinPhotoFileOutcome(file, PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS);
+    if (retry.ok) return { ok: true, file: retry.file };
+    return { ok: false, reason: retry.reason };
+  }
+
+  return { ok: false, reason: first.reason };
+}
+
 export async function ensureReadablePinPhotoFile(
   file: File,
   localReadTimeoutMs = PIN_PHOTO_LOCAL_READ_TIMEOUT_MS
 ): Promise<File | null> {
-  if (file.size <= 0 || file.size > LIMITS.maxPinPhotoBytes) return null;
-
-  const materialized = await materializePinPhotoFile(file, localReadTimeoutMs);
-  if (materialized) return materialized;
-
-  if (pinPhotoNeedsForceRead(file)) {
-    return materializePinPhotoFile(file, PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS);
-  }
-
-  return null;
+  const result = await ensureReadablePinPhotoFileDetailed(file, localReadTimeoutMs);
+  return result.ok ? result.file : null;
 }
 
 /** Same as ensureReadable — pick and upload share one materialization path. */

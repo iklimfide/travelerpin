@@ -1,7 +1,7 @@
 import { LIMITS } from "@/lib/constants";
 import { mimeFromImageFileName } from "@/lib/utils/image-mime";
 import {
-  ensureReadablePinPhotoFile,
+  ensureReadablePinPhotoFileDetailed,
   PIN_PHOTO_LOCAL_READ_TIMEOUT_MS,
 } from "@/lib/client/pin-photo-force-read";
 
@@ -62,9 +62,16 @@ export async function pickPinPhotoFiles(
       continue;
     }
 
-    const materialized = await ensureReadablePinPhotoFile(raw, readTimeoutMs);
-    if (!materialized || materialized.size <= 0) {
-      rejectedUnsupported = true;
+    const readResult = await ensureReadablePinPhotoFileDetailed(raw, readTimeoutMs);
+    if (!readResult.ok) {
+      if (readResult.reason === "too_large") rejectedFileTooLarge = true;
+      else rejectedUnsupported = true;
+      continue;
+    }
+    const materialized = readResult.file;
+
+    if (materialized.size > LIMITS.maxPinPhotoBytes) {
+      rejectedFileTooLarge = true;
       continue;
     }
 
@@ -78,6 +85,31 @@ export async function pickPinPhotoFiles(
   }
 
   return { accepted, rejectedUnsupported, rejectedFileTooLarge, mimeByFile };
+}
+
+const PREVIEW_DECODE_TIMEOUT_MS = 4_000;
+
+/** Ensures the browser can decode a previewable image (avoids broken img flicker on mobile). */
+export async function validatePinPhotoBrowserPreview(
+  file: File,
+  sniffedMime: string | null
+): Promise<boolean> {
+  if (!canBrowserPreviewPinPhoto(file, sniffedMime)) return true;
+
+  if (typeof createImageBitmap !== "function") return true;
+
+  try {
+    const bitmap = await Promise.race([
+      createImageBitmap(file),
+      new Promise<never>((_, reject) => {
+        window.setTimeout(() => reject(new Error("preview_timeout")), PREVIEW_DECODE_TIMEOUT_MS);
+      }),
+    ]);
+    bitmap.close();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function canBrowserPreviewPinPhoto(file: File, sniffedMime: string | null): boolean {

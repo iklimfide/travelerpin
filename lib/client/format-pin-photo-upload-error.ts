@@ -1,9 +1,12 @@
 import { LIMITS } from "@/lib/constants";
-import { PIN_PHOTO_FILE_TOO_LARGE_ERROR } from "@/lib/utils/image-errors";
+import {
+  PIN_PHOTO_FILE_TOO_LARGE_ERROR,
+  UNSUPPORTED_IMAGE_FORMAT_ERROR,
+} from "@/lib/utils/image-errors";
 import { formatPhotoUploadError as formatPhotoUploadErrorDefault } from "@/lib/utils/photo-upload-error";
 
-type FileTooLargeTranslator = (
-  key: "photoUploadFileTooLarge",
+type PinPhotoUploadErrorTranslator = (
+  key: "photoUploadFileTooLarge" | "photoUploadUnsupportedFormat",
   values?: Record<string, string | number>
 ) => string;
 
@@ -13,13 +16,16 @@ export function pinPhotoMaxSizeMb(): number {
 
 /** Maps machine upload error codes to locale-aware copy (e.g. profile modals). */
 export function formatPinPhotoUploadError(
-  tCommon: FileTooLargeTranslator,
+  tCommon: PinPhotoUploadErrorTranslator,
   message: string
 ): string {
   if (message === PIN_PHOTO_FILE_TOO_LARGE_ERROR) {
     return tCommon("photoUploadFileTooLarge", { maxMb: pinPhotoMaxSizeMb() });
   }
+  if (message === UNSUPPORTED_IMAGE_FORMAT_ERROR) {
+    return tCommon("photoUploadUnsupportedFormat");
+  }
   return formatPhotoUploadErrorDefault(message);
 }
 
-export { PIN_PHOTO_FILE_TOO_LARGE_ERROR };
+export { PIN_PHOTO_FILE_TOO_LARGE_ERROR, UNSUPPORTED_IMAGE_FORMAT_ERROR };

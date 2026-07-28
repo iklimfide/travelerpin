@@ -26,8 +26,8 @@
     "addLink": "Add link",
     "loading": "Loading...",
     "photoUploadFailed": "Could not upload photo. Please try again.",
-    "photoUploadUnsupportedFormat": "Unsupported file format.",
-    "photoUploadFileTooLarge": "This photo is over {maxMb} MB. Please choose a smaller file.",
+    "photoUploadUnsupportedFormat": "Invalid photo format.",
+    "photoUploadFileTooLarge": "This file is too large. Please upload a photo smaller than {maxMb} MB.",
     "photoUploadNotConfigured": "Photo upload is not set up yet. Add Cloudflare R2 credentials to your environment.",
     "photoUploadRlsDenied": "Photo upload was blocked. Sign in again, or ask an admin to enable city-media storage policies.",
     "pinSaveFailed": "Could not save your pin. Please try again."

@@ -26,8 +26,8 @@
     "addLink": "Bağlantı ekle",
     "loading": "Yükleniyor...",
     "photoUploadFailed": "Fotoğraf yüklenemedi. Lütfen tekrar deneyin.",
-    "photoUploadUnsupportedFormat": "Kabul edilemeyen dosya biçimi.",
-    "photoUploadFileTooLarge": "Bu fotoğraf {maxMb} MB sınırını aşıyor. Daha küçük bir dosya seçin.",
+    "photoUploadUnsupportedFormat": "Geçersiz fotoğraf formatı.",
+    "photoUploadFileTooLarge": "Dosya çok büyük. Lütfen {maxMb} MB'den küçük bir dosya yükleyin.",
     "photoUploadNotConfigured": "Fotoğraf yükleme henüz ayarlanmadı. Ortamınıza Cloudflare R2 kimlik bilgilerini ekleyin.",
     "photoUploadRlsDenied": "Fotoğraf yükleme engellendi. Yeniden giriş yapın veya bir yöneticiden city-media depolama politikalarını etkinleştirmesini isteyin.",
     "pinSaveFailed": "Pin kaydedilemedi. Lütfen tekrar deneyin."

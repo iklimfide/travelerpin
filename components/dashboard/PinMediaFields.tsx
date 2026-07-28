@@ -5,6 +5,7 @@ import {
   canBrowserPreviewPinPhoto,
   pickPinPhotoFiles,
   PIN_PHOTO_GALLERY_ACCEPT,
+  validatePinPhotoBrowserPreview,
 } from "@/lib/client/pin-photo-pick";
 import { uploadPinPhotoToR2 } from "@/lib/client/pin-photo-upload";
 import {
@@ -68,6 +69,14 @@ export function PinMediaFields({
   const formatUploadError =
     formatPhotoUploadErrorProp ??
     ((message: string) => formatPinPhotoUploadError(tCommon, message));
+
+  function photoPickFileTooLargeMessage(): string {
+    return formatUploadError(PIN_PHOTO_FILE_TOO_LARGE_ERROR);
+  }
+
+  function photoPickUnsupportedFormatMessage(): string {
+    return photoUnsupportedFormatMessage ?? tCommon("photoUploadUnsupportedFormat");
+  }
   const removedSet = useMemo(() => new Set(removedSavedPhotoUrls), [removedSavedPhotoUrls]);
   const visibleSavedUrls = savedPhotoUrls.filter((url) => !removedSet.has(url));
   const photoCount = activePinPhotoCount({
@@ -83,6 +92,7 @@ export function PinMediaFields({
   const photoLibraryInputRef = useRef<HTMLInputElement>(null);
   const pickedFileMimeRef = useRef(new WeakMap<File, string | null>());
   const photoPickBusyRef = useRef(false);
+  const lastPhotoInputAtRef = useRef(0);
   const newPhotoFilesRef = useRef(newPhotoFiles);
   newPhotoFilesRef.current = newPhotoFiles;
 
@@ -154,9 +164,8 @@ export function PinMediaFields({
 
     const replaceSavedUrls = multiPhoto ? [] : visibleSavedUrls;
 
-    const pickErrorMessage =
-      photoUnsupportedFormatMessage ??
-      "Unsupported or unreadable file format.";
+    const fileTooLargeMessage = photoPickFileTooLargeMessage();
+    const unsupportedFormatMessage = photoPickUnsupportedFormatMessage();
 
     const notifyPickError = (message: string) => {
       queueMicrotask(() => {
@@ -165,31 +174,44 @@ export function PinMediaFields({
     };
 
     if (files.some((file) => file.size > LIMITS.maxPinPhotoBytes)) {
-      notifyPickError(formatUploadError(PIN_PHOTO_FILE_TOO_LARGE_ERROR));
+      notifyPickError(fileTooLargeMessage);
       resetPhotoPickerInputs();
       return;
     }
 
     if (files.every((file) => file.size <= 0)) {
-      notifyPickError(pickErrorMessage);
+      notifyPickError(unsupportedFormatMessage);
       resetPhotoPickerInputs();
       return;
     }
 
     photoPickBusyRef.current = true;
     void pickPinPhotoFiles(files)
-      .then(({ accepted, rejectedFileTooLarge, mimeByFile }) => {
+      .then(async ({ accepted, rejectedFileTooLarge, mimeByFile }) => {
         for (const [file, mime] of mimeByFile) {
           pickedFileMimeRef.current.set(file, mime);
         }
-        if (rejectedFileTooLarge) {
-          notifyPickError(formatUploadError(PIN_PHOTO_FILE_TOO_LARGE_ERROR));
-        } else if (accepted.length === 0) {
-          notifyPickError(pickErrorMessage);
+
+        let filesToAdd: File[] = [];
+
+        if (!rejectedFileTooLarge) {
+          for (const file of accepted) {
+            const mime = mimeByFile.get(file) ?? null;
+            if (await validatePinPhotoBrowserPreview(file, mime)) {
+              filesToAdd.push(file);
+            }
+          }
         }
-        if (accepted.length > 0) {
+
+        if (rejectedFileTooLarge) {
+          notifyPickError(fileTooLargeMessage);
+        } else if (filesToAdd.length === 0) {
+          notifyPickError(unsupportedFormatMessage);
+        }
+
+        if (filesToAdd.length > 0) {
           if (multiPhoto) {
-            onNewPhotoFilesChange([...newPhotoFilesRef.current, ...accepted]);
+            onNewPhotoFilesChange([...newPhotoFilesRef.current, ...filesToAdd]);
           } else {
             if (replaceSavedUrls.length > 0) {
               const removed = new Set(removedSavedPhotoUrls);
@@ -199,12 +221,12 @@ export function PinMediaFields({
               }
               onRemovedSavedPhotoUrlsChange(nextRemoved);
             }
-            onNewPhotoFilesChange(accepted.slice(0, 1));
+            onNewPhotoFilesChange(filesToAdd.slice(0, 1));
           }
         }
       })
       .catch(() => {
-        notifyPickError(pickErrorMessage);
+        notifyPickError(unsupportedFormatMessage);
       })
       .finally(() => {
         photoPickBusyRef.current = false;
@@ -214,7 +236,17 @@ export function PinMediaFields({
 
   function handlePhotoInputChange(fileList: FileList | null) {
     if (!fileList?.length || photoPickBusyRef.current) return;
+    const now = Date.now();
+    if (now - lastPhotoInputAtRef.current < 400) return;
+    lastPhotoInputAtRef.current = now;
     processPhotoFiles(Array.from(fileList));
+  }
+
+  function handleNewPhotoPreviewError(index: number) {
+    onNewPhotoFilesChange(newPhotoFilesRef.current.filter((_, i) => i !== index));
+    queueMicrotask(() => {
+      onPhotoPickError?.(photoPickUnsupportedFormatMessage());
+    });
   }
 
   const photoButtonLabel = labels.photoLibrary ?? labels.photo;
@@ -295,6 +327,7 @@ export function PinMediaFields({
                     src={previewUrl}
                     alt=""
                     className="pin-media-photo-grid__image"
+                    onError={() => handleNewPhotoPreviewError(index)}
                   />
                 ) : (
                   <div
