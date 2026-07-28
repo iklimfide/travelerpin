@@ -97,9 +97,7 @@ export function CountryForm({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ...payloadBase, ...media }),
           }),
-        onError: (message) => {
-          void modal.alert(message, { variant: "error" });
-        },
+        onError: (message) => modal.alert(message, { variant: "error" }),
         onPhotoChanged: () => router.refresh(),
         formatPhotoUploadError: (message) => formatPinPhotoUploadError(tCommon, message),
       });

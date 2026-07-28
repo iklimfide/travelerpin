@@ -105,9 +105,12 @@ function bytesToPinPhotoFile(
   });
 }
 
-export type PinPhotoEnsureReadableResult =
-  | { ok: true; file: File }
-  | { ok: false; reason: "too_large" | "unsupported" };
+export function pinPhotoReadTimeoutMs(file: File): number {
+  const size = Math.max(file.size, 0);
+  if (size === 0) return 45_000;
+  const mb = size / (1024 * 1024);
+  return Math.min(90_000, Math.max(PIN_PHOTO_LOCAL_READ_TIMEOUT_MS, Math.ceil(mb * 5) * 1000));
+}
 
 /** Read first bytes with a hard timeout. */
 export async function readPinPhotoHeaderBytes(
@@ -171,6 +174,10 @@ export async function materializePinPhotoFile(
   return outcome.ok ? outcome.file : null;
 }
 
+export type PinPhotoEnsureReadableResult =
+  | { ok: true; file: File }
+  | { ok: false; reason: "too_large" | "unsupported" };
+
 /**
  * Ensures the picker file is readable and upload-safe (always in-memory when possible).
  */
@@ -182,7 +189,8 @@ export async function ensureReadablePinPhotoFileDetailed(
     return { ok: false, reason: "too_large" };
   }
 
-  const first = await materializePinPhotoFileOutcome(file, localReadTimeoutMs);
+  const timeout = pinPhotoReadTimeoutMs(file);
+  const first = await materializePinPhotoFileOutcome(file, timeout);
   if (first.ok) return { ok: true, file: first.file };
   if (first.reason === "too_large") return first;
 

@@ -19,7 +19,7 @@ export type BackgroundPinSaveOptions = {
     photo_urls: string[];
     instagram_urls: string[];
   }) => Promise<Response>;
-  onError: (message: string) => void;
+  onError: (message: string) => void | Promise<void>;
   onPhotoChanged?: () => void;
   /** Called when upload/media payload is ready — close modals here; PATCH may still run. */
   onMediaReady?: () => void;
@@ -41,7 +41,7 @@ export async function executeBackgroundPinSave(options: BackgroundPinSaveOptions
   });
 
   if (!mediaResult.ok) {
-    options.onError(mediaResult.error);
+    await options.onError(mediaResult.error);
     return false;
   }
 
@@ -55,7 +55,7 @@ export async function executeBackgroundPinSave(options: BackgroundPinSaveOptions
       instagram_urls: mediaResult.instagram_urls,
     });
   } catch {
-    options.onError(options.genericSaveFailedMessage);
+    await options.onError(options.genericSaveFailedMessage);
     return false;
   }
 
@@ -72,7 +72,7 @@ export async function executeBackgroundPinSave(options: BackgroundPinSaveOptions
     } catch {
       /* use generic */
     }
-    options.onError(message);
+    await options.onError(message);
     return false;
   }
 

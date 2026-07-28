@@ -1,9 +1,13 @@
 "use client";
 
+import {
+  compressPinPhotoForUpload,
+  PIN_PHOTO_UPLOAD_BODY_SAFE_MAX_BYTES,
+} from "@/lib/client/pin-photo-compress";
 import { preparePinPhotoFileForUpload } from "@/lib/client/pin-photo-force-read";
 import { LIMITS } from "@/lib/constants";
 import { PIN_PHOTO_FILE_TOO_LARGE_ERROR, UNSUPPORTED_IMAGE_FORMAT_ERROR } from "@/lib/utils/image-errors";
-import { mimeFromImageFileName } from "@/lib/utils/image-mime";
+import { detectImageMimeFromBuffer, mimeFromImageFileName } from "@/lib/utils/image-mime";
 
 async function readFileBytes(file: File): Promise<ArrayBuffer | null> {
   try {
@@ -14,16 +18,22 @@ async function readFileBytes(file: File): Promise<ArrayBuffer | null> {
   }
 }
 
+function mimeFromBytes(bytes: ArrayBuffer, fileName: string, declaredType: string): string | null {
+  const view = new Uint8Array(bytes, 0, Math.min(32, bytes.byteLength));
+  const sniffed = detectImageMimeFromBuffer(view);
+  if (sniffed) return sniffed;
+  if (declaredType.trim().toLowerCase().startsWith("image/")) return declaredType.trim();
+  return mimeFromImageFileName(fileName);
+}
+
 async function resolveUploadFile(
   file: File
 ): Promise<{ bytes: ArrayBuffer; name: string; mime: string } | null> {
   const directBytes = await readFileBytes(file);
   if (directBytes) {
     const name = file.name || "photo.jpg";
-    const mime =
-      file.type.startsWith("image/") ?
-        file.type
-      : mimeFromImageFileName(name) ?? "image/jpeg";
+    const mime = mimeFromBytes(directBytes, name, file.type);
+    if (!mime?.startsWith("image/")) return null;
     return { bytes: directBytes, name, mime };
   }
 
@@ -34,10 +44,8 @@ async function resolveUploadFile(
   if (!bytes) return null;
 
   const name = materialized.name || "photo.jpg";
-  const mime =
-    materialized.type.startsWith("image/") ?
-      materialized.type
-    : mimeFromImageFileName(name) ?? "image/jpeg";
+  const mime = mimeFromBytes(bytes, name, materialized.type);
+  if (!mime?.startsWith("image/")) return null;
 
   return { bytes, name, mime };
 }
@@ -50,7 +58,20 @@ export async function uploadPinPhotoToR2(
     return { ok: false, error: formatPhotoUploadError(PIN_PHOTO_FILE_TOO_LARGE_ERROR) };
   }
 
-  const resolved = await resolveUploadFile(file);
+  const compressed = await compressPinPhotoForUpload(file);
+  if (!compressed.ok) {
+    if (compressed.reason === "too_large") {
+      return { ok: false, error: formatPhotoUploadError(PIN_PHOTO_FILE_TOO_LARGE_ERROR) };
+    }
+    return { ok: false, error: formatPhotoUploadError(UNSUPPORTED_IMAGE_FORMAT_ERROR) };
+  }
+
+  const fileForUpload = compressed.file;
+  if (fileForUpload.size > PIN_PHOTO_UPLOAD_BODY_SAFE_MAX_BYTES) {
+    return { ok: false, error: formatPhotoUploadError(PIN_PHOTO_FILE_TOO_LARGE_ERROR) };
+  }
+
+  const resolved = await resolveUploadFile(fileForUpload);
   if (!resolved) {
     return { ok: false, error: formatPhotoUploadError(UNSUPPORTED_IMAGE_FORMAT_ERROR) };
   }
@@ -71,6 +92,10 @@ export async function uploadPinPhotoToR2(
     return { ok: false, error: formatPhotoUploadError("Upload failed") };
   }
 
+  if (uploadRes.status === 413) {
+    return { ok: false, error: formatPhotoUploadError(PIN_PHOTO_FILE_TOO_LARGE_ERROR) };
+  }
+
   if (!uploadRes.ok) {
     let apiError = "";
     try {
@@ -78,6 +103,9 @@ export async function uploadPinPhotoToR2(
       apiError = data.error ?? "";
     } catch {
       apiError = "";
+    }
+    if (!apiError && uploadFile.size > PIN_PHOTO_UPLOAD_BODY_SAFE_MAX_BYTES) {
+      return { ok: false, error: formatPhotoUploadError(PIN_PHOTO_FILE_TOO_LARGE_ERROR) };
     }
     return { ok: false, error: formatPhotoUploadError(apiError || "Upload failed") };
   }

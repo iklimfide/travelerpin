@@ -422,9 +422,7 @@ export function ParkForm({
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ ...payloadBase, ...media }),
             }),
-          onError: (message) => {
-            void modal.alert(message, { variant: "error" });
-          },
+          onError: (message) => modal.alert(message, { variant: "error" }),
           onPhotoChanged: () => router.refresh(),
           onNotFound: () => notifyProfileDataChanged(),
           formatPhotoUploadError: (message) => formatPinPhotoUploadError(tCommon, message),

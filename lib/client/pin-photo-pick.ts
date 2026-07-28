@@ -1,9 +1,10 @@
 import { LIMITS } from "@/lib/constants";
-import { mimeFromImageFileName } from "@/lib/utils/image-mime";
+import { detectImageMimeFromBuffer, mimeFromImageFileName } from "@/lib/utils/image-mime";
 import {
   ensureReadablePinPhotoFileDetailed,
   pinPhotoNeedsForceRead,
-  PIN_PHOTO_LOCAL_READ_TIMEOUT_MS,
+  pinPhotoReadTimeoutMs,
+  readPinPhotoHeaderBytes,
 } from "@/lib/client/pin-photo-force-read";
 
 /**
@@ -38,10 +39,30 @@ export type PinPhotoPickResult = {
   mimeByFile: Map<File, string | null>;
 };
 
-export async function pickPinPhotoFiles(
-  files: File[],
-  readTimeoutMs = PIN_PHOTO_LOCAL_READ_TIMEOUT_MS
-): Promise<PinPhotoPickResult> {
+function mimeForNativePickerFile(file: File, header: ArrayBuffer | null): string | null {
+  if (header && header.byteLength > 0) {
+    const view = new Uint8Array(header, 0, Math.min(32, header.byteLength));
+    const sniffed = detectImageMimeFromBuffer(view);
+    if (sniffed) return sniffed;
+  }
+  const t = file.type.trim().toLowerCase();
+  if (t.startsWith("image/") && t !== "application/octet-stream") return t;
+  return mimeFromImageFileName(file.name);
+}
+
+/** Normal gallery files: validate magic bytes from header only — do not read 6–10 MB into RAM at pick time. */
+async function tryAcceptNativePickerFile(raw: File): Promise<{ file: File; mime: string } | null> {
+  if (raw.size <= 0 || raw.size > LIMITS.maxPinPhotoBytes) return null;
+  if (pinPhotoNeedsForceRead(raw)) return null;
+
+  const header = await readPinPhotoHeaderBytes(raw, 10_000);
+  const mime = mimeForNativePickerFile(raw, header);
+  if (!mime) return null;
+
+  return { file: raw, mime };
+}
+
+export async function pickPinPhotoFiles(files: File[]): Promise<PinPhotoPickResult> {
   const accepted: File[] = [];
   const mimeByFile = new Map<File, string | null>();
   let rejectedUnsupported = false;
@@ -53,6 +74,13 @@ export async function pickPinPhotoFiles(
       continue;
     }
 
+    const native = await tryAcceptNativePickerFile(raw);
+    if (native) {
+      accepted.push(native.file);
+      mimeByFile.set(native.file, native.mime);
+      continue;
+    }
+
     const virtualOrEmpty = raw.size <= 0 || pinPhotoNeedsForceRead(raw);
     if (!virtualOrEmpty) {
       if (!declaredTypeLooksLikeImage(raw.type) && !hasImageExtension(raw.name)) {
@@ -61,7 +89,10 @@ export async function pickPinPhotoFiles(
       }
     }
 
-    const readResult = await ensureReadablePinPhotoFileDetailed(raw, readTimeoutMs);
+    const readResult = await ensureReadablePinPhotoFileDetailed(
+      raw,
+      pinPhotoReadTimeoutMs(raw)
+    );
     if (!readResult.ok) {
       if (readResult.reason === "too_large") rejectedFileTooLarge = true;
       else rejectedUnsupported = true;
