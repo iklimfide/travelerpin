@@ -6,7 +6,8 @@ import { LIMITS } from "@/lib/constants";
 import { useTranslateCity, useTranslateCommon } from "@/lib/i18n/client-messages";
 import { addCity } from "@/lib/client/city-actions";
 import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
-import { startBackgroundPinSave } from "@/lib/client/background-pin-save";
+import { executeBackgroundPinSave } from "@/lib/client/background-pin-save";
+import { formatPinPhotoUploadError } from "@/lib/client/format-pin-photo-upload-error";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { isValidInstagramUrl } from "@/lib/utils/instagram";
@@ -423,21 +424,27 @@ export function CityForm({
         visit_dates: visitDates,
       };
       const cityId = city.id;
-      onSuccess?.();
-      startBackgroundPinSave({
-        media: mediaSnapshot,
-        genericSaveFailedMessage: tCommon("pinSaveFailed"),
-        saveRecord: (media) =>
-          fetch(`/api/cities/${cityId}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...payloadBase, ...media }),
-          }),
-        onError: (message) => {
-          void modal.alert(message, { variant: "error" });
-        },
-        onPhotoChanged: () => router.refresh(),
-      });
+      setLoading(true);
+      try {
+        await executeBackgroundPinSave({
+          media: mediaSnapshot,
+          genericSaveFailedMessage: tCommon("pinSaveFailed"),
+          onMediaReady: () => onSuccess?.(),
+          saveRecord: (media) =>
+            fetch(`/api/cities/${cityId}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ...payloadBase, ...media }),
+            }),
+          onError: (message) => {
+            void modal.alert(message, { variant: "error" });
+          },
+          onPhotoChanged: () => router.refresh(),
+          formatPhotoUploadError: (message) => formatPinPhotoUploadError(tCommon, message),
+        });
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
@@ -450,7 +457,7 @@ export function CityForm({
         newPhotoFiles,
         instagramUrls,
         isValidInstagramUrl,
-        formatPhotoUploadError,
+        formatPhotoUploadError: (message) => formatPinPhotoUploadError(tCommon, message),
       });
 
       if (!mediaResult.ok) {
@@ -715,7 +722,6 @@ export function CityForm({
               mediaHint: t("mediaHint"),
               photo: t("photo"),
               photoLibrary: t("photoLibrary"),
-              photoCamera: t("photoCamera"),
               photoSaved: t("photoSaved"),
               instagram: t("instagram"),
               instagramHint: t("instagramHint"),

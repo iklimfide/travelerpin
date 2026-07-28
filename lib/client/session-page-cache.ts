@@ -9,6 +9,7 @@ import type {
   WishlistCountry,
 } from "@/types/database";
 import { parseNextRoutePayload } from "@/lib/utils/next-route";
+import { mergeTravelStateIntoProfilePageData } from "@/lib/supabase/profile-page-types";
 import { getWishlistCountryCodes } from "@/lib/utils/stats";
 
 export type TravelStateData = {
@@ -21,7 +22,7 @@ export type TravelStateData = {
 };
 
 /** Bump when payload shape changes. Persists in localStorage until pin/settings/logout. */
-const CACHE_VERSION = 5;
+const CACHE_VERSION = 6;
 const OWN_USERNAME_KEY = "tp:own-username";
 const OWN_USER_ID_KEY = "tp:own-user-id";
 const OWN_AVATAR_URL_KEY = "tp:own-avatar-url";
@@ -258,16 +259,17 @@ export function syncOwnProfileCacheFromTravelState(data: TravelStateData): void 
   const cached = readProfileCache(username);
   if (!cached) return;
 
-  writeProfileCache(username, {
-    ...cached,
-    visitedCountries: data.visitedCountries,
-    visitedCities: data.visitedCities,
-    visitedParks: data.visitedParks,
-    wishlistCountries: data.wishlistCountries,
-    wishlistCodes: getWishlistCountryCodes(data.wishlistCountries),
-    visitedCodes: data.visitedCodes,
-    stats: data.stats,
-  });
+  writeProfileCache(
+    username,
+    mergeTravelStateIntoProfilePageData(cached, {
+      visitedCountries: data.visitedCountries,
+      visitedCities: data.visitedCities,
+      visitedParks: data.visitedParks,
+      wishlistCountries: data.wishlistCountries,
+      visitedCodes: data.visitedCodes,
+      stats: data.stats,
+    })
+  );
 }
 
 export function readOwnNextRouteCache(): NextRoutePayload | null {

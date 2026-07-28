@@ -16,6 +16,7 @@ import {
 } from "@/lib/client/session-page-cache";
 import { useCachedProfile } from "@/lib/client/use-page-cache";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-types";
+import { mergeTravelStateIntoProfilePageData } from "@/lib/supabase/profile-page-types";
 import { computeTravelStats, getVisitedCountryCodes } from "@/lib/utils/stats";
 
 type ProfileRouteProps = {
@@ -66,15 +67,7 @@ function applyTravelStateToProfile(
   data: PublicProfilePageData,
   travel: TravelStateData
 ): PublicProfilePageData {
-  return {
-    ...data,
-    visitedCountries: travel.visitedCountries,
-    visitedCities: travel.visitedCities,
-    visitedParks: travel.visitedParks,
-    wishlistCountries: travel.wishlistCountries,
-    visitedCodes: travel.visitedCodes,
-    stats: travel.stats,
-  };
+  return mergeTravelStateIntoProfilePageData(data, travel);
 }
 
 export function ProfileRoute({ username }: ProfileRouteProps) {
@@ -87,7 +80,7 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
   const displayData = data ?? cachedSnapshot;
 
   const loadProfile = useCallback(
-    async (forceNetwork = false) => {
+    async (forceNetwork = false, options?: { silent?: boolean }) => {
       if (!forceNetwork) {
         const cached = readProfileCache(normalized);
         if (cached) {
@@ -96,6 +89,10 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
           setLoading(false);
           return;
         }
+      }
+
+      if (!options?.silent) {
+        setLoading(true);
       }
 
       const res = await fetch(`/api/profile/${encodeURIComponent(normalized)}/page-data`, {
@@ -133,12 +130,7 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
   useEffect(() => {
     if (readProfileCache(normalized)) {
       setLoading(false);
-      // Own profile cache is invalidated by stale/travel-state events; other
-      // profiles have no such signal — revalidate them in the background so
-      // visitors see new Instagram links, bio changes, etc.
-      if (getOwnUsername() !== normalized) {
-        void loadProfile(true);
-      }
+      void loadProfile(true, { silent: true });
       return;
     }
 
@@ -168,7 +160,7 @@ export function ProfileRoute({ username }: ProfileRouteProps) {
         setData((prev) => (prev ? applyOptimisticRemovals(prev, detail) : prev));
       }
 
-      void loadProfile(true);
+      void loadProfile(true, { silent: true });
     }
 
     function onTravelStateUpdated(event: Event) {

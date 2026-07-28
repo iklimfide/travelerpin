@@ -47,3 +47,15 @@ export function detectImageMimeFromBuffer(buffer: Bytes): string | null {
   }
   return null;
 }
+
+/** Fallback when the browser omits or mislabels `File.type`. */
+export function mimeFromImageFileName(name: string): string | null {
+  const base = name.trim().toLowerCase();
+  if (/\.jpe?g$/i.test(base)) return "image/jpeg";
+  if (/\.png$/i.test(base)) return "image/png";
+  if (/\.webp$/i.test(base)) return "image/webp";
+  if (/\.gif$/i.test(base)) return "image/gif";
+  if (/\.heic$/i.test(base)) return "image/heic";
+  if (/\.heif$/i.test(base)) return "image/heif";
+  return null;
+}

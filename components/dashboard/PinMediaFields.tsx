@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   canBrowserPreviewPinPhoto,
-  openPinPhotoGalleryFiles,
   pickPinPhotoFiles,
-  PIN_PHOTO_CAMERA_ACCEPT,
   PIN_PHOTO_GALLERY_ACCEPT,
 } from "@/lib/client/pin-photo-pick";
+import { uploadPinPhotoToR2 } from "@/lib/client/pin-photo-upload";
+import {
+  formatPinPhotoUploadError,
+  PIN_PHOTO_FILE_TOO_LARGE_ERROR,
+} from "@/lib/client/format-pin-photo-upload-error";
 import { LIMITS } from "@/lib/constants";
+import { useTranslateCommon } from "@/lib/i18n/client-messages";
 import { activePinPhotoCount } from "@/lib/utils/pin-media";
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
 
@@ -17,7 +21,6 @@ type PinMediaFieldsProps = {
     mediaHint: string;
     photo: string;
     photoLibrary?: string;
-    photoCamera?: string;
     photoSaved: string;
     instagram: string;
     instagramHint: string;
@@ -40,25 +43,8 @@ type PinMediaFieldsProps = {
   /** Shown when the picker returns a non-image (e.g. Google Photos edge cases). */
   onPhotoPickError?: (message: string) => void;
   photoUnsupportedFormatMessage?: string;
+  formatPhotoUploadError?: (message: string) => string;
 };
-
-async function uploadPinPhotoFile(
-  file: File,
-  formatPhotoUploadError: (message: string) => string
-): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
-  const formData = new FormData();
-  formData.append("file", file);
-  const uploadRes = await fetch("/api/upload", {
-    method: "POST",
-    body: formData,
-  });
-  if (!uploadRes.ok) {
-    const data = await uploadRes.json();
-    return { ok: false, error: formatPhotoUploadError(data.error) };
-  }
-  const { url } = await uploadRes.json();
-  return { ok: true, url: url as string };
-}
 
 export function PinMediaFields({
   labels,
@@ -76,7 +62,12 @@ export function PinMediaFields({
   hideMediaHint = false,
   onPhotoPickError,
   photoUnsupportedFormatMessage,
+  formatPhotoUploadError: formatPhotoUploadErrorProp,
 }: PinMediaFieldsProps) {
+  const tCommon = useTranslateCommon();
+  const formatUploadError =
+    formatPhotoUploadErrorProp ??
+    ((message: string) => formatPinPhotoUploadError(tCommon, message));
   const removedSet = useMemo(() => new Set(removedSavedPhotoUrls), [removedSavedPhotoUrls]);
   const visibleSavedUrls = savedPhotoUrls.filter((url) => !removedSet.has(url));
   const photoCount = activePinPhotoCount({
@@ -84,25 +75,27 @@ export function PinMediaFields({
     removedSavedPhotoUrls,
     newPhotoFiles,
   });
-  const canAddPhotos = photoCount < LIMITS.maxPinPhotos;
-  const remainingSlots = LIMITS.maxPinPhotos - photoCount;
+  const multiPhoto = LIMITS.maxPinPhotos > 1;
+  const canAddPhotos = multiPhoto ? photoCount < LIMITS.maxPinPhotos : true;
+  const remainingSlots = multiPhoto ? LIMITS.maxPinPhotos - photoCount : 1;
 
   const instagramDraftRef = useRef<HTMLInputElement>(null);
   const photoLibraryInputRef = useRef<HTMLInputElement>(null);
-  const photoCameraInputRef = useRef<HTMLInputElement>(null);
-  const [newPhotoPreviewUrls, setNewPhotoPreviewUrls] = useState<string[]>([]);
   const pickedFileMimeRef = useRef(new WeakMap<File, string | null>());
   const photoPickBusyRef = useRef(false);
   const newPhotoFilesRef = useRef(newPhotoFiles);
   newPhotoFilesRef.current = newPhotoFiles;
 
+  const newPhotoPreviewUrls = useMemo(
+    () => newPhotoFiles.map((file) => URL.createObjectURL(file)),
+    [newPhotoFiles]
+  );
+
   useEffect(() => {
-    const urls = newPhotoFiles.map((file) => URL.createObjectURL(file));
-    setNewPhotoPreviewUrls(urls);
     return () => {
-      for (const url of urls) URL.revokeObjectURL(url);
+      for (const url of newPhotoPreviewUrls) URL.revokeObjectURL(url);
     };
-  }, [newPhotoFiles]);
+  }, [newPhotoPreviewUrls]);
 
   useEffect(() => {
     if (!autoFocusInstagram) return;
@@ -145,67 +138,73 @@ export function PinMediaFields({
 
   function resetPhotoPickerInputs() {
     if (photoLibraryInputRef.current) photoLibraryInputRef.current.value = "";
-    if (photoCameraInputRef.current) photoCameraInputRef.current.value = "";
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
   }
 
-  function scheduleNativePickerDismissGuard() {
-    const onReturn = () => {
-      window.setTimeout(() => {
-        photoPickBusyRef.current = false;
-        resetPhotoPickerInputs();
-      }, 300);
-    };
-    window.addEventListener("focus", onReturn, { once: true });
-    document.addEventListener(
-      "visibilitychange",
-      () => {
-        if (document.visibilityState === "visible") onReturn();
-      },
-      { once: true }
-    );
+  function openPhotoLibrary() {
+    if (!canAddPhotos || photoPickBusyRef.current) return;
+    photoLibraryInputRef.current?.click();
   }
 
   function processPhotoFiles(incoming: File[]) {
     const files = incoming.slice(0, remainingSlots);
     if (files.length === 0) return;
 
+    const replaceSavedUrls = multiPhoto ? [] : visibleSavedUrls;
+
     const pickErrorMessage =
       photoUnsupportedFormatMessage ??
       "Unsupported or unreadable file format.";
 
-    const notifyPickError = () => {
+    const notifyPickError = (message: string) => {
       queueMicrotask(() => {
-        onPhotoPickError?.(pickErrorMessage);
+        onPhotoPickError?.(message);
       });
     };
 
+    if (files.some((file) => file.size > LIMITS.maxPinPhotoBytes)) {
+      notifyPickError(formatUploadError(PIN_PHOTO_FILE_TOO_LARGE_ERROR));
+      resetPhotoPickerInputs();
+      return;
+    }
+
     if (files.every((file) => file.size <= 0)) {
-      notifyPickError();
+      notifyPickError(pickErrorMessage);
       resetPhotoPickerInputs();
       return;
     }
 
     photoPickBusyRef.current = true;
     void pickPinPhotoFiles(files)
-      .then(({ accepted, rejectedUnsupported, mimeByFile }) => {
+      .then(({ accepted, rejectedFileTooLarge, mimeByFile }) => {
         for (const [file, mime] of mimeByFile) {
           pickedFileMimeRef.current.set(file, mime);
         }
-        if (rejectedUnsupported) {
-          notifyPickError();
-        }
-        if (accepted.length === 0 && !rejectedUnsupported) {
-          notifyPickError();
+        if (rejectedFileTooLarge) {
+          notifyPickError(formatUploadError(PIN_PHOTO_FILE_TOO_LARGE_ERROR));
+        } else if (accepted.length === 0) {
+          notifyPickError(pickErrorMessage);
         }
         if (accepted.length > 0) {
-          onNewPhotoFilesChange([...newPhotoFilesRef.current, ...accepted]);
+          if (multiPhoto) {
+            onNewPhotoFilesChange([...newPhotoFilesRef.current, ...accepted]);
+          } else {
+            if (replaceSavedUrls.length > 0) {
+              const removed = new Set(removedSavedPhotoUrls);
+              const nextRemoved = [...removedSavedPhotoUrls];
+              for (const url of replaceSavedUrls) {
+                if (!removed.has(url)) nextRemoved.push(url);
+              }
+              onRemovedSavedPhotoUrlsChange(nextRemoved);
+            }
+            onNewPhotoFilesChange(accepted.slice(0, 1));
+          }
         }
       })
       .catch(() => {
-        notifyPickError();
+        notifyPickError(pickErrorMessage);
       })
       .finally(() => {
         photoPickBusyRef.current = false;
@@ -218,28 +217,7 @@ export function PinMediaFields({
     processPhotoFiles(Array.from(fileList));
   }
 
-  async function openPhotoLibrary() {
-    if (!canAddPhotos || photoPickBusyRef.current) return;
-
-    const fromPicker = await openPinPhotoGalleryFiles(remainingSlots);
-    if (fromPicker !== null) {
-      if (fromPicker.length > 0) {
-        processPhotoFiles(fromPicker);
-      }
-      return;
-    }
-
-    scheduleNativePickerDismissGuard();
-    photoLibraryInputRef.current?.click();
-  }
-
-  function openPhotoCamera() {
-    if (!canAddPhotos || photoPickBusyRef.current) return;
-    scheduleNativePickerDismissGuard();
-    photoCameraInputRef.current?.click();
-  }
-
-  const showPhotoSourceChoice = Boolean(labels.photoLibrary && labels.photoCamera);
+  const photoButtonLabel = labels.photoLibrary ?? labels.photo;
 
   const visibleInstagramUrls =
     defaultInstagramField && instagramUrls.length === 0 ? [""] : instagramUrls;
@@ -257,60 +235,23 @@ export function PinMediaFields({
           ref={photoLibraryInputRef}
           type="file"
           accept={PIN_PHOTO_GALLERY_ACCEPT}
-          multiple
-          className="hidden"
-          onChange={(e) => handlePhotoInputChange(e.target.files)}
-        />
-        <input
-          ref={photoCameraInputRef}
-          type="file"
-          accept={PIN_PHOTO_CAMERA_ACCEPT}
-          capture="environment"
+          multiple={multiPhoto}
           className="hidden"
           onChange={(e) => handlePhotoInputChange(e.target.files)}
         />
         <div className={equalActionButtons ? "pin-form-actions" : "flex flex-wrap gap-2"}>
-          {showPhotoSourceChoice ? (
-            <>
-              <button
-                type="button"
-                disabled={!canAddPhotos}
-                onClick={() => void openPhotoLibrary()}
-                className={
-                  equalActionButtons
-                    ? "pin-form-actions__btn pin-form-actions__btn--primary"
-                    : "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
-                }
-              >
-                {labels.photoLibrary}
-              </button>
-              <button
-                type="button"
-                disabled={!canAddPhotos}
-                onClick={openPhotoCamera}
-                className={
-                  equalActionButtons
-                    ? "pin-form-actions__btn pin-form-actions__btn--secondary"
-                    : "rounded-lg border border-blue-600 bg-transparent px-4 py-2 text-sm font-medium text-blue-400 hover:bg-blue-600/10 disabled:cursor-not-allowed disabled:opacity-50"
-                }
-              >
-                {labels.photoCamera}
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              disabled={!canAddPhotos}
-              onClick={() => void openPhotoLibrary()}
-              className={
-                equalActionButtons
-                  ? "pin-form-actions__btn pin-form-actions__btn--primary"
-                  : "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
-              }
-            >
-              {labels.photo}
-            </button>
-          )}
+          <button
+            type="button"
+            disabled={!canAddPhotos}
+            onClick={openPhotoLibrary}
+            className={
+              equalActionButtons
+                ? "pin-form-actions__btn pin-form-actions__btn--primary"
+                : "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+            }
+          >
+            {photoButtonLabel}
+          </button>
           <button
             type="button"
             onClick={addInstagramField}
@@ -343,13 +284,15 @@ export function PinMediaFields({
             ))}
             {newPhotoFiles.map((file, index) => {
               const sniffed = pickedFileMimeRef.current.get(file) ?? null;
-              const showPreview = canBrowserPreviewPinPhoto(file, sniffed);
+              const previewUrl = newPhotoPreviewUrls[index];
+              const showPreview =
+                Boolean(previewUrl) && canBrowserPreviewPinPhoto(file, sniffed);
               return (
               <li key={`${file.name}-${file.size}-${index}`} className="pin-media-photo-grid__item">
                 {showPreview ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
-                    src={newPhotoPreviewUrls[index] ?? ""}
+                    src={previewUrl}
                     alt=""
                     className="pin-media-photo-grid__image"
                   />
@@ -413,6 +356,30 @@ export function PinMediaFields({
   );
 }
 
+export function normalizePinInstagramUrls(
+  instagramUrls: string[],
+  isValidInstagramUrl: (url: string) => boolean
+): { ok: true; instagram_urls: string[] } | { ok: false; error: string } {
+  const normalized: string[] = [];
+  const seen = new Set<string>();
+
+  for (const raw of instagramUrls) {
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+    if (!isValidInstagramUrl(trimmed)) {
+      return { ok: false, error: "Invalid Instagram post URL" };
+    }
+
+    const canonical = normalizeInstagramPostUrl(trimmed);
+    const key = canonical.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push(canonical);
+  }
+
+  return { ok: true, instagram_urls: normalized };
+}
+
 export async function buildPinMediaPayload(options: {
   savedPhotoUrls: string[];
   removedSavedPhotoUrls: string[];
@@ -424,39 +391,28 @@ export async function buildPinMediaPayload(options: {
   | { ok: true; photo_url: string | null; photo_urls: string[]; instagram_urls: string[] }
   | { ok: false; error: string }
 > {
+  const instagramResult = normalizePinInstagramUrls(
+    options.instagramUrls,
+    options.isValidInstagramUrl
+  );
+  if (!instagramResult.ok) return instagramResult;
+
   const removed = new Set(options.removedSavedPhotoUrls);
   const photoUrls = options.savedPhotoUrls.filter((url) => !removed.has(url));
 
   for (const file of options.newPhotoFiles) {
     if (photoUrls.length >= LIMITS.maxPinPhotos) break;
-    const uploaded = await uploadPinPhotoFile(file, options.formatPhotoUploadError);
+    const uploaded = await uploadPinPhotoToR2(file, options.formatPhotoUploadError);
     if (!uploaded.ok) return uploaded;
     photoUrls.push(uploaded.url);
   }
 
   const capped = photoUrls.slice(0, LIMITS.maxPinPhotos);
 
-  const instagramUrls: string[] = [];
-  const seen = new Set<string>();
-
-  for (const raw of options.instagramUrls) {
-    const trimmed = raw.trim();
-    if (!trimmed) continue;
-    if (!options.isValidInstagramUrl(trimmed)) {
-      return { ok: false, error: "Invalid Instagram post URL" };
-    }
-
-    const canonical = normalizeInstagramPostUrl(trimmed);
-    const key = canonical.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    instagramUrls.push(canonical);
-  }
-
   return {
     ok: true,
     photo_url: capped[0] ?? null,
     photo_urls: capped,
-    instagram_urls: instagramUrls,
+    instagram_urls: instagramResult.instagram_urls,
   };
 }

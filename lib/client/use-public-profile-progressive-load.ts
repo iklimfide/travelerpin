@@ -89,7 +89,7 @@ export function usePublicProfileProgressiveLoad(
   }, [enabled, normalized]);
 
   const load = useCallback(
-    async (forceNetwork = false) => {
+    async (forceNetwork = false, options?: { silent?: boolean }) => {
       if (!enabled) return;
 
       if (!forceNetwork) {
@@ -109,7 +109,9 @@ export function usePublicProfileProgressiveLoad(
         }
       }
 
-      setLoading(true);
+      if (!options?.silent) {
+        setLoading(true);
+      }
 
       try {
         const res = await fetch(`/api/profile/${encodeURIComponent(normalized)}/page-data`, {
@@ -145,8 +147,13 @@ export function usePublicProfileProgressiveLoad(
     if (!enabled) return;
 
     const cached = readProfileCache(normalized);
+    const isOwn = getOwnUsername() === normalized;
+
     if (cached) {
-      // Cache is kept fresh via PROFILE_DATA_STALE_EVENT / travel-state sync.
+      // Own profile: refresh from API in background — localStorage may lack pin media.
+      if (isOwn) {
+        void load(true, { silent: true });
+      }
       return;
     }
 
@@ -163,12 +170,12 @@ export function usePublicProfileProgressiveLoad(
       const travel = (event as CustomEvent<{ data: TravelStateData }>).detail?.data;
       if (!travel) return;
 
-      const cached = readProfileCache(normalized);
-      const next =
-        cached ??
-        mergeTravelStateIntoProfilePageData(shellFallbackData, travel);
-
-      setFullData(next);
+      setFullData((prev) => {
+        const base = prev ?? readProfileCache(normalized) ?? shellFallbackData;
+        const next = mergeTravelStateIntoProfilePageData(base, travel);
+        writeProfileCache(normalized, next);
+        return next;
+      });
       setLoading(false);
     }
 
@@ -192,7 +199,7 @@ export function usePublicProfileProgressiveLoad(
         });
       }
 
-      void load(true);
+      void load(true, { silent: true });
     }
 
     window.addEventListener(TRAVEL_STATE_UPDATED_EVENT, onTravelStateUpdated);

@@ -29,11 +29,11 @@ export async function GET() {
           .eq("user_id", user.id),
         supabase
           .from("visited_cities")
-          .select("id, city_name, country_code, country_name")
+          .select("*")
           .eq("user_id", user.id),
         supabase
           .from("visited_parks")
-          .select("id, park_name, park_type, country_code, country_name")
+          .select("*")
           .eq("user_id", user.id),
         supabase
           .from("wishlist_countries")

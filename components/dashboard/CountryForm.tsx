@@ -8,7 +8,8 @@ import { ProfilePinEditFields } from "@/components/profile/ProfilePinEditFields"
 import { useModal } from "@/components/ui/ModalProvider";
 import { getCountryName } from "@/lib/data/countries";
 import { useTranslateCommon } from "@/lib/i18n/client-messages";
-import { startBackgroundPinSave } from "@/lib/client/background-pin-save";
+import { formatPinPhotoUploadError } from "@/lib/client/format-pin-photo-upload-error";
+import { executeBackgroundPinSave } from "@/lib/client/background-pin-save";
 import { readInstagramUrls, readPhotoUrls, withInstagramDraftField } from "@/lib/utils/pin-media";
 import { createPinPhotoFormState } from "@/lib/client/pin-photo-form-state";
 import type { VisitedCity, VisitedCountry } from "@/types/database";
@@ -85,21 +86,27 @@ export function CountryForm({
     const url = backingCity ? `/api/cities/${backingCity.id}` : "/api/cities";
     const method = backingCity ? "PATCH" : "POST";
 
-    onSuccess?.();
-    startBackgroundPinSave({
-      media: mediaSnapshot,
-      genericSaveFailedMessage: tCommon("pinSaveFailed"),
-      saveRecord: (media) =>
-        fetch(url, {
-          method,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...payloadBase, ...media }),
-        }),
-      onError: (message) => {
-        void modal.alert(message, { variant: "error" });
-      },
-      onPhotoChanged: () => router.refresh(),
-    });
+    setLoading(true);
+    try {
+      await executeBackgroundPinSave({
+        media: mediaSnapshot,
+        genericSaveFailedMessage: tCommon("pinSaveFailed"),
+        onMediaReady: () => onSuccess?.(),
+        saveRecord: (media) =>
+          fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...payloadBase, ...media }),
+          }),
+        onError: (message) => {
+          void modal.alert(message, { variant: "error" });
+        },
+        onPhotoChanged: () => router.refresh(),
+        formatPhotoUploadError: (message) => formatPinPhotoUploadError(tCommon, message),
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

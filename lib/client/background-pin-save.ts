@@ -21,25 +21,31 @@ export type BackgroundPinSaveOptions = {
   }) => Promise<Response>;
   onError: (message: string) => void;
   onPhotoChanged?: () => void;
+  /** Called when upload/media payload is ready — close modals here; PATCH may still run. */
+  onMediaReady?: () => void;
   /** Called when save returns 404 (record already removed). */
   onNotFound?: () => void;
   genericSaveFailedMessage: string;
+  formatPhotoUploadError?: (message: string) => string;
 };
 
-export async function executeBackgroundPinSave(options: BackgroundPinSaveOptions): Promise<void> {
+export async function executeBackgroundPinSave(options: BackgroundPinSaveOptions): Promise<boolean> {
+  const formatUploadError = options.formatPhotoUploadError ?? formatPhotoUploadError;
   const mediaResult = await buildPinMediaPayload({
     savedPhotoUrls: options.media.savedPhotoUrls,
     removedSavedPhotoUrls: options.media.removedSavedPhotoUrls,
     newPhotoFiles: options.media.newPhotoFiles,
     instagramUrls: options.media.instagramUrls,
     isValidInstagramUrl,
-    formatPhotoUploadError,
+    formatPhotoUploadError: formatUploadError,
   });
 
   if (!mediaResult.ok) {
     options.onError(mediaResult.error);
-    return;
+    return false;
   }
+
+  options.onMediaReady?.();
 
   let res: Response;
   try {
@@ -50,12 +56,12 @@ export async function executeBackgroundPinSave(options: BackgroundPinSaveOptions
     });
   } catch {
     options.onError(options.genericSaveFailedMessage);
-    return;
+    return false;
   }
 
   if (res.status === 404 && options.onNotFound) {
     options.onNotFound();
-    return;
+    return false;
   }
 
   if (!res.ok) {
@@ -67,7 +73,7 @@ export async function executeBackgroundPinSave(options: BackgroundPinSaveOptions
       /* use generic */
     }
     options.onError(message);
-    return;
+    return false;
   }
 
   notifyProfileDataChanged();
@@ -82,6 +88,7 @@ export async function executeBackgroundPinSave(options: BackgroundPinSaveOptions
   ) {
     options.onPhotoChanged?.();
   }
+  return true;
 }
 
 export function startBackgroundPinSave(options: BackgroundPinSaveOptions): void {

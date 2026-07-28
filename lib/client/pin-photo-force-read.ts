@@ -1,5 +1,5 @@
 import { LIMITS } from "@/lib/constants";
-import { detectImageMimeFromBuffer } from "@/lib/utils/image-mime";
+import { detectImageMimeFromBuffer, mimeFromImageFileName } from "@/lib/utils/image-mime";
 
 /** Virtual picker files (Google Photos / content URI) — fail fast, no UI freeze. */
 export const PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS = 500;
@@ -7,7 +7,7 @@ export const PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS = 500;
 /** @deprecated Use PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS */
 export const PIN_PHOTO_FORCE_READ_TIMEOUT_MS = PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS;
 
-/** Local gallery / camera files may need longer to read on slow devices. */
+/** Local gallery files may need longer to read on slow devices. */
 export const PIN_PHOTO_LOCAL_READ_TIMEOUT_MS = 12_000;
 
 export type PinPhotoReadFailureCode =
@@ -22,6 +22,9 @@ const VIRTUAL_PICKER_MIME = new Set([
   "binary/octet-stream",
   "content/unknown",
 ]);
+
+/** @deprecated Use LIMITS.maxPinPhotoBytes */
+export const PIN_PHOTO_MATERIALIZE_MAX_BYTES = LIMITS.maxPinPhotoBytes;
 
 function readBlobWithTimeout(blob: Blob, timeoutMs: number): Promise<ArrayBuffer> {
   return new Promise((resolve, reject) => {
@@ -71,12 +74,13 @@ function safePhotoFileName(originalName: string, mime: string): string {
   return `${base || "photo"}.${ext}`;
 }
 
-function resolveImageMime(buffer: ArrayBuffer, declaredType: string): string | null {
-  const sniffed = detectImageMimeFromBuffer(new Uint8Array(buffer.slice(0, 16)));
+function resolveImageMime(buffer: ArrayBuffer, declaredType: string, fileName: string): string | null {
+  const view = new Uint8Array(buffer, 0, Math.min(32, buffer.byteLength));
+  const sniffed = detectImageMimeFromBuffer(view);
   if (sniffed) return sniffed;
   const t = declaredType.trim().toLowerCase();
   if (t.startsWith("image/") && !VIRTUAL_PICKER_MIME.has(t)) return t;
-  return null;
+  return mimeFromImageFileName(fileName);
 }
 
 export function pinPhotoNeedsForceRead(file: File): boolean {
@@ -91,7 +95,7 @@ function bytesToPinPhotoFile(
   buffer: ArrayBuffer,
   mime: string
 ): File | null {
-  if (buffer.byteLength <= 0 || buffer.byteLength > LIMITS.avatarMaxBytes) {
+  if (buffer.byteLength <= 0 || buffer.byteLength > LIMITS.maxPinPhotoBytes) {
     return null;
   }
   const name = safePhotoFileName(file.name, mime);
@@ -101,7 +105,7 @@ function bytesToPinPhotoFile(
   });
 }
 
-/** Read first bytes with the same hard timeout as full materialization. */
+/** Read first bytes with a hard timeout. */
 export async function readPinPhotoHeaderBytes(
   file: File,
   timeoutMs = PIN_PHOTO_LOCAL_READ_TIMEOUT_MS
@@ -115,16 +119,16 @@ export async function readPinPhotoHeaderBytes(
   }
 }
 
-/** Read virtual picker files (Google Photos / content URI) into a normal in-memory File. */
+/** Read picker file into a normal in-memory File (safe for FormData upload). */
 export async function materializePinPhotoFile(
   file: File,
-  timeoutMs = PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS
+  timeoutMs = PIN_PHOTO_LOCAL_READ_TIMEOUT_MS
 ): Promise<File | null> {
-  if (file.size <= 0) return null;
+  if (file.size <= 0 || file.size > LIMITS.maxPinPhotoBytes) return null;
 
   try {
     const buffer = await readBlobWithTimeout(file, timeoutMs);
-    const mime = resolveImageMime(buffer, file.type);
+    const mime = resolveImageMime(buffer, file.type, file.name);
     if (!mime) return null;
     return bytesToPinPhotoFile(file, buffer, mime);
   } catch {
@@ -133,32 +137,28 @@ export async function materializePinPhotoFile(
 }
 
 /**
- * Ensures the picker file is readable locally before upload/preview.
- * Fails fast — no fetch/object-URL fallback, no second read pass.
+ * Ensures the picker file is readable and upload-safe (always in-memory when possible).
  */
 export async function ensureReadablePinPhotoFile(
   file: File,
   localReadTimeoutMs = PIN_PHOTO_LOCAL_READ_TIMEOUT_MS
 ): Promise<File | null> {
-  if (file.size <= 0) return null;
+  if (file.size <= 0 || file.size > LIMITS.maxPinPhotoBytes) return null;
+
+  const materialized = await materializePinPhotoFile(file, localReadTimeoutMs);
+  if (materialized) return materialized;
 
   if (pinPhotoNeedsForceRead(file)) {
     return materializePinPhotoFile(file, PIN_PHOTO_VIRTUAL_READ_TIMEOUT_MS);
   }
 
-  try {
-    const head = await readBlobWithTimeout(
-      file.slice(0, Math.min(16, file.size)),
-      localReadTimeoutMs
-    );
-    const sniffed = detectImageMimeFromBuffer(new Uint8Array(head));
-    const type = file.type.trim().toLowerCase();
-    if (sniffed && type.startsWith("image/") && !VIRTUAL_PICKER_MIME.has(type)) {
-      return file;
-    }
-  } catch {
-    return null;
-  }
-
   return null;
+}
+
+/** Same as ensureReadable — pick and upload share one materialization path. */
+export async function preparePinPhotoFileForUpload(
+  file: File,
+  localReadTimeoutMs = PIN_PHOTO_LOCAL_READ_TIMEOUT_MS
+): Promise<File | null> {
+  return ensureReadablePinPhotoFile(file, localReadTimeoutMs);
 }

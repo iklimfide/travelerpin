@@ -1,7 +1,7 @@
 import type { MediaType } from "@/types/database";
 import type { CountryTraveler } from "@/lib/supabase/country-travelers";
 import { toHubPhotoSrc } from "@/lib/storage/hub-photo-url";
-import { readInstagramUrls, readPhotoUrl, readPhotoUrls, type PinMediaRow } from "@/lib/utils/pin-media";
+import { readInstagramUrls, readPhotoUrl, readPhotoUrls, readPhotoUrlsForGallery, type PinMediaRow } from "@/lib/utils/pin-media";
 
 export type HubTravelerPin = {
   id: string;
@@ -81,7 +81,7 @@ export function normalizeHubTravelerPin(pin: HubTravelerPin): HubTravelerPin {
 }
 
 export function buildHubTravelerPinMedia(row: PinMediaRow) {
-  const photoUrls = readPhotoUrls(row);
+  const photoUrls = readPhotoUrlsForGallery(row);
   const photoUrl = photoUrls[0] ?? readPhotoUrl(row);
   const instagramUrls = readInstagramUrls(row);
   const mediaUrl = photoUrl ?? instagramUrls[0] ?? row.media_url ?? null;

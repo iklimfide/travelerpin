@@ -6,7 +6,8 @@ import { LIMITS } from "@/lib/constants";
 import { useTranslateCommon, useTranslatePark } from "@/lib/i18n/client-messages";
 import { addPark } from "@/lib/client/park-actions";
 import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
-import { startBackgroundPinSave } from "@/lib/client/background-pin-save";
+import { executeBackgroundPinSave } from "@/lib/client/background-pin-save";
+import { formatPinPhotoUploadError } from "@/lib/client/format-pin-photo-upload-error";
 import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEditor";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
@@ -410,22 +411,28 @@ export function ParkForm({
         visit_dates: visitDates,
       };
       const parkId = park.id;
-      onSuccess?.();
-      startBackgroundPinSave({
-        media: mediaSnapshot,
-        genericSaveFailedMessage: tCommon("pinSaveFailed"),
-        saveRecord: (media) =>
-          fetch(`/api/parks/${parkId}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...payloadBase, ...media }),
-          }),
-        onError: (message) => {
-          void modal.alert(message, { variant: "error" });
-        },
-        onPhotoChanged: () => router.refresh(),
-        onNotFound: () => notifyProfileDataChanged(),
-      });
+      setLoading(true);
+      try {
+        await executeBackgroundPinSave({
+          media: mediaSnapshot,
+          genericSaveFailedMessage: tCommon("pinSaveFailed"),
+          onMediaReady: () => onSuccess?.(),
+          saveRecord: (media) =>
+            fetch(`/api/parks/${parkId}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ...payloadBase, ...media }),
+            }),
+          onError: (message) => {
+            void modal.alert(message, { variant: "error" });
+          },
+          onPhotoChanged: () => router.refresh(),
+          onNotFound: () => notifyProfileDataChanged(),
+          formatPhotoUploadError: (message) => formatPinPhotoUploadError(tCommon, message),
+        });
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
@@ -438,7 +445,7 @@ export function ParkForm({
         newPhotoFiles,
         instagramUrls,
         isValidInstagramUrl,
-        formatPhotoUploadError,
+        formatPhotoUploadError: (message) => formatPinPhotoUploadError(tCommon, message),
       });
 
       if (!mediaResult.ok) {
@@ -504,7 +511,6 @@ export function ParkForm({
           mediaHint: t("mediaHint"),
           photo: t("photo"),
           photoLibrary: t("photoLibrary"),
-          photoCamera: t("photoCamera"),
           photoSaved: t("photoSaved"),
           instagram: t("instagram"),
           instagramHint: t("instagramHint"),

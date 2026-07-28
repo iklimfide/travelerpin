@@ -1,20 +1,7 @@
 import { getCountryName } from "@/lib/data/countries";
 import { canonicalCityKey, canonicalCityName } from "@/lib/utils/city-aliases";
+import { mergeDuplicateVisitedCityRows } from "@/lib/utils/merge-profile-travel-pins";
 import type { VisitedCity } from "@/types/database";
-
-function pickPreferredVisitedCity(a: VisitedCity, b: VisitedCity): VisitedCity {
-  const aVisits = a.visit_dates?.length ?? 0;
-  const bVisits = b.visit_dates?.length ?? 0;
-  if (aVisits !== bVisits) return aVisits > bVisits ? a : b;
-
-  const aTime = Date.parse(a.updated_at || a.created_at);
-  const bTime = Date.parse(b.updated_at || b.created_at);
-  if (!Number.isNaN(aTime) && !Number.isNaN(bTime) && aTime !== bTime) {
-    return aTime >= bTime ? a : b;
-  }
-
-  return a.id.localeCompare(b.id) <= 0 ? a : b;
-}
 
 export function normalizeVisitedCityForDisplay(city: VisitedCity): VisitedCity {
   const city_name = canonicalCityName(city.country_code, city.city_name);
@@ -36,7 +23,7 @@ export function dedupeVisitedCitiesForDisplay(cities: VisitedCity[]): VisitedCit
       continue;
     }
 
-    byKey.set(key, normalizeVisitedCityForDisplay(pickPreferredVisitedCity(existing, city)));
+    byKey.set(key, mergeDuplicateVisitedCityRows(existing, city));
   }
 
   return [...byKey.values()];

@@ -177,3 +177,13 @@ export function getWebpFileName(originalName: string): string {
   const safe = base.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 50);
   return `${safe}-${Date.now()}.webp`;
 }
+
+export function getPinPhotoObjectKey(
+  userId: string,
+  originalName: string,
+  extension: OptimizedImage["extension"]
+): string {
+  const base = originalName.replace(/\.[^.]+$/, "");
+  const safe = base.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 50);
+  return `${userId}/${safe || "photo"}-${Date.now()}.${heroStorageExtension(extension)}`;
+}

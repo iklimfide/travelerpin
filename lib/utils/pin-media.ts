@@ -15,6 +15,26 @@ export type PinMediaInput = PinMediaRow & {
   photo_urls?: string[] | null;
 };
 
+/** All stored photo URLs for gallery tiles (legacy multi-photo rows stay visible). */
+export function readPhotoUrlsForGallery(row: PinMediaRow | null | undefined): string[] {
+  if (!row) return [];
+
+  const fromArray = (row.photo_urls ?? []).map((url) => url?.trim()).filter(Boolean) as string[];
+  if (fromArray.length > 0) {
+    return fromArray;
+  }
+
+  if (row.photo_url?.trim()) {
+    return [row.photo_url.trim()];
+  }
+
+  if (row.media_type === "photo" && row.media_url?.trim()) {
+    return [row.media_url.trim()];
+  }
+
+  return [];
+}
+
 export function readPhotoUrls(row: PinMediaRow | null | undefined): string[] {
   if (!row) return [];
 
