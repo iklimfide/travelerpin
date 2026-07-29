@@ -9,17 +9,17 @@
 }
 
 .profile-page {
-  --profile-bg: #f4f7fb;
+  --profile-bg: #ffffff;
   --profile-card: #ffffff;
-  --profile-soft: #eaf1f8;
+  --profile-soft: #f8fafc;
   --profile-text: #152033;
   --profile-muted: #748197;
   --profile-primary: #2563eb;
   --profile-primary-soft: #dbeafe;
-  --profile-shadow: 0 16px 40px rgba(25, 43, 68, 0.1);
+  --profile-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   --profile-inset: 8px;
   --profile-stack-gap: 12px;
-  background: var(--profile-bg);
+  background: #ffffff;
   color: var(--profile-text);
   flex: 1;
   width: 100%;
@@ -196,7 +196,7 @@
   height: 100%;
   border-radius: 30px;
   overflow: hidden;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
 .profile-page--embedded .profile-shell {
@@ -240,6 +240,7 @@
   min-height: 100%;
   margin: 0 auto;
   overflow: hidden;
+  background: #ffffff;
 }
 
 .profile-city-pill--link,
@@ -486,7 +487,8 @@
   border-radius: 30px;
   padding: 76px 22px 28px;
   text-align: center;
-  box-shadow: 0 20px 40px rgba(16, 32, 60, 0.12);
+  box-shadow: none;
+  border: 1px solid #e8eef5;
   z-index: 5;
 }
 
@@ -691,7 +693,8 @@
   background: #ffffff;
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 14px 28px rgba(16, 32, 60, 0.08);
+  box-shadow: none;
+  border: 1px solid #e8eef5;
 }
 
 .profile-square-capture.profile-capture-active .profile-square-capture-header {
@@ -790,7 +793,7 @@
 .profile-world-progress {
   display: flex;
   flex-direction: column;
-  background: #f5f7fb;
+  background: #ffffff;
   border: 1px solid #dfe5ee;
   border-radius: 24px;
   padding: 18px;
@@ -904,7 +907,7 @@
 .profile-stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  background: #f5f7fb;
+  background: #ffffff;
   border: 1px solid #dfe5ee;
   border-radius: 24px;
   padding: 18px 10px;
@@ -1189,7 +1192,7 @@
 .profile-media-sections {
   --city-border: #dfe5ee;
   --city-card: #ffffff;
-  --city-shadow: 0 14px 28px rgba(16, 32, 60, 0.08);
+  --city-shadow: none;
   --city-text: #142033;
   --city-muted: #7a8798;
   padding: 0 var(--profile-inset);
@@ -1215,7 +1218,7 @@
   border-radius: 20px;
   background: var(--city-card);
   padding: 0;
-  box-shadow: 0 12px 40px rgba(21, 32, 51, 0.08);
+  box-shadow: none;
 }
 
 .profile-media-box__head.profile-card-hero {
@@ -1782,7 +1785,8 @@
   border-radius: 28px;
   overflow: hidden;
   padding: 16px;
-  box-shadow: 0 14px 28px rgba(16, 32, 60, 0.08);
+  box-shadow: none;
+  border: 1px solid #e8eef5;
 }
 
 .profile-map-panel--link {
@@ -1790,14 +1794,13 @@
   color: inherit;
   text-decoration: none;
   cursor: pointer;
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 
 .profile-map-panel--link:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 18px 34px rgba(16, 32, 60, 0.12);
+  transform: none;
+  border-color: #dce4ef;
+  box-shadow: none;
 }
 
 .profile-map-panel--link:focus-visible {
@@ -1979,7 +1982,7 @@
   border-radius: 20px;
   overflow: hidden;
   border: 1px solid #e8eef5;
-  box-shadow: 0 4px 14px rgba(25, 43, 68, 0.06);
+  box-shadow: none;
 }
 
 .profile-trip-image {
@@ -2274,7 +2277,8 @@
 .profile-all-nav.profile-card-hero {
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 12px 40px rgba(21, 32, 51, 0.08);
+  box-shadow: none;
+  border: 1px solid #e8eef5;
 }
 
 .profile-all-nav__title {
@@ -2364,7 +2368,7 @@
   border-radius: 18px;
   background: #fff;
   border: 1px solid #e8eef5;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: none;
   overflow: hidden;
   scroll-margin-top: 16px;
 }
@@ -2955,10 +2959,10 @@
 
 .profile-next-route-box {
   background: #fff;
-  border: none;
+  border: 1px solid #e8eef5;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 12px 40px rgba(21, 32, 51, 0.08);
+  box-shadow: none;
 }
 
 /* Shared gradient card header — Next Route, visited top nav, … */
@@ -3546,7 +3550,8 @@
   background: var(--profile-card);
   border-radius: 22px;
   padding: 18px;
-  box-shadow: 0 10px 28px rgba(25, 43, 68, 0.06);
+  border: 1px solid #e8eef5;
+  box-shadow: none;
 }
 
 .profile-cta-title {
@@ -3605,10 +3610,12 @@
 .dashboard-shell--guest .profile-page:not(.profile-page--embedded) {
   padding-top: var(--dashboard-top-bar-height);
   padding-bottom: 0;
+  background: #ffffff;
 }
 
 .dashboard-shell .profile-page {
   padding-bottom: 0;
+  background: #ffffff;
 }
 
 .profile-owner-tools {
@@ -3619,10 +3626,10 @@
 
 .profile-owner-section {
   background: var(--profile-card);
-  border: none;
+  border: 1px solid #e8eef5;
   border-radius: 28px;
   padding: 24px;
-  box-shadow: 0 12px 24px rgba(16, 32, 60, 0.07);
+  box-shadow: none;
 }
 
 .profile-owner-section__header {
@@ -3940,11 +3947,13 @@
 @media (min-width: 720px) {
   .profile-page {
     padding: 18px 0;
+    background: #ffffff;
   }
 
   .profile-shell {
     border-radius: 38px;
-    box-shadow: 0 30px 80px rgba(20, 40, 70, 0.14);
+    box-shadow: none;
+    background: #ffffff;
   }
 
   .profile-hero {
@@ -3966,6 +3975,7 @@
     max-width: none;
     margin-inline: auto;
     padding: 18px 0 40px;
+    background: #ffffff;
   }
 
   .profile-page--route .profile-guest-auth-bar {
@@ -3978,6 +3988,8 @@
   .profile-page--route .profile-shell {
     max-width: 640px;
     margin-inline: auto;
+    background: #ffffff;
+    box-shadow: none;
   }
 
   .profile-page--route .profile-visited-preview .profile-all-grid--preview {
@@ -4037,6 +4049,7 @@
     max-width: min(1480px, calc(100vw - 48px));
     margin-inline: auto;
     padding: 28px 24px 40px;
+    background: #ffffff;
   }
 
   .profile-all-page .profile-shell {
@@ -4050,8 +4063,9 @@
     padding: var(--profile-desktop-gap);
     overflow: visible;
     border-radius: 28px;
-    background: var(--profile-card);
-    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.1);
+    background: #ffffff;
+    box-shadow: none;
+    border: 1px solid #e8eef5;
   }
 
   .profile-all-page .profile-all-header {
@@ -4172,6 +4186,7 @@
   .dashboard-shell .profile-page:not(.profile-page--embedded) {
     padding-top: var(--dashboard-top-bar-height);
     padding-bottom: 0;
+    background: #ffffff;
   }
 }
 
