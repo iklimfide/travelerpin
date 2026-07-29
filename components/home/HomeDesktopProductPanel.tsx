@@ -13,6 +13,8 @@ type HomeDesktopProductPanelProps = {
   countries: number;
   cities: number;
   worldPercent: number;
+  showcaseName?: string;
+  showcaseUsername?: string;
 };
 
 function DashboardStat({
@@ -57,10 +59,14 @@ export function HomeDesktopProductPanel({
   countries,
   cities,
   worldPercent,
+  showcaseName,
+  showcaseUsername,
 }: HomeDesktopProductPanelProps) {
   const t = useTranslateHome();
   const latestPinned = getDemoLatestPinned();
-  const demoAllHref = profileAllPath(DEMO_PERSONA.username);
+  const profileUsername = showcaseUsername ?? DEMO_PERSONA.username;
+  const profileName = showcaseName ?? DEMO_PERSONA.name;
+  const demoAllHref = profileAllPath(profileUsername);
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -140,10 +146,10 @@ export function HomeDesktopProductPanel({
               {t("heroCtaPrimary")}
             </Link>
             <Link
-              href={profilePath(DEMO_PERSONA.username)}
+              href={profilePath(profileUsername)}
               className="inline-flex items-center justify-center rounded-full border border-[#d8e1ef] bg-white px-[22px] py-[13px] text-[15px] font-extrabold text-[#2563eb] transition hover:-translate-y-px hover:shadow-[0_10px_22px_rgba(15,23,42,0.08)]"
             >
-              {t("heroCtaSecondary", { name: DEMO_PERSONA.name })}
+              {t("heroCtaSecondary", { name: profileName })}
             </Link>
           </div>
 
@@ -162,10 +168,10 @@ export function HomeDesktopProductPanel({
           <div className="mt-8 flex flex-col items-center gap-5 border-t border-[#eef2f7] pt-8">
             <HomeBelowFoldSections
               compact
-              name={DEMO_PERSONA.name}
+              name={profileName}
               countries={countries}
               cities={cities}
-              profileHref={profilePath(DEMO_PERSONA.username)}
+              profileHref={profilePath(profileUsername)}
             />
           </div>
         </div>

@@ -11,6 +11,8 @@ import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
 import { ProfileSquareCaptureHeader } from "@/components/profile/ProfileSquareCaptureHeader";
 import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections";
 import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
+import { syncJenniferDemoPresentation } from "@/lib/data/jennifer-demo-display";
+import { buildJenniferProfileMediaPins } from "@/lib/data/jennifer-demo-media";
 import { usePublicProfileProgressiveLoad } from "@/lib/client/use-public-profile-progressive-load";
 import {
   fetchHeroImageMaps,
@@ -26,6 +28,8 @@ import { ProfileTravelUpdateCard } from "@/components/profile/ProfileTravelUpdat
 import { ProfileNextRouteSection } from "@/components/profile/ProfileNextRouteSection";
 import { ProfileTripsRow } from "@/components/profile/ProfileTripsRow";
 import { ProfilePublicPreviewBanner } from "@/components/profile/ProfilePublicPreviewBanner";
+import { ProfileMainProgressiveSkeleton } from "@/components/skeletons/ProfileMainProgressiveSkeleton";
+import { ProfileMapPanelSkeleton } from "@/components/skeletons/ProfileMapPanelSkeleton";
 import { buildProfileAllDestinations } from "@/lib/utils/profile-all-destinations";
 import { buildProfileMediaPins } from "@/lib/utils/profile-media";
 import { resolveResidenceCityHref } from "@/lib/utils/residence-city";
@@ -95,43 +99,13 @@ export function PublicProfileViewClient({
 
   const rawData = progressive ? progressiveState.data : initialFullData!;
   const fullData = progressive ? progressiveState.fullData : initialFullData ?? null;
+  const awaitingFullData = progressive && !fullData;
   const pinsLoading = progressive && progressiveState.loading;
 
   const data = useMemo(() => {
     if (!previewAsPublic || !fullData) return rawData;
     return applyPublicPreviewToProfileData(fullData);
   }, [fullData, previewAsPublic, rawData]);
-
-  const resolvedStats = fullData?.stats ?? null;
-  const animateStats = useProfileStatsAnimationEnabled(progressive);
-  const animatedCountries = useProgressiveStatCount(
-    resolvedStats?.countries ?? null,
-    PROFILE_STATS_LOADING_PLACEHOLDER.countries,
-    animateStats
-  );
-  const animatedCities = useProgressiveStatCount(
-    resolvedStats?.cities ?? null,
-    PROFILE_STATS_LOADING_PLACEHOLDER.cities,
-    animateStats
-  );
-  const animatedNationalParks = useProgressiveStatCount(
-    resolvedStats?.nationalParks ?? null,
-    PROFILE_STATS_LOADING_PLACEHOLDER.nationalParks,
-    animateStats
-  );
-  const animatedThemeParks = useProgressiveStatCount(
-    resolvedStats?.themeParks ?? null,
-    PROFILE_STATS_LOADING_PLACEHOLDER.themeParks,
-    animateStats
-  );
-  const displayStats = animateStats
-    ? {
-        countries: animatedCountries,
-        cities: animatedCities,
-        nationalParks: animatedNationalParks,
-        themeParks: animatedThemeParks,
-      }
-    : data.stats;
 
   const {
     profile,
@@ -154,19 +128,11 @@ export function PublicProfileViewClient({
   const visibleWishlistCodes =
     isOwnProfile || wishlistPublic ? wishlistCodes : [];
 
-
   const mapPinsReady = Boolean(fullData);
   const mapVisitedCountries = mapPinsReady ? visitedCountries : [];
   const mapVisitedCodes = mapPinsReady ? visitedCodes : [];
-  const mapCountryCount = animateStats ? animatedCountries : data.stats.countries;
 
-  const hasMapContent =
-    pinsLoading ||
-    visitedCountries.length > 0 ||
-    visitedCities.length > 0 ||
-    visitedParks.length > 0 ||
-    visibleWishlistCodes.length > 0;
-  const showEmptyMapState = !pinsLoading && !hasMapContent;
+  const isDemoProfile = isDemoProfileUsername(profile.username);
 
   const [cityHeroImages, setCityHeroImages] = useState<Map<string, string>>(() =>
     serverHeroMapsProvided
@@ -234,19 +200,84 @@ export function PublicProfileViewClient({
     ]
   );
 
-  const destinationCount =
-    destinations.countries.length +
-    destinations.cities.length +
-    destinations.parks.length +
-    destinations.wishlist.length;
+  const presentation = useMemo(() => {
+    if (!isDemoProfile) {
+      return { stats: data.stats, destinations };
+    }
+    return syncJenniferDemoPresentation(data.stats, destinations, locale);
+  }, [isDemoProfile, data.stats, destinations, locale]);
 
-  const mediaPins = buildProfileMediaPins(visitedCities, visitedParks, profile);
-  const isDemoProfile = isDemoProfileUsername(profile.username);
+  const resolvedStats = fullData ? presentation.stats : null;
+  const animateStats = useProfileStatsAnimationEnabled(progressive && Boolean(fullData));
+  const animatedCountries = useProgressiveStatCount(
+    resolvedStats?.countries ?? null,
+    PROFILE_STATS_LOADING_PLACEHOLDER.countries,
+    animateStats
+  );
+  const animatedCities = useProgressiveStatCount(
+    resolvedStats?.cities ?? null,
+    PROFILE_STATS_LOADING_PLACEHOLDER.cities,
+    animateStats
+  );
+  const animatedNationalParks = useProgressiveStatCount(
+    resolvedStats?.nationalParks ?? null,
+    PROFILE_STATS_LOADING_PLACEHOLDER.nationalParks,
+    animateStats
+  );
+  const animatedThemeParks = useProgressiveStatCount(
+    resolvedStats?.themeParks ?? null,
+    PROFILE_STATS_LOADING_PLACEHOLDER.themeParks,
+    animateStats
+  );
+  const displayStats = animateStats
+    ? {
+        countries: animatedCountries,
+        cities: animatedCities,
+        nationalParks: animatedNationalParks,
+        themeParks: animatedThemeParks,
+      }
+    : presentation.stats;
+
+  const mapCountryCount = animateStats ? animatedCountries : presentation.stats.countries;
+
+  const destinationCount =
+    presentation.destinations.countries.length +
+    presentation.destinations.cities.length +
+    presentation.destinations.parks.length +
+    presentation.destinations.wishlist.length;
+
+  const hasMapContent =
+    !awaitingFullData &&
+    (visitedCountries.length > 0 ||
+      visitedCities.length > 0 ||
+      visitedParks.length > 0 ||
+      visibleWishlistCodes.length > 0);
+  const showEmptyMapState = !awaitingFullData && !pinsLoading && !hasMapContent;
+
+  const mediaPins = useMemo(() => {
+    if (!isDemoProfile) {
+      return buildProfileMediaPins(visitedCities, visitedParks, profile);
+    }
+    return buildJenniferProfileMediaPins(
+      visitedCities,
+      visitedParks,
+      profile,
+      cityHeroImages,
+      parkHeroImages
+    );
+  }, [
+    isDemoProfile,
+    visitedCities,
+    visitedParks,
+    profile,
+    cityHeroImages,
+    parkHeroImages,
+  ]);
   const showTravelUpdateCard =
     (isOwnProfile || isDemoProfile) && (!embedded || isDemoProfile);
   const travelDelta = computeTravelUpdateDelta(
     null,
-    data.stats,
+    presentation.stats,
     visitedCodes,
     visitedCountries,
     visitedCities,
@@ -267,6 +298,10 @@ export function PublicProfileViewClient({
         visitedCodes={fullData.visitedCodes}
       />
     ) : undefined);
+
+  const showProgressiveMainSkeleton = awaitingFullData && !embedded;
+  const showProgressiveNextRouteSkeleton =
+    isOwnProfile || parseNextRoute(profile.next_route).length > 0;
 
   const profileBody = (
     <div
@@ -314,9 +349,13 @@ export function PublicProfileViewClient({
               canFollow={fullData ? canFollow : false}
               isLoggedIn={isLoggedIn}
               previewAsPublic={previewAsPublic}
+              animateStats={animateStats}
+              statsPending={awaitingFullData}
             />
 
-            {hasMapContent ? (
+            {awaitingFullData ? (
+              <ProfileMapPanelSkeleton />
+            ) : hasMapContent ? (
               <div
                 id={`profile-square-capture-${profile.username.toLowerCase()}`}
                 className="profile-square-capture"
@@ -326,12 +365,12 @@ export function PublicProfileViewClient({
                     avatarUrl={profile.avatar_url}
                     displayName={displayName}
                     username={profile.username}
-                    countryCount={data.stats.countries}
+                    countryCount={presentation.stats.countries}
                     instagramUrl={profile.instagram_url}
                     instagramSampleNotice={
                       isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
                     }
-                    stats={data.stats}
+                    stats={displayStats}
                     labels={{
                       countries: t("statCountriesShort"),
                       cities: t("statCitiesShort"),
@@ -364,92 +403,12 @@ export function PublicProfileViewClient({
         </div>
 
         <main className="profile-main">
-          {showTravelUpdateCard && (!progressive || fullData) ? (
-            <ProfileTravelUpdateCard
-              username={profile.username}
-              displayName={displayName}
-              stats={data.stats}
-              delta={travelDelta}
-              isOwnProfile={isOwnProfile}
-              persistShareSnapshot={isOwnProfile}
-            />
-          ) : null}
-
-          {!embedded ? (
+          {showProgressiveMainSkeleton ? (
             <>
-              {(!progressive || fullData) && destinationCount > 0 ? (
-                <ProfileTripsRow
-                  destinations={destinations}
-                  displayName={displayName}
-                  isOwnProfile={isOwnProfile}
-                  badgeLabels={{
-                    recent: t("tripBadgeRecent"),
-                    favorite: t("tripBadgeFavorite"),
-                    dayTrip: t("tripBadgeDayTrip"),
-                  }}
-                />
-              ) : null}
-
-              {(!progressive || fullData) && isOwnProfile && resolvedOwnerTools ? (
-                <div className="profile-dashboard-tools">{resolvedOwnerTools}</div>
-              ) : null}
-
-              {(!progressive || fullData) ? (
-                <ProfileMediaSections
-                  displayName={displayName}
-                  memoryPins={mediaPins}
-                  isOwnProfile={isOwnProfile}
-                  visitedCountries={visitedCountries}
-                  visitedCities={visitedCities}
-                  visitedParks={visitedParks}
-                  labels={{
-                    photosHeading: isOwnProfile
-                      ? t("myPhotos")
-                      : t("visitorPhotos", { name: displayName }),
-                    instagramHeading: isOwnProfile
-                      ? t("myInstagramLinks")
-                      : t("visitorInstagramLinks", { name: displayName }),
-                    noPhotosYet: isOwnProfile
-                      ? t("noPhotosYet")
-                      : t("visitorNoPhotosYet", { name: displayName }),
-                    noInstagramYet: isOwnProfile
-                      ? t("noInstagramYet")
-                      : t("visitorNoInstagramYet", { name: displayName }),
-                    viewPin: t("viewPin"),
-                    viewMap: t("viewMap"),
-                    close: t("closePin"),
-                    instagramPost: t("instagramPost"),
-                    viewAll: t("allDestinationsAll"),
-                    editMedia: tCommon("edit"),
-                    removeMedia: tCommon("delete"),
-                    removePhotoTitle: t("removePhotoTitle"),
-                    removePhotoMessage: t("removePhotoMessage"),
-                    removeInstagramTitle: t("removeInstagramTitle"),
-                    removeInstagramMessage: t("removeInstagramMessage"),
-                  }}
-                />
-              ) : null}
-
-              {(!progressive || fullData) ? (
-                <ProfileNextRouteSection
-                  initialStops={parseNextRoute(profile.next_route)}
-                  initialTotalDays={profile.next_route_total_days}
-                  initialTransport={profile.next_route_transport}
-                  isOwnProfile={isOwnProfile}
-                  displayName={displayName}
-                  username={profile.username}
-                  avatarUrl={profile.avatar_url}
-                  visitedCountries={visitedCountries}
-                  visitedCities={visitedCities}
-                />
-              ) : null}
-
-              {!isOwnProfile && isGuest && hasMapContent && !showEmptyMapState && (!progressive || fullData) ? (
-                <section className="profile-section">
-                  <HomeFeaturesClient />
-                </section>
-              ) : null}
-
+              <ProfileMainProgressiveSkeleton
+                showTravelUpdate={showTravelUpdateCard}
+                showNextRoute={showProgressiveNextRouteSkeleton}
+              />
               {!isOwnProfile && isGuest ? (
                 <section className="profile-cta">
                   <div>
@@ -467,7 +426,110 @@ export function PublicProfileViewClient({
                 </section>
               ) : null}
             </>
-          ) : null}
+          ) : (
+            <>
+              {showTravelUpdateCard ? (
+                <ProfileTravelUpdateCard
+                  username={profile.username}
+                  displayName={displayName}
+                  stats={presentation.stats}
+                  delta={travelDelta}
+                  isOwnProfile={isOwnProfile}
+                  persistShareSnapshot={isOwnProfile}
+                />
+              ) : null}
+
+              {!embedded ? (
+                <>
+                  {destinationCount > 0 ? (
+                    <ProfileTripsRow
+                      destinations={presentation.destinations}
+                      displayName={displayName}
+                      isOwnProfile={isOwnProfile}
+                      badgeLabels={{
+                        recent: t("tripBadgeRecent"),
+                        favorite: t("tripBadgeFavorite"),
+                        dayTrip: t("tripBadgeDayTrip"),
+                      }}
+                    />
+                  ) : null}
+
+                  {isOwnProfile && resolvedOwnerTools ? (
+                    <div className="profile-dashboard-tools">{resolvedOwnerTools}</div>
+                  ) : null}
+
+                  <ProfileMediaSections
+                    displayName={displayName}
+                    memoryPins={mediaPins}
+                    isOwnProfile={isOwnProfile}
+                    visitedCountries={visitedCountries}
+                    visitedCities={visitedCities}
+                    visitedParks={visitedParks}
+                    labels={{
+                      photosHeading: isOwnProfile
+                        ? t("myPhotos")
+                        : t("visitorPhotos", { name: displayName }),
+                      instagramHeading: isOwnProfile
+                        ? t("myInstagramLinks")
+                        : t("visitorInstagramLinks", { name: displayName }),
+                      noPhotosYet: isOwnProfile
+                        ? t("noPhotosYet")
+                        : t("visitorNoPhotosYet", { name: displayName }),
+                      noInstagramYet: isOwnProfile
+                        ? t("noInstagramYet")
+                        : t("visitorNoInstagramYet", { name: displayName }),
+                      viewPin: t("viewPin"),
+                      viewMap: t("viewMap"),
+                      close: t("closePin"),
+                      instagramPost: t("instagramPost"),
+                      viewAll: t("allDestinationsAll"),
+                      editMedia: tCommon("edit"),
+                      removeMedia: tCommon("delete"),
+                      removePhotoTitle: t("removePhotoTitle"),
+                      removePhotoMessage: t("removePhotoMessage"),
+                      removeInstagramTitle: t("removeInstagramTitle"),
+                      removeInstagramMessage: t("removeInstagramMessage"),
+                    }}
+                  />
+
+                  <ProfileNextRouteSection
+                    initialStops={parseNextRoute(profile.next_route)}
+                    initialTotalDays={profile.next_route_total_days}
+                    initialTransport={profile.next_route_transport}
+                    isOwnProfile={isOwnProfile}
+                    displayName={displayName}
+                    username={profile.username}
+                    avatarUrl={profile.avatar_url}
+                    visitedCountries={visitedCountries}
+                    visitedCities={visitedCities}
+                  />
+
+                  {!isOwnProfile && isGuest && hasMapContent && !showEmptyMapState ? (
+                    <section className="profile-section">
+                      <HomeFeaturesClient />
+                    </section>
+                  ) : null}
+
+                  {!isOwnProfile && isGuest ? (
+                    <section className="profile-cta">
+                      <div>
+                        <p className="profile-cta-title">{tHome("ctaTitle")}</p>
+                        <p className="profile-cta-hint">{tHome("ctaHint")}</p>
+                      </div>
+                      <div className="profile-cta-actions">
+                        <Link href="/register" className="profile-cta-primary">
+                          {t("createYourMap")}
+                        </Link>
+                        <Link href="/login" className="profile-cta-secondary">
+                          {tHome("login")}
+                        </Link>
+                      </div>
+                    </section>
+                  ) : null}
+                </>
+              ) : null}
+            </>
+          )}
         </main>
       </div>
     </div>

@@ -1,15 +1,16 @@
 import countriesLib from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
+import { isUkNationCode, UK_LEGACY_CODE } from "@/lib/data/uk-nations";
 import type { VisitedCountry } from "@/types/database";
 
 countriesLib.registerLocale(enLocale);
 
-const DEMO_VISITED_CODES = [
+/** Jennifer demo map fill (41 countries) + share-card PNG showcase. */
+const DEMO_MAP_SHOWCASE_CODES = [
   "FR", "IT", "ES", "TR", "DE", "GB", "PT", "GR", "NL", "CH", "AT", "PL", "HR",
   "US", "CA", "MX", "BR", "AR", "CL", "CO",
   "JP", "TH", "VN", "IN", "AE", "KR", "SG", "ID",
   "MA", "EG", "ZA", "KE", "TZ",
-  // West Africa
   "SN", "GH", "NG", "CI", "ML",
   "RU",
   "AU", "NZ",
@@ -25,6 +26,20 @@ function demoCountry(code: string): VisitedCountry {
   };
 }
 
-export const DEMO_VISITED_COUNTRIES: VisitedCountry[] = DEMO_VISITED_CODES.map(demoCountry);
+export const DEMO_MAP_SHOWCASE_COUNTRY_CODES = DEMO_MAP_SHOWCASE_CODES.map((code) =>
+  code.toUpperCase()
+);
+export const DEMO_MAP_SHOWCASE_COUNTRIES: VisitedCountry[] =
+  DEMO_MAP_SHOWCASE_COUNTRY_CODES.map((code) => demoCountry(code));
 
-export const DEMO_VISITED_COUNTRY_CODES = DEMO_VISITED_CODES.map((code) => code.toUpperCase());
+export const DEMO_VISITED_COUNTRY_CODES = DEMO_MAP_SHOWCASE_COUNTRY_CODES;
+export const DEMO_VISITED_COUNTRIES: VisitedCountry[] = DEMO_MAP_SHOWCASE_COUNTRIES;
+
+const SHOWCASE_COUNTRY_CODE_SET = new Set(DEMO_MAP_SHOWCASE_COUNTRY_CODES);
+
+export function isJenniferShowcaseCountryCode(countryCode: string): boolean {
+  const upper = countryCode.trim().toUpperCase();
+  if (SHOWCASE_COUNTRY_CODE_SET.has(upper)) return true;
+  if (isUkNationCode(upper) && SHOWCASE_COUNTRY_CODE_SET.has(UK_LEGACY_CODE)) return true;
+  return false;
+}

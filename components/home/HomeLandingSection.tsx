@@ -13,7 +13,6 @@ import { HomeLandingDemoNextRoute } from "@/components/home/HomeLandingDemoNextR
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 
 import { DEMO_PERSONA } from "@/lib/data/demo-persona";
-
 import { loadDemoPublicProfilePage } from "@/lib/data/jennifer-demo-page";
 
 import { buildProfileDescription } from "@/lib/seo/profile";
@@ -70,7 +69,7 @@ export async function HomeLandingSection() {
 
         <div className="lg:hidden">
 
-          <HomeHero />
+          <HomeHero showcaseName={displayName} showcaseUsername={DEMO_PERSONA.username} />
 
         </div>
 
@@ -83,6 +82,10 @@ export async function HomeLandingSection() {
             cities={data.stats.cities}
 
             worldPercent={worldCoveragePercent(data.stats.countries)}
+
+            showcaseName={displayName}
+
+            showcaseUsername={DEMO_PERSONA.username}
 
           />
 

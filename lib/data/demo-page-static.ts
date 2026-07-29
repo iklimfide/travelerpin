@@ -2,7 +2,7 @@ import { DEMO_CITIES } from "@/lib/data/demo-cities";
 import { DEMO_VISITED_COUNTRIES } from "@/lib/data/demo-countries";
 import { DEMO_NEXT_ROUTE_STOPS, DEMO_NEXT_ROUTE_TOTAL_DAYS, DEMO_NEXT_ROUTE_TRANSPORT } from "@/lib/data/demo-next-route";
 import { DEMO_PARKS } from "@/lib/data/demo-parks";
-import { DEMO_PERSONA, getDemoTravelStats } from "@/lib/data/demo-persona";
+import { getDemoTravelStats } from "@/lib/data/demo-persona";
 import { DEMO_WISHLIST_COUNTRIES } from "@/lib/data/demo-wishlist";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
 import type { PublicProfile } from "@/lib/supabase/public-profile";
@@ -16,16 +16,16 @@ import {
 } from "@/lib/utils/stats";
 import type { VisitedCity } from "@/types/database";
 
-/** Fully static showcase profile — never loaded from the database. */
+/** Legacy static Jennifer row — hub/dev fallbacks only; public showcase is @guvencgiller. */
 export const DEMO_PROFILE: PublicProfile = {
   id: "demo-jennifer",
-  username: DEMO_PERSONA.username,
-  display_name: DEMO_PERSONA.name,
-  avatar_url: DEMO_PERSONA.avatarUrl,
+  username: "jennifer",
+  display_name: "Jennifer",
+  avatar_url: "/demo/jennifer-avatar.webp",
   cover_url: null,
-  bio: DEMO_PERSONA.bio,
-  residence: DEMO_PERSONA.residence,
-  instagram_url: DEMO_PERSONA.instagramUrl,
+  bio: "Weekend city breaks, Natura&Parks, and theme parks — pinning every stop along the way.",
+  residence: "Los Angeles",
+  instagram_url: "https://www.instagram.com/jennifer.travels/",
   profession: null,
   marital_status: null,
   wishlist_public: true,
@@ -55,7 +55,7 @@ const JENNIFER_HOME_CITY: VisitedCity = {
 };
 
 function demoCitiesWithResidencePin(): VisitedCity[] {
-  const residencePin = resolveResidenceCityPinInput(DEMO_PERSONA.residence);
+  const residencePin = resolveResidenceCityPinInput(DEMO_PROFILE.residence);
   const homeCityName = residencePin?.city_name ?? JENNIFER_HOME_CITY.city_name;
   const homeCountryCode = (
     residencePin?.country_code ?? JENNIFER_HOME_CITY.country_code
@@ -119,6 +119,11 @@ const DEMO_PAGE_ROWS = {
   ),
   wishlistCodes: getWishlistCountryCodes(DEMO_WISHLIST_COUNTRIES),
 };
+
+/** Demo counters always match pinned countries, cities, and parks in code. */
+export function getDemoTravelStatsFromStaticRows() {
+  return DEMO_PAGE_ROWS.stats;
+}
 
 export const DEMO_PUBLIC_PROFILE_BUNDLE = {
   profile: DEMO_PROFILE,

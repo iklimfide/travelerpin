@@ -44,6 +44,8 @@ import {
   buildProfileAllDestinations,
   type ProfileAllDestinations,
 } from "@/lib/utils/profile-all-destinations";
+import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
+import { syncJenniferDemoPresentation } from "@/lib/data/jennifer-demo-display";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-types";
 import {
   countryHasMappedPlaces,
@@ -147,29 +149,32 @@ export function ProfileAllDestinationsView({
         filterWishlistForProfileView(viewData, isOwnProfile);
       const { cityHeroImages, parkHeroImages } = await fetchHeroImageMaps();
 
+      const built = buildProfileAllDestinations(
+        viewData.visitedCountries,
+        viewData.visitedCities,
+        viewData.visitedParks,
+        visibleWishlist,
+        viewData.visitedCodes,
+        viewData.profile.residence,
+        locale,
+        cityHeroImages,
+        parkHeroImages
+      );
+      const aligned = isDemoProfileUsername(username)
+        ? syncJenniferDemoPresentation(viewData.stats, built, locale)
+        : { stats: viewData.stats, destinations: built };
+
       setViewVisitedCountries(viewData.visitedCountries);
       setViewVisitedCities(viewData.visitedCities);
       setViewVisitedParks(viewData.visitedParks);
       setViewVisitedCodes(viewData.visitedCodes);
       setViewWishlistCodes(visibleWishlistCodes);
       setViewWishlistCountries(visibleWishlist);
-      setViewStats(viewData.stats);
+      setViewStats(aligned.stats);
       setViewNextRouteStops(viewData.profile.next_route ?? []);
       setViewNextRouteTotalDays(viewData.profile.next_route_total_days);
       setViewNextRouteTransport(viewData.profile.next_route_transport);
-      setViewDestinations(
-        buildProfileAllDestinations(
-          viewData.visitedCountries,
-          viewData.visitedCities,
-          viewData.visitedParks,
-          visibleWishlist,
-          viewData.visitedCodes,
-          viewData.profile.residence,
-          locale,
-          cityHeroImages,
-          parkHeroImages
-        )
-      );
+      setViewDestinations(aligned.destinations);
     },
     [isOwnProfile, locale, previewAsPublic]
   );

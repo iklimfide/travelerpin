@@ -4,7 +4,8 @@ import dynamic from "next/dynamic";
 import { Link } from "@/lib/i18n/navigation";
 import { useEffect, useState } from "react";
 import { VisitedCountryFlags } from "@/components/map/VisitedCountryFlags";
-import { DEMO_VISITED_COUNTRIES, DEMO_VISITED_COUNTRY_CODES } from "@/lib/data/demo-countries";
+import { ProfileMiniMapSkeleton } from "@/components/skeletons/ProfileMapPanelSkeleton";
+import { DEMO_MAP_SHOWCASE_COUNTRIES, DEMO_MAP_SHOWCASE_COUNTRY_CODES } from "@/lib/data/demo-countries";
 import { DEMO_WISHLIST_COUNTRY_CODES } from "@/lib/data/demo-wishlist";
 import {
   SHARE_MAP_SHOWCASE_END_EVENT,
@@ -21,11 +22,7 @@ const TravelMapView = dynamic(
     import("@/components/map/TravelMapView").then((mod) => mod.TravelMapView),
   {
     ssr: false,
-    loading: () => (
-      <div id="travel-map" aria-hidden>
-        <div />
-      </div>
-    ),
+    loading: () => <ProfileMiniMapSkeleton />,
   }
 );
 
@@ -113,7 +110,7 @@ export function ProfileMapPanel({
             ...new Set(visitedParks.map((p) => p.country_code.toUpperCase())),
           ]}
           shareFillCountryCodes={
-            shareShowcaseMap ? [...DEMO_VISITED_COUNTRY_CODES] : null
+            shareShowcaseMap ? [...DEMO_MAP_SHOWCASE_COUNTRY_CODES] : null
           }
           shareFillWishlistCountryCodes={
             shareShowcaseMap ? [...DEMO_WISHLIST_COUNTRY_CODES] : null
@@ -131,11 +128,11 @@ export function ProfileMapPanel({
       </div>
 
       <VisitedCountryFlags
-        visitedCountries={shareShowcaseMap ? DEMO_VISITED_COUNTRIES : visitedCountries}
+        visitedCountries={shareShowcaseMap ? DEMO_MAP_SHOWCASE_COUNTRIES : visitedCountries}
         userCities={shareShowcaseMap ? [] : visitedCities}
         userParks={shareShowcaseMap ? [] : visitedParks}
         countryCodes={
-          shareShowcaseMap ? [...DEMO_VISITED_COUNTRY_CODES] : visitedCountryCodes
+          shareShowcaseMap ? [...DEMO_MAP_SHOWCASE_COUNTRY_CODES] : visitedCountryCodes
         }
         variant="landing"
         disableCountryLinks={Boolean(allHref)}

@@ -6,6 +6,8 @@ import { resolveProfileDisplayName } from "@/lib/utils/display-name";
 import { getCachedCityHeroImageMap } from "@/lib/city/city-hero-images";
 import { getCachedParkHeroImageMap } from "@/lib/park/park-hero-images";
 import { buildProfileAllDestinations } from "@/lib/utils/profile-all-destinations";
+import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
+import { syncJenniferDemoPresentation } from "@/lib/data/jennifer-demo-display";
 import { parseNextRoute } from "@/lib/utils/next-route";
 import { DEFAULT_DESCRIPTION, profileAllPath } from "@/lib/seo/site";
 import {
@@ -75,7 +77,7 @@ export default async function ProfileAllDestinationsPage({ params, searchParams 
     getCachedCityHeroImageMap(),
     getCachedParkHeroImageMap(),
   ]);
-  const destinations = buildProfileAllDestinations(
+  const builtDestinations = buildProfileAllDestinations(
     viewData.visitedCountries,
     viewData.visitedCities,
     viewData.visitedParks,
@@ -86,6 +88,9 @@ export default async function ProfileAllDestinationsPage({ params, searchParams 
     cityHeroImages,
     parkHeroImages
   );
+  const demoAligned = isDemoProfileUsername(profile.username)
+    ? syncJenniferDemoPresentation(viewData.stats, builtDestinations, locale)
+    : { stats: viewData.stats, destinations: builtDestinations };
 
   return (
     <>
@@ -96,7 +101,7 @@ export default async function ProfileAllDestinationsPage({ params, searchParams 
         avatarUrl={profile.avatar_url}
         isOwnProfile={isOwnProfile}
         previewAsPublic={previewAsPublic}
-        destinations={destinations}
+        destinations={demoAligned.destinations}
         visitedCountries={viewData.visitedCountries}
         visitedCities={viewData.visitedCities}
         visitedParks={viewData.visitedParks}
@@ -104,7 +109,7 @@ export default async function ProfileAllDestinationsPage({ params, searchParams 
         wishlistCodes={visibleWishlistCodes}
         wishlistCountries={visibleWishlistCountries}
         isLoggedIn={viewData.isLoggedIn}
-        stats={viewData.stats}
+        stats={demoAligned.stats}
         initialNextRouteStops={parseNextRoute(profile.next_route)}
         initialNextRouteTotalDays={profile.next_route_total_days}
         initialNextRouteTransport={profile.next_route_transport}

@@ -25,9 +25,10 @@ export {
   createEmptyProfilePageData,
 } from "@/lib/supabase/profile-page-types";
 import { profileCacheTag } from "@/lib/cache/revalidate-profile";
+import { isDemoProfileUsername } from "@/lib/data/showcase-profile";
+import { DEMO_PROFILE } from "@/lib/data/demo-page-static";
+import { loadJenniferDemoTravelRows } from "@/lib/data/jennifer-demo-travel";
 import {
-  DEMO_PUBLIC_PROFILE_BUNDLE,
-  isDemoProfileUsername,
   loadDemoPublicProfilePage,
 } from "@/lib/data/jennifer-demo-page";
 import { loadProfileFollowState } from "@/lib/supabase/profile-follows";
@@ -106,9 +107,21 @@ export function getCachedPublicProfileBundle(
   const key = username.trim().toLowerCase();
   if (!isPlausibleProfileUsername(key)) return Promise.resolve(null);
 
-  // Sample profile is code-only — never touch Supabase for @jennifer.
   if (isDemoProfileUsername(key)) {
-    return Promise.resolve(DEMO_PUBLIC_PROFILE_BUNDLE);
+    return unstable_cache(
+      async () => {
+        const travel = await loadJenniferDemoTravelRows();
+        return {
+          profile: DEMO_PROFILE,
+          visitedCountries: travel.visitedCountries,
+          visitedCities: travel.visitedCities,
+          visitedParks: travel.visitedParks,
+          publicWishlistCountries: travel.wishlistCountries,
+        };
+      },
+      ["jennifer-demo-public-bundle-v6"],
+      { revalidate: 300 }
+    )();
   }
 
   return unstable_cache(
@@ -236,8 +249,7 @@ export const loadPublicProfileShell = cache(
 );
 
 /**
- * Public profile page loader. Demo username always uses in-memory sample data.
- * Real profiles use the cached Supabase bundle.
+ * Public profile page loader. @jennifer uses hybrid demo + guvencgiller pins.
  */
 export const loadPublicProfilePage = cache(
   async (username: string): Promise<PublicProfilePageData | null> => {

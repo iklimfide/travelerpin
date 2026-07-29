@@ -1,4 +1,4 @@
-/** Showcase persona for the public homepage demo map. */
+/** Homepage sample persona — travel pins sync from @guvencgiller (see jennifer-demo-travel). */
 export const DEMO_PERSONA = {
   name: "Jennifer",
   username: "jennifer",
@@ -6,18 +6,13 @@ export const DEMO_PERSONA = {
   bio: "Weekend city breaks, Natura&Parks, and theme parks — pinning every stop along the way.",
   residence: "Los Angeles",
   instagramUrl: "https://www.instagram.com/jennifer.travels/",
-  visitedCountries: 41,
-  visitedCities: 124,
-  wishlistCountries: 8,
-  nationalParks: 10,
-  themeParks: 13,
 } as const;
 
 export function getDemoTravelStats() {
   return {
-    countries: DEMO_PERSONA.visitedCountries,
-    cities: DEMO_PERSONA.visitedCities,
-    nationalParks: DEMO_PERSONA.nationalParks,
-    themeParks: DEMO_PERSONA.themeParks,
+    countries: 41,
+    cities: 124,
+    nationalParks: 10,
+    themeParks: 13,
   };
 }

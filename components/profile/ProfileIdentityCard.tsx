@@ -10,6 +10,7 @@ import { ProfileInstagramLink } from "@/components/profile/ProfileInstagramLink"
 import { ProfileStatCounters } from "@/components/profile/ProfileStatCounters";
 import { ProfileWorldProgress } from "@/components/profile/ProfileWorldProgress";
 import { TravelerBadge } from "@/components/profile/TravelerBadge";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useTranslateProfile } from "@/lib/i18n/client-messages";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { mapTitleOwnerName } from "@/lib/i18n/turkish-genitive";
@@ -18,6 +19,7 @@ import { profileAllPath } from "@/lib/seo/site";
 import { useAnimatedCount } from "@/lib/hooks/useAnimatedCount";
 import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 import { withProfilePublicPreview } from "@/lib/profile/public-preview";
+import { ProfileIdentityStatsSkeleton } from "@/components/skeletons/ProfileIdentityStatsSkeleton";
 import type { TravelStats } from "@/types/database";
 
 type ProfileIdentityCardProps = {
@@ -51,6 +53,8 @@ type ProfileIdentityCardProps = {
   previewAsPublic?: boolean;
   /** Count up from zero on mount (homepage demo). */
   animateStats?: boolean;
+  /** Reserve stat layout while profile travel data is still loading. */
+  statsPending?: boolean;
 };
 
 export function ProfileIdentityCard({
@@ -73,6 +77,7 @@ export function ProfileIdentityCard({
   isLoggedIn = false,
   previewAsPublic = false,
   animateStats = false,
+  statsPending = false,
 }: ProfileIdentityCardProps) {
   const t = useTranslateProfile();
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -186,7 +191,11 @@ export function ProfileIdentityCard({
       )}
 
       <div className="mt-2 flex justify-center">
-        <TravelerBadge countryCount={displayCountryCount} className="traveler-badge--profile-card" />
+        {statsPending ? (
+          <Skeleton className="h-8 w-28 rounded-full" aria-hidden="true" />
+        ) : (
+          <TravelerBadge countryCount={displayCountryCount} className="traveler-badge--profile-card" />
+        )}
       </div>
 
       {instagramUrl ? (
@@ -197,24 +206,28 @@ export function ProfileIdentityCard({
 
       {bio?.trim() ? <p className="profile-desc">{bio.trim()}</p> : null}
 
-      <Link
-        href={allHref}
-        className="profile-metrics profile-metrics-link"
-        aria-label={t("allDestinationsTitle", { name: mapTitleOwnerName(displayName, locale) })}
-      >
-        <ProfileWorldProgress countryCount={displayCountryCount} />
+      {statsPending ? (
+        <ProfileIdentityStatsSkeleton />
+      ) : (
+        <Link
+          href={allHref}
+          className="profile-metrics profile-metrics-link"
+          aria-label={t("allDestinationsTitle", { name: mapTitleOwnerName(displayName, locale) })}
+        >
+          <ProfileWorldProgress countryCount={displayCountryCount} />
 
-        <ProfileStatCounters
-          countries={displayStats.countries}
-          cities={displayStats.cities}
-          nationalParks={displayStats.nationalParks}
-          themeParks={displayStats.themeParks}
-          countriesLabel={labels.countries}
-          citiesLabel={labels.cities}
-          nationalParksLabel={labels.nationalParks}
-          themeParksLabel={labels.themeParks}
-        />
-      </Link>
+          <ProfileStatCounters
+            countries={displayStats.countries}
+            cities={displayStats.cities}
+            nationalParks={displayStats.nationalParks}
+            themeParks={displayStats.themeParks}
+            countriesLabel={labels.countries}
+            citiesLabel={labels.cities}
+            nationalParksLabel={labels.nationalParks}
+            themeParksLabel={labels.themeParks}
+          />
+        </Link>
+      )}
     </section>
   );
 }

@@ -9,7 +9,9 @@ import { ProfileSquareCaptureHeader } from "@/components/profile/ProfileSquareCa
 import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections";
 import { getCachedCityHeroImageMap } from "@/lib/city/city-hero-images";
 import { getCachedParkHeroImageMap } from "@/lib/park/park-hero-images";
-import { isDemoProfileUsername } from "@/lib/data/jennifer-demo-page";
+import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
+import { syncJenniferDemoPresentation } from "@/lib/data/jennifer-demo-display";
+import { buildJenniferProfileMediaPins } from "@/lib/data/jennifer-demo-media";
 import {
   BADGE_TIER_THEMES,
   getTravelerBadgeTier,
@@ -119,15 +121,28 @@ export async function PublicProfileView({
     cityHeroImages,
     parkHeroImages
   );
-  const mediaPins = buildProfileMediaPins(visitedCities, visitedParks, profile);
   const isDemoProfile = isDemoProfileUsername(profile.username);
+  const demoPresentation = isDemoProfile
+    ? syncJenniferDemoPresentation(stats, destinations, localeCode)
+    : null;
+  const profileStats = demoPresentation?.stats ?? stats;
+  const profileDestinations = demoPresentation?.destinations ?? destinations;
+  const mediaPins = isDemoProfile
+    ? buildJenniferProfileMediaPins(
+        visitedCities,
+        visitedParks,
+        profile,
+        cityHeroImages,
+        parkHeroImages
+      )
+    : buildProfileMediaPins(visitedCities, visitedParks, profile);
   const showEmbeddedDemoSections = embedded && isDemoProfile;
   const showProfileBelowFold = !embedded || showEmbeddedDemoSections;
   const showTravelUpdateCard =
     (isOwnProfile || isDemoProfile) && (!embedded || isDemoProfile);
   const demoTravelDelta = computeTravelUpdateDelta(
     null,
-    stats,
+    profileStats,
     visitedCodes,
     visitedCountries,
     visitedCities,
@@ -136,7 +151,7 @@ export async function PublicProfileView({
   const demoProfileHref = profilePageHref ?? (embedded && isDemoProfile ? profilePath(profile.username) : undefined);
   const residenceHref = resolveResidenceCityHref(profile.residence);
   const heroTitle = t("travelDiaryTitle", { name: mapOwnerName });
-  const badgeTier = getTravelerBadgeTier(stats.countries);
+  const badgeTier = getTravelerBadgeTier(profileStats.countries);
   const badgeLabel = badgeTier ? tBadge(badgeTier) : null;
   const badgeShellClassName = badgeTier ? BADGE_TIER_THEMES[badgeTier].shell : "";
 
@@ -173,9 +188,9 @@ export async function PublicProfileView({
               instagramSampleNotice={
                 isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
               }
-              stats={stats}
+              stats={profileStats}
               isOwnProfile={isOwnProfile}
-              countryCount={stats.countries}
+              countryCount={profileStats.countries}
               profileHref={demoProfileHref}
               labels={{
                 countries: t("statCountriesShort"),
@@ -200,12 +215,12 @@ export async function PublicProfileView({
                   avatarUrl={profile.avatar_url}
                   displayName={displayName}
                   username={profile.username}
-                  countryCount={stats.countries}
+                  countryCount={profileStats.countries}
                   instagramUrl={profile.instagram_url}
                   instagramSampleNotice={
                     isDemoProfile ? t("sampleInstagramNotice", { name: displayName }) : null
                   }
-                  stats={stats}
+                  stats={profileStats}
                   labels={{
                     countries: t("statCountriesShort"),
                     cities: t("statCitiesShort"),
@@ -222,7 +237,7 @@ export async function PublicProfileView({
                   visitedParks={visitedParks}
                   isLoggedIn={isLoggedIn}
                   canEditMap={isOwnProfile}
-                  countryCount={stats.countries}
+                  countryCount={profileStats.countries}
                   exploredBadgeLabel={t("mapExploredBadge")}
                   allHref={withProfilePublicPreview(profileAllPath(profile.username), previewAsPublic)}
                   allAriaLabel={t("mapViewAll")}
@@ -244,7 +259,7 @@ export async function PublicProfileView({
                 profileId={profile.id}
                 username={profile.username}
                 displayName={displayName}
-                stats={stats}
+                stats={profileStats}
                 visitedCountries={visitedCountries}
                 visitedCities={visitedCities}
                 visitedParks={visitedParks}
@@ -254,7 +269,7 @@ export async function PublicProfileView({
               <ProfileTravelUpdateCard
                 username={profile.username}
                 displayName={displayName}
-                stats={stats}
+                stats={profileStats}
                 delta={demoTravelDelta}
                 isOwnProfile={false}
                 persistShareSnapshot={false}
@@ -265,7 +280,7 @@ export async function PublicProfileView({
           {showProfileBelowFold ? (
             <>
               <ProfileTripsRow
-                destinations={destinations}
+                destinations={profileDestinations}
                 displayName={displayName}
                 isOwnProfile={isOwnProfile}
                 badgeLabels={{

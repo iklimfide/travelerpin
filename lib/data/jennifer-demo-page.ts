@@ -1,25 +1,24 @@
-import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
+import { getAuthUser } from "@/lib/supabase/auth";
 import {
-  buildStaticDemoPublicProfilePage,
-  DEMO_PUBLIC_PROFILE_BUNDLE,
   DEMO_PROFILE,
+  buildStaticDemoPublicProfilePage,
   getDemoVisitedCities,
   getDemoVisitedParks,
   loadJenniferDemoPageStatic,
   type JenniferDemoPageData,
 } from "@/lib/data/demo-page-static";
-import { getAuthUser } from "@/lib/supabase/auth";
+import { isDemoProfileUsername } from "@/lib/data/showcase-profile";
+import { loadJenniferDemoTravelRows } from "@/lib/data/jennifer-demo-travel";
 import type { PublicProfilePageData } from "@/lib/supabase/profile-page-data";
 
 export {
   DEMO_PROFILE,
-  DEMO_PUBLIC_PROFILE_BUNDLE,
   getDemoVisitedCities,
   getDemoVisitedParks,
   buildStaticDemoPublicProfilePage,
-};
+} from "@/lib/data/demo-page-static";
 
-export { isDemoProfileUsername };
+export { isDemoProfileUsername, isShowcaseProfileUsername } from "@/lib/data/showcase-profile";
 
 export async function loadDemoPublicProfilePage(
   username: string
@@ -27,7 +26,26 @@ export async function loadDemoPublicProfilePage(
   if (!isDemoProfileUsername(username)) return null;
 
   const authUser = await getAuthUser();
-  return buildStaticDemoPublicProfilePage({ isLoggedIn: !!authUser });
+  const travel = await loadJenniferDemoTravelRows();
+
+  return {
+    profile: DEMO_PROFILE,
+    visitedCountries: travel.visitedCountries,
+    visitedCities: travel.visitedCities,
+    visitedParks: travel.visitedParks,
+    wishlistCountries: travel.wishlistCountries,
+    stats: travel.stats,
+    visitedCodes: travel.visitedCodes,
+    wishlistCodes: travel.wishlistCodes,
+    isLoggedIn: !!authUser,
+    currentUsername: null,
+    followState: {
+      isFollowing: false,
+      followerCount: 128,
+      followingCount: 42,
+    },
+    canFollow: false,
+  };
 }
 
 /** @deprecated Use loadDemoPublicProfilePage */

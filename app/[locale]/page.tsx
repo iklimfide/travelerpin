@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { HomeBelowFoldSections } from "@/components/home/HomeBelowFoldSections";
 import { HomeLandingSection } from "@/components/home/HomeLandingSection";
-import { DEMO_PERSONA, getDemoTravelStats } from "@/lib/data/demo-persona";
+import { DEMO_PERSONA } from "@/lib/data/demo-persona";
+import { loadDemoPublicProfilePage } from "@/lib/data/jennifer-demo-page";
 import { redirectTo } from "@/lib/i18n/redirect-to";
 import { getAuthenticatedHomePath } from "@/lib/supabase/authenticated-home";
 import { getAuthUser } from "@/lib/supabase/auth";
@@ -43,7 +44,8 @@ export default async function HomePage() {
     }
   }
 
-  const stats = getDemoTravelStats();
+  const showcaseData = await loadDemoPublicProfilePage(DEMO_PERSONA.username);
+  const stats = showcaseData?.stats ?? { countries: 41, cities: 124, nationalParks: 0, themeParks: 0 };
 
   return (
     <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 py-[46px] pb-[72px] max-sm:px-3.5 max-sm:py-8 max-sm:pb-[54px] lg:max-w-[1400px] lg:px-10 xl:max-w-[1520px] xl:px-12">

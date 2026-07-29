@@ -1,6 +1,8 @@
 import { DEMO_PERSONA } from "@/lib/data/demo-persona";
+import { isDemoProfileUsername as isDemoProfileUsernameImpl } from "@/lib/data/showcase-profile";
 
-/** Client-safe check — no server-only imports. */
 export function isDemoProfileUsername(username: string): boolean {
-  return username.trim().toLowerCase() === DEMO_PERSONA.username;
+  return isDemoProfileUsernameImpl(username);
 }
+
+export { isShowcaseProfileUsername } from "@/lib/data/showcase-profile";
