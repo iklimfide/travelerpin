@@ -8,7 +8,9 @@ import {
   clearAllYpHostedPhotos,
   loadYpProfileMediaSnapshot,
   moveYpProfilePhoto,
+  moveAllYpProfilePhotosBetweenCities,
   removeYpProfilePhoto,
+  deleteYpProfileCityPin,
 } from "@/lib/kamikaze/profile-media-fix";
 import {
   normalizeYpInstagramImportUsername,
@@ -128,8 +130,37 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, ...result });
     }
 
+    if (action === "move_all_photos") {
+      const fromCityId = String(body.fromCityId ?? "");
+      const toCityId = String(body.toCityId ?? "");
+      if (!fromCityId || !toCityId) {
+        return NextResponse.json({ error: "fromCityId and toCityId required" }, { status: 400 });
+      }
+      const mergeInstagramUrls =
+        body.mergeInstagramUrls !== false && String(body.mergeInstagramUrls ?? "true") !== "false";
+      const result = await moveAllYpProfilePhotosBetweenCities(
+        admin,
+        profile.id,
+        fromCityId,
+        toCityId,
+        { mergeInstagramUrls }
+      );
+      revalidateAfterFix(profile.username);
+      return NextResponse.json({ ok: true, ...result });
+    }
+
     if (action === "clear_all_hosted_photos") {
       const result = await clearAllYpHostedPhotos(admin, profile.id);
+      revalidateAfterFix(profile.username);
+      return NextResponse.json({ ok: true, ...result });
+    }
+
+    if (action === "delete_city_pin") {
+      const cityId = String(body.cityId ?? "").trim();
+      if (!cityId) {
+        return NextResponse.json({ error: "cityId required" }, { status: 400 });
+      }
+      const result = await deleteYpProfileCityPin(admin, profile.id, cityId);
       revalidateAfterFix(profile.username);
       return NextResponse.json({ ok: true, ...result });
     }

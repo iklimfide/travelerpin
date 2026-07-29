@@ -8,6 +8,8 @@ type HubMediaThumbFrameProps = {
   pin: HubTravelerPin;
   children: ReactNode;
   linkToProfile?: boolean;
+  /** City/country hub: show who uploaded. Profile gallery: off (context is already one traveler). */
+  showUploader?: boolean;
 };
 
 function stopBubble(event: MouseEvent) {
@@ -18,8 +20,13 @@ export function HubMediaThumbFrame({
   pin,
   children,
   linkToProfile = true,
+  showUploader = true,
 }: HubMediaThumbFrameProps) {
   const name = pin.displayName?.trim() || `@${pin.username}`;
+
+  if (!showUploader) {
+    return <div className="city-page__hub-media-thumb-frame">{children}</div>;
+  }
 
   const badge = linkToProfile ? (
     <Link

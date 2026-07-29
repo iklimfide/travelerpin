@@ -178,7 +178,7 @@ function GalleryTile({
   } else {
     const photoSrc = hubGalleryPhotoSrc(item);
     media = (
-      <HubMediaThumbFrame pin={item.pin}>
+      <HubMediaThumbFrame pin={item.pin} showUploader={false}>
         <button
           type="button"
           className="city-page__traveler-picture-btn profile-media-item__link"

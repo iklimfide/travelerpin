@@ -12,6 +12,12 @@ import {
   requireAdminClient,
   requireKamikazeMasterApi,
 } from "@/lib/kamikaze/auth";
+import { syncYpCatalogCitiesFromProfilePins } from "@/lib/kamikaze/ensure-yp-catalog-city";
+import {
+  normalizeYpInstagramImportUsername,
+  YP_INSTAGRAM_IMPORT_DEFAULT_USERNAME,
+} from "@/lib/kamikaze/instagram-import-targets";
+import { purgeCatalogCityFromSite } from "@/lib/kamikaze/remove-catalog-place-pins";
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
 import {
   getCatalogOverlay,
@@ -916,6 +922,10 @@ type CatalogBody =
       action: "set_popular_bulk";
       isPopular: boolean;
       items: Array<{ countryCode: string; name: string; parkType?: ParkType }>;
+    }
+  | {
+      action: "sync_profile_cities";
+      username?: string;
     };
 
 export async function POST(request: Request) {
@@ -1130,7 +1140,27 @@ export async function POST(request: Request) {
   }
 
   if (body.action === "delete_addition") {
-    const table = body.kind === "city" ? "yp_catalog_cities" : "yp_catalog_parks";
+    if (body.kind === "city") {
+      const { data: row } = await admin
+        .from("yp_catalog_cities")
+        .select("name, country_code")
+        .eq("id", body.id)
+        .maybeSingle();
+      if (!row?.name || !row.country_code) {
+        return NextResponse.json({ error: "Kayıt bulunamadı" }, { status: 404 });
+      }
+      const purgeError = await purgeCatalogCityFromSite(
+        admin,
+        String(row.country_code),
+        String(row.name)
+      );
+      if (purgeError) {
+        return NextResponse.json({ error: purgeError }, { status: 400 });
+      }
+      return NextResponse.json({ ok: true });
+    }
+
+    const table = "yp_catalog_parks";
     const { error } = await admin.from(table).delete().eq("id", body.id);
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
@@ -1150,22 +1180,22 @@ export async function POST(request: Request) {
     const name = input.name.trim();
     if (!countryCode || !name) return "Geçersiz silme isteği";
 
-    const nameKey = catalogNameKey(
-      name,
-      input.kind === "city" ? countryCode : undefined
-    );
+    if (input.kind === "city") {
+      return purgeCatalogCityFromSite(admin, countryCode, name);
+    }
+
+    const nameKey = catalogNameKey(name, undefined);
 
     // YP rows are hard-deleted from the DB.
     if (input.source === "yp") {
       if (!input.id) return "YP kaydı id gerekli";
-      const table = input.kind === "city" ? "yp_catalog_cities" : "yp_catalog_parks";
+      const table = "yp_catalog_parks";
       const { error, count } = await admin
         .from(table)
         .delete({ count: "exact" })
         .eq("id", input.id);
       if (error) return error.message;
 
-      // Id miss (stale UI): also drop any same country+name remnant.
       if (!count) {
         const { data: remnants } = await admin
           .from(table)
@@ -1173,10 +1203,7 @@ export async function POST(request: Request) {
         const matches = (remnants ?? []).filter((row) => {
           const code = String(row.country_code ?? "").toUpperCase();
           if (code !== countryCode) return false;
-          const rowKey = catalogNameKey(
-            String(row.name ?? ""),
-            input.kind === "city" ? countryCode : undefined
-          );
+          const rowKey = catalogNameKey(String(row.name ?? ""), undefined);
           return rowKey === nameKey;
         });
         for (const row of matches) {
@@ -1184,35 +1211,24 @@ export async function POST(request: Request) {
         }
       }
 
-      // Exclusion only needed when a static twin would otherwise reappear.
-      const hasStaticTwin =
-        input.kind === "city"
-          ? TOURIST_CITIES.some(
-              (city) =>
-                city.countryCode === countryCode &&
-                catalogNameKey(city.name, countryCode) === nameKey
-            )
-          : TOURIST_PARKS.some(
-              (park) =>
-                park.countryCode === countryCode &&
-                catalogNameKey(park.name) === nameKey
-            );
+      const hasStaticTwin = TOURIST_PARKS.some(
+        (park) =>
+          park.countryCode === countryCode && catalogNameKey(park.name) === nameKey
+      );
 
       if (!hasStaticTwin) {
-        // YP-only place: drop any leftover exclusion so re-add is clean.
         await admin
           .from("yp_catalog_exclusions")
           .delete()
-          .eq("kind", input.kind)
+          .eq("kind", "park")
           .eq("country_code", countryCode)
           .eq("name_key", nameKey);
         return null;
       }
     }
 
-    // Permanent catalog removal (blocks a static twin from reappearing).
     const { error: insertError } = await admin.from("yp_catalog_exclusions").insert({
-      kind: input.kind,
+      kind: "park",
       country_code: countryCode,
       name_key: nameKey,
     });
@@ -1863,6 +1879,41 @@ export async function POST(request: Request) {
       );
     }
     return NextResponse.json({ ok: true, updated: items.length });
+  }
+
+  if (body.action === "sync_profile_cities") {
+    const targetUsername =
+      normalizeYpInstagramImportUsername(String(body.username ?? "")) ??
+      YP_INSTAGRAM_IMPORT_DEFAULT_USERNAME;
+
+    const { data: profile, error: profileError } = await admin
+      .from("profiles")
+      .select("id, username")
+      .eq("username", targetUsername)
+      .maybeSingle();
+
+    if (profileError) {
+      return NextResponse.json({ error: profileError.message }, { status: 500 });
+    }
+    if (!profile?.id) {
+      return NextResponse.json(
+        { error: `Profile @${targetUsername} not found` },
+        { status: 404 }
+      );
+    }
+
+    try {
+      const stats = await syncYpCatalogCitiesFromProfilePins(admin, profile.id);
+      return NextResponse.json({
+        targetUsername: profile.username,
+        ...stats,
+      });
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : "Sync failed" },
+        { status: 500 }
+      );
+    }
   }
 
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });

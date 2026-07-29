@@ -34,6 +34,7 @@ import {
   type LocationMap,
   type CityResolveSource,
 } from "@/lib/kamikaze/instagram-export/resolve-city";
+import { ensureYpCatalogCity } from "@/lib/kamikaze/ensure-yp-catalog-city";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
 import { isR2Configured, uploadPhotoToR2 } from "@/lib/storage/r2";
 import { normalizeCityKey } from "@/lib/utils/city-name";
@@ -182,6 +183,13 @@ async function upsertCityPinMedia(options: {
       .eq("id", existing.id)
       .eq("user_id", userId);
     if (error) throw new Error(error.message);
+    await ensureYpCatalogCity(supabase, {
+      city_name: cityMeta.city_name,
+      country_code: cityMeta.country_code,
+      country_name: countryName,
+      latitude: cityMeta.latitude,
+      longitude: cityMeta.longitude,
+    });
     return { mode: "updated" as const, cityId: existing.id as string, photoCount: mergedPhotos.length, igCount: mergedIg.length };
   }
 
@@ -203,6 +211,13 @@ async function upsertCityPinMedia(options: {
     .select("id")
     .single();
   if (error) throw new Error(error.message);
+  await ensureYpCatalogCity(supabase, {
+    city_name: cityMeta.city_name,
+    country_code: cityMeta.country_code,
+    country_name: countryName,
+    latitude: cityMeta.latitude,
+    longitude: cityMeta.longitude,
+  });
   return { mode: "inserted" as const, cityId: data.id as string, photoCount: mergedPhotos.length, igCount: mergedIg.length };
 }
 

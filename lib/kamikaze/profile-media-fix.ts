@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidateCityHubForPin } from "@/lib/cache/revalidate-city-hub";
 import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
+import { deleteR2Objects, isR2Configured, parseR2ObjectKey } from "@/lib/storage/r2";
+import { deletePinNotifications } from "@/lib/supabase/notifications";
 import { normalizeCityKey } from "@/lib/utils/city-name";
 import { readInstagramUrls, readPhotoUrlsForGallery } from "@/lib/utils/pin-media";
 import type { VisitedCity } from "@/types/database";
@@ -111,9 +113,11 @@ async function saveCityPhotos(
   admin: SupabaseClient,
   userId: string,
   city: VisitedCity,
-  photoUrls: string[]
+  photoUrls: string[],
+  instagramUrls?: string[]
 ) {
-  const payload = buildMediaPayload(photoUrls, readInstagramUrls(city));
+  const ig = instagramUrls ?? readInstagramUrls(city);
+  const payload = buildMediaPayload(photoUrls, ig);
   const { error } = await admin
     .from("visited_cities")
     .update(payload)
@@ -168,6 +172,66 @@ export async function moveYpProfilePhoto(
     fromCityId,
     toCityId,
     photoUrl,
+  };
+}
+
+function mergeUniqueUrls(existing: string[], added: string[]): string[] {
+  const seen = new Set(existing.map((u) => u.toLowerCase()));
+  const out = [...existing];
+  for (const raw of added) {
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(trimmed);
+  }
+  return out;
+}
+
+/** Move every hosted photo from one city pin to another (optional IG links too). */
+export async function moveAllYpProfilePhotosBetweenCities(
+  admin: SupabaseClient,
+  userId: string,
+  fromCityId: string,
+  toCityId: string,
+  options?: { mergeInstagramUrls?: boolean }
+): Promise<{ movedPhotoCount: number; mergedInstagramCount: number; fromCityId: string; toCityId: string }> {
+  if (fromCityId === toCityId) {
+    throw new Error("Kaynak ve hedef pin aynı olamaz");
+  }
+
+  const mergeInstagramUrls = options?.mergeInstagramUrls !== false;
+  const fromCity = await getCityRow(admin, userId, fromCityId);
+  const toCity = await getCityRow(admin, userId, toCityId);
+
+  const fromPhotos = photoUrlsFromRow(fromCity);
+  if (fromPhotos.length === 0) {
+    return { movedPhotoCount: 0, mergedInstagramCount: 0, fromCityId, toCityId };
+  }
+
+  const toPhotos = mergeUniqueUrls(photoUrlsFromRow(toCity), fromPhotos);
+  let mergedInstagramCount = 0;
+
+  if (mergeInstagramUrls) {
+    const fromIg = readInstagramUrls(fromCity);
+    const before = readInstagramUrls(toCity).length;
+    const toIg = mergeUniqueUrls(readInstagramUrls(toCity), fromIg);
+    mergedInstagramCount = toIg.length - before;
+    await saveCityPhotos(admin, userId, toCity, toPhotos, toIg);
+    await saveCityPhotos(admin, userId, fromCity, [], []);
+  } else {
+    await saveCityPhotos(admin, userId, toCity, toPhotos);
+    await saveCityPhotos(admin, userId, fromCity, []);
+  }
+
+  await revalidateProfileForPin(admin, userId);
+
+  return {
+    movedPhotoCount: fromPhotos.length,
+    mergedInstagramCount,
+    fromCityId,
+    toCityId,
   };
 }
 
@@ -296,6 +360,68 @@ export async function clearAllYpHostedPhotos(
 
   await revalidateProfileForPin(admin, userId);
   return { clearedCities, removedPhotoUrls };
+}
+
+/** Profilden şehir pin’ini tamamen kaldır (katalogda olmasa da). */
+export async function deleteYpProfileCityPin(
+  admin: SupabaseClient,
+  userId: string,
+  cityId: string
+): Promise<{ cityName: string; countryCode: string; countryRemoved: boolean }> {
+  const city = await getCityRow(admin, userId, cityId);
+  const code = city.country_code.toUpperCase();
+  const cityName = city.city_name;
+
+  const r2Keys: string[] = [];
+  if (isR2Configured()) {
+    for (const url of photoUrlsFromRow(city)) {
+      const key = parseR2ObjectKey(url.split("?")[0] ?? url);
+      if (key) r2Keys.push(key);
+    }
+  }
+
+  const { error: deleteError } = await admin
+    .from("visited_cities")
+    .delete()
+    .eq("id", cityId)
+    .eq("user_id", userId);
+  if (deleteError) throw new Error(deleteError.message);
+
+  await deletePinNotifications(admin, userId, "city", cityId);
+
+  const { count: remainingCities } = await admin
+    .from("visited_cities")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("country_code", code);
+
+  let countryRemoved = false;
+  if ((remainingCities ?? 0) === 0) {
+    const { data: countryRow } = await admin
+      .from("visited_countries")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("country_code", code)
+      .maybeSingle();
+    if (countryRow?.id) {
+      await admin.from("visited_countries").delete().eq("id", countryRow.id).eq("user_id", userId);
+      await deletePinNotifications(admin, userId, "country", countryRow.id);
+      countryRemoved = true;
+    }
+  }
+
+  if (r2Keys.length > 0) {
+    try {
+      await deleteR2Objects(r2Keys);
+    } catch (err) {
+      console.warn("deleteYpProfileCityPin R2 cleanup failed:", err);
+    }
+  }
+
+  revalidateCityHubForPin(code, cityName);
+  await revalidateProfileForPin(admin, userId);
+
+  return { cityName, countryCode: code, countryRemoved };
 }
 
 export async function findCityByKey(

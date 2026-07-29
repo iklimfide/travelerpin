@@ -18,6 +18,9 @@ export function KamikazeProfileMediaPanel() {
   const [username, setUsername] = useState("guvencgiller");
   const [snapshot, setSnapshot] = useState<YpProfileMediaSnapshot | null>(null);
   const [moveTargetByItem, setMoveTargetByItem] = useState<Record<string, string>>({});
+  const [bulkFromCityId, setBulkFromCityId] = useState("");
+  const [bulkToCityId, setBulkToCityId] = useState("");
+  const [bulkMergeIg, setBulkMergeIg] = useState(true);
   const [loading, setLoading] = useState(false);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -68,13 +71,30 @@ export function KamikazeProfileMediaPanel() {
         updatedCities?: number;
         removedPhotoUrls?: number;
         clearedCities?: number;
+        movedPhotoCount?: number;
+        mergedInstagramCount?: number;
+        cityName?: string;
+        countryCode?: string;
+        countryRemoved?: boolean;
       };
       if (!res.ok) throw new Error(data.error ?? "İşlem başarısız");
-      if (typeof data.removedUrls === "number") {
+      if (typeof data.movedPhotoCount === "number") {
+        setMessage(
+          `${data.movedPhotoCount} foto taşındı` +
+            (data.mergedInstagramCount ? ` · ${data.mergedInstagramCount} IG link birleşti` : "") +
+            "."
+        );
+      } else if (typeof data.removedUrls === "number") {
         setMessage(`${data.removedUrls} çift URL silindi (${data.updatedCities ?? 0} pin güncellendi).`);
       } else if (typeof data.removedPhotoUrls === "number") {
         setMessage(
           `${data.removedPhotoUrls} foto kaldırıldı (${data.clearedCities ?? 0} pin temizlendi).`
+        );
+      } else if (typeof data.cityName === "string") {
+        setMessage(
+          `Pin silindi: ${data.cityName}, ${data.countryCode}` +
+            (data.countryRemoved ? " (ülke pin’i de kalktı)" : "") +
+            "."
         );
       } else {
         setMessage("Kaydedildi.");
@@ -90,13 +110,21 @@ export function KamikazeProfileMediaPanel() {
   const cities = snapshot?.cities ?? [];
   const items = snapshot?.photoItems ?? [];
 
+  const citiesWithPhotos = useMemo(
+    () => cities.filter((c) => c.photo_urls.length > 0),
+    [cities]
+  );
+
+  const bulkFromCity = cities.find((c) => c.id === bulkFromCityId);
+  const bulkPhotoCount = bulkFromCity?.photo_urls.length ?? 0;
+
   return (
     <div className="yp-panel">
       <header className="yp-panel__title">
         <div className="yp-panel__title-start">
           <h1 className="yp-panel__title-label">Pin foto düzelt</h1>
           <p className="yp-muted">
-            Çoklu foto + şehir taşıma (tek-foto limiti yok). Service role ile doğrudan pin güncellenir.
+            Çoklu foto + şehir taşıma. Katalogda görünmeyen profil pinlerini de buradan silebilirsin.
           </p>
         </div>
       </header>
@@ -157,6 +185,147 @@ export function KamikazeProfileMediaPanel() {
           </button>
         </div>
       </section>
+
+      {snapshot && cities.length > 0 ? (
+        <section className="yp-panel__section">
+          <h2 className="yp-panel__section-title">Profil şehir pinleri ({cities.length})</h2>
+          <p className="yp-muted" style={{ fontSize: "0.85rem", marginBottom: "0.65rem" }}>
+            Instagram/Tayca isim gibi YP Şehirler listesinde olmayan kayıtlar sadece profilde durur —{" "}
+            <strong>Pin sil</strong> ile kaldır.
+          </p>
+          <div className="yp-table-wrap">
+            <table className="yp-table">
+              <thead>
+                <tr>
+                  <th>Şehir</th>
+                  <th>Medya</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {cities.map((city) => (
+                  <tr key={city.id}>
+                    <td>
+                      <strong>{city.city_name}</strong>
+                      <div className="yp-muted">
+                        {city.country_name} ({city.country_code})
+                      </div>
+                    </td>
+                    <td className="yp-muted">
+                      {city.photo_urls.length} foto · {city.instagram_urls.length} IG
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="yp-btn yp-btn--danger"
+                        disabled={Boolean(busyAction)}
+                        onClick={() => {
+                          if (
+                            !window.confirm(
+                              `“${city.city_name}” pin’i @${username} profilinden tamamen silinsin mi? (foto + IG)`
+                            )
+                          ) {
+                            return;
+                          }
+                          void postAction("delete_city_pin", { cityId: city.id });
+                        }}
+                      >
+                        {busyAction === "delete_city_pin" ? "…" : "Pin sil"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+
+      {snapshot && citiesWithPhotos.length > 0 ? (
+        <section className="yp-panel__section">
+          <h2 className="yp-panel__section-title">Toplu taşıma</h2>
+          <p className="yp-muted" style={{ fontSize: "0.85rem", marginBottom: "0.65rem" }}>
+            Bir şehir pin’indeki <strong>tüm fotoları</strong> başka pine taşı (Milano → Milan gibi).
+            Tek tek kart kullanmana gerek yok.
+          </p>
+          <div className="yp-field yp-field--wide">
+            <label htmlFor="yp-bulk-from">Kaynak pin</label>
+            <select
+              id="yp-bulk-from"
+              className="yp-input"
+              value={bulkFromCityId}
+              disabled={Boolean(busyAction)}
+              onChange={(e) => setBulkFromCityId(e.target.value)}
+            >
+              <option value="">— seç —</option>
+              {citiesWithPhotos.map((city) => (
+                <option key={city.id} value={city.id}>
+                  {city.city_name}, {city.country_code} ({city.photo_urls.length} foto)
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="yp-field yp-field--wide" style={{ marginTop: "0.5rem" }}>
+            <label htmlFor="yp-bulk-to">Hedef pin</label>
+            <select
+              id="yp-bulk-to"
+              className="yp-input"
+              value={bulkToCityId}
+              disabled={Boolean(busyAction)}
+              onChange={(e) => setBulkToCityId(e.target.value)}
+            >
+              <option value="">— seç —</option>
+              {cities.map((city) => (
+                <option key={city.id} value={city.id} disabled={city.id === bulkFromCityId}>
+                  {city.city_name}, {city.country_code} ({city.photo_urls.length} foto)
+                </option>
+              ))}
+            </select>
+          </div>
+          <label className="yp-check" style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem" }}>
+            <input
+              type="checkbox"
+              checked={bulkMergeIg}
+              disabled={Boolean(busyAction)}
+              onChange={(e) => setBulkMergeIg(e.target.checked)}
+            />
+            <span>Kaynak pin’deki Instagram linklerini de hedefe birleştir</span>
+          </label>
+          <div className="yp-form-actions" style={{ paddingTop: "0.65rem" }}>
+            <button
+              type="button"
+              className="yp-btn yp-btn--primary"
+              disabled={
+                Boolean(busyAction) ||
+                !bulkFromCityId ||
+                !bulkToCityId ||
+                bulkFromCityId === bulkToCityId ||
+                bulkPhotoCount === 0
+              }
+              onClick={() => {
+                const from = cities.find((c) => c.id === bulkFromCityId);
+                const to = cities.find((c) => c.id === bulkToCityId);
+                if (
+                  !window.confirm(
+                    `${from?.city_name} pin’indeki ${bulkPhotoCount} foto ${to?.city_name} pin’ine taşınsın mı?`
+                  )
+                ) {
+                  return;
+                }
+                void postAction("move_all_photos", {
+                  fromCityId: bulkFromCityId,
+                  toCityId: bulkToCityId,
+                  mergeInstagramUrls: bulkMergeIg ? "true" : "false",
+                });
+              }}
+            >
+              {busyAction === "move_all_photos"
+                ? "Taşınıyor…"
+                : `Tüm fotoları taşı (${bulkPhotoCount || "—"})`}
+            </button>
+          </div>
+        </section>
+      ) : null}
 
       {error ? <p className="yp-error">{error}</p> : null}
       {message ? <p className="yp-muted">{message}</p> : null}

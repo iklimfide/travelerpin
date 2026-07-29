@@ -21,6 +21,12 @@ import {
 } from "@/lib/kamikaze/client/bulk-city-hero";
 import { citiesAreSame } from "@/lib/utils/city-aliases";
 import { cityPlacePath } from "@/lib/utils/hub-place-path";
+import {
+  normalizeYpInstagramImportUsername,
+  YP_INSTAGRAM_IMPORT_DEFAULT_USERNAME,
+  YP_INSTAGRAM_IMPORT_USERNAMES,
+  type YpInstagramImportUsername,
+} from "@/lib/kamikaze/instagram-import-targets";
 
 type CatalogCityRow = {
   id?: string;
@@ -43,9 +49,10 @@ type CustomHeroRow = {
 };
 
 type PopularFilter = "" | "popular" | "not_popular";
-type ListScope = "catalog" | "yp";
 
 const MIN_QUERY_LENGTH = 2;
+/** Unified city browse: static catalog + YP additions (no separate tabs). */
+const CITY_LIST_SCOPE = "all" as const;
 const ADD_SEARCH_DEBOUNCE_MS = 300;
 const CATALOG_PAGE_SIZE = 80;
 
@@ -58,7 +65,9 @@ export function KamikazeCitiesPanel() {
   const [country, setCountry] = useState("");
   const [query, setQuery] = useState("");
   const [popularFilter, setPopularFilter] = useState<PopularFilter>("");
-  const [listScope, setListScope] = useState<ListScope>("catalog");
+  const [profileSyncUsername, setProfileSyncUsername] = useState<YpInstagramImportUsername>(
+    YP_INSTAGRAM_IMPORT_DEFAULT_USERNAME
+  );
   const [results, setResults] = useState<CatalogCityRow[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [nextOffset, setNextOffset] = useState(0);
@@ -93,7 +102,6 @@ export function KamikazeCitiesPanel() {
   const [addSearchDone, setAddSearchDone] = useState(false);
 
   const canBrowse =
-    listScope === "yp" ||
     Boolean(country) ||
     query.trim().length >= MIN_QUERY_LENGTH ||
     Boolean(popularFilter);
@@ -123,7 +131,7 @@ export function KamikazeCitiesPanel() {
         return;
       }
 
-      const cacheKey = YP_CACHE_KEYS.catalog("city", listScope, country, query, popularFilter);
+      const cacheKey = YP_CACHE_KEYS.catalog("city", CITY_LIST_SCOPE, country, query, popularFilter);
       const offset = options?.offset ?? 0;
 
       if (mode === "replace" && !options?.force) {
@@ -156,7 +164,6 @@ export function KamikazeCitiesPanel() {
         if (country) params.set("country", country);
         if (query.trim()) params.set("q", query.trim());
         if (popularFilter) params.set("popularFilter", popularFilter);
-        if (listScope === "yp") params.set("ypOnly", "1");
 
         const res = await fetch(`/api/kamikaze/catalog?${params}`);
         const data = (await res.json()) as {
@@ -194,7 +201,7 @@ export function KamikazeCitiesPanel() {
         setLoadingMore(false);
       }
     },
-    [canBrowse, country, query, popularFilter, listScope]
+    [canBrowse, country, query, popularFilter]
   );
 
   useEffect(() => {
@@ -287,12 +294,6 @@ export function KamikazeCitiesPanel() {
     return stored ? toCityHeroDisplayUrl(stored) : null;
   }
 
-  function selectListScope(next: ListScope) {
-    if (next === listScope) return;
-    setListScope(next);
-    setSelectedKeys(new Set());
-  }
-
   async function postAction(body: Record<string, unknown>, busy: string) {
     setBusyId(busy);
     setError(null);
@@ -308,6 +309,38 @@ export function KamikazeCitiesPanel() {
       await loadList("replace", { force: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "İşlem başarısız");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleSyncProfileCities() {
+    setBusyId("sync-profile");
+    setError(null);
+    try {
+      const res = await fetch("/api/kamikaze/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "sync_profile_cities",
+          username: profileSyncUsername,
+        }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        ensured?: number;
+        created?: number;
+        targetUsername?: string;
+      };
+      if (!res.ok) throw new Error(data.error ?? "Senkron başarısız");
+      ypCacheInvalidate("catalog:");
+      await loadList("replace", { force: true });
+      await modal.alert(
+        `@${data.targetUsername ?? profileSyncUsername}: ${data.ensured ?? 0} profil şehri tarandı, ${data.created ?? 0} yeni YP kaydı eklendi.`,
+        { title: "Katalog senkronu" }
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Senkron başarısız");
     } finally {
       setBusyId(null);
     }
@@ -451,7 +484,7 @@ export function KamikazeCitiesPanel() {
 
   async function handleDelete(row: CatalogCityRow) {
     const ok = await modal.confirm(
-      `"${row.name}" katalogdan kalıcı silinsin mi? Kullanıcı pinleri silinmez.`,
+      `"${row.name}" siteden tamamen silinsin mi? Tüm pinler, fotoğraflar, IG linkleri, kapak ve katalog kaydı kaldırılır.`,
       {
         title: "Kayıt silinsin mi?",
         variant: "error",
@@ -494,7 +527,7 @@ export function KamikazeCitiesPanel() {
     const selected = selectedRows();
     if (selected.length === 0) return;
     const ok = await modal.confirm(
-      `${selected.length} kayıt katalogdan kalıcı silinsin mi? Kullanıcı pinleri silinmez.`,
+      `${selected.length} şehir siteden tamamen silinsin mi? Pinler, medya, kapak ve katalog dahil.`,
       {
         title: "Toplu silme",
         variant: "error",
@@ -532,7 +565,6 @@ export function KamikazeCitiesPanel() {
     if (country) params.set("country", country);
     if (query.trim()) params.set("q", query.trim());
     if (popularFilter) params.set("popularFilter", popularFilter);
-    if (listScope === "yp") params.set("ypOnly", "1");
 
     const res = await fetch(`/api/kamikaze/catalog?${params}`);
     const data = (await res.json()) as {
@@ -885,7 +917,7 @@ export function KamikazeCitiesPanel() {
       <h1>Şehirler</h1>
       <p className="yp-main__lead">
         Tek yerden şehir ekle, TR adını düzenle, popüler işaretle ve kapak fotoğrafı yükle.
-        Kullanıcı pinleri silinmez.
+        Silme: şehir siteden tamamen kaldırılır (pin, foto, IG, kapak, katalog).
       </p>
 
       {error ? <p className="yp-error">{error}</p> : null}
@@ -1070,27 +1102,41 @@ export function KamikazeCitiesPanel() {
               : "Süzgeçteki eksiklere kapak ata"}
           </button>
         ) : null}
+        <div className="yp-field yp-field--filter-popular">
+          <label htmlFor="yp-city-sync-profile">Profil (IG allowlist)</label>
+          <select
+            id="yp-city-sync-profile"
+            value={profileSyncUsername}
+            onChange={(e) => {
+              const next = normalizeYpInstagramImportUsername(e.target.value);
+              if (next) setProfileSyncUsername(next);
+            }}
+          >
+            {YP_INSTAGRAM_IMPORT_USERNAMES.map((u) => (
+              <option key={u} value={u}>
+                @{u}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button
+          type="button"
+          className="yp-btn"
+          disabled={Boolean(busyId)}
+          onClick={() => void handleSyncProfileCities()}
+          title="Profil pinlerinde olup katalogda eksik kalan şehirleri tamamla (import sonrası)"
+        >
+          {busyId === "sync-profile" ? "Senkron…" : "Profil pinlerinden aktar"}
+        </button>
       </div>
 
       <div className="yp-panel">
         <div className="yp-panel__title">
           <div className="yp-panel__title-start">
-            <div className="yp-tabs yp-tabs--inline" role="tablist" aria-label="Liste kapsamı">
-              <button
-                type="button"
-                aria-selected={listScope === "catalog"}
-                onClick={() => selectListScope("catalog")}
-              >
-                Katalog
-              </button>
-              <button
-                type="button"
-                aria-selected={listScope === "yp"}
-                onClick={() => selectListScope("yp")}
-              >
-                YP eklemeleri
-              </button>
-            </div>
+            <span>Şehirler</span>
+            <span className="yp-muted" style={{ fontSize: "0.78rem", fontWeight: 500 }}>
+              Arama statik katalog + YP kayıtlarını birlikte listeler
+            </span>
           </div>
           {selectedKeys.size > 0 ? (
             <div className="yp-actions">
@@ -1146,9 +1192,8 @@ export function KamikazeCitiesPanel() {
           <div className="yp-empty">Yükleniyor…</div>
         ) : results.length === 0 ? (
           <div className="yp-empty">
-            {listScope === "yp"
-              ? "Sonuç yok. Henüz YP ile eklenen şehir yok veya süzgeçe uymuyor."
-              : "Sonuç yok. Katalogda yoksa yukarıdaki formdan ekleyebilirsin."}
+            Sonuç yok. Yukarıdaki formdan yeni şehir ekleyebilir veya «Profil pinlerinden aktar» ile
+            import pinlerini kataloga yansıtabilirsin.
           </div>
         ) : (
           <>
