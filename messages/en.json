@@ -981,6 +981,16 @@
       "special": "Special regions"
     }
   },
+  "notFoundPage": {
+    "metaTitle": "404 — Off the map!",
+    "stamp": "NOT FOUND • 404",
+    "title": "This pin isn't on the map!",
+    "description": "The traveler or place you're looking for hasn't been discovered yet, or its coordinates may have changed.",
+    "searchPlaceholder": "Search for a traveler or city…",
+    "explore": "Explore",
+    "home": "Back to home",
+    "back": "Go back"
+  },
   "footer": {
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",

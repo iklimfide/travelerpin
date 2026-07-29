@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import { JENNIFER_MARKETING_STATS } from "@/lib/data/jennifer-marketing-stats";
 import { getSiteUrl } from "@/lib/seo/site";
+
+/** Keep `public/images/og-share-card.png` in sync with these values. */
+export const OG_SHARE_CARD_STATS = JENNIFER_MARKETING_STATS;
 
 export const OG_IMAGE_PATH = "/images/og-share-card.png";
 

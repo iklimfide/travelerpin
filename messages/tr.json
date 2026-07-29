@@ -980,6 +980,16 @@
       "special": "Özel bölgeler"
     }
   },
+  "notFoundPage": {
+    "metaTitle": "404 — Yoldan çıktın!",
+    "stamp": "NOT FOUND • 404",
+    "title": "Bu pin haritada yok!",
+    "description": "Aradığın gezgin veya lokasyon henüz keşfedilmemiş ya da koordinatları değişmiş olabilir.",
+    "searchPlaceholder": "Gezgin veya şehir ara…",
+    "explore": "Keşfet",
+    "home": "Ana sayfaya dön",
+    "back": "Geri git"
+  },
   "footer": {
     "terms": "Hizmet Şartları",
     "privacy": "Gizlilik Politikası",

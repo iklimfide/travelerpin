@@ -1439,6 +1439,36 @@ html.dark .city-page__memory-lightbox .city-page__memory-place-link {
   justify-content: center;
 }
 
+@keyframes not-found-passport-stamp {
+  0% {
+    transform: scale(3) rotate(-15deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(-8deg);
+    opacity: 0.85;
+  }
+}
+
+.not-found-stamp {
+  animation: not-found-passport-stamp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+html.light .not-found-page .not-found-btn-primary {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+html.light .not-found-page .not-found-btn-primary:hover {
+  background-color: #1d4ed8 !important;
+  color: #ffffff !important;
+}
+
+html.light .not-found-page .not-found-btn-primary svg {
+  color: #ffffff !important;
+  fill: currentColor;
+}
+
 .dashboard-shell {
   --dashboard-bottom-bar-height: 84px;
   --profile-stack-gap: 12px;

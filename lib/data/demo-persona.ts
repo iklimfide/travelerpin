@@ -1,3 +1,5 @@
+import { JENNIFER_MARKETING_STATS } from "@/lib/data/jennifer-marketing-stats";
+
 /** Homepage sample persona — travel pins sync from @guvencgiller (see jennifer-demo-travel). */
 export const DEMO_PERSONA = {
   name: "Jennifer",
@@ -9,10 +11,6 @@ export const DEMO_PERSONA = {
 } as const;
 
 export function getDemoTravelStats() {
-  return {
-    countries: 41,
-    cities: 124,
-    nationalParks: 10,
-    themeParks: 13,
-  };
+  const { countries, cities, nationalParks, themeParks } = JENNIFER_MARKETING_STATS;
+  return { countries, cities, nationalParks, themeParks };
 }

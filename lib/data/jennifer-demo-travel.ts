@@ -17,10 +17,12 @@ import { normalizeJenniferDemoCountryCode } from "@/lib/data/jennifer-demo-displ
 import { stripJenniferDemoPinUserPhotos } from "@/lib/data/jennifer-demo-media";
 import { dedupeVisitedCitiesForDisplay } from "@/lib/utils/visited-city-normalize";
 
+import { JENNIFER_MARKETING_STATS } from "@/lib/data/jennifer-marketing-stats";
+
 /** Homepage / Jennifer identity counters (marketing). */
 export const JENNIFER_DISPLAY_STATS = {
-  countries: 41,
-  cities: 124,
+  countries: JENNIFER_MARKETING_STATS.countries,
+  cities: JENNIFER_MARKETING_STATS.cities,
 } as const;
 
 const DEMO_USER_ID = "demo";
