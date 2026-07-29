@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import { InstagramMemoryThumb } from "@/components/city/InstagramMemoryThumb";
 import { HubExternalPhoto } from "@/components/hub/HubExternalPhoto";
 import { HubMediaPlaceCaption } from "@/components/hub/HubMediaPlaceCaption";
+import { HubMediaThumbFrame } from "@/components/hub/HubMediaThumbFrame";
 import { HubMemoryLightbox } from "@/components/hub/HubMemoryLightbox";
 import { HubSectionHeading } from "@/components/hub/HubSectionHeading";
 import { normalizeInstagramPostUrl } from "@/lib/utils/instagram";
@@ -65,12 +66,13 @@ function GalleryGrid({
           ) : (
             (() => {
               const photoSrc = hubGalleryPhotoSrc(item);
-              return photoSrc ? (
+              if (!photoSrc) return null;
+              const thumb = (
                 <button
                   type="button"
                   className="city-page__traveler-picture-btn"
                   onClick={() => onSelectPhoto(item)}
-                  aria-label={`${labels.viewPin} — ${item.pin.placeLabel}`}
+                  aria-label={`${labels.viewPin} — ${item.pin.displayName} — ${item.pin.placeLabel}`}
                 >
                   <HubExternalPhoto
                     src={photoSrc}
@@ -80,7 +82,12 @@ function GalleryGrid({
                     className="city-page__traveler-picture-image"
                   />
                 </button>
-              ) : null;
+              );
+              return (
+                <HubMediaThumbFrame pin={item.pin}>
+                  {thumb}
+                </HubMediaThumbFrame>
+              );
             })()
           );
 

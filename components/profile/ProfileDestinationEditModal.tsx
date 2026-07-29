@@ -13,6 +13,7 @@ type ProfileDestinationEditModalProps = {
   countryCode?: string | null;
   countryBackingCity?: VisitedCity | null;
   visitedCountries: VisitedCountry[];
+  visitedCities?: VisitedCity[];
   onClose: () => void;
   mediaFocus?: "photo" | "instagram";
 };
@@ -23,6 +24,7 @@ export function ProfileDestinationEditModal({
   countryCode = null,
   countryBackingCity = null,
   visitedCountries,
+  visitedCities = [],
   onClose,
   mediaFocus,
 }: ProfileDestinationEditModalProps) {
@@ -82,6 +84,7 @@ export function ProfileDestinationEditModal({
             <CityForm
               city={city}
               visitedCountries={visitedCountries}
+              existingCities={visitedCities}
               onSuccess={handleSuccess}
               onCancel={onClose}
               mediaFocus={mediaFocus}

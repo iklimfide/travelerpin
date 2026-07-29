@@ -24,6 +24,8 @@ const nextConfig: NextConfig = {
       dynamic: 86400,
       static: 86400,
     },
+    // Default 10MB breaks YP Instagram ZIP import (multipart through proxy.ts).
+    proxyClientMaxBodySize: 512 * 1024 * 1024,
   },
   images: {
     unoptimized: true,

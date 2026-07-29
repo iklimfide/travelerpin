@@ -3314,6 +3314,19 @@ a.save-destination-modal__name-link:hover {
   gap: 0;
 }
 
+.profile-pin-edit-fields--location {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+}
+
+.profile-pin-edit-fields__section-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
 .profile-dashboard-add-anchor {
   scroll-margin-top: 88px;
 }

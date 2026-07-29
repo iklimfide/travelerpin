@@ -694,6 +694,8 @@
     "visitDatesPickCityFirst": "Arama sonuçlarından bir şehir seç. Zaten haritandaysa dokun — tarih eklemek için düzenleme açılır.",
     "alreadyOnMapEdit": "Haritanda · tarih eklemek için dokun",
     "alreadyOnMapEditHint": "Bu şehir zaten haritanda. Ziyaret tarihleri eklemek için listede Düzenle'yi kullan.",
+    "mediaEditPinLocation": "Pin konumu",
+    "mediaEditPinLocationHint": "Yanlış şehir etiketi mi? Buradan düzelt — bu pine bağlı tüm foto ve linkler bu konuma yazılır.",
     "visitDatePrompt": "Ne zaman ziyaret ettiğini eklemek ister misin?",
     "visitDateYes": "Evet, tarih ekle",
     "visitDateSkip": "Şimdi değil",

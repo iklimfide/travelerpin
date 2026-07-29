@@ -1401,11 +1401,17 @@
 
 .profile-media-sections .city-page__traveler-pictures-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
   margin: 0;
   padding: 16px;
   list-style: none;
+}
+
+@media (max-width: 640px) {
+  .profile-media-sections .city-page__traveler-pictures-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .profile-media-sections .city-page__traveler-pictures-grid > li {
@@ -1573,6 +1579,11 @@
   height: 100%;
 }
 
+.profile-media-item__media .city-page__hub-media-thumb-frame {
+  width: 100%;
+  height: 100%;
+}
+
 .profile-media-item__place {
   display: block;
   margin-top: 6px;
@@ -1600,6 +1611,7 @@
 .profile-media-item__actions {
   position: absolute;
   inset: auto 4px 4px 4px;
+  z-index: 3;
   display: flex;
   gap: 4px;
   opacity: 0;
@@ -2701,7 +2713,7 @@
 
 @media (min-width: 1024px) {
   .profile-media-list-modal__content.profile-media-sections .city-page__traveler-pictures-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 10px;
   }
 }
@@ -4025,7 +4037,13 @@
   }
 
   .profile-page--route .profile-media-sections .city-page__traveler-pictures-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  @media (max-width: 640px) {
+    .profile-page--route .profile-media-sections .city-page__traveler-pictures-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   .profile-all-page {

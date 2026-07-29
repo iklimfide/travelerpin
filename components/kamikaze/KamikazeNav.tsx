@@ -12,6 +12,8 @@ const LINKS = [
   { href: "/kamikaze/stats", label: "İstatistik" },
   { href: "/kamikaze/notifications", label: "Bildirim" },
   { href: "/kamikaze/i18n", label: "EN–TR" },
+  { href: "/kamikaze/instagram-import", label: "IG import" },
+  { href: "/kamikaze/profile-media", label: "Pin foto" },
 ] as const;
 
 export function KamikazeNav() {

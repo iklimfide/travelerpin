@@ -58,7 +58,7 @@ function parkToProfilePin(park: VisitedPark, profile: ProfileIdentity): HubTrave
   });
 }
 
-export const PROFILE_MEDIA_PREVIEW_LIMIT = 6;
+export const PROFILE_MEDIA_PREVIEW_LIMIT = 10;
 export const PROFILE_MEDIA_PAGE_SIZE = 48;
 
 export type ProfilePinRef =

@@ -426,6 +426,7 @@ export function CityList({
           city={editingCity}
           park={null}
           visitedCountries={countries}
+          visitedCities={cities}
           onClose={() => setEditingId(null)}
         />
       ) : null}

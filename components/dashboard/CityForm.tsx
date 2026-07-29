@@ -408,6 +408,15 @@ export function CityForm({
       }
     }
 
+    if (isEdit && city) {
+      const key = `${resolvedCountryCode.toUpperCase()}:${resolvedCityName.toLowerCase()}`;
+      const originalKey = `${city.country_code.toUpperCase()}:${city.city_name.toLowerCase()}`;
+      if (key !== originalKey && existingKeys.has(key)) {
+        await modal.alert(t("alreadyOnMap"), { variant: "info" });
+        return;
+      }
+    }
+
     if (hideHeader && isEdit && city) {
       const mediaSnapshot = {
         savedPhotoUrls: [...savedPhotoUrls],
@@ -513,6 +522,35 @@ export function CityForm({
   if (hideHeader && isEdit && city) {
     return (
       <form onSubmit={handleSubmit} className="dashboard-form-city profile-pin-edit-form">
+        <div className="profile-pin-edit-fields profile-pin-edit-fields--location">
+          <p className="profile-pin-edit-fields__section-title">{t("mediaEditPinLocation")}</p>
+          <p className="text-xs text-slate-500">{t("mediaEditPinLocationHint")}</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="dashboard-form-city__label">{t("cityName")}</label>
+              <input
+                value={cityName}
+                onChange={(e) => setCityName(e.target.value)}
+                required
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="dashboard-form-city__label">{t("country")}</label>
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-blue-500"
+              >
+                {visitedCountries.map((c) => (
+                  <option key={c.country_code} value={c.country_code}>
+                    {c.country_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
         <ProfilePinEditFields
           visitDates={visitDates}
           onVisitDatesChange={setVisitDates}

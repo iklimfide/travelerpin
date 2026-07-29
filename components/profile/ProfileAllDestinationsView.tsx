@@ -540,6 +540,7 @@ export function ProfileAllDestinationsView({
         countryCode={editingCountryCode}
         countryBackingCity={editingCountryBackingCity}
         visitedCountries={viewVisitedCountries}
+        visitedCities={viewVisitedCities}
         onClose={() => {
           setEditingCityId(null);
           setEditingParkId(null);

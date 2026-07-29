@@ -5,6 +5,7 @@ import { useLocale } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { ProfileInstagramLinkCard } from "@/components/profile/ProfileInstagramLinkCard";
 import { HubExternalPhoto } from "@/components/hub/HubExternalPhoto";
+import { HubMediaThumbFrame } from "@/components/hub/HubMediaThumbFrame";
 import { HubMemoryLightbox } from "@/components/hub/HubMemoryLightbox";
 import { HubSectionCta } from "@/components/hub/HubSectionCta";
 import { ProfileDestinationEditModal } from "@/components/profile/ProfileDestinationEditModal";
@@ -177,22 +178,24 @@ function GalleryTile({
   } else {
     const photoSrc = hubGalleryPhotoSrc(item);
     media = (
-      <button
-        type="button"
-        className="city-page__traveler-picture-btn profile-media-item__link"
-        onClick={() => onSelect(item)}
-        aria-label={`${labels.viewPin} — ${item.pin.placeLabel}`}
-      >
-        {photoSrc ? (
-          <HubExternalPhoto
-            src={photoSrc}
-            alt={`${hubName} — ${item.pin.placeLabel}`}
-            width={160}
-            height={160}
-            className="city-page__traveler-picture-image"
-          />
-        ) : null}
-      </button>
+      <HubMediaThumbFrame pin={item.pin}>
+        <button
+          type="button"
+          className="city-page__traveler-picture-btn profile-media-item__link"
+          onClick={() => onSelect(item)}
+          aria-label={`${labels.viewPin} — ${item.pin.displayName} — ${item.pin.placeLabel}`}
+        >
+          {photoSrc ? (
+            <HubExternalPhoto
+              src={photoSrc}
+              alt={`${hubName} — ${item.pin.placeLabel}`}
+              width={160}
+              height={160}
+              className="city-page__traveler-picture-image"
+            />
+          ) : null}
+        </button>
+      </HubMediaThumbFrame>
     );
   }
 
@@ -548,6 +551,7 @@ export function ProfileMediaGallery({
           city={editModalCity}
           park={editModalPark}
           visitedCountries={visitedCountries}
+          visitedCities={visitedCities}
           mediaFocus={editMediaFocus}
           onClose={() => {
             setEditModalCity(null);

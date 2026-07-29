@@ -694,6 +694,8 @@
     "visitDatesPickCityFirst": "Pick a city from search results. If it's already on your map, tap it — edit opens to add dates.",
     "alreadyOnMapEdit": "On your map · tap to add dates",
     "alreadyOnMapEditHint": "This city is already on your map. Use Edit in the list to add visit dates.",
+    "mediaEditPinLocation": "Pin location",
+    "mediaEditPinLocationHint": "Wrong city label? Change it here — every photo and link on this pin uses this place.",
     "visitDatePrompt": "Would you like to add when you visited?",
     "visitDateYes": "Yes, add dates",
     "visitDateSkip": "Not now",
