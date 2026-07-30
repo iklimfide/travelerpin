@@ -29,7 +29,11 @@ export async function loadDemoPublicProfilePage(
   const travel = await loadJenniferDemoTravelRows();
 
   return {
-    profile: DEMO_PROFILE,
+    profile: {
+      ...DEMO_PROFILE,
+      instagram_url:
+        travel.showcaseInstagramUrl?.trim() || DEMO_PROFILE.instagram_url,
+    },
     visitedCountries: travel.visitedCountries,
     visitedCities: travel.visitedCities,
     visitedParks: travel.visitedParks,

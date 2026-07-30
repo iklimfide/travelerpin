@@ -1,9 +1,12 @@
 "use client";
 
+import { useMemo } from "react";
 import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEditor";
 import { PinMediaFields } from "@/components/dashboard/PinMediaFields";
 import { PinNoteEditor } from "@/components/dashboard/PinNoteEditor";
 import { LIMITS } from "@/lib/constants";
+import { getOwnUsername } from "@/lib/client/session-page-cache";
+import { maxPinPhotosForUsername } from "@/lib/utils/pin-photo-limits";
 import { useTranslateCity, useTranslateCommon } from "@/lib/i18n/client-messages";
 import { useModal } from "@/components/ui/ModalProvider";
 
@@ -23,6 +26,7 @@ type ProfilePinEditFieldsProps = {
   loading: boolean;
   onCancel?: () => void;
   submitDisabled?: boolean;
+  maxPinPhotos?: number;
 };
 
 export function ProfilePinEditFields({
@@ -41,10 +45,15 @@ export function ProfilePinEditFields({
   loading,
   onCancel,
   submitDisabled = false,
+  maxPinPhotos: maxPinPhotosProp,
 }: ProfilePinEditFieldsProps) {
   const t = useTranslateCity();
   const tCommon = useTranslateCommon();
   const modal = useModal();
+  const maxPinPhotos = useMemo(
+    () => maxPinPhotosProp ?? maxPinPhotosForUsername(getOwnUsername()),
+    [maxPinPhotosProp]
+  );
 
   return (
     <div className="profile-pin-edit-fields">
@@ -78,6 +87,7 @@ export function ProfilePinEditFields({
           void modal.alert(message, { variant: "error" });
         }}
         photoUnsupportedFormatMessage={tCommon("photoUploadUnsupportedFormat")}
+        maxPinPhotos={maxPinPhotos}
       />
 
       <div className="dashboard-form-city__footer dashboard-form-city__footer--before-note">

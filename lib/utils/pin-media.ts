@@ -124,7 +124,10 @@ export function normalizeInstagramUrlList(urls: string[] | null | undefined): st
   return result;
 }
 
-export async function resolvePinMediaFields(data: PinMediaInput): Promise<{
+export async function resolvePinMediaFields(
+  data: PinMediaInput,
+  options?: { maxPhotos?: number }
+): Promise<{
   photo_url: string | null;
   photo_urls: string[];
   instagram_urls: string[];
@@ -132,10 +135,11 @@ export async function resolvePinMediaFields(data: PinMediaInput): Promise<{
   media_url: string | null;
   media_preview_url: string | null;
 }> {
+  const maxPhotos = options?.maxPhotos ?? LIMITS.maxPinPhotos;
   let photoUrls = (data.photo_urls ?? [])
     .map((url) => url.trim())
     .filter(Boolean)
-    .slice(0, LIMITS.maxPinPhotos);
+    .slice(0, maxPhotos);
 
   if (photoUrls.length === 0) {
     const legacy = data.photo_url?.trim();

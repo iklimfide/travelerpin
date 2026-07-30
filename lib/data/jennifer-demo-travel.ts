@@ -14,7 +14,6 @@ import { computeTravelStats, getWishlistCountryCodes } from "@/lib/utils/stats";
 import { withUkMapCountryCodes } from "@/lib/data/uk-nations";
 import { getCountryName } from "@/lib/data/countries";
 import { normalizeJenniferDemoCountryCode } from "@/lib/data/jennifer-demo-display";
-import { stripJenniferDemoPinUserPhotos } from "@/lib/data/jennifer-demo-media";
 import { dedupeVisitedCitiesForDisplay } from "@/lib/utils/visited-city-normalize";
 
 import { JENNIFER_MARKETING_STATS } from "@/lib/data/jennifer-marketing-stats";
@@ -31,6 +30,7 @@ type GuvencTravelPins = {
   visitedCities: VisitedCity[];
   visitedParks: VisitedPark[];
   wishlistCountries: WishlistCountry[];
+  instagramUrl: string | null;
 };
 
 const getCachedGuvencTravelPins = unstable_cache(
@@ -65,9 +65,10 @@ const getCachedGuvencTravelPins = unstable_cache(
       visitedCities: dedupeVisitedCitiesForDisplay((cities ?? []) as VisitedCity[]),
       visitedParks: (parks ?? []) as VisitedPark[],
       wishlistCountries: (wishlistResult.data ?? []) as WishlistCountry[],
+      instagramUrl: profile.instagram_url?.trim() || null,
     };
   },
-  ["jennifer-demo-guvenc-pins-v4"],
+  ["jennifer-demo-guvenc-pins-v5"],
   { revalidate: 300 }
 );
 
@@ -88,12 +89,10 @@ function pickGuvencCitiesForJennifer(cities: VisitedCity[]): VisitedCity[] {
   });
   const filtered = normalized.filter((city) => isJenniferShowcaseCountryCode(city.country_code));
   const sorted = [...filtered].sort((a, b) => cityPinSortTime(b) - cityPinSortTime(a));
-  return sorted.slice(0, JENNIFER_DISPLAY_STATS.cities).map((city) =>
-    stripJenniferDemoPinUserPhotos({
-      ...city,
-      user_id: DEMO_USER_ID,
-    })
-  );
+  return sorted.slice(0, JENNIFER_DISPLAY_STATS.cities).map((city) => ({
+    ...city,
+    user_id: DEMO_USER_ID,
+  }));
 }
 
 function pickGuvencParksForJennifer(parks: VisitedPark[]): VisitedPark[] {
@@ -107,12 +106,10 @@ function pickGuvencParksForJennifer(parks: VisitedPark[]): VisitedPark[] {
       };
     })
     .filter((park) => isJenniferShowcaseCountryCode(park.country_code))
-    .map((park) =>
-      stripJenniferDemoPinUserPhotos({
-        ...park,
-        user_id: DEMO_USER_ID,
-      })
-    );
+    .map((park) => ({
+      ...park,
+      user_id: DEMO_USER_ID,
+    }));
 }
 
 function jenniferShowcaseVisitedCodes(): string[] {
@@ -127,6 +124,8 @@ export type JenniferDemoTravelRows = {
   stats: TravelStats;
   visitedCodes: string[];
   wishlistCodes: string[];
+  /** @guvencgiller profile IG link for Jennifer identity card. */
+  showcaseInstagramUrl: string | null;
 };
 
 function buildJenniferStats(visitedCities: VisitedCity[], parks: VisitedPark[]): TravelStats {
@@ -141,12 +140,12 @@ function buildJenniferStats(visitedCities: VisitedCity[], parks: VisitedPark[]):
 
 function buildStaticFallbackRows(): JenniferDemoTravelRows {
   const visitedCountries = DEMO_MAP_SHOWCASE_COUNTRIES;
-  const visitedCities = getDemoVisitedCities()
-    .filter((city) => isJenniferShowcaseCountryCode(city.country_code))
-    .map(stripJenniferDemoPinUserPhotos);
-  const visitedParks = getDemoVisitedParks()
-    .filter((park) => isJenniferShowcaseCountryCode(park.country_code))
-    .map(stripJenniferDemoPinUserPhotos);
+  const visitedCities = getDemoVisitedCities().filter((city) =>
+    isJenniferShowcaseCountryCode(city.country_code)
+  );
+  const visitedParks = getDemoVisitedParks().filter((park) =>
+    isJenniferShowcaseCountryCode(park.country_code)
+  );
   const wishlistCountries = DEMO_WISHLIST_COUNTRIES;
   const stats = buildJenniferStats(visitedCities, visitedParks);
 
@@ -158,6 +157,7 @@ function buildStaticFallbackRows(): JenniferDemoTravelRows {
     stats,
     visitedCodes: jenniferShowcaseVisitedCodes(),
     wishlistCodes: getWishlistCountryCodes(wishlistCountries),
+    showcaseInstagramUrl: null,
   };
 }
 
@@ -188,5 +188,6 @@ export async function loadJenniferDemoTravelRows(): Promise<JenniferDemoTravelRo
     stats,
     visitedCodes: jenniferShowcaseVisitedCodes(),
     wishlistCodes: getWishlistCountryCodes(wishlistCountries),
+    showcaseInstagramUrl: guvenc.instagramUrl,
   };
 }

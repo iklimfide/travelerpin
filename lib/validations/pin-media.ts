@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { LIMITS } from "@/lib/constants";
+import { ELEVATED_PIN_PHOTO_LIMIT } from "@/lib/utils/pin-photo-limits";
 import { isValidInstagramUrl } from "@/lib/utils/instagram";
 
 const photoUrlField = z
@@ -25,8 +26,8 @@ const photoUrlsField = z
   .nullable()
   .transform((value) => value ?? [])
   .refine(
-    (urls) => urls.length <= LIMITS.maxPinPhotos,
-    { message: `At most ${LIMITS.maxPinPhotos} photos allowed` }
+    (urls) => urls.length <= ELEVATED_PIN_PHOTO_LIMIT,
+    { message: `At most ${ELEVATED_PIN_PHOTO_LIMIT} photos allowed` }
   );
 
 const instagramUrlsField = z
@@ -52,13 +53,16 @@ function isValidPhotoUrl(value: string): boolean {
   }
 }
 
-export function refinePinMediaInput(data: {
-  photo_url?: string | null;
-  photo_urls?: string[];
-  instagram_urls?: string[];
-  media_type?: "photo" | "instagram" | null;
-  media_url?: string | null;
-}): boolean {
+export function refinePinMediaInput(
+  data: {
+    photo_url?: string | null;
+    photo_urls?: string[];
+    instagram_urls?: string[];
+    media_type?: "photo" | "instagram" | null;
+    media_url?: string | null;
+  },
+  maxPhotos = ELEVATED_PIN_PHOTO_LIMIT
+): boolean {
   const photoUrls = (data.photo_urls ?? [])
     .map((url) => url.trim())
     .filter(Boolean);
@@ -67,7 +71,7 @@ export function refinePinMediaInput(data: {
   const photoCount =
     photoUrls.length > 0 ? photoUrls.length : legacyPhotoUrl ? 1 : 0;
 
-  if (photoCount > LIMITS.maxPinPhotos) return false;
+  if (photoCount > maxPhotos) return false;
   if (photoUrls.some((url) => !isValidPhotoUrl(url))) return false;
   if (legacyPhotoUrl && !isValidPhotoUrl(legacyPhotoUrl)) return false;
 

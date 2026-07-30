@@ -13,6 +13,7 @@ const LINKS = [
   { href: "/kamikaze/notifications", label: "Bildirim" },
   { href: "/kamikaze/i18n", label: "EN–TR" },
   { href: "/kamikaze/instagram-import", label: "IG import" },
+  { href: "/kamikaze/pin-upload", label: "Pin yükle" },
   { href: "/kamikaze/profile-media", label: "Pin foto" },
 ] as const;
 

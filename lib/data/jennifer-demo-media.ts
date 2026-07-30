@@ -2,7 +2,7 @@ import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { resolveCityHeroImageUrl } from "@/lib/city/city-hero-images";
 import { resolveParkHeroImageUrl } from "@/lib/park/park-hero-images";
 import { buildProfileMediaPins } from "@/lib/utils/profile-media";
-import { readInstagramUrls } from "@/lib/utils/pin-media";
+import { readInstagramUrls, readPhotoUrlsForGallery } from "@/lib/utils/pin-media";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
 import { normalizeCityKey } from "@/lib/utils/city-name";
 import type { VisitedCity, VisitedPark } from "@/types/database";
@@ -96,17 +96,35 @@ export function withJenniferDemoGalleryPhotos(
   parkHeroImages?: ReadonlyMap<string, string>
 ): { cities: VisitedCity[]; parks: VisitedPark[] } {
   const citiesWithPhotos = cities.map((city) => {
-    const base = stripJenniferDemoPinUserPhotos(city);
+    if (readPhotoUrlsForGallery(city).length > 0) {
+      return city;
+    }
     const photo_url = resolveJenniferCityGalleryPhotoUrl(city, cityHeroImages);
-    if (!photo_url) return base;
-    return { ...base, photo_url, photo_urls: [photo_url] };
+    if (!photo_url) return city;
+    return {
+      ...city,
+      photo_url,
+      photo_urls: [photo_url],
+      media_type: "photo" as const,
+      media_url: photo_url,
+      media_preview_url: photo_url,
+    };
   });
 
   const parksWithPhotos = parks.map((park) => {
-    const base = stripJenniferDemoPinUserPhotos(park);
+    if (readPhotoUrlsForGallery(park).length > 0) {
+      return park;
+    }
     const photo_url = resolveJenniferParkGalleryPhotoUrl(park, parkHeroImages);
-    if (!photo_url) return base;
-    return { ...base, photo_url, photo_urls: [photo_url] };
+    if (!photo_url) return park;
+    return {
+      ...park,
+      photo_url,
+      photo_urls: [photo_url],
+      media_type: "photo" as const,
+      media_url: photo_url,
+      media_preview_url: photo_url,
+    };
   });
 
   return { cities: citiesWithPhotos, parks: parksWithPhotos };
@@ -119,7 +137,7 @@ type JenniferProfileIdentity = {
   instagram_url?: string | null;
 };
 
-/** Profile photos from YP heroes + overrides; Instagram links still come from pins. */
+/** Profile photos + IG post links from @guvencgiller pins; hero/override only when a pin has no upload. */
 export function buildJenniferProfileMediaPins(
   cities: VisitedCity[],
   parks: VisitedPark[],

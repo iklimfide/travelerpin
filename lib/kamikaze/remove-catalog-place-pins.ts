@@ -184,7 +184,7 @@ export async function purgeCatalogCityFromSite(
       .eq("id", userId)
       .maybeSingle();
     if (profile?.username?.trim().toLowerCase() === "guvencgiller") {
-      revalidateTag("jennifer-demo-guvenc-pins-v4", "max");
+      revalidateTag("jennifer-demo-guvenc-pins-v5", "max");
     }
   }
 

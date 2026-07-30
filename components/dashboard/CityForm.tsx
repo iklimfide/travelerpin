@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getOwnUsername } from "@/lib/client/session-page-cache";
+import { maxPinPhotosForUsername } from "@/lib/utils/pin-photo-limits";
 import { useRouter } from "next/navigation";
 import { LIMITS } from "@/lib/constants";
 import { useTranslateCity, useTranslateCommon } from "@/lib/i18n/client-messages";
@@ -68,6 +70,10 @@ export function CityForm({
   const modal = useModal();
   const toast = useToast();
   const router = useRouter();
+  const maxPinPhotos = useMemo(
+    () => maxPinPhotosForUsername(getOwnUsername()),
+    []
+  );
   const abortRef = useRef<AbortController | null>(null);
   const lastPromptKeyRef = useRef<string | null>(null);
 
@@ -465,6 +471,7 @@ export function CityForm({
         instagramUrls,
         isValidInstagramUrl,
         formatPhotoUploadError: (message) => formatPinPhotoUploadError(tCommon, message),
+        maxPinPhotos,
       });
 
       if (!mediaResult.ok) {
@@ -566,6 +573,7 @@ export function CityForm({
           mediaFocus={mediaFocus}
           loading={loading}
           onCancel={onCancel}
+          maxPinPhotos={maxPinPhotos}
         />
       </form>
     );
@@ -777,6 +785,7 @@ export function CityForm({
               void modal.alert(message, { variant: "error" });
             }}
             photoUnsupportedFormatMessage={tCommon("photoUploadUnsupportedFormat")}
+            maxPinPhotos={maxPinPhotos}
           />
 
           <div>

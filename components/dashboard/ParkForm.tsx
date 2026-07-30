@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { LIMITS } from "@/lib/constants";
 import { useTranslateCommon, useTranslatePark } from "@/lib/i18n/client-messages";
 import { addPark } from "@/lib/client/park-actions";
-import { notifyProfileDataChanged } from "@/lib/client/session-page-cache";
+import { notifyProfileDataChanged, getOwnUsername } from "@/lib/client/session-page-cache";
+import { maxPinPhotosForUsername } from "@/lib/utils/pin-photo-limits";
 import { executeBackgroundPinSave } from "@/lib/client/background-pin-save";
 import { formatPinPhotoUploadError } from "@/lib/client/format-pin-photo-upload-error";
 import { CityVisitDatesEditor } from "@/components/dashboard/CityVisitDatesEditor";
@@ -66,6 +67,10 @@ export function ParkForm({
   const modal = useModal();
   const toast = useToast();
   const router = useRouter();
+  const maxPinPhotos = useMemo(
+    () => maxPinPhotosForUsername(getOwnUsername()),
+    []
+  );
   const abortRef = useRef<AbortController | null>(null);
   const lastPromptKeyRef = useRef<string | null>(null);
 
@@ -444,6 +449,7 @@ export function ParkForm({
         instagramUrls,
         isValidInstagramUrl,
         formatPhotoUploadError: (message) => formatPinPhotoUploadError(tCommon, message),
+        maxPinPhotos,
       });
 
       if (!mediaResult.ok) {
@@ -531,6 +537,7 @@ export function ParkForm({
           void modal.alert(message, { variant: "error" });
         }}
         photoUnsupportedFormatMessage={tCommon("photoUploadUnsupportedFormat")}
+        maxPinPhotos={maxPinPhotos}
       />
     );
   }

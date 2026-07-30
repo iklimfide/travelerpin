@@ -49,6 +49,8 @@ type PinMediaFieldsProps = {
   onPhotoPickError?: (message: string) => void;
   photoUnsupportedFormatMessage?: string;
   formatPhotoUploadError?: (message: string) => string;
+  /** Default 1; allowlist (arif, guvencgiller, nazli) get 20 via caller. */
+  maxPinPhotos?: number;
 };
 
 export function PinMediaFields({
@@ -68,6 +70,7 @@ export function PinMediaFields({
   onPhotoPickError,
   photoUnsupportedFormatMessage,
   formatPhotoUploadError: formatPhotoUploadErrorProp,
+  maxPinPhotos = LIMITS.maxPinPhotos,
 }: PinMediaFieldsProps) {
   const tCommon = useTranslateCommon();
   const formatUploadError =
@@ -90,9 +93,9 @@ export function PinMediaFields({
     removedSavedPhotoUrls,
     newPhotoFiles,
   });
-  const multiPhoto = LIMITS.maxPinPhotos > 1;
-  const canAddPhotos = multiPhoto ? photoCount < LIMITS.maxPinPhotos : true;
-  const remainingSlots = multiPhoto ? LIMITS.maxPinPhotos - photoCount : 1;
+  const multiPhoto = maxPinPhotos > 1;
+  const canAddPhotos = multiPhoto ? photoCount < maxPinPhotos : true;
+  const remainingSlots = multiPhoto ? maxPinPhotos - photoCount : 1;
 
   const instagramDraftRef = useRef<HTMLInputElement>(null);
   const photoLibraryInputRef = useRef<HTMLInputElement>(null);
@@ -425,6 +428,7 @@ export async function buildPinMediaPayload(options: {
   instagramUrls: string[];
   isValidInstagramUrl: (url: string) => boolean;
   formatPhotoUploadError: (message: string) => string;
+  maxPinPhotos?: number;
 }): Promise<
   | { ok: true; photo_url: string | null; photo_urls: string[]; instagram_urls: string[] }
   | { ok: false; error: string }
@@ -435,17 +439,18 @@ export async function buildPinMediaPayload(options: {
   );
   if (!instagramResult.ok) return instagramResult;
 
+  const maxPinPhotos = options.maxPinPhotos ?? LIMITS.maxPinPhotos;
   const removed = new Set(options.removedSavedPhotoUrls);
   const photoUrls = options.savedPhotoUrls.filter((url) => !removed.has(url));
 
   for (const file of options.newPhotoFiles) {
-    if (photoUrls.length >= LIMITS.maxPinPhotos) break;
+    if (photoUrls.length >= maxPinPhotos) break;
     const uploaded = await uploadPinPhotoToR2(file, options.formatPhotoUploadError);
     if (!uploaded.ok) return uploaded;
     photoUrls.push(uploaded.url);
   }
 
-  const capped = photoUrls.slice(0, LIMITS.maxPinPhotos);
+  const capped = photoUrls.slice(0, maxPinPhotos);
 
   return {
     ok: true,

@@ -452,7 +452,7 @@ export async function applyInstagramImportReview(options: {
     await revalidateCityHubForPin(city.country_code, city.city_name);
   }
   if (options.targetUsername?.trim().toLowerCase() === "guvencgiller") {
-    revalidateTag("jennifer-demo-guvenc-pins-v4", "max");
+    revalidateTag("jennifer-demo-guvenc-pins-v5", "max");
   }
 
   destroyInstagramImportSession(options.sessionId);
@@ -670,7 +670,7 @@ export async function runInstagramImport(options: {
     await revalidateCityHubForPin(city.country_code, city.city_name);
   }
   if (options.targetUsername?.trim().toLowerCase() === "guvencgiller") {
-    revalidateTag("jennifer-demo-guvenc-pins-v4", "max");
+    revalidateTag("jennifer-demo-guvenc-pins-v5", "max");
   }
 
   return {

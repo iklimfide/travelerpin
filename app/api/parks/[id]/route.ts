@@ -4,7 +4,7 @@ import { revalidateParkHubForPin } from "@/lib/cache/revalidate-park-hub";
 import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
 import { deletePinNotifications } from "@/lib/supabase/notifications";
-import { resolveCityMediaFields } from "@/lib/utils/city-media";
+import { resolvePinMediaForUser } from "@/lib/utils/pin-media-save";
 import { parkInputSchema } from "@/lib/validations/park";
 import {
   formatVisitedParkSaveError,
@@ -79,7 +79,11 @@ export async function PATCH(request: Request, context: RouteContext) {
     longitude = null;
   }
 
-  const media = await resolveCityMediaFields(data);
+  const mediaResult = await resolvePinMediaForUser(supabase, user.id, data);
+  if (!mediaResult.ok) {
+    return NextResponse.json({ error: mediaResult.error }, { status: 400 });
+  }
+  const media = mediaResult.media;
 
   const { data: park, error } = await updateVisitedParkRow(supabase, id, user.id, {
     park_name: data.park_name,

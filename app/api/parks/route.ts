@@ -6,7 +6,7 @@ import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { publishParkHubOnPin } from "@/lib/supabase/published-hubs";
 import { notifyFollowersAfterParkPin } from "@/lib/supabase/notify-pin-followers";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
-import { resolveCityMediaFields } from "@/lib/utils/city-media";
+import { resolvePinMediaForUser } from "@/lib/utils/pin-media-save";
 import { geocodeCity } from "@/lib/utils/geocode";
 import {
   formatVisitedParkSaveError,
@@ -62,7 +62,11 @@ export async function POST(request: Request) {
     }
   }
 
-  const media = await resolveCityMediaFields(data);
+  const mediaResult = await resolvePinMediaForUser(supabase, user.id, data);
+  if (!mediaResult.ok) {
+    return NextResponse.json({ error: mediaResult.error }, { status: 400 });
+  }
+  const media = mediaResult.media;
 
   const { data: park, error } = await insertVisitedParkRow(supabase, {
     user_id: user.id,

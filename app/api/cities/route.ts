@@ -5,7 +5,7 @@ import { revalidateProfileForPin } from "@/lib/cache/revalidate-profile";
 import { publishCityHubOnPin } from "@/lib/supabase/published-hubs";
 import { notifyFollowersAfterCityPin } from "@/lib/supabase/notify-pin-followers";
 import { cityInputSchema } from "@/lib/validations/city";
-import { resolveCityMediaFields } from "@/lib/utils/city-media";
+import { resolvePinMediaForUser } from "@/lib/utils/pin-media-save";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
 import { formatVisitedCitySaveError, insertVisitedCityRow } from "@/lib/supabase/visited-city-update";
 import { geocodeCity } from "@/lib/utils/geocode";
@@ -53,7 +53,11 @@ export async function POST(request: Request) {
       ? { latitude: data.latitude, longitude: data.longitude }
       : await geocodeCity(data.city_name, code, data.country_name);
 
-  const media = await resolveCityMediaFields(data);
+  const mediaResult = await resolvePinMediaForUser(supabase, user.id, data);
+  if (!mediaResult.ok) {
+    return NextResponse.json({ error: mediaResult.error }, { status: 400 });
+  }
+  const media = mediaResult.media;
 
   const { data: city, error } = await insertVisitedCityRow(supabase, {
     user_id: user.id,

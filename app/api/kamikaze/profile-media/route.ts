@@ -35,7 +35,7 @@ async function resolveTargetProfile(admin: SupabaseClient, username: string) {
 function revalidateAfterFix(username: string) {
   revalidateTag(profileCacheTag(username), "max");
   if (username.toLowerCase() === "guvencgiller") {
-    revalidateTag("jennifer-demo-guvenc-pins-v4", "max");
+    revalidateTag("jennifer-demo-guvenc-pins-v5", "max");
   }
 }
 

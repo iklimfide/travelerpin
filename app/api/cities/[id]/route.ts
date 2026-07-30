@@ -6,7 +6,7 @@ import { cityInputSchema } from "@/lib/validations/city";
 import { ensureVisitedCountry } from "@/lib/supabase/ensure-visited-country";
 import { deletePinNotifications } from "@/lib/supabase/notifications";
 import { formatVisitedCitySaveError, updateVisitedCityRow } from "@/lib/supabase/visited-city-update";
-import { resolveCityMediaFields } from "@/lib/utils/city-media";
+import { resolvePinMediaForUser } from "@/lib/utils/pin-media-save";
 import { geocodeCity } from "@/lib/utils/geocode";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -74,7 +74,11 @@ export async function PATCH(request: Request, context: RouteContext) {
     longitude = coords?.longitude ?? null;
   }
 
-  const media = await resolveCityMediaFields(data);
+  const mediaResult = await resolvePinMediaForUser(supabase, user.id, data);
+  if (!mediaResult.ok) {
+    return NextResponse.json({ error: mediaResult.error }, { status: 400 });
+  }
+  const media = mediaResult.media;
 
   const { data: city, error } = await updateVisitedCityRow(supabase, id, user.id, {
     city_name: data.city_name,
