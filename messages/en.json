@@ -971,6 +971,7 @@
     "parkSaveHint": "Open a country, tick parks, then tap Save to pin them.",
     "saveFailed": "Could not save your selections. Please try again.",
     "loginRequired": "Sign in to save places to your map.",
+    "signUpToSave": "Create a free account to save these places to your map.",
     "missingPlacePrompt": "Can't find your city or park in the list?",
     "missingPlaceContactLink": "Contact us",
     "regions": {

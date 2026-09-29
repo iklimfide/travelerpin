@@ -17,6 +17,7 @@ import { BRAND } from "@/lib/constants";
 import { useIsDesktopDashboardNav } from "@/lib/hooks/useIsDesktopDashboardNav";
 import { useVisualViewportFixed } from "@/lib/hooks/useVisualViewportFixed";
 import { useAppMessages } from "@/lib/i18n/client-messages";
+import { stripLocalePrefix } from "@/lib/i18n/pathname";
 import { profilePath } from "@/lib/seo/site";
 
 type DashboardBottomBarProps = {
@@ -109,7 +110,7 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
   } = useAppMessages();
   const pathname = usePathname();
   const router = useRouter();
-  const { open: openAddDestination } = useAddDestination();
+  const { open: openAddDestination, isOpen: addDestinationOpen } = useAddDestination();
   const { open: openNextRouteDestination } = useNextRouteDestination();
   const { openNextRouteModal } = useDashboardAdd();
   const { open: openWishlistDestination } = useWishlistDestination();
@@ -143,10 +144,6 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
   };
 
   function handleAddClick() {
-    if (!username) {
-      router.push(loginHrefFor(currentPath));
-      return;
-    }
     openAddDestination();
   }
 
@@ -274,11 +271,15 @@ export function DashboardBottomBar({ ownProfile }: DashboardBottomBarProps) {
 
   if (!mounted) return null;
 
-  const desktopAddFab =
-    isDesktopNav && !isGuest ? (
+  const barePath = stripLocalePrefix(currentPath);
+  const onAuthRoute = barePath === "/login" || barePath === "/register";
+  const showAddFab = (isDesktopNav || isGuest) && !addDestinationOpen;
+  const desktopAddFab = showAddFab ? (
       <button
         type="button"
-        className="dashboard-desktop-add-fab"
+        className={`dashboard-desktop-add-fab${
+          onAuthRoute ? " dashboard-desktop-add-fab--over-auth" : ""
+        }`}
         aria-label={dashboardNavMessages.add}
         onClick={handleAddClick}
       >

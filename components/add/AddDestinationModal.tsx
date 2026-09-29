@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { usePathname, useRouter } from "@/lib/i18n/navigation";
 import { CountryPickerStep } from "@/components/add/CountryPickerStep";
 import { CityPickerStep, citySelectionKey } from "@/components/add/CityPickerStep";
 import {
@@ -14,8 +15,11 @@ import {
   TRAVEL_STATE_UPDATED_EVENT,
   notifyTravelStateUpdated,
   readTravelStateCache,
+  getOwnUserId,
   type TravelStateData,
 } from "@/lib/client/session-page-cache";
+import { writeGuestPendingPins } from "@/lib/client/guest-pending-pins";
+import { stripLocalePrefix } from "@/lib/i18n/pathname";
 import {
   fetchTravelState,
   refreshTravelStateAfterSave,
@@ -48,6 +52,8 @@ export type AddDestinationMode = "places" | "parks";
 type AddDestinationModalProps = {
   onClose: () => void;
   mode?: AddDestinationMode;
+  /** In-page picker (homepage) instead of a full-screen overlay. */
+  embedded?: boolean;
 };
 
 type Step =
@@ -189,11 +195,18 @@ function applyOptimisticParksSave(params: {
   return { visitedCodes: nextCodes, visitedParks: nextParks };
 }
 
-export function AddDestinationModal({ onClose, mode = "places" }: AddDestinationModalProps) {
+export function AddDestinationModal({
+  onClose,
+  mode = "places",
+  embedded = false,
+}: AddDestinationModalProps) {
   const { common: commonMessages, addDestination: addDestinationMessages } = useAppMessages();
   const modal = useModal();
   const toast = useToast();
-  useLockBodyScroll(true);
+  const router = useRouter();
+  const pathname = usePathname();
+  const reactId = useId();
+  useLockBodyScroll(!embedded);
   const isParksMode = mode === "parks";
   const [step, setStep] = useState<Step>({ kind: "countries" });
   const [visitedCodes, setVisitedCodes] = useState<Set<string>>(
@@ -236,6 +249,12 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
   }, []);
 
   const loadTravelState = useCallback(async (options?: { force?: boolean }) => {
+    if (!getOwnUserId()) {
+      hasTravelStateRef.current = true;
+      setTravelStateReady(true);
+      return true;
+    }
+
     const result = await fetchTravelState({
       preferCache: !options?.force,
       force: options?.force,
@@ -282,6 +301,11 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
       return;
     }
 
+    if (!getOwnUserId()) {
+      setTravelStateReady(true);
+      return;
+    }
+
     setTravelStateReady(false);
     void loadTravelState();
   }, [loadTravelState, mode]);
@@ -313,13 +337,15 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
   }, [loadTravelState]);
 
   useEffect(() => {
+    if (embedded) return;
+
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape" && !syncing) onClose();
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose, syncing]);
+  }, [embedded, onClose, syncing]);
 
   const parkCountryCodes = useMemo(() => {
     const codes = new Set<string>();
@@ -593,6 +619,27 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
   function handleSave() {
     if (pendingSelectionCount === 0 || syncing || !travelStateReady) return;
 
+    if (!getOwnUserId()) {
+      writeGuestPendingPins(
+        isParksMode
+          ? {
+              countryCodes: [],
+              cities: [],
+              parks: [...pendingParks.values()],
+            }
+          : {
+              countryCodes: [...pendingCountryCodes],
+              cities: [...pendingCities.values()],
+              parks: [],
+            }
+      );
+      onClose();
+      const bare = stripLocalePrefix(pathname ?? "/");
+      const next = bare === "/login" || bare === "/register" ? "/" : (pathname ?? "/");
+      router.push(`/register?next=${encodeURIComponent(next)}`);
+      return;
+    }
+
     if (isParksMode) {
       const pendingParksSnapshot = new Map(pendingParks);
       const pendingRemoveParkKeysSnapshot = new Set(pendingRemoveParkKeys);
@@ -738,24 +785,46 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
     })();
   }
 
-  if (!mounted) return null;
+  if (!mounted) {
+    if (!embedded) return null;
+    return (
+      <div className="add-destination-modal add-destination-modal--embedded" role="presentation">
+        <div className="add-destination-modal__sheet" aria-busy="true">
+          <div className="add-destination-modal__header">
+            <h2 className="add-destination-modal__title">
+              {addDestinationMessages.selectCountryTitle}
+            </h2>
+          </div>
+          <div className="add-destination-modal__body">
+            <AddDestinationCountryPickerSkeleton />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const isDetailStep = step.kind === "cities" || step.kind === "parks";
+  const titleId = embedded ? `add-destination-title-${reactId}` : "add-destination-title";
 
-  return createPortal(
-    <div className="add-destination-modal" role="presentation">
-      <button
-        type="button"
-        className="add-destination-modal__backdrop"
-        aria-label={addDestinationMessages.close}
-        onClick={onClose}
-        disabled={syncing}
-      />
+  const modalTree = (
+    <div
+      className={`add-destination-modal${embedded ? " add-destination-modal--embedded" : ""}`}
+      role="presentation"
+    >
+      {embedded ? null : (
+        <button
+          type="button"
+          className="add-destination-modal__backdrop"
+          aria-label={addDestinationMessages.close}
+          onClick={onClose}
+          disabled={syncing}
+        />
+      )}
       <div
         className="add-destination-modal__sheet"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="add-destination-title"
+        role={embedded ? "region" : "dialog"}
+        aria-modal={embedded ? undefined : true}
+        aria-labelledby={titleId}
         aria-busy={!travelStateReady || syncing}
       >
         <div
@@ -764,7 +833,7 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
           }`}
         >
           {step.kind === "countries" ? (
-            <h2 id="add-destination-title" className="add-destination-modal__title">
+            <h2 id={titleId} className="add-destination-modal__title">
               {isParksMode
                 ? addDestinationMessages.selectCountryForParksTitle
                 : addDestinationMessages.selectCountryTitle}
@@ -781,20 +850,22 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
                 </span>
                 {addDestinationMessages.back}
               </button>
-              <h2 id="add-destination-title" className="sr-only">
+              <h2 id={titleId} className="sr-only">
                 {step.countryName}
               </h2>
             </>
           )}
-          <button
-            type="button"
-            className="add-destination-modal__close"
-            aria-label={addDestinationMessages.close}
-            onClick={onClose}
-            disabled={syncing}
-          >
-            ✕
-          </button>
+          {embedded ? null : (
+            <button
+              type="button"
+              className="add-destination-modal__close"
+              aria-label={addDestinationMessages.close}
+              onClick={onClose}
+              disabled={syncing}
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         <div className="add-destination-modal__body">
@@ -872,7 +943,9 @@ export function AddDestinationModal({ onClose, mode = "places" }: AddDestination
           </button>
         </div>
       </div>
-    </div>,
-    document.body
+    </div>
   );
+
+  if (embedded) return modalTree;
+  return createPortal(modalTree, document.body);
 }

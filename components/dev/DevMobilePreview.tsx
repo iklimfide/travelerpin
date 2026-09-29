@@ -82,6 +82,8 @@ export function DevMobilePreview() {
     return null;
   }
 
+  if (!ready) return null;
+
   return (
     <>
       {!open ? (

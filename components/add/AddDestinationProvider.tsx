@@ -17,6 +17,8 @@ import {
   type AddDestinationMode,
 } from "@/components/add/AddDestinationModal";
 import { stripLocalePrefix } from "@/lib/i18n/pathname";
+import { createClient } from "@/lib/supabase/client";
+import { flushGuestPendingPins } from "@/lib/client/guest-pending-pins";
 
 const ADD_ROUTE = "/c/add";
 const MODAL_RETURN_BLOCKLIST = new Set([ADD_ROUTE, "/c/wishlist", "/c/next"]);
@@ -48,6 +50,30 @@ function sanitizeNext(next: string | null | undefined): string | null {
   const bare = stripLocalePrefix(next.split("?")[0] || next);
   if (MODAL_RETURN_BLOCKLIST.has(bare)) return null;
   return stripLocalePrefix(next.split("?")[0] || next);
+}
+
+function GuestPendingPinsFlusher() {
+  useEffect(() => {
+    const supabase = createClient();
+
+    function maybeFlush() {
+      void flushGuestPendingPins();
+    }
+
+    maybeFlush();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+        maybeFlush();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return null;
 }
 
 export function AddDestinationProvider({ children }: { children: ReactNode }) {
@@ -108,6 +134,7 @@ function AddDestinationProviderInner({ children }: { children: ReactNode }) {
   return (
     <AddDestinationContext.Provider value={ctxValue}>
       {children}
+      <GuestPendingPinsFlusher />
       {open ? <AddDestinationModal mode={mode} onClose={close} /> : null}
     </AddDestinationContext.Provider>
   );

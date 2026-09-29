@@ -970,6 +970,7 @@
     "parkSaveHint": "Bir ülke aç, parkları işaretle, sonra pinlemek için Kaydet'e dokun.",
     "saveFailed": "Seçimlerin kaydedilemedi. Lütfen tekrar deneyin.",
     "loginRequired": "Yerleri haritana kaydetmek için giriş yap.",
+    "signUpToSave": "Bu yerleri haritana kaydetmek için ücretsiz hesap oluştur.",
     "missingPlacePrompt": "Şehrini veya parkını listede bulamıyor musun?",
     "missingPlaceContactLink": "İletişim",
     "regions": {

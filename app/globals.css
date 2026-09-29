@@ -2849,37 +2849,41 @@ a.save-destination-modal__name-link:hover {
   .dashboard-bottom-bar__item--profile-avatar.dashboard-bottom-bar__item--active {
     color: #ffffff;
   }
+}
 
-  .dashboard-desktop-add-fab {
-    position: fixed;
-    left: 50%;
-    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-    z-index: 45;
-    display: grid;
-    place-items: center;
-    width: 58px;
-    height: 58px;
-    margin: 0;
-    padding: 0;
-    border: 4px solid #ffffff;
-    border-radius: 20px;
-    background: #2563eb;
-    color: #ffffff;
-    box-shadow: 0 14px 32px rgba(37, 99, 235, 0.38);
-    cursor: pointer;
-    transform: translateX(-50%);
-    transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-  }
+.dashboard-desktop-add-fab {
+  position: fixed;
+  left: 50%;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin: 0;
+  padding: 0;
+  border: 4px solid #ffffff;
+  border-radius: 20px;
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 14px 32px rgba(37, 99, 235, 0.38);
+  cursor: pointer;
+  transform: translateX(-50%);
+  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
 
-  .dashboard-desktop-add-fab:hover {
-    background: #1d4ed8;
-    transform: translateX(-50%) translateY(-2px);
-    box-shadow: 0 16px 34px rgba(37, 99, 235, 0.42);
-  }
+.dashboard-desktop-add-fab:hover {
+  background: #1d4ed8;
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.42);
+}
 
-  .dashboard-desktop-add-fab:active {
-    transform: translateX(-50%) translateY(0);
-  }
+.dashboard-desktop-add-fab:active {
+  transform: translateX(-50%) translateY(0);
+}
+
+.dashboard-desktop-add-fab--over-auth {
+  z-index: 125;
 }
 
 .dashboard-bottom-bar__icon--badge-host {
