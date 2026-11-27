@@ -1,5 +1,4 @@
-function readEnv(name: string): string | undefined {
-  const raw = process.env[name];
+function trimEnvValue(raw: string | undefined): string | undefined {
   if (!raw) return undefined;
 
   const trimmed = raw.trim();
@@ -13,9 +12,13 @@ function readEnv(name: string): string | undefined {
   return trimmed;
 }
 
-/** Server + client (via NEXT_PUBLIC_) base URL for stored R2 media links. */
+function readEnv(name: string): string | undefined {
+  return trimEnvValue(process.env[name]);
+}
+
+/** Server + client public R2 base. NEXT_PUBLIC_ is read statically so Next inlines it in the browser. */
 export function getR2PublicBaseUrl(): string | undefined {
-  return readEnv("R2_PUBLIC_BASE_URL") ?? readEnv("NEXT_PUBLIC_R2_PUBLIC_BASE_URL");
+  return readEnv("R2_PUBLIC_BASE_URL") ?? trimEnvValue(process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL);
 }
 
 export function validateR2PublicBaseUrl(): string | null {
