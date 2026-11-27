@@ -1,9 +1,14 @@
+import { createClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 import { findParkHubSlug } from "@/lib/data/park-hubs";
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
 import { resolvePublicMediaImageUrl } from "@/lib/storage/hub-photo-url";
 import { parkPath } from "@/lib/seo/site";
-import { createPublicSupabaseClient } from "@/lib/supabase/public";
+import { getSupabasePublicEnv } from "@/lib/supabase/env";
+import {
+  fetchWithTimeoutMs,
+  SUPABASE_HERO_FETCH_TIMEOUT_MS,
+} from "@/lib/supabase/fetch";
 import { formatCityDisplayName } from "@/lib/utils/city-name";
 import { buildParkSlug } from "@/lib/utils/park-slug";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
@@ -58,8 +63,20 @@ function isMissingRelationError(message: string | undefined): boolean {
   );
 }
 
+function createHeroPublicClient() {
+  const env = getSupabasePublicEnv();
+  if (!env) return null;
+  return createClient(env.url, env.key, {
+    global: { fetch: fetchWithTimeoutMs(SUPABASE_HERO_FETCH_TIMEOUT_MS) },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+}
+
 async function fetchParkHeroImageRecordUncached(): Promise<Record<string, string>> {
-  const client = createPublicSupabaseClient();
+  const client = createHeroPublicClient();
   const record: Record<string, string> = {};
   if (!client) return record;
 
@@ -68,10 +85,10 @@ async function fetchParkHeroImageRecordUncached(): Promise<Record<string, string
     .select("country_code, park_type, name_key, park_name, image_url");
 
   if (error) {
-    if (!isMissingRelationError(error.message)) {
-      console.error("yp_park_hero_image read failed:", error.message);
+    if (isMissingRelationError(error.message)) {
+      return record;
     }
-    return record;
+    throw new Error(`yp_park_hero_image read failed: ${error.message}`);
   }
 
   for (const row of data ?? []) {
@@ -94,15 +111,55 @@ async function fetchParkHeroImageRecordUncached(): Promise<Record<string, string
   return record;
 }
 
-const getCachedParkHeroImageRecord = unstable_cache(
+const PARK_HERO_DATA_CACHE_SECONDS = 3_600;
+const PARK_HERO_MEMORY_TTL_MS = PARK_HERO_DATA_CACHE_SECONDS * 1_000;
+
+const getDataCachedParkHeroImageRecord = unstable_cache(
   fetchParkHeroImageRecordUncached,
-  ["yp-park-hero-images-map"],
-  { revalidate: 300, tags: [PARK_HERO_IMAGES_CACHE_TAG] }
+  ["yp-park-hero-images-map-v2"],
+  { revalidate: PARK_HERO_DATA_CACHE_SECONDS, tags: [PARK_HERO_IMAGES_CACHE_TAG] }
 );
 
+type MemoryHeroRecord = {
+  record: Record<string, string>;
+  expiresAt: number;
+};
+
+let memoryHeroRecord: MemoryHeroRecord | null = null;
+
+export function peekCachedParkHeroImageMap(): Map<string, string> | null {
+  if (!memoryHeroRecord || memoryHeroRecord.expiresAt <= Date.now()) {
+    return null;
+  }
+  return new Map(Object.entries(memoryHeroRecord.record));
+}
+
+function rememberParkHeroRecord(record: Record<string, string>): void {
+  memoryHeroRecord = {
+    record,
+    expiresAt: Date.now() + PARK_HERO_MEMORY_TTL_MS,
+  };
+}
+
+export function clearParkHeroImageMemoryCache(): void {
+  memoryHeroRecord = null;
+}
+
 export async function getCachedParkHeroImageMap(): Promise<Map<string, string>> {
-  const record = await getCachedParkHeroImageRecord();
-  return new Map(Object.entries(record));
+  const peeked = peekCachedParkHeroImageMap();
+  if (peeked) return peeked;
+
+  try {
+    const record = await getDataCachedParkHeroImageRecord();
+    rememberParkHeroRecord(record);
+    return new Map(Object.entries(record));
+  } catch (error) {
+    console.error(
+      "yp_park_hero_image read failed:",
+      error instanceof Error ? error.message : error
+    );
+    return new Map();
+  }
 }
 
 export function toParkHeroDisplayUrl(
@@ -139,6 +196,7 @@ export async function revalidateParkHeroCaches(
   parkType: ParkType
 ): Promise<void> {
   const { revalidatePath, revalidateTag } = await import("next/cache");
+  clearParkHeroImageMemoryCache();
   revalidateTag(PARK_HERO_IMAGES_CACHE_TAG, "max");
 
   const code = countryCode.toUpperCase();

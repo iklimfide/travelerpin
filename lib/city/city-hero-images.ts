@@ -1,9 +1,14 @@
+import { createClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { findCityHubSlug, getCityHubBySlug } from "@/lib/data/city-hubs";
 import { resolvePublicMediaImageUrl } from "@/lib/storage/hub-photo-url";
 import { catalogNameKey } from "@/lib/kamikaze/catalog-keys";
-import { createPublicSupabaseClient } from "@/lib/supabase/public";
+import { getSupabasePublicEnv } from "@/lib/supabase/env";
+import {
+  fetchWithTimeoutMs,
+  SUPABASE_HERO_FETCH_TIMEOUT_MS,
+} from "@/lib/supabase/fetch";
 import { cityPath } from "@/lib/seo/site";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
 import { buildCitySlug } from "@/lib/utils/city-slug";
@@ -42,8 +47,20 @@ function isMissingRelationError(message: string | undefined): boolean {
   );
 }
 
+function createHeroPublicClient() {
+  const env = getSupabasePublicEnv();
+  if (!env) return null;
+  return createClient(env.url, env.key, {
+    global: { fetch: fetchWithTimeoutMs(SUPABASE_HERO_FETCH_TIMEOUT_MS) },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+}
+
 async function fetchCityHeroImageRecordUncached(): Promise<Record<string, string>> {
-  const client = createPublicSupabaseClient();
+  const client = createHeroPublicClient();
   const record: Record<string, string> = {};
   if (!client) return record;
 
@@ -52,10 +69,10 @@ async function fetchCityHeroImageRecordUncached(): Promise<Record<string, string
     .select("country_code, name_key, city_name, image_url");
 
   if (error) {
-    if (!isMissingRelationError(error.message)) {
-      console.error("yp_city_hero_image read failed:", error.message);
+    if (isMissingRelationError(error.message)) {
+      return record;
     }
-    return record;
+    throw new Error(`yp_city_hero_image read failed: ${error.message}`);
   }
 
   for (const row of data ?? []) {
@@ -76,15 +93,55 @@ async function fetchCityHeroImageRecordUncached(): Promise<Record<string, string
   return record;
 }
 
-const getCachedCityHeroImageRecord = unstable_cache(
+const CITY_HERO_DATA_CACHE_SECONDS = 3_600;
+const CITY_HERO_MEMORY_TTL_MS = CITY_HERO_DATA_CACHE_SECONDS * 1_000;
+
+const getDataCachedCityHeroImageRecord = unstable_cache(
   fetchCityHeroImageRecordUncached,
-  ["yp-city-hero-images-map"],
-  { revalidate: 300, tags: [CITY_HERO_IMAGES_CACHE_TAG] }
+  ["yp-city-hero-images-map-v2"],
+  { revalidate: CITY_HERO_DATA_CACHE_SECONDS, tags: [CITY_HERO_IMAGES_CACHE_TAG] }
 );
 
+type MemoryHeroRecord = {
+  record: Record<string, string>;
+  expiresAt: number;
+};
+
+let memoryHeroRecord: MemoryHeroRecord | null = null;
+
+export function peekCachedCityHeroImageMap(): Map<string, string> | null {
+  if (!memoryHeroRecord || memoryHeroRecord.expiresAt <= Date.now()) {
+    return null;
+  }
+  return new Map(Object.entries(memoryHeroRecord.record));
+}
+
+function rememberCityHeroRecord(record: Record<string, string>): void {
+  memoryHeroRecord = {
+    record,
+    expiresAt: Date.now() + CITY_HERO_MEMORY_TTL_MS,
+  };
+}
+
+export function clearCityHeroImageMemoryCache(): void {
+  memoryHeroRecord = null;
+}
+
 export async function getCachedCityHeroImageMap(): Promise<Map<string, string>> {
-  const record = await getCachedCityHeroImageRecord();
-  return new Map(Object.entries(record));
+  const peeked = peekCachedCityHeroImageMap();
+  if (peeked) return peeked;
+
+  try {
+    const record = await getDataCachedCityHeroImageRecord();
+    rememberCityHeroRecord(record);
+    return new Map(Object.entries(record));
+  } catch (error) {
+    console.error(
+      "yp_city_hero_image read failed:",
+      error instanceof Error ? error.message : error
+    );
+    return new Map();
+  }
 }
 
 export function toCityHeroDisplayUrl(storedUrl: string | null | undefined): string {
@@ -128,6 +185,7 @@ export async function revalidateCityHeroCaches(
   cityName: string
 ): Promise<void> {
   const { revalidatePath, revalidateTag } = await import("next/cache");
+  clearCityHeroImageMemoryCache();
   revalidateTag(CITY_HERO_IMAGES_CACHE_TAG, "max");
 
   const code = countryCode.toUpperCase();

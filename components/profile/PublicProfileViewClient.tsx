@@ -16,8 +16,6 @@ import { buildJenniferProfileMediaPins } from "@/lib/data/jennifer-demo-media";
 import { usePublicProfileProgressiveLoad } from "@/lib/client/use-public-profile-progressive-load";
 import {
   fetchHeroImageMaps,
-  readCachedCityHeroImages,
-  readCachedParkHeroImages,
   writeCachedCityHeroImages,
   writeCachedParkHeroImages,
 } from "@/lib/client/hero-images-cache";
@@ -135,14 +133,10 @@ export function PublicProfileViewClient({
   const isDemoProfile = isDemoProfileUsername(profile.username);
 
   const [cityHeroImages, setCityHeroImages] = useState<Map<string, string>>(() =>
-    serverHeroMapsProvided
-      ? heroRecordToMap(initialCityHeroImages)
-      : (readCachedCityHeroImages() ?? new Map())
+    serverHeroMapsProvided ? heroRecordToMap(initialCityHeroImages) : new Map()
   );
   const [parkHeroImages, setParkHeroImages] = useState<Map<string, string>>(() =>
-    serverHeroMapsProvided
-      ? heroRecordToMap(initialParkHeroImages)
-      : (readCachedParkHeroImages() ?? new Map())
+    serverHeroMapsProvided ? heroRecordToMap(initialParkHeroImages) : new Map()
   );
   const heroesEnsuredRef = useRef(false);
 

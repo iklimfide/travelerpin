@@ -4,11 +4,11 @@ import { ProfileJsonLd } from "@/components/profile/ProfileJsonLd";
 import { ProfileServerBridge } from "@/components/profile/ProfileServerBridge";
 import { PublicProfileViewClient } from "@/components/profile/PublicProfileViewClient";
 import {
-  getCachedCityHeroImageMap,
+  peekCachedCityHeroImageMap,
   serializeCityHeroImageMap,
 } from "@/lib/city/city-hero-images";
 import {
-  getCachedParkHeroImageMap,
+  peekCachedParkHeroImageMap,
   serializeParkHeroImageMap,
 } from "@/lib/park/park-hero-images";
 import { defaultLocale, isLocale, type Locale } from "@/lib/i18n/config";
@@ -50,10 +50,9 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
   const isOwnProfile = isAccountOwner && !previewAsPublic;
   const isGuest = !shell.isLoggedIn;
 
-  const [cityHeroImages, parkHeroImages] = await Promise.all([
-    getCachedCityHeroImageMap(),
-    getCachedParkHeroImageMap(),
-  ]);
+  const cityHeroImages = peekCachedCityHeroImageMap();
+  const parkHeroImages = peekCachedParkHeroImageMap();
+  const hasWarmHeroMaps = cityHeroImages != null && parkHeroImages != null;
 
   return (
     <>
@@ -65,8 +64,12 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
         isOwnProfile={isOwnProfile}
         isGuest={isGuest}
         previewAsPublic={previewAsPublic}
-        initialCityHeroImages={serializeCityHeroImageMap(cityHeroImages)}
-        initialParkHeroImages={serializeParkHeroImageMap(parkHeroImages)}
+        initialCityHeroImages={
+          hasWarmHeroMaps ? serializeCityHeroImageMap(cityHeroImages) : undefined
+        }
+        initialParkHeroImages={
+          hasWarmHeroMaps ? serializeParkHeroImageMap(parkHeroImages) : undefined
+        }
       />
     </>
   );

@@ -7,8 +7,8 @@ import { ProfileIdentityCard } from "@/components/profile/ProfileIdentityCard";
 import { ProfileMapPanel } from "@/components/profile/ProfileMapPanel";
 import { ProfileSquareCaptureHeader } from "@/components/profile/ProfileSquareCaptureHeader";
 import { ProfileMediaSections } from "@/components/profile/ProfileMediaSections";
-import { getCachedCityHeroImageMap } from "@/lib/city/city-hero-images";
-import { getCachedParkHeroImageMap } from "@/lib/park/park-hero-images";
+import { peekCachedCityHeroImageMap } from "@/lib/city/city-hero-images";
+import { peekCachedParkHeroImageMap } from "@/lib/park/park-hero-images";
 import { isDemoProfileUsername } from "@/lib/data/demo-profile-username";
 import { syncJenniferDemoPresentation } from "@/lib/data/jennifer-demo-display";
 import { buildJenniferProfileMediaPins } from "@/lib/data/jennifer-demo-media";
@@ -55,6 +55,8 @@ type PublicProfileViewProps = {
   omitNextRoute?: boolean;
   /** Show only photos, only Instagram, or both (default). */
   mediaSections?: "both" | "photos" | "instagram";
+  /** Homepage: render after the map title (mobile add picker). */
+  afterHero?: ReactNode;
 };
 
 export async function PublicProfileView({
@@ -69,6 +71,7 @@ export async function PublicProfileView({
   animateStats = false,
   omitNextRoute = false,
   mediaSections = "both",
+  afterHero,
 }: PublicProfileViewProps) {
   const [t, tHome, tCommon, tBadge, locale] = await Promise.all([
     getTranslations("profile"),
@@ -106,10 +109,8 @@ export async function PublicProfileView({
     visitedParks.length > 0 ||
     visibleWishlistCodes.length > 0;
 
-  const [cityHeroImages, parkHeroImages] = await Promise.all([
-    getCachedCityHeroImageMap(),
-    getCachedParkHeroImageMap(),
-  ]);
+  const cityHeroImages = peekCachedCityHeroImageMap() ?? new Map();
+  const parkHeroImages = peekCachedParkHeroImageMap() ?? new Map();
   const destinations = buildProfileAllDestinations(
     visitedCountries,
     visitedCities,
@@ -175,6 +176,7 @@ export async function PublicProfileView({
                 : t("travelDiarySubtitleVisitor", { name: displayName })
             }
           />
+          {afterHero}
 
           <div className="profile-main">
             <ProfileIdentityCard

@@ -18,34 +18,39 @@ export type OptimizedImage = {
 
 let cachedSharp: SharpModule | null = null;
 
+function asNativeSharp(mod: unknown): SharpModule | null {
+  const sharp =
+    typeof mod === "function"
+      ? mod
+      : mod && typeof mod === "object" && "default" in mod
+        ? (mod as { default: unknown }).default
+        : null;
+  if (typeof sharp !== "function") return null;
+
+  const probe = sharp as SharpModule & { versions?: { sharp?: string } };
+  if (!probe.versions?.sharp) return null;
+  return sharp as SharpModule;
+}
+
 /**
- * Load sharp from node_modules on disk so Turbopack does not substitute the wasm stub
- * (`sharp.libvipsVersion is not a function` / missing `@emnapi/runtime`).
+ * Prefer Next-externalized `sharp` (Vercel lambda), then on-disk node_modules.
+ * Skip wasm stubs that lack `versions.sharp`.
  */
 function loadSharp(): SharpModule {
   if (cachedSharp) return cachedSharp;
 
   const sharpRoot = join(process.cwd(), "node_modules", "sharp");
   const loaders = [
+    () => createRequire(import.meta.url)("sharp") as unknown,
     () => createRequire(join(process.cwd(), "package.json"))("sharp") as unknown,
     () => createRequire(join(sharpRoot, "package.json"))("./dist/index.cjs") as unknown,
   ];
 
   for (const load of loaders) {
     try {
-      const mod = load();
-      const sharp =
-        typeof mod === "function"
-          ? mod
-          : mod && typeof mod === "object" && "default" in mod
-            ? (mod as { default: unknown }).default
-            : null;
-      if (typeof sharp !== "function") continue;
-
-      const probe = sharp as SharpModule & { versions?: { sharp?: string } };
-      if (!probe.versions?.sharp) continue;
-
-      cachedSharp = sharp as SharpModule;
+      const native = asNativeSharp(load());
+      if (!native) continue;
+      cachedSharp = native;
       return cachedSharp;
     } catch {
       // try next loader

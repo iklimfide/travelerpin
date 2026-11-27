@@ -6,6 +6,11 @@ const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 
 const r2Hostname = getR2PublicHostname();
 
+const sharpTracingIncludes = [
+  "./node_modules/sharp/**/*",
+  "./node_modules/@img/**/*",
+];
+
 const nextConfig: NextConfig = {
   serverExternalPackages: [
     "sharp",
@@ -15,8 +20,16 @@ const nextConfig: NextConfig = {
     "@img/sharp-linux-x64",
     "@img/sharp-linux-arm64",
     "@img/sharp-linuxmusl-x64",
+    "@img/sharp-libvips-linux-x64",
+    "@img/sharp-libvips-linux-arm64",
+    "@img/sharp-libvips-linuxmusl-x64",
     "detect-libc",
   ],
+  outputFileTracingIncludes: {
+    "/api/kamikaze/**/*": sharpTracingIncludes,
+    "/api/upload/**/*": sharpTracingIncludes,
+    "/api/profile/avatar/**/*": sharpTracingIncludes,
+  },
   // Soft-nav revisits (profile/settings/modals) stay instant until pin/settings change.
   // Page bodies still hydrate from localStorage; this only caches the thin RSC shell.
   experimental: {
