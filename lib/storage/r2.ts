@@ -131,9 +131,13 @@ export async function deleteR2Objects(keys: string[]): Promise<void> {
   );
 }
 
-export async function getR2Object(
+export async function getR2ObjectStream(
   key: string
-): Promise<{ body: Uint8Array; contentType: string } | null> {
+): Promise<{
+  body: ReadableStream<Uint8Array>;
+  contentType: string;
+  contentLength: number | null;
+} | null> {
   const bucket = readEnv("R2_BUCKET_NAME");
   if (!bucket || !isSafeR2ObjectKey(key)) {
     return null;
@@ -149,12 +153,26 @@ export async function getR2Object(
 
     if (!response.Body) return null;
 
-    const bytes = await response.Body.transformToByteArray();
     return {
-      body: bytes,
+      body: response.Body.transformToWebStream(),
       contentType: response.ContentType ?? "image/webp",
+      contentLength:
+        typeof response.ContentLength === "number" ? response.ContentLength : null,
     };
   } catch {
     return null;
   }
+}
+
+export async function getR2Object(
+  key: string
+): Promise<{ body: Uint8Array; contentType: string } | null> {
+  const streamed = await getR2ObjectStream(key);
+  if (!streamed) return null;
+
+  const bytes = new Uint8Array(await new Response(streamed.body).arrayBuffer());
+  return {
+    body: bytes,
+    contentType: streamed.contentType,
+  };
 }

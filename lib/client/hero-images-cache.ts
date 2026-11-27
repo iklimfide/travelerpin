@@ -1,4 +1,4 @@
-const CACHE_VERSION = 4;
+const CACHE_VERSION = 5;
 /** YP hero images change rarely — avoid hammering API on every profile visit. */
 const CACHE_TTL_MS = 30 * 60 * 1000;
 const CITY_KEY = `tp:v${CACHE_VERSION}:city-hero-images`;

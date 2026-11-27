@@ -62,7 +62,7 @@ export function isR2PublicMediaUrl(publicUrl: string): boolean {
 }
 
 /** Known public media prefixes in the R2 bucket. */
-const R2_MEDIA_KEY_PREFIXES = ["avatars/", "city-heroes/", "park-heroes/"] as const;
+const R2_MEDIA_KEY_PREFIXES = ["avatars/", "city-heroes/", "park-heroes/", "covers/"] as const;
 
 function isR2MediaKey(key: string): boolean {
   return R2_MEDIA_KEY_PREFIXES.some((prefix) => key.startsWith(prefix)) && isSafeR2ObjectKey(key);
@@ -102,7 +102,7 @@ export function getR2PublicHostname(): string | null {
   }
 }
 
-/** Direct CDN URL for an R2 object. Returns null when the public base URL is not configured. */
+/** Stored public object URL (uploads). Browsers load via hubPhotoProxyPath instead. */
 export function publicR2ObjectUrl(key: string, cacheBuster?: string | null): string | null {
   if (!isSafeR2ObjectKey(key)) return null;
   const publicBaseUrl = getR2PublicBaseUrl();
@@ -114,11 +114,8 @@ export function publicR2ObjectUrl(key: string, cacheBuster?: string | null): str
   return url.href;
 }
 
-/** @deprecated Leftover `/api/hub-photo` links; new renders use publicR2ObjectUrl. */
+/** Same-origin image src. r2.dev is not reachable from many client networks. */
 export function hubPhotoProxyPath(key: string, cacheBuster?: string | null): string {
-  const cdnUrl = publicR2ObjectUrl(key, cacheBuster);
-  if (cdnUrl) return cdnUrl;
-
   const params = new URLSearchParams();
   params.set("key", key);
   if (cacheBuster) params.set("v", cacheBuster);

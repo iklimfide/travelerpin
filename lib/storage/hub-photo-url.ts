@@ -1,15 +1,13 @@
 import {
   hubPhotoProxyPath,
-  isR2PublicMediaUrl,
   parseHubPhotoProxyRequest,
   parseR2ObjectKey,
-  publicR2ObjectUrl,
   readMediaCacheBuster,
 } from "@/lib/storage/r2-public";
 import { readPhotoUrl, type PinMediaRow } from "@/lib/utils/pin-media";
 import type { MediaType } from "@/types/database";
 
-/** Browser-safe media src: public R2 CDN URL, never a Node stream proxy. */
+/** Browser-safe media src: same-origin /api/hub-photo for R2 objects. */
 export function toHubPhotoSrc(mediaUrl: string | null | undefined): string | null {
   if (!mediaUrl) return null;
 
@@ -18,11 +16,7 @@ export function toHubPhotoSrc(mediaUrl: string | null | undefined): string | nul
 
   const legacyProxy = parseHubPhotoProxyRequest(trimmed);
   if (legacyProxy) {
-    return publicR2ObjectUrl(legacyProxy.key, legacyProxy.cacheBuster) ?? trimmed;
-  }
-
-  if (isR2PublicMediaUrl(trimmed)) {
-    return trimmed;
+    return hubPhotoProxyPath(legacyProxy.key, legacyProxy.cacheBuster);
   }
 
   const key = parseR2ObjectKey(trimmed);
@@ -33,7 +27,7 @@ export function toHubPhotoSrc(mediaUrl: string | null | undefined): string | nul
   return trimmed;
 }
 
-/** Resolve pin/city/park media for display — public CDN when the object is on R2. */
+/** Resolve pin/city/park media for display — proxy R2 objects, pass through other URLs. */
 export function resolvePublicMediaImageUrl(
   mediaUrl: string | null | undefined
 ): string | null {

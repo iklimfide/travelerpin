@@ -1,7 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { fetchWithTimeout } from "@/lib/supabase/fetch";
-import { hasSupabaseAuthCookie } from "@/lib/supabase/session-cookie";
+import {
+  hasSupabaseAuthCookie,
+  readSupabaseAccessTokenExpiresAt,
+} from "@/lib/supabase/session-cookie";
 
 function getSupabaseEnv() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -44,6 +47,15 @@ export async function updateSession(
 
   let supabaseResponse = baseResponse ?? NextResponse.next({ request });
 
+  const expiresAt = readSupabaseAccessTokenExpiresAt(request.cookies);
+  const now = Math.floor(Date.now() / 1000);
+  const secondsLeft = expiresAt != null ? expiresAt - now : 0;
+
+  // Cookie can last weeks; only hit Auth when the access token needs refresh.
+  if (secondsLeft > SESSION_REFRESH_LEAD_SECONDS) {
+    return supabaseResponse;
+  }
+
   const supabase = createServerClient(env.url, env.key, {
     global: { fetch: fetchWithTimeout },
     cookies: {
@@ -65,23 +77,6 @@ export async function updateSession(
   });
 
   try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      return supabaseResponse;
-    }
-
-    const expiresAt = session.expires_at;
-    const now = Math.floor(Date.now() / 1000);
-    const secondsLeft = expiresAt != null ? expiresAt - now : 0;
-
-    // Cookie can last weeks; only hit Supabase when the access token needs refresh.
-    if (secondsLeft > SESSION_REFRESH_LEAD_SECONDS) {
-      return supabaseResponse;
-    }
-
     const {
       data: { user },
       error,
