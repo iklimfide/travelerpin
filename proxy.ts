@@ -216,6 +216,6 @@ export const config = {
   matcher: [
     "/",
     "/(tr|en)/:path*",
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api/hub-photo|api/city-hero-images|api/park-hero-images|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml)$).*)",
   ],
 };

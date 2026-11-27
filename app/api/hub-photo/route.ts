@@ -1,29 +1,33 @@
 import { NextResponse } from "next/server";
-import { getR2Object, isR2Configured } from "@/lib/storage/r2";
+import { isSafeR2ObjectKey, publicR2ObjectUrl } from "@/lib/storage/r2-public";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
-export async function GET(request: Request) {
-  const key = new URL(request.url).searchParams.get("key");
-  if (!key) {
+const REDIRECT_CACHE_CONTROL =
+  "public, s-maxage=31536000, stale-while-revalidate=86400";
+
+function redirectToPublicObject(request: Request) {
+  const url = new URL(request.url);
+  const key = url.searchParams.get("key")?.trim() ?? "";
+  if (!key || !isSafeR2ObjectKey(key)) {
     return NextResponse.json({ error: "Missing key" }, { status: 400 });
   }
 
-  if (!isR2Configured()) {
+  const destination = publicR2ObjectUrl(key, url.searchParams.get("v"));
+  if (!destination) {
     return NextResponse.json({ error: "Photo storage is not configured" }, { status: 503 });
   }
 
-  const object = await getR2Object(key);
-  if (!object) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+  const response = NextResponse.redirect(destination, 307);
+  response.headers.set("Cache-Control", REDIRECT_CACHE_CONTROL);
+  return response;
+}
 
-  return new NextResponse(Buffer.from(object.body), {
-    headers: {
-      "Content-Type": object.contentType,
-      // max-age = browsers; s-maxage = Vercel CDN so Fluid Functions are not
-      // re-invoked for every visitor of the same immutable R2 object key.
-      "Cache-Control": "public, max-age=31536000, s-maxage=31536000, immutable",
-    },
-  });
+/** Legacy `/api/hub-photo?key=` links → public R2 CDN. No object streaming. */
+export function GET(request: Request) {
+  return redirectToPublicObject(request);
+}
+
+export function HEAD(request: Request) {
+  return redirectToPublicObject(request);
 }

@@ -13,7 +13,7 @@ export type HubTravelerPin = {
   instagramUrls: string[];
   mediaType: MediaType | null;
   mediaUrl: string | null;
-  /** Resolved on the server for stable SSR/hydration (e.g. /api/hub-photo proxy). */
+  /** Resolved on the server for stable SSR/hydration (public R2 CDN URL). */
   mediaDisplayUrl: string | null;
   mediaPreviewUrl: string | null;
   visitDates: string[];

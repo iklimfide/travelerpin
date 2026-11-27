@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
-import { getR2PublicHostname } from "./lib/storage/r2";
+import { getR2PublicHostname } from "./lib/storage/r2-public";
 
 const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 

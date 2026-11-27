@@ -1,12 +1,12 @@
 import "server-only";
 import { LIMITS } from "@/lib/constants";
 import { getSiteUrl } from "@/lib/seo/site";
+import { getR2Object } from "@/lib/storage/r2";
 import {
-  getR2Object,
   isR2PublicMediaUrl,
   isSafeR2ObjectKey,
   parseR2ObjectKey,
-} from "@/lib/storage/r2";
+} from "@/lib/storage/r2-public";
 
 const BLOCKED_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "0.0.0.0"]);
 const BLOCKED_HOST_SUFFIXES = [".local", ".internal"];
