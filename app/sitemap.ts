@@ -21,7 +21,7 @@ async function loadLastPinDates(
 ): Promise<Map<string, Date>> {
   const lastPinAt = new Map<string, Date>();
 
-  async function consume(
+  async function pagePinRows(
     table: "visited_countries" | "visited_cities",
     dateColumn: "created_at" | "updated_at"
   ) {
@@ -41,9 +41,15 @@ async function loadLastPinDates(
       for (const row of rows) {
         const userId = typeof row.user_id === "string" ? row.user_id : "";
         if (!userId) continue;
+        const rawDate =
+          dateColumn === "updated_at" && "updated_at" in row
+            ? row.updated_at
+            : "created_at" in row
+              ? row.created_at
+              : null;
         const stamp = laterDate(
           lastPinAt.get(userId) ?? null,
-          typeof row[dateColumn] === "string" ? row[dateColumn] : null
+          typeof rawDate === "string" ? rawDate : null
         );
         if (stamp) lastPinAt.set(userId, stamp);
       }
@@ -54,8 +60,8 @@ async function loadLastPinDates(
   }
 
   await Promise.all([
-    consume("visited_countries", "created_at"),
-    consume("visited_cities", "updated_at"),
+    pagePinRows("visited_countries", "created_at"),
+    pagePinRows("visited_cities", "updated_at"),
   ]);
 
   return lastPinAt;
