@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { HomeBelowFoldSections } from "@/components/home/HomeBelowFoldSections";
+import { HomeGuestNudgeModal } from "@/components/home/HomeGuestNudgeModal";
 import { HomeLandingSection } from "@/components/home/HomeLandingSection";
 import { DEMO_PERSONA } from "@/lib/data/demo-persona";
 import { loadDemoPublicProfilePage } from "@/lib/data/jennifer-demo-page";
@@ -61,6 +62,7 @@ export default async function HomePage() {
           />
         </div>
       </div>
+      <HomeGuestNudgeModal />
     </main>
   );
 }
