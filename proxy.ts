@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { isPublicProfilePath, isProfileShapedPath, stripLocalePrefix } from "@/lib/i18n/pathname";
 import { isPlausibleProfileUsername } from "@/lib/utils/username";
 import { routing } from "@/lib/i18n/routing";
+import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { fetchWithTimeout } from "@/lib/supabase/fetch";
 import { updateSession } from "@/lib/supabase/middleware";
 import { hasSupabaseAuthCookie } from "@/lib/supabase/session-cookie";
@@ -22,9 +23,9 @@ const handleI18nRouting = createMiddleware(routing);
 async function getLoggedInHomeRedirectPath(
   request: NextRequest
 ): Promise<string | null> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !supabaseKey) return null;
+  const supabaseEnv = getSupabasePublicEnv();
+  if (!supabaseEnv) return null;
+  const { url: supabaseUrl, key: supabaseKey } = supabaseEnv;
   if (!hasSupabaseAuthCookie(request.cookies)) return null;
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {

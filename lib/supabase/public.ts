@@ -1,14 +1,14 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { fetchWithTimeout } from "@/lib/supabase/fetch";
 
 /** Cookie-less Supabase client for public cached/server reads. */
 export function createPublicSupabaseClient(): SupabaseClient | null {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
+  const env = getSupabasePublicEnv();
+  if (!env) return null;
 
-  return createSupabaseClient(url, key, {
+  return createSupabaseClient(env.url, env.key, {
     global: { fetch: fetchWithTimeout },
     auth: {
       persistSession: false,

@@ -1,16 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { fetchWithTimeout } from "@/lib/supabase/fetch";
+import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import {
   hasSupabaseAuthCookie,
   readSupabaseAccessTokenExpiresAt,
 } from "@/lib/supabase/session-cookie";
 
 function getSupabaseEnv() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
-  return { url, key };
+  return getSupabasePublicEnv();
 }
 
 function isRecoverableAuthError(message: string): boolean {

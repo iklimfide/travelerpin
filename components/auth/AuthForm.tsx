@@ -285,6 +285,18 @@ export function AuthForm({ mode, next, onRegisteredPendingConfirmation }: AuthFo
           safeNext ?? (await resolveAuthenticatedHomePath(supabase))
         );
       }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Sign in failed";
+      setSubmitError(
+        formatAuthErrorMessage(
+          message,
+          {
+            loginInvalidCredentials: t("loginInvalidCredentials"),
+            loginEmailNotConfirmed: t("loginEmailNotConfirmed"),
+          },
+          null
+        )
+      );
     } finally {
       setLoading(false);
     }

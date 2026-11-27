@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { fetchWithTimeout } from "@/lib/supabase/fetch";
 import type { CatalogCity } from "@/lib/add/city-catalog";
 import type { TouristPark } from "@/lib/data/tourist-parks";
@@ -29,10 +30,9 @@ function createOverlayReadClient() {
   const admin = createAdminSupabaseClient();
   if (admin) return admin;
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (url && anon) {
-    return createSupabaseClient(url, anon, {
+  const env = getSupabasePublicEnv();
+  if (env) {
+    return createSupabaseClient(env.url, env.key, {
       global: { fetch: fetchWithTimeout },
       auth: { persistSession: false, autoRefreshToken: false },
     });
