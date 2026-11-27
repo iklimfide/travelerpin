@@ -62,11 +62,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     nameTrOverrides: parkNameTrOverrideMap(overlay),
   });
   const title = buildParkPageTitle(displayName);
+  const pinCount = await countParkPinners(supabase, hub);
 
   return {
     title,
     description: DEFAULT_DESCRIPTION,
-    robots: { index: false, follow: true },
+    robots: { index: pinCount > 0, follow: true },
     alternates: { canonical: parkPath(slug) },
     openGraph: {
       title: PIN_MAP_OG_TITLE,

@@ -63,11 +63,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
   const displayName = getLocalizedCityName(hub.countryCode, hub.name, locale);
   const title = buildCityPageTitle(displayName);
+  const pinCount = await getCachedCityPinnerCount(hub);
 
   return {
     title,
     description: DEFAULT_DESCRIPTION,
-    robots: { index: false, follow: true },
+    robots: { index: pinCount > 0, follow: true },
     alternates: { canonical: cityPath(slug) },
     openGraph: {
       title: PIN_MAP_OG_TITLE,

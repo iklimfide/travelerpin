@@ -65,11 +65,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!hub) return { title: "Country not found", robots: { index: false, follow: true } };
 
   const title = buildCountryPageTitle(hub.name);
+  const pinCount = await getCachedCountryPinnerCount(hub.code);
 
   return {
     title,
     description: DEFAULT_DESCRIPTION,
-    robots: { index: false, follow: true },
+    robots: { index: pinCount > 0, follow: true },
     alternates: { canonical: countryPath(slug) },
     openGraph: {
       title: PIN_MAP_OG_TITLE,
