@@ -48,11 +48,11 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug: rawSlug } = await params;
   const slug = sanitizeParkSlug(rawSlug);
-  if (!slug) return { title: "Park" };
+  if (!slug) return { title: "Park", robots: { index: false, follow: true } };
 
   const supabase = await createClient();
   const hub = await loadPublicParkHubBySlug(supabase, slug);
-  if (!hub) return { title: "Park not found" };
+  if (!hub) return { title: "Park not found", robots: { index: false, follow: true } };
 
   const localeRaw = await getLocale();
   const locale: Locale = isLocale(localeRaw) ? localeRaw : "en";
@@ -66,6 +66,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description: DEFAULT_DESCRIPTION,
+    robots: { index: false, follow: true },
     alternates: { canonical: parkPath(slug) },
     openGraph: {
       title: PIN_MAP_OG_TITLE,

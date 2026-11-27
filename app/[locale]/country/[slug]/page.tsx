@@ -59,16 +59,17 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug: rawSlug } = await params;
   const slug = sanitizeCountrySlug(rawSlug);
-  if (!slug) return { title: "Country" };
+  if (!slug) return { title: "Country", robots: { index: false, follow: true } };
 
   const hub = getCountryHubBySlug(slug);
-  if (!hub) return { title: "Country not found" };
+  if (!hub) return { title: "Country not found", robots: { index: false, follow: true } };
 
   const title = buildCountryPageTitle(hub.name);
 
   return {
     title,
     description: DEFAULT_DESCRIPTION,
+    robots: { index: false, follow: true },
     alternates: { canonical: countryPath(slug) },
     openGraph: {
       title: PIN_MAP_OG_TITLE,

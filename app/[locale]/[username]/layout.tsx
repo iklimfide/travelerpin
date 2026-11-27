@@ -32,10 +32,11 @@ export async function generateMetadata({ params }: LayoutProps): Promise<Metadat
   const data = await loadPublicProfileMetadata(username);
 
   if (!data) {
-    return { title: "Traveler not found" };
+    return { title: "Traveler not found", robots: { index: false, follow: true } };
   }
 
   const { profile, stats } = data;
+  const hasIndexedPins = stats.countries > 0 || stats.cities > 0;
   const locale: Locale =
     isLocale(profile.locale) ? profile.locale : defaultLocale;
   const tShare = await getTranslations({ locale, namespace: "share" });
@@ -53,6 +54,10 @@ export async function generateMetadata({ params }: LayoutProps): Promise<Metadat
     metadataBase: new URL(getSiteUrl()),
     title,
     description,
+    robots: {
+      index: hasIndexedPins,
+      follow: true,
+    },
     alternates: {
       canonical: profilePath(profile.username, locale),
     },

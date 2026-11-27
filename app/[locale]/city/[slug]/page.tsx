@@ -52,11 +52,11 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug: rawSlug } = await params;
   const slug = sanitizeCitySlug(rawSlug);
-  if (!slug) return { title: "City" };
+  if (!slug) return { title: "City", robots: { index: false, follow: true } };
 
   const supabase = await createClient();
   const context = await loadPublicCityHubContext(supabase, slug);
-  if (!context) return { title: "City not found" };
+  if (!context) return { title: "City not found", robots: { index: false, follow: true } };
 
   const { hub } = context;
   const localeRaw = await getLocale();
@@ -67,6 +67,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description: DEFAULT_DESCRIPTION,
+    robots: { index: false, follow: true },
     alternates: { canonical: cityPath(slug) },
     openGraph: {
       title: PIN_MAP_OG_TITLE,
