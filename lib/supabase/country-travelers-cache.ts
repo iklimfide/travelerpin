@@ -17,7 +17,7 @@ export function getCachedRecentCountryTravelers(
       if (!supabase) return [];
       return fetchRecentCountryTravelers(supabase, code);
     },
-    ["country-recent-travelers", code],
+    ["country-all-pinners-v1", code],
     { revalidate: revalidateSeconds }
   )();
 }

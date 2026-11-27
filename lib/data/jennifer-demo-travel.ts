@@ -68,7 +68,7 @@ const getCachedGuvencTravelPins = unstable_cache(
       instagramUrl: profile.instagram_url?.trim() || null,
     };
   },
-  ["jennifer-demo-guvenc-pins-v5"],
+  ["jennifer-demo-guvenc-pins-v8"],
   { revalidate: 300 }
 );
 

@@ -45,7 +45,7 @@ export function isR2PublicMediaUrl(publicUrl: string): boolean {
     const parsed = new URL(publicUrl);
     if (parsed.protocol !== "https:") return false;
 
-    if (parsed.hostname.endsWith(".r2.dev")) {
+    if (parsed.hostname.endsWith(".r2.dev") || parsed.hostname === "media.travelerpin.com") {
       return true;
     }
 
@@ -68,7 +68,7 @@ function isR2MediaKey(key: string): boolean {
   return R2_MEDIA_KEY_PREFIXES.some((prefix) => key.startsWith(prefix)) && isSafeR2ObjectKey(key);
 }
 
-/** Parse object key from a public R2 URL (works on client for pub-*.r2.dev links). */
+/** Parse object key from a public R2 URL (custom domain, pub-*.r2.dev, or stored base URL). */
 export function parseR2ObjectKey(publicUrl: string): string | null {
   try {
     if (!publicUrl.startsWith("/")) {
@@ -102,7 +102,7 @@ export function getR2PublicHostname(): string | null {
   }
 }
 
-/** Stored public object URL (uploads). Browsers load via hubPhotoProxyPath instead. */
+/** Public object URL on the R2 custom domain (or configured public base). */
 export function publicR2ObjectUrl(key: string, cacheBuster?: string | null): string | null {
   if (!isSafeR2ObjectKey(key)) return null;
   const publicBaseUrl = getR2PublicBaseUrl();
@@ -114,7 +114,7 @@ export function publicR2ObjectUrl(key: string, cacheBuster?: string | null): str
   return url.href;
 }
 
-/** Same-origin image src. r2.dev is not reachable from many client networks. */
+/** Legacy same-origin path; /api/hub-photo 302s to publicR2ObjectUrl. */
 export function hubPhotoProxyPath(key: string, cacheBuster?: string | null): string {
   const params = new URLSearchParams();
   params.set("key", key);

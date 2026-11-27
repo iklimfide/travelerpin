@@ -16,6 +16,9 @@ import {
 import type { VisitedCity, VisitedCountry, VisitedPark } from "@/types/database";
 
 type HubMediaTab = "photos" | "instagram";
+type HubTravelersModal = "pinned" | "wishlist";
+
+const HUB_TRAVELERS_PREVIEW_LIMIT = 6;
 
 type HubPageListingSectionsLabels = {
   recentTravelers: string;
@@ -112,7 +115,10 @@ export function HubPageListingSections({
   const [editOpen, setEditOpen] = useState(false);
   const [editMediaFocus, setEditMediaFocus] = useState<"photo" | "instagram" | undefined>();
   const [openModalTab, setOpenModalTab] = useState<HubMediaTab | null>(null);
+  const [openTravelersModal, setOpenTravelersModal] = useState<HubTravelersModal | null>(null);
   const canOpenEdit = canEditMedia && (ownerCity || ownerPark);
+  const previewTravelers = travelers.slice(0, HUB_TRAVELERS_PREVIEW_LIMIT);
+  const previewWishlistTravelers = wishlistTravelers.slice(0, HUB_TRAVELERS_PREVIEW_LIMIT);
 
   const { photos, instagram } = splitProfileMediaItems(memoryPins);
   const previewPhotos = photos.slice(0, PROFILE_MEDIA_PREVIEW_LIMIT);
@@ -156,7 +162,7 @@ export function HubPageListingSections({
       ) : null}
 
       <HubRecentTravelers
-        travelers={travelers}
+        travelers={previewTravelers}
         headingId={headingIds.travelers}
         layout={travelersLayout}
         headingCta={pinItHeadingCta(
@@ -165,6 +171,9 @@ export function HubPageListingSections({
           isLoggedIn,
           loginHref
         )}
+        showViewAll={travelers.length > HUB_TRAVELERS_PREVIEW_LIMIT}
+        viewAllLabel={viewAllLabel}
+        onViewAll={() => setOpenTravelersModal("pinned")}
         labels={{
           recentTravelers: labels.recentTravelers,
           noTravelersYet: labels.noTravelersYet,
@@ -173,9 +182,12 @@ export function HubPageListingSections({
       />
 
       <HubRecentTravelers
-        travelers={wishlistTravelers}
+        travelers={previewWishlistTravelers}
         headingId={headingIds.wishlist}
         layout={travelersLayout}
+        showViewAll={wishlistTravelers.length > HUB_TRAVELERS_PREVIEW_LIMIT}
+        viewAllLabel={viewAllLabel}
+        onViewAll={() => setOpenTravelersModal("wishlist")}
         labels={{
           recentTravelers: labels.wantTravelers,
           noTravelersYet: labels.noWantTravelersYet,
@@ -226,6 +238,40 @@ export function HubPageListingSections({
         showPlaceCaptions={showPlaceCaptions}
         lightboxFooterLabel={lightboxFooterLabel}
       />
+
+      <ProfileMediaListModal
+        open={openTravelersModal !== null}
+        title={
+          openTravelersModal === "wishlist" ? labels.wantTravelers : labels.recentTravelers
+        }
+        onClose={() => setOpenTravelersModal(null)}
+      >
+        {openTravelersModal ? (
+          <div className="profile-media-list-modal__content">
+            <HubRecentTravelers
+              travelers={openTravelersModal === "wishlist" ? wishlistTravelers : travelers}
+              headingId={
+                openTravelersModal === "wishlist"
+                  ? `${headingIds.wishlist}-modal`
+                  : `${headingIds.travelers}-modal`
+              }
+              layout={travelersLayout}
+              hideHeading
+              labels={{
+                recentTravelers:
+                  openTravelersModal === "wishlist"
+                    ? labels.wantTravelers
+                    : labels.recentTravelers,
+                noTravelersYet:
+                  openTravelersModal === "wishlist"
+                    ? labels.noWantTravelersYet
+                    : labels.noTravelersYet,
+                pinCta: "",
+              }}
+            />
+          </div>
+        ) : null}
+      </ProfileMediaListModal>
 
       <ProfileMediaListModal
         open={openModalTab !== null}
