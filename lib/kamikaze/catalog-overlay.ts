@@ -221,8 +221,11 @@ export function exclusionSet(
   for (const row of overlay.exclusions) {
     if (row.kind !== kind) continue;
     const code = row.country_code.toUpperCase();
-    // Fold legacy DB keys ("göreme") and country aliases ("goreme").
-    set.add(`${code}:${catalogNameKey(row.name_key, kind === "city" ? code : undefined)}`);
+    const raw = String(row.name_key ?? "").trim();
+    if (!raw) continue;
+    set.add(`${code}:${raw}`);
+    set.add(`${code}:${catalogNameKey(raw)}`);
+    set.add(`${code}:${catalogNameKey(raw, code)}`);
   }
   return set;
 }
@@ -232,8 +235,10 @@ function isExcluded(
   countryCode: string,
   name: string
 ): boolean {
-  return excluded.has(
-    `${countryCode.toUpperCase()}:${catalogNameKey(name, countryCode)}`
+  const code = countryCode.toUpperCase();
+  return (
+    excluded.has(`${code}:${catalogNameKey(name, countryCode)}`) ||
+    excluded.has(`${code}:${catalogNameKey(name)}`)
   );
 }
 

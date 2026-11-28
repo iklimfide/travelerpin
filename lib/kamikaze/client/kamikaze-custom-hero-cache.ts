@@ -59,7 +59,9 @@ async function fetchCityHeroMapFromNetwork(): Promise<Map<string, string>> {
 }
 
 async function fetchParkHeroMapFromNetwork(): Promise<Map<string, string>> {
-  const res = await fetch("/api/kamikaze/park-images");
+  const res = await fetch(`/api/kamikaze/park-images?_=${Date.now()}`, {
+    cache: "no-store",
+  });
   if (!res.ok) return new Map();
   const data = (await res.json()) as { images?: KamikazeParkHeroRow[] };
   const map = rowsToParkMap(data.images ?? []);

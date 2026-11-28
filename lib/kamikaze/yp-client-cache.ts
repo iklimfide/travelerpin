@@ -88,5 +88,5 @@ export const YP_CACHE_KEYS = {
   stats: "stats",
   notifications: "notifications",
   kamikazeCityHeroImages: "hero:kamikaze:city:v1",
-  kamikazeParkHeroImages: "hero:kamikaze:park:v1",
+  kamikazeParkHeroImages: "hero:kamikaze:park:v2",
 } as const;

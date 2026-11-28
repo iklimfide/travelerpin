@@ -36,7 +36,7 @@ export function getTravelerBadgeTier(
   return "world_citizen";
 }
 
-/** Per-tier colors — progression from fresh explorer to gold world citizen. */
+/** Per-tier colors — progression from explorer to navy-and-gold world citizen. */
 export const BADGE_TIER_THEMES: Record<TravelerBadgeTier, BadgeTierTheme> = {
   explorer: {
     shell:
@@ -57,9 +57,8 @@ export const BADGE_TIER_THEMES: Record<TravelerBadgeTier, BadgeTierTheme> = {
     iconRing: "border-violet-400/60 bg-violet-200/80 dark:border-white/10 dark:bg-black/20",
   },
   world_citizen: {
-    shell:
-      "border-amber-600/50 bg-gradient-to-r from-amber-50 via-amber-100/90 to-orange-50 text-amber-950 shadow-sm dark:border-amber-400/55 dark:from-amber-500/20 dark:via-amber-400/15 dark:to-orange-500/15 dark:text-amber-50 dark:shadow-[0_0_24px_rgba(251,191,36,0.2)]",
-    icon: "text-amber-800 dark:text-amber-300",
-    iconRing: "border-amber-400/60 bg-amber-100 dark:border-white/10 dark:bg-black/20",
+    shell: "traveler-badge--world-citizen shadow-sm",
+    icon: "traveler-badge--world-citizen-icon",
+    iconRing: "traveler-badge--world-citizen-ring",
   },
 };

@@ -52,6 +52,7 @@ type ListScope = "catalog" | "yp";
 const MIN_QUERY_LENGTH = 2;
 const ADD_SEARCH_DEBOUNCE_MS = 300;
 const CATALOG_PAGE_SIZE = 80;
+const CATALOG_DELETE_CHUNK = 200;
 
 function resultKey(row: CatalogParkRow): string {
   return `${row.source}:${row.countryCode}:${row.parkType}:${row.name}:${row.id ?? ""}`;
@@ -94,6 +95,10 @@ export function KamikazeParksPanel() {
     current: number;
     total: number;
     parkName: string;
+  } | null>(null);
+  const [bulkDeleteProgress, setBulkDeleteProgress] = useState<{
+    current: number;
+    total: number;
   } | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [renameTrValue, setRenameTrValue] = useState("");
@@ -175,8 +180,9 @@ export function KamikazeParksPanel() {
         if (query.trim()) params.set("q", query.trim());
         if (popularFilter) params.set("popularFilter", popularFilter);
         if (listScope === "yp") params.set("ypOnly", "1");
+        if (options?.force) params.set("_", String(Date.now()));
 
-        const res = await fetch(`/api/kamikaze/catalog?${params}`);
+        const res = await fetch(`/api/kamikaze/catalog?${params}`, { cache: "no-store" });
         const data = (await res.json()) as {
           results?: CatalogParkRow[];
           hasMore?: boolean;
@@ -477,16 +483,31 @@ export function KamikazeParksPanel() {
 
   async function handleDelete(row: CatalogParkRow) {
     const ok = await modal.confirm(
-      `"${row.name}" katalogdan kalıcı silinsin mi? Kullanıcı pinleri silinmez.`,
+      `"${row.name}" katalogdan silinsin mi? Kapağı da kalkar. Kullanıcı pinleri silinmez.`,
       {
-        title: "Kayıt silinsin mi?",
+        title: "Park silinsin mi?",
         variant: "error",
         destructive: true,
-        confirmLabel: "Sil",
+        confirmLabel: "Parkı sil",
         cancelLabel: "Vazgeç",
       }
     );
     if (!ok) return;
+    try {
+      await fetch("/api/kamikaze/park-images", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          countryCode: row.countryCode,
+          parkName: row.name,
+          parkType: row.parkType,
+        }),
+      });
+    } catch {
+      /* kapak yoksa katalog silmeye devam */
+    }
+    invalidateCachedHeroImages();
+    invalidateKamikazeCustomHeroCache("park");
     await postAction(
       {
         action: "delete",
@@ -531,8 +552,9 @@ export function KamikazeParksPanel() {
     if (query.trim()) params.set("q", query.trim());
     if (popularFilter) params.set("popularFilter", popularFilter);
     if (listScope === "yp") params.set("ypOnly", "1");
+    params.set("_", String(Date.now()));
 
-    const res = await fetch(`/api/kamikaze/catalog?${params}`);
+    const res = await fetch(`/api/kamikaze/catalog?${params}`, { cache: "no-store" });
     const data = (await res.json()) as {
       results?: CatalogParkRow[];
       hasMore?: boolean;
@@ -637,32 +659,200 @@ export function KamikazeParksPanel() {
     await runBulkAutoHero(selectedRows(), `Seçili (${selectedRows().length})`);
   }
 
+  async function deleteParkCovers(rows: CatalogParkRow[]): Promise<void> {
+    for (let i = 0; i < rows.length; i += CATALOG_DELETE_CHUNK) {
+      const chunk = rows.slice(i, i + CATALOG_DELETE_CHUNK);
+      await fetch("/api/kamikaze/park-images", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: chunk.map((row) => ({
+            countryCode: row.countryCode,
+            parkName: row.name,
+            parkType: row.parkType,
+          })),
+        }),
+      }).catch(() => {
+        /* kapak silme başarısız olsa da katalog silinir */
+      });
+    }
+  }
+
+  async function deleteCatalogParkItems(rows: CatalogParkRow[]): Promise<void> {
+    for (let i = 0; i < rows.length; i += CATALOG_DELETE_CHUNK) {
+      const chunk = rows.slice(i, i + CATALOG_DELETE_CHUNK);
+      setBulkDeleteProgress({ current: Math.min(i + chunk.length, rows.length), total: rows.length });
+      const res = await fetch("/api/kamikaze/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete_bulk",
+          kind: "park",
+          items: chunk.map((row) => ({
+            source: row.source,
+            countryCode: row.countryCode,
+            name: row.name,
+            id: row.id,
+          })),
+        }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Parklar silinemedi");
+    }
+  }
+
+  async function deleteParksWithCovers(rows: CatalogParkRow[], busy: string) {
+    setBusyId(busy);
+    setError(null);
+    try {
+      setBulkDeleteProgress({ current: 0, total: rows.length });
+      await deleteParkCovers(rows);
+      await deleteCatalogParkItems(rows);
+      const removedKeys = new Set(rows.map(resultKey));
+      setResults((prev) => prev.filter((row) => !removedKeys.has(resultKey(row))));
+      setSelectedKeys(new Set());
+      setTotal((prev) => Math.max(0, prev - rows.length));
+      invalidateCachedHeroImages();
+      invalidateKamikazeCustomHeroCache("park");
+      const heroMap = await fetchKamikazeParkCustomHeroMap({ force: true });
+      setCustomImages(heroMap);
+      ypCacheInvalidate("catalog:");
+      await loadList("replace", { force: true });
+      await modal.alert(
+        `${rows.length} park katalogdan silindi. Kullanıcı pinleri duruyor.`,
+        { variant: "success" }
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Parklar silinemedi");
+    } finally {
+      setBulkDeleteProgress(null);
+      setBusyId(null);
+    }
+  }
+
   async function handleBulkDelete() {
     const selected = selectedRows();
     if (selected.length === 0) return;
     const ok = await modal.confirm(
-      `${selected.length} kayıt katalogdan kalıcı silinsin mi? Kullanıcı pinleri silinmez.`,
+      `${selected.length} park katalogdan silinsin mi? Kapakları da kalkar. Kullanıcı pinleri silinmez.`,
       {
-        title: "Toplu silme",
+        title: "Parkları sil",
         variant: "error",
         destructive: true,
-        confirmLabel: "Sil",
+        confirmLabel: "Parkları sil",
         cancelLabel: "Vazgeç",
       }
     );
     if (!ok) return;
-    await postAction(
+    await deleteParksWithCovers(selected, "bulk-delete");
+  }
+
+  async function handleBulkDeleteFiltered() {
+    if (!canBrowse) return;
+    setError(null);
+    try {
+      setBusyId("bulk-delete-load");
+      const all = await fetchAllFilteredCatalogRows();
+      setBusyId(null);
+      if (all.length === 0) {
+        await modal.alert("Süzgeçte silinecek park yok.", { variant: "info" });
+        return;
+      }
+      const ok = await modal.confirm(
+        `Süzgeçteki ${all.length} park katalogdan silinsin mi? Kapakları da kalkar. Kullanıcı pinleri kalır. Bu işlem geri alınamaz.`,
+        {
+          title: "Süzgeçteki parkları sil",
+          variant: "error",
+          destructive: true,
+          confirmLabel: "Parkları sil",
+          cancelLabel: "Vazgeç",
+        }
+      );
+      if (!ok) return;
+      await deleteParksWithCovers(all, "bulk-delete-filter");
+    } catch (err) {
+      setBusyId(null);
+      setError(err instanceof Error ? err.message : "Liste yüklenemedi");
+    }
+  }
+
+  async function deleteParkHeroes(body: Record<string, unknown>, busy: string) {
+    setBusyId(busy);
+    setError(null);
+    try {
+      const res = await fetch("/api/kamikaze/park-images", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = (await res.json()) as { deleted?: number; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Kapaklar silinemedi");
+
+      if (body.all === true) {
+        setCustomImages(new Map());
+      }
+      invalidateCachedHeroImages();
+      invalidateKamikazeCustomHeroCache("park");
+      const heroMap = await fetchKamikazeParkCustomHeroMap({ force: true });
+      setCustomImages(heroMap);
+
+      await modal.alert(
+        `${data.deleted ?? 0} park kapağı silindi. Sitede varsayılan görseller kullanılır.`,
+        { variant: "success" }
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Kapaklar silinemedi");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleBulkDeleteAllHeroes() {
+    const count = customImages.size;
+    if (count === 0) {
+      await modal.alert("Silinecek özel park kapağı yok.", { variant: "info" });
+      return;
+    }
+    const ok = await modal.confirm(
+      `${count} özel park kapağı veritabanından ve R2’den silinsin mi? Sitede varsayılan görseller kullanılmaya devam eder. Kullanıcı pinleri silinmez.`,
       {
-        action: "delete_bulk",
-        kind: "park",
+        title: "Tüm park kapaklarını sil",
+        variant: "error",
+        destructive: true,
+        confirmLabel: "Tümünü sil",
+        cancelLabel: "Vazgeç",
+      }
+    );
+    if (!ok) return;
+    await deleteParkHeroes({ all: true }, "bulk-hero-delete");
+  }
+
+  async function handleBulkDeleteSelectedHeroes() {
+    const selected = selectedRows().filter((row) => hasCustomHero(row));
+    if (selected.length === 0) {
+      await modal.alert("Seçilen parklerde özel kapak yok.", { variant: "info" });
+      return;
+    }
+    const ok = await modal.confirm(
+      `${selected.length} seçili park kapağı silinsin mi? Katalog kayıtları ve kullanıcı pinleri kalır.`,
+      {
+        title: "Seçili kapakları sil",
+        variant: "error",
+        destructive: true,
+        confirmLabel: "Kapakları sil",
+        cancelLabel: "Vazgeç",
+      }
+    );
+    if (!ok) return;
+    await deleteParkHeroes(
+      {
         items: selected.map((row) => ({
-          source: row.source,
           countryCode: row.countryCode,
-          name: row.name,
-          id: row.id,
+          parkName: row.name,
+          parkType: row.parkType,
         })),
       },
-      "bulk-delete"
+      "bulk-hero-delete-selected"
     );
   }
 
@@ -900,7 +1090,7 @@ export function KamikazeParksPanel() {
               disabled={Boolean(busyId?.startsWith("delete:"))}
               onClick={() => void handleDelete(row)}
             >
-              Sil
+              Parkı sil
             </button>
           </div>
         </td>
@@ -912,8 +1102,9 @@ export function KamikazeParksPanel() {
     <div>
       <h1>Parklar</h1>
       <p className="yp-main__lead">
-        Tek yerden park ekle, popüler işaretle, yeniden adlandır ve kapak fotoğrafı yükle.
-        Kullanıcı pinleri silinmez.
+        Tek yerden park ekle, popüler işaretle, yeniden adlandır veya katalogdan sil. Gereksiz
+        parkları süzüp «Süzgeçtekileri sil» veya seçip «Parkları sil» ile kaldır. Kullanıcı pinleri
+        silinmez.
       </p>
 
       {error ? <p className="yp-error">{error}</p> : null}
@@ -921,6 +1112,11 @@ export function KamikazeParksPanel() {
         <p className="yp-muted" style={{ marginTop: bulkHeroProgress ? "0.35rem" : 0 }}>
           Kapak atanıyor ({bulkHeroProgress.current}/{bulkHeroProgress.total}):{" "}
           {bulkHeroProgress.parkName}
+        </p>
+      ) : null}
+      {bulkDeleteProgress ? (
+        <p className="yp-muted" style={{ marginTop: "0.35rem" }}>
+          Parklar siliniyor ({bulkDeleteProgress.current}/{bulkDeleteProgress.total})
         </p>
       ) : null}
 
@@ -1110,6 +1306,28 @@ export function KamikazeParksPanel() {
               : "Süzgeçteki eksiklere kapak ata"}
           </button>
         ) : null}
+        <button
+          type="button"
+          className="yp-btn yp-btn--danger"
+          disabled={Boolean(busyId) || loading || customImages.size === 0}
+          onClick={() => void handleBulkDeleteAllHeroes()}
+        >
+          {busyId === "bulk-hero-delete"
+            ? "Kapaklar siliniyor…"
+            : `Tüm kapakları sil${customImages.size > 0 ? ` (${customImages.size})` : ""}`}
+        </button>
+        {canBrowse ? (
+          <button
+            type="button"
+            className="yp-btn yp-btn--danger"
+            disabled={Boolean(busyId) || loading}
+            onClick={() => void handleBulkDeleteFiltered()}
+          >
+            {busyId === "bulk-delete-load" || busyId === "bulk-delete-filter"
+              ? "Parklar siliniyor…"
+              : "Süzgeçtekileri sil"}
+          </button>
+        ) : null}
       </div>
 
       <div className="yp-panel">
@@ -1161,10 +1379,18 @@ export function KamikazeParksPanel() {
               <button
                 type="button"
                 className="yp-btn yp-btn--danger"
+                disabled={busyId === "bulk-hero-delete-selected"}
+                onClick={() => void handleBulkDeleteSelectedHeroes()}
+              >
+                Kapakları sil ({selectedKeys.size})
+              </button>
+              <button
+                type="button"
+                className="yp-btn yp-btn--danger"
                 disabled={busyId === "bulk-delete"}
                 onClick={() => void handleBulkDelete()}
               >
-                Sil ({selectedKeys.size})
+                Parkları sil ({selectedKeys.size})
               </button>
             </div>
           ) : (

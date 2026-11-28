@@ -7,6 +7,7 @@ export function fetchWithTimeoutMs(timeoutMs: number) {
   return (input: RequestInfo | URL, init?: RequestInit): Promise<Response> =>
     fetch(input, {
       ...init,
+      cache: init?.cache ?? "no-store",
       signal: init?.signal ?? AbortSignal.timeout(timeoutMs),
     });
 }

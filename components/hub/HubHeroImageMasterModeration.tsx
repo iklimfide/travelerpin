@@ -17,6 +17,7 @@ import {
 } from "@/components/kamikaze/StockPhotoSearchModal";
 import { formatPhotoUploadError } from "@/lib/utils/photo-upload-error";
 import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
+import { stockQueryForCity } from "@/lib/kamikaze/client/bulk-city-hero";
 import { stockQueryForPark } from "@/lib/kamikaze/client/bulk-park-hero";
 import type { ParkType } from "@/types/database";
 
@@ -277,7 +278,7 @@ export function HubHeroImageMasterModeration({
           defaultQuery={
             kind === "park" && parkType
               ? stockQueryForPark(placeName, parkType)
-              : placeName
+              : stockQueryForCity(placeName, countryCode)
           }
           busy={busy}
           labels={labels.stockSearch}

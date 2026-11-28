@@ -928,6 +928,32 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
   line-height: 1.2;
 }
 
+/* Navy + gold — custom class so html.light slate/amber remaps cannot wash it out. */
+.traveler-badge--world-citizen {
+  background: #0f172a;
+  color: #fde68a;
+  border-color: #f59e0b;
+}
+
+.traveler-badge--world-citizen-icon {
+  color: #fcd34d;
+}
+
+.traveler-badge--world-citizen-ring {
+  background: #1e293b;
+  border-color: rgb(245 158 11 / 0.55);
+}
+
+html.dark .traveler-badge--world-citizen {
+  background: #020617;
+  color: #fef3c7;
+  border-color: #fbbf24;
+}
+
+html.dark .traveler-badge--world-citizen-icon {
+  color: #fde68a;
+}
+
 .traveler-badge--profile-card svg {
   width: 16px;
   height: 16px;

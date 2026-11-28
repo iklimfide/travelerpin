@@ -1,6 +1,7 @@
 import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { resolveCityHeroImageUrl } from "@/lib/city/city-hero-images";
 import { resolveParkHeroImageUrl } from "@/lib/park/park-hero-images";
+import { getDefaultParkHeroImage } from "@/lib/utils/park-hero-image";
 import { buildProfileMediaPins } from "@/lib/utils/profile-media";
 import { readInstagramUrls, readPhotoUrlsForGallery } from "@/lib/utils/pin-media";
 import { canonicalCityName } from "@/lib/utils/city-aliases";
@@ -81,12 +82,14 @@ function resolveJenniferParkGalleryPhotoUrl(
 
   if (!parkHeroImages) return null;
 
-  return resolveParkHeroImageUrl(
+  const heroUrl = resolveParkHeroImageUrl(
     park.country_code,
     park.park_name,
     park.park_type,
     parkHeroImages
   );
+  if (heroUrl === getDefaultParkHeroImage(park.park_type)) return null;
+  return heroUrl;
 }
 
 export function withJenniferDemoGalleryPhotos(

@@ -18,6 +18,7 @@ import { DEFAULT_CITY_HERO_IMAGE } from "@/lib/constants";
 import { YP_CACHE_KEYS, ypCacheGet, ypCacheInvalidate, ypCacheSet } from "@/lib/kamikaze/yp-client-cache";
 import {
   assignBulkCityHeroes,
+  stockQueryForCity,
 } from "@/lib/kamikaze/client/bulk-city-hero";
 import { citiesAreSame } from "@/lib/utils/city-aliases";
 import { cityPlacePath } from "@/lib/utils/hub-place-path";
@@ -72,6 +73,7 @@ export function KamikazeCitiesPanel() {
   const [hasMore, setHasMore] = useState(false);
   const [nextOffset, setNextOffset] = useState(0);
   const [total, setTotal] = useState(0);
+  const [countryCityCount, setCountryCityCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [customImages, setCustomImages] = useState<Map<string, string>>(() => new Map());
@@ -85,8 +87,11 @@ export function KamikazeCitiesPanel() {
   const [bulkHeroProgress, setBulkHeroProgress] = useState<{
     current: number;
     total: number;
+    countryCode: string;
     cityName: string;
+    imageUrl?: string | null;
   } | null>(null);
+  const bulkHeroRowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map());
   const [renameValue, setRenameValue] = useState("");
   const [renameTrValue, setRenameTrValue] = useState("");
   const fileInputsRef = useRef<Map<string, HTMLInputElement>>(new Map());
@@ -127,6 +132,7 @@ export function KamikazeCitiesPanel() {
         setHasMore(false);
         setNextOffset(0);
         setTotal(0);
+        setCountryCityCount(null);
         setSelectedKeys(new Set());
         return;
       }
@@ -146,6 +152,9 @@ export function KamikazeCitiesPanel() {
           setHasMore(cached.hasMore);
           setNextOffset(cached.nextOffset);
           setTotal(cached.total);
+          if (country && !query.trim() && !popularFilter) {
+            setCountryCityCount(cached.total);
+          }
           setSelectedKeys(new Set());
           setLoading(false);
           return;
@@ -193,6 +202,11 @@ export function KamikazeCitiesPanel() {
         setHasMore(nextHasMore);
         setNextOffset(nextOff);
         setTotal(nextTotal);
+        if (!country) {
+          setCountryCityCount(null);
+        } else if (!query.trim() && !popularFilter) {
+          setCountryCityCount(nextTotal);
+        }
         if (mode === "replace") setSelectedKeys(new Set());
       } catch (err) {
         setError(err instanceof Error ? err.message : "Şehirler yüklenemedi");
@@ -210,6 +224,7 @@ export function KamikazeCitiesPanel() {
       setHasMore(false);
       setNextOffset(0);
       setTotal(0);
+      setCountryCityCount(null);
       setSelectedKeys(new Set());
       setLoading(false);
       return;
@@ -220,6 +235,37 @@ export function KamikazeCitiesPanel() {
     }, 280);
     return () => window.clearTimeout(timer);
   }, [canBrowse, loadList]);
+
+  useEffect(() => {
+    if (!country) {
+      setCountryCityCount(null);
+      return;
+    }
+
+    setCountryCityCount(null);
+    let cancelled = false;
+    const params = new URLSearchParams({
+      kind: "city",
+      country,
+      offset: "0",
+      limit: "1",
+    });
+
+    void fetch(`/api/kamikaze/catalog?${params}`)
+      .then((res) => res.json())
+      .then((data: { total?: number }) => {
+        if (!cancelled && typeof data.total === "number") {
+          setCountryCityCount(data.total);
+        }
+      })
+      .catch(() => {
+        /* list fetch still provides a count when unfiltered */
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [country]);
 
   useEffect(() => {
     const queryText = formName.trim();
@@ -623,7 +669,25 @@ export function KamikazeCitiesPanel() {
       const { assigned, failed } = await assignBulkCityHeroes(
         rows.map((row) => ({ countryCode: row.countryCode, cityName: row.name })),
         {
-          onProgress: (progress) => setBulkHeroProgress(progress),
+          onProgress: (progress) => {
+            setBulkHeroProgress({ ...progress, imageUrl: null });
+            const key = cityHeroLookupKey(progress.countryCode, progress.cityName);
+            bulkHeroRowRefs.current.get(key)?.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          },
+          onAssigned: ({ countryCode, cityName, imageUrl }) => {
+            const lookup = cityHeroLookupKey(countryCode, cityName);
+            setCustomImages((prev) => {
+              const next = new Map(prev);
+              next.set(lookup, imageUrl);
+              return next;
+            });
+            setBulkHeroProgress((prev) =>
+              prev ? { ...prev, imageUrl } : prev
+            );
+          },
         }
       );
 
@@ -818,9 +882,20 @@ export function KamikazeCitiesPanel() {
     const rowBusyKey = heroKey(row);
     const customUrl = resolveCustomUrl(row);
     const checked = selectedKeys.has(key);
+    const isBulkActive =
+      bulkHeroProgress != null &&
+      cityHeroLookupKey(bulkHeroProgress.countryCode, bulkHeroProgress.cityName) ===
+        rowBusyKey;
 
     return (
-      <tr key={key}>
+      <tr
+        key={key}
+        className={isBulkActive ? "yp-row--hero-active" : undefined}
+        ref={(el) => {
+          if (el) bulkHeroRowRefs.current.set(rowBusyKey, el);
+          else bulkHeroRowRefs.current.delete(rowBusyKey);
+        }}
+      >
         <td className="yp-table__check">
           <input
             type="checkbox"
@@ -922,10 +997,18 @@ export function KamikazeCitiesPanel() {
 
       {error ? <p className="yp-error">{error}</p> : null}
       {bulkHeroProgress ? (
-        <p className="yp-muted" style={{ marginTop: bulkHeroProgress ? "0.35rem" : 0 }}>
-          Kapak atanıyor ({bulkHeroProgress.current}/{bulkHeroProgress.total}):{" "}
-          {bulkHeroProgress.cityName}
-        </p>
+        <div className="yp-bulk-hero-status">
+          {bulkHeroProgress.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={toCityHeroDisplayUrl(bulkHeroProgress.imageUrl)} alt="" />
+          ) : (
+            <span className="yp-bulk-hero-status__placeholder" />
+          )}
+          <p className="yp-muted" style={{ margin: 0 }}>
+            {bulkHeroProgress.imageUrl ? "Atandı" : "Aranıyor"} (
+            {bulkHeroProgress.current}/{bulkHeroProgress.total}): {bulkHeroProgress.cityName}
+          </p>
+        </div>
       ) : null}
 
       <div className="yp-panel">
@@ -1045,6 +1128,11 @@ export function KamikazeCitiesPanel() {
             emptyLabel="Tümü"
             showCode
           />
+          {country && countryCityCount != null ? (
+            <span className="yp-muted" style={{ fontSize: "0.75rem", fontWeight: 500 }}>
+              {countryCityCount} şehir
+            </span>
+          ) : null}
         </div>
         <div className="yp-field yp-field--filter-q">
           <label htmlFor="yp-city-browse-q">Şehir ara</label>
@@ -1177,9 +1265,11 @@ export function KamikazeCitiesPanel() {
             <span className="yp-muted" style={{ fontWeight: 500, fontSize: "0.78rem" }}>
               {!canBrowse
                 ? "Listelemek için ülke seç, arama yaz veya popüler filtresi kullan"
-                : total > results.length
-                  ? `${results.length} / ${total} şehir`
-                  : `${results.length} şehir`}
+                : country && countryCityCount != null && (query.trim() || popularFilter)
+                  ? `${results.length} / ${total} eşleşme · ${countryCityCount} şehir`
+                  : total > results.length
+                    ? `${results.length} / ${total} şehir`
+                    : `${countryCityCount ?? results.length} şehir`}
             </span>
           )}
         </div>
@@ -1246,7 +1336,7 @@ export function KamikazeCitiesPanel() {
           skin="yp"
           title="Stok foto ara"
           subtitle={`${stockSearchTarget.countryName} · ${stockSearchTarget.name}`}
-          defaultQuery={stockSearchTarget.name}
+          defaultQuery={stockQueryForCity(stockSearchTarget.name, stockSearchTarget.countryCode)}
           busy={busyKey === heroKey(stockSearchTarget)}
           labels={YP_STOCK_PHOTO_LABELS}
           onClose={() => setStockSearchTarget(null)}

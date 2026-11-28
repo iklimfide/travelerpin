@@ -69,7 +69,7 @@ export function TravelerBadge({ countryCount, className = "" }: TravelerBadgePro
 
   return (
     <span
-      className={`inline-flex w-fit max-w-full items-center gap-0.5 rounded-full border px-1.5 py-px text-[9px] font-medium leading-tight tracking-normal text-inherit sm:text-[10px] ${theme.shell} ${className}`}
+      className={`inline-flex w-fit max-w-full items-center gap-0.5 rounded-full border px-1.5 py-px text-[9px] font-medium leading-tight tracking-normal sm:text-[10px] ${theme.shell} ${className}`}
     >
       <BadgeIcon tier={tier} className={`h-2.5 w-2.5 shrink-0 ${theme.icon}`} />
       {t(tier)}

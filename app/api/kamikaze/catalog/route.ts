@@ -583,7 +583,7 @@ export async function GET(request: Request) {
     });
   }
 
-  const overlay = await getCatalogOverlay();
+  const overlay = await getCatalogOverlayFresh();
   const offsetRaw = Number(searchParams.get("offset") ?? "0");
   const limitRaw = Number(searchParams.get("limit") ?? "80");
   const offset = Number.isFinite(offsetRaw) && offsetRaw > 0 ? Math.floor(offsetRaw) : 0;
@@ -703,11 +703,15 @@ export async function GET(request: Request) {
     });
   }
 
-  const excludedKeys = new Set(
-    overlay.exclusions
-      .filter((row) => row.kind === "park")
-      .map((row) => `${row.country_code.toUpperCase()}:${row.name_key}`)
-  );
+  const excludedKeys = new Set<string>();
+  for (const row of overlay.exclusions) {
+    if (row.kind !== "park") continue;
+    const code = row.country_code.toUpperCase();
+    const raw = String(row.name_key ?? "").trim();
+    if (!raw) continue;
+    excludedKeys.add(`${code}:${raw}`);
+    excludedKeys.add(`${code}:${catalogNameKey(raw)}`);
+  }
   const parkOverrides = parkPopularityOverrideMap(overlay);
   const parkNameTrOverrides = parkNameTrOverrideMap(overlay);
 
@@ -1184,46 +1188,27 @@ export async function POST(request: Request) {
       return purgeCatalogCityFromSite(admin, countryCode, name);
     }
 
-    const nameKey = catalogNameKey(name, undefined);
+    const nameKey = catalogNameKey(name);
 
-    // YP rows are hard-deleted from the DB.
-    if (input.source === "yp") {
-      if (!input.id) return "YP kaydı id gerekli";
-      const table = "yp_catalog_parks";
-      const { error, count } = await admin
-        .from(table)
-        .delete({ count: "exact" })
-        .eq("id", input.id);
-      if (error) return error.message;
+    const { data: ypRows, error: ypReadError } = await admin
+      .from("yp_catalog_parks")
+      .select("id, name, country_code")
+      .eq("country_code", countryCode);
+    if (ypReadError && !isMissingRelationError(ypReadError.message)) {
+      return ypReadError.message;
+    }
 
-      if (!count) {
-        const { data: remnants } = await admin
-          .from(table)
-          .select("id, name, country_code");
-        const matches = (remnants ?? []).filter((row) => {
-          const code = String(row.country_code ?? "").toUpperCase();
-          if (code !== countryCode) return false;
-          const rowKey = catalogNameKey(String(row.name ?? ""), undefined);
-          return rowKey === nameKey;
-        });
-        for (const row of matches) {
-          await admin.from(table).delete().eq("id", row.id);
-        }
+    const ypIds = new Set<string>();
+    if (input.id) ypIds.add(input.id);
+    for (const row of ypRows ?? []) {
+      if (catalogNameKey(String(row.name ?? "")) === nameKey) {
+        ypIds.add(String(row.id));
       }
-
-      const hasStaticTwin = TOURIST_PARKS.some(
-        (park) =>
-          park.countryCode === countryCode && catalogNameKey(park.name) === nameKey
-      );
-
-      if (!hasStaticTwin) {
-        await admin
-          .from("yp_catalog_exclusions")
-          .delete()
-          .eq("kind", "park")
-          .eq("country_code", countryCode)
-          .eq("name_key", nameKey);
-        return null;
+    }
+    for (const id of ypIds) {
+      const { error: ypDeleteError } = await admin.from("yp_catalog_parks").delete().eq("id", id);
+      if (ypDeleteError && !isMissingRelationError(ypDeleteError.message)) {
+        return ypDeleteError.message;
       }
     }
 
@@ -1233,8 +1218,27 @@ export async function POST(request: Request) {
       name_key: nameKey,
     });
     if (insertError && !insertError.message.toLowerCase().includes("duplicate")) {
-      return insertError.message;
+      if (!isMissingRelationError(insertError.message)) {
+        return insertError.message;
+      }
     }
+
+    await admin
+      .from("yp_park_hero_image")
+      .delete()
+      .eq("country_code", countryCode)
+      .eq("name_key", nameKey);
+    await admin
+      .from("yp_park_popularity")
+      .delete()
+      .eq("country_code", countryCode)
+      .eq("name_key", nameKey);
+    await admin
+      .from("yp_park_name_tr")
+      .delete()
+      .eq("country_code", countryCode)
+      .eq("name_key", nameKey);
+
     return null;
   }
 

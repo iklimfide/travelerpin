@@ -914,6 +914,33 @@
   object-position: center;
 }
 
+.yp-row--hero-active {
+  background: color-mix(in srgb, var(--yp-accent, #2563eb) 12%, transparent);
+}
+
+.yp-row--hero-active .yp-city-thumb-wrap {
+  outline: 2px solid var(--yp-accent, #2563eb);
+  outline-offset: 1px;
+}
+
+.yp-bulk-hero-status {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.yp-bulk-hero-status img,
+.yp-bulk-hero-status__placeholder {
+  width: 4.5rem;
+  height: 2.55rem;
+  border-radius: 0.35rem;
+  object-fit: cover;
+  border: 1px solid var(--yp-border);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  flex-shrink: 0;
+}
+
 .yp-city-name {
   font-weight: 600;
 }

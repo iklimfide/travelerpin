@@ -16,6 +16,9 @@ import type { ParkType } from "@/types/database";
 
 export const PARK_HERO_IMAGES_CACHE_TAG = "yp-park-hero-images";
 
+/** Custom catalog park heroes from YP / R2 (`yp_park_hero_image`). */
+export const PARK_CUSTOM_HERO_IMAGES_ENABLED = true;
+
 export type ParkHeroImageRow = {
   countryCode: string;
   parkType: ParkType;
@@ -128,6 +131,7 @@ type MemoryHeroRecord = {
 let memoryHeroRecord: MemoryHeroRecord | null = null;
 
 export function peekCachedParkHeroImageMap(): Map<string, string> | null {
+  if (!PARK_CUSTOM_HERO_IMAGES_ENABLED) return new Map();
   if (!memoryHeroRecord || memoryHeroRecord.expiresAt <= Date.now()) {
     return null;
   }
@@ -146,6 +150,8 @@ export function clearParkHeroImageMemoryCache(): void {
 }
 
 export async function getCachedParkHeroImageMap(): Promise<Map<string, string>> {
+  if (!PARK_CUSTOM_HERO_IMAGES_ENABLED) return new Map();
+
   const peeked = peekCachedParkHeroImageMap();
   if (peeked) return peeked;
 
@@ -176,6 +182,8 @@ export function resolveParkHeroImageUrl(
   parkType: ParkType,
   heroMap: ReadonlyMap<string, string>
 ): string {
+  if (!PARK_CUSTOM_HERO_IMAGES_ENABLED) return getDefaultParkHeroImage(parkType);
+
   const code = countryCode.toUpperCase();
   const lookupKeys = new Set<string>([
     parkHeroLookupKey(code, parkName, parkType),
@@ -190,14 +198,19 @@ export function resolveParkHeroImageUrl(
   return getDefaultParkHeroImage(parkType);
 }
 
+export async function revalidateAllParkHeroCaches(): Promise<void> {
+  const { revalidateTag } = await import("next/cache");
+  clearParkHeroImageMemoryCache();
+  revalidateTag(PARK_HERO_IMAGES_CACHE_TAG, "max");
+}
+
 export async function revalidateParkHeroCaches(
   countryCode: string,
   parkName: string,
   parkType: ParkType
 ): Promise<void> {
-  const { revalidatePath, revalidateTag } = await import("next/cache");
-  clearParkHeroImageMemoryCache();
-  revalidateTag(PARK_HERO_IMAGES_CACHE_TAG, "max");
+  const { revalidatePath } = await import("next/cache");
+  await revalidateAllParkHeroCaches();
 
   const code = countryCode.toUpperCase();
   const canonical = formatCityDisplayName(parkName);
@@ -213,6 +226,8 @@ export async function getParkHeroImageUrl(
   parkName: string,
   parkType: ParkType
 ): Promise<string> {
+  if (!PARK_CUSTOM_HERO_IMAGES_ENABLED) return getDefaultParkHeroImage(parkType);
+
   const heroMap = await getCachedParkHeroImageMap();
   return resolveParkHeroImageUrl(countryCode, parkName, parkType, heroMap);
 }

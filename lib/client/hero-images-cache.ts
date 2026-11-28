@@ -1,4 +1,6 @@
-const CACHE_VERSION = 5;
+import { PARK_CUSTOM_HERO_IMAGES_ENABLED } from "@/lib/park/park-hero-images";
+
+const CACHE_VERSION = 7;
 /** YP hero images change rarely — avoid hammering API on every profile visit. */
 const CACHE_TTL_MS = 30 * 60 * 1000;
 const CITY_KEY = `tp:v${CACHE_VERSION}:city-hero-images`;
@@ -71,8 +73,12 @@ function readCachedHeroImageMaps(): {
   parkHeroImages: Map<string, string>;
 } | null {
   const cityHeroImages = readCachedCityHeroImages();
+  if (!cityHeroImages?.size) return null;
+  if (!PARK_CUSTOM_HERO_IMAGES_ENABLED) {
+    return { cityHeroImages, parkHeroImages: new Map() };
+  }
   const parkHeroImages = readCachedParkHeroImages();
-  if (!cityHeroImages?.size || !parkHeroImages?.size) return null;
+  if (!parkHeroImages?.size) return null;
   return { cityHeroImages, parkHeroImages };
 }
 
@@ -85,22 +91,22 @@ async function fetchHeroImageMapsFromNetwork(): Promise<{
   cityHeroImages: Map<string, string>;
   parkHeroImages: Map<string, string>;
 }> {
-  const [cityResponse, parkResponse] = await Promise.all([
-    fetch("/api/city-hero-images"),
-    fetch("/api/park-hero-images"),
-  ]);
-
+  const cityResponse = await fetch("/api/city-hero-images");
   const cityPayload = cityResponse.ok ? await cityResponse.json().catch(() => null) : null;
-  const parkPayload = parkResponse.ok ? await parkResponse.json().catch(() => null) : null;
-
   const cityHeroImages = new Map(
     Object.entries((cityPayload?.images as Record<string, string> | undefined) ?? {})
   );
+  writeCachedCityHeroImages(cityHeroImages);
+
+  if (!PARK_CUSTOM_HERO_IMAGES_ENABLED) {
+    return { cityHeroImages, parkHeroImages: new Map() };
+  }
+
+  const parkResponse = await fetch("/api/park-hero-images");
+  const parkPayload = parkResponse.ok ? await parkResponse.json().catch(() => null) : null;
   const parkHeroImages = new Map(
     Object.entries((parkPayload?.images as Record<string, string> | undefined) ?? {})
   );
-
-  writeCachedCityHeroImages(cityHeroImages);
   writeCachedParkHeroImages(parkHeroImages);
 
   return { cityHeroImages, parkHeroImages };
