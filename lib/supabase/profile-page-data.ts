@@ -148,7 +148,7 @@ export function getCachedPublicProfileBundle(
         publicWishlistCountries,
       };
     },
-    ["public-profile-bundle-v5", key],
+    ["public-profile-bundle-v6", key],
     // Indefinite until pin/profile write calls revalidateProfileForPin.
     { revalidate: false, tags: [profileCacheTag(key)] }
   )();

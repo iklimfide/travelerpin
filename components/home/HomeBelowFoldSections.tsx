@@ -22,13 +22,15 @@ export function HomeBelowFoldSections({
 }: HomeBelowFoldSectionsProps) {
   return (
     <>
-      <HomeExplainer
-        name={name}
-        countries={countries}
-        cities={cities}
-        compact={compact}
-        profileHref={profileHref}
-      />
+      {compact ? (
+        <HomeExplainer
+          name={name}
+          countries={countries}
+          cities={cities}
+          compact={compact}
+          profileHref={profileHref}
+        />
+      ) : null}
       <HomeFeaturesClient compact={compact} />
       <HomeFinalCta compact={compact} />
       {!compact ? <HomeBestDestinations /> : null}

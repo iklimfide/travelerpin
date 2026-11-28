@@ -207,7 +207,15 @@ export async function fetchRecentCountryTravelers(
   for (const profile of profiles) {
     if (!profile.username) continue;
     travelers.push(
-      travelerFromProfile(profile.id, profile, pinTimes.get(profile.id) ?? "")
+      travelerFromProfile(
+        profile.id,
+        {
+          username: profile.username,
+          display_name: profile.display_name,
+          avatar_url: profile.avatar_url,
+        },
+        pinTimes.get(profile.id) ?? ""
+      )
     );
   }
 
